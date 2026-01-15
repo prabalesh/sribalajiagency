@@ -1,0 +1,52 @@
+<div class="public-layout">
+    <header class="main-header">
+        <div class="brand">
+            <a routerLink="/">Sri Balaji Agency</a>
+        </div>
+        <nav>
+            <ul>
+                <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
+                <li><a routerLink="/products" routerLinkActive="active">Products</a></li>
+                <li><a routerLink="/brands" routerLinkActive="active">Brands</a></li>
+                <li><a routerLink="/history" routerLinkActive="active">History</a></li>
+                <li><a routerLink="/request-quote" routerLinkActive="active">Get Quote</a></li>
+                <li><a routerLink="/my-quotes" routerLinkActive="active">My Quotes</a></li>
+                <li><a routerLink="/contact" routerLinkActive="active">Contact</a></li>
+                <li>
+                    <button class="search-toggle" (click)="toggleSearch()">
+                        <!-- Simple Search Icon SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <span style="margin-left: 5px;">Search</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Search Overlay/Bar -->
+    @if (isSearchOpen) {
+    <div class="search-bar">
+        <div class="container">
+            <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" placeholder="Search for products..."
+                autoFocus>
+            <button (click)="onSearch()">Search</button>
+            <button class="close-search" (click)="toggleSearch()">Close</button>
+        </div>
+    </div>
+    }
+
+    <main class="content">
+        <router-outlet></router-outlet>
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; 2024 Sri Balaji Agency. All rights reserved.</p>
+        <div class="links">
+            <a routerLink="/feedback">Feedback</a>
+        </div>
+    </footer>
+</div>

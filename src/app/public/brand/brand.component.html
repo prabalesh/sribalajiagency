@@ -1,0 +1,13 @@
+<div class="brands-container">
+    <h1>Our Brands</h1>
+    <div class="brand-grid">
+        @for (brand of brands; track brand.name) {
+        <div class="brand-card">
+            <div class="logo-area">
+                <h3>{{ brand.name }}</h3>
+            </div>
+            <p>{{ brand.description }}</p>
+        </div>
+        }
+    </div>
+</div>

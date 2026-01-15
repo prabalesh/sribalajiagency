@@ -1,0 +1,59 @@
+<div class="products-page">
+    <!-- Breadcrumbs / Header -->
+    <header class="page-header">
+        <nav class="breadcrumbs">
+            <a routerLink="/products">All Products</a>
+            @if (currentCategory) {
+            <span> / {{ currentCategory.name }}</span>
+            }
+        </nav>
+        <h1>{{ currentCategory ? currentCategory.name : 'Our Products' }}</h1>
+    </header>
+
+    <!-- Categories / Subcategories List -->
+    @if (categories.length > 0 || subCategories.length > 0) {
+    <section class="categories-list">
+        @for (cat of (isRoot ? categories : subCategories); track cat.id) {
+        <div class="category-card"
+            [routerLink]="isRoot ? ['/products', cat.slug] : ['/products', currentCategory?.slug, cat.slug]">
+            <div class="category-icon">
+                <!-- Ideally use cat.imageUrl here -->
+                <div class="placeholder-icon">{{ cat.name.charAt(0) }}</div>
+            </div>
+            <h3>{{ cat.name }}</h3>
+        </div>
+        }
+    </section>
+    }
+
+    <!-- Product Grid -->
+    @if (products.length > 0) {
+    <section class="product-grid">
+        @for (product of products; track product.id) {
+        <div class="product-card">
+            <div class="product-image">
+                <div class="placeholder-img">Image</div>
+            </div>
+            <div class="product-info">
+                <h3>{{ product.name }}</h3>
+                <p class="description">{{ product.description }}</p>
+                <div class="actions">
+                    @if (product.price) {
+                    <p class="price">₹{{ product.price }}</p>
+                    }
+                    <button class="btn-primary" [routerLink]="['/quotations', { productId: product.id }]">
+                        Get Quote
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+    </section>
+    }
+
+    @if (products.length === 0 && subCategories.length === 0) {
+    <div class="no-products">
+        <p>No products found in this category.</p>
+    </div>
+    }
+</div>

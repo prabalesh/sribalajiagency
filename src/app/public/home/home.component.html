@@ -1,0 +1,20 @@
+<div class="home-container">
+    <section class="hero">
+        <h1>Welcome to Sri Balaji Agency</h1>
+        <p>Your one-stop solution for industrial tools and machinery.</p>
+        <button class="btn-primary" routerLink="/products">View Products</button>
+    </section>
+
+    <section class="featured">
+        <h2>Featured Brands</h2>
+        <!-- Placeholder for brands loop -->
+        <div class="brand-grid">
+            @for (brand of featuredBrands; track brand.name) {
+            <div class="brand-item">
+                <!-- <img [src]="brand.logo" [alt]="brand.name"> -->
+                <h3>{{ brand.name }}</h3>
+            </div>
+            }
+        </div>
+    </section>
+</div>

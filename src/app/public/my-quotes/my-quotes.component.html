@@ -1,0 +1,54 @@
+<div class="quotes-container">
+    <h1>My Quotations</h1>
+
+    <div class="layout">
+        <div class="list">
+            @for (req of myRequests; track req.id) {
+            <div class="request-card" [class.active]="selectedRequest?.id === req.id" (click)="selectRequest(req)">
+                <div class="header">
+                    <span class="date">{{ req.createdAt | date:'mediumDate' }}</span>
+                    <span class="status" [class]="req.status.toLowerCase()">{{ req.status }}</span>
+                </div>
+                <p class="summary">{{ req.message }}</p>
+            </div>
+            }
+            @if (myRequests.length === 0) {
+            <div class="no-data">
+                No quotation requests found.
+            </div>
+            }
+        </div>
+
+        @if (selectedRequest) {
+        <div class="chat-view">
+            <div class="chat-header">
+                <h3>Conversation</h3>
+                <span class="status-badge" [class]="selectedRequest.status.toLowerCase()">{{ selectedRequest.status
+                    }}</span>
+            </div>
+
+            <div class="messages">
+                @for (msg of selectedRequest.messages; track msg.timestamp) {
+                <div class="message" [ngClass]="msg.sender === 'user' ? 'outgoing' : 'incoming'">
+                    <div class="content">{{ msg.content }}</div>
+                    <div class="time">{{ msg.timestamp | date:'shortTime' }}</div>
+                </div>
+                }
+            </div>
+
+            @if (selectedRequest.status === 'Open') {
+            <div class="input-area">
+                <input type="text" [(ngModel)]="newMessage" (keyup.enter)="sendMessage()"
+                    placeholder="Type a message...">
+                <button (click)="sendMessage()">Send</button>
+            </div>
+            }
+            @if (selectedRequest.status === 'Closed') {
+            <div class="closed-notice">
+                This conversation has been closed by the admin.
+            </div>
+            }
+        </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,108 @@
+.search-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    h1 {
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1rem;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 4rem;
+        font-size: 1.2rem;
+        color: #666;
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .product-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-placeholder {
+            height: 200px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+        }
+
+        .details {
+            padding: 1rem;
+
+            h3 {
+                margin: 0 0 0.5rem;
+                font-size: 1.1rem;
+            }
+
+            .desc {
+                color: #666;
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .price {
+                font-weight: bold;
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+
+            .btn-view {
+                display: block;
+                text-align: center;
+                background: #000;
+                color: #fff;
+                padding: 0.8rem;
+                border-radius: 4px;
+                text-decoration: none;
+                cursor: pointer;
+
+                &:hover {
+                    background: #333;
+                }
+            }
+        }
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 4rem;
+        background: #f9f9f9;
+        border-radius: 8px;
+
+        p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            text-decoration: none;
+        }
+    }
+}

@@ -1,0 +1,29 @@
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div class="brand">Admin Panel</div>
+        <nav>
+            <ul>
+                <li><a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a></li>
+                <li><a routerLink="/admin/users" routerLinkActive="active">Users</a></li>
+                <li><a routerLink="/admin/categories" routerLinkActive="active">Categories</a></li>
+                <li><a routerLink="/admin/brands" routerLinkActive="active">Brands</a></li>
+                <li><a routerLink="/admin/products" routerLinkActive="active">Products</a></li>
+                <li><a routerLink="/admin/models" routerLinkActive="active">Models</a></li>
+                <li><a routerLink="/admin/quotations" routerLinkActive="active">Quotations</a></li>
+                <li><a routerLink="/admin/feedback" routerLinkActive="active">Feedback</a></li>
+                <li><a routerLink="/admin/settings" routerLinkActive="active">Settings</a></li>
+                <li class="logout"><a href="#">Logout</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="topbar">
+            <h2>Title</h2>
+            <div class="user-profile">Admin</div>
+        </header>
+        <main class="admin-content">
+            <router-outlet></router-outlet>
+        </main>
+    </div>
+</div>

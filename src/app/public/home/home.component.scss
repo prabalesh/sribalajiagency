@@ -1,0 +1,43 @@
+.home-container {
+    .hero {
+        text-align: center;
+        padding: 4rem 1rem;
+        background: linear-gradient(135deg, #f0f0f0 0%, #ffffff 100%);
+        border-radius: 8px;
+        margin-bottom: 2rem;
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--color-bg-dark);
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: var(--color-secondary);
+            margin-bottom: 2rem;
+        }
+    }
+
+    .featured {
+        text-align: center;
+
+        h2 {
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+
+            .brand-item {
+                background: #fff;
+                padding: 2rem;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+        }
+    }
+}

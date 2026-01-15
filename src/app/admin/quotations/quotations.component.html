@@ -1,0 +1,69 @@
+<div class="quotation-container">
+    <div class="sidebar">
+        <h2>Requests</h2>
+        <div class="request-list">
+            @for (req of requests; track req.id) {
+            <div class="request-item" [class.active]="selectedRequest?.id === req.id" (click)="selectRequest(req)">
+                <div class="name">{{ req.customerName }}</div>
+                <div class="preview">{{ req.message }}</div>
+                <div class="meta">
+                    <span class="date">{{ req.createdAt | date:'shortDate' }}</span>
+                    <span class="status" [class]="req.status.toLowerCase()">{{ req.status }}</span>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    @if (selectedRequest) {
+    <div class="chat-area">
+        <div class="chat-header">
+            <div>
+                <h3>{{ selectedRequest.customerName }}</h3>
+                <span class="email">{{ selectedRequest.email }} | {{ selectedRequest.phone }}</span>
+            </div>
+            <div class="actions">
+                <span class="status-badge" [class]="selectedRequest.status.toLowerCase()">{{ selectedRequest.status
+                    }}</span>
+                @if (selectedRequest.status === 'Open') {
+                <button (click)="closeRequest()" class="btn-close">Close Request</button>
+                }
+            </div>
+        </div>
+
+        <div class="messages">
+            <!-- Initial Query -->
+            <div class="message incoming">
+                <div class="sender">{{ selectedRequest.customerName }}</div>
+                <div class="content">{{ selectedRequest.message }}</div>
+                <div class="time">{{ selectedRequest.createdAt | date:'shortTime' }}</div>
+            </div>
+
+            <!-- Chat Messages -->
+            @for (msg of selectedRequest.messages; track msg.timestamp) {
+            <div class="message" [ngClass]="msg.sender === 'admin' ? 'outgoing' : 'incoming'">
+                <div class="sender">{{ msg.sender === 'admin' ? 'You' : selectedRequest.customerName }}</div>
+                <div class="content">{{ msg.content }}</div>
+                <div class="time">{{ msg.timestamp | date:'shortTime' }}</div>
+            </div>
+            }
+        </div>
+
+        @if (selectedRequest.status === 'Open') {
+        <div class="input-area">
+            <input type="text" [(ngModel)]="newMessage" (keyup.enter)="sendMessage()" placeholder="Type a reply...">
+            <button (click)="sendMessage()">Send</button>
+        </div>
+        }
+        @if (selectedRequest.status === 'Closed') {
+        <div class="closed-notice">
+            This request is closed.
+        </div>
+        }
+    </div>
+    } @else {
+    <div class="empty-state">
+        <p>Select a quotation request to view details.</p>
+    </div>
+    }
+</div>

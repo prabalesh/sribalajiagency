@@ -1,1 +1,30 @@
 /* You can add global styles to this file, and also import other style files */
+
+:root {
+  --color-primary: #ccff00; /* Fluorescent Green */
+  --color-secondary: #808080; /* Grey */
+  --color-bg-light: #ffffff; /* White */
+  --color-bg-dark: #000000; /* Black */
+  --color-text-main: #000000;
+  --color-text-invert: #ffffff;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif; /* Example font */
+  background-color: var(--color-bg-light);
+  color: var(--color-text-main);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-main);
+  padding: 10px 20px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  
+  &:hover {
+    filter: brightness(0.9);
+  }
+}

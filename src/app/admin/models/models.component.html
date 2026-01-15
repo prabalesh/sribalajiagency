@@ -1,0 +1,38 @@
+<div class="crud-container">
+    <h1>Manage Models</h1>
+
+    <div class="form-card">
+        <h3>Add Model</h3>
+        <form (ngSubmit)="addModel()">
+            <div class="form-row">
+                <select [(ngModel)]="newModel.brandId" name="brandId" required>
+                    <option value="" disabled>Select Brand</option>
+                    @for (brand of brands; track brand.id) {
+                    <option [value]="brand.id">{{ brand.name }}</option>
+                    }
+                </select>
+                <input type="text" [(ngModel)]="newModel.name" name="name" placeholder="Model Name" required>
+                <button type="submit" class="btn-primary">Add</button>
+            </div>
+        </form>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Brand ID</th>
+                <th>Model Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (model of models; track model.id) {
+            <tr>
+                <td>{{ model.brandId }}</td>
+                <td>{{ model.name }}</td>
+                <td><button (click)="deleteModel(model.id)" class="delete">Delete</button></td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

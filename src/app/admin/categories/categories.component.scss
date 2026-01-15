@@ -1,0 +1,94 @@
+.crud-container {
+    padding: 2rem;
+
+    h1 {
+        margin-bottom: 2rem;
+    }
+
+    .crud-layout {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 2rem;
+    }
+
+    .form-card,
+    .list-card {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+        h3 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+        }
+    }
+
+    .form-group {
+        margin-bottom: 1.2rem;
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 0.8rem;
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+
+        &:hover {
+            background: #333;
+        }
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+
+            &.main {
+                background: #e3f2fd;
+                color: #1565c0;
+            }
+
+            &.sub {
+                background: #f5f5f5;
+                color: #666;
+            }
+        }
+    }
+}

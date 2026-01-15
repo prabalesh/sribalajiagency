@@ -1,0 +1,127 @@
+.history-page {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+
+    h1 {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .order-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+
+            .header-info {
+                display: flex;
+                flex-direction: column;
+
+                .order-id {
+                    font-weight: 600;
+                    color: #333;
+                }
+
+                .order-date {
+                    font-size: 0.9rem;
+                    color: #888;
+                    margin-top: 0.2rem;
+                }
+            }
+
+            .order-status {
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 500;
+
+                &.delivered {
+                    background: #e8f5e9;
+                    color: #2e7d32;
+                }
+
+                &.processing {
+                    background: #fff3e0;
+                    color: #f57c00;
+                }
+
+                &.cancelled {
+                    background: #ffebee;
+                    color: #c62828;
+                }
+            }
+        }
+
+        .order-items {
+            margin-bottom: 1.5rem;
+
+            .item {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.5rem 0;
+
+                .item-name {
+                    color: #555;
+                }
+
+                .item-price {
+                    font-weight: 500;
+                }
+            }
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #f0f0f0;
+
+            .label {
+                font-weight: 600;
+            }
+
+            .total {
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #000;
+            }
+        }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 1rem;
+        background: #f9f9f9;
+        border-radius: 8px;
+
+        p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: #000;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+
+            &:hover {
+                background: #333;
+            }
+        }
+    }
+}

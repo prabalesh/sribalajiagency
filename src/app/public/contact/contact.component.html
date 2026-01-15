@@ -1,0 +1,38 @@
+<div class="contact-container">
+    <h1>Contact Us</h1>
+
+    <div class="contact-wrapper">
+        <div class="info">
+            <h3>Get in Touch</h3>
+            <p><strong>Address:</strong> 123 Industrial Area, Coimbatore, Tamil Nadu</p>
+            <p><strong>Phone:</strong> +91 98765 43210</p>
+            <p><strong>Email:</strong> info&#64;sribalajiagency.com</p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" #form="ngForm">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" required [(ngModel)]="contactForm.name" name="name" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required [(ngModel)]="contactForm.email" name="email"
+                    class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" [(ngModel)]="contactForm.subject" name="subject" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" required [(ngModel)]="contactForm.message" name="message" rows="5"
+                    class="form-control"></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" [disabled]="!form.valid">Send Message</button>
+        </form>
+    </div>
+</div>
