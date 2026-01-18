@@ -1,0 +1,300 @@
+.account-page {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 4rem;
+    padding: 4rem 0 8rem;
+}
+
+.account-sidebar {
+    padding: 2rem;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+
+        .avatar {
+            width: 56px;
+            height: 56px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        p {
+            font-size: 0.85rem;
+            color: var(--text-color-muted);
+        }
+    }
+
+    nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        a,
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-color-muted);
+            transition: all var(--transition-speed);
+
+            svg {
+                opacity: 0.6;
+            }
+
+            &:hover {
+                background-color: var(--surface-color);
+                color: var(--primary-color);
+
+                svg {
+                    opacity: 1;
+                }
+            }
+
+            &.active {
+                background-color: rgba(255, 62, 0, 0.1);
+                color: var(--primary-color);
+
+                svg {
+                    opacity: 1;
+                }
+            }
+        }
+
+        .logout-btn {
+            margin-top: 2rem;
+            color: #ef4444;
+
+            &:hover {
+                background-color: rgba(239, 68, 68, 0.05);
+            }
+        }
+    }
+}
+
+.account-content {
+    .content-header {
+        margin-bottom: 3rem;
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            color: var(--text-color-muted);
+            font-size: 1.1rem;
+        }
+    }
+}
+
+.address-form {
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-color-muted);
+        }
+
+        .form-control {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-sm);
+            font-family: inherit;
+        }
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+}
+
+.address-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.address-card {
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    transition: all var(--transition-speed);
+
+    &.is-default {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 1px var(--primary-color);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .type-badge {
+            background-color: var(--surface-color);
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .default-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+        }
+    }
+
+    .addr-details {
+        strong {
+            display: block;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin: 0;
+            color: var(--text-color-muted);
+            line-height: 1.6;
+        }
+    }
+
+    .card-footer {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 0;
+            cursor: pointer;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #ef4444;
+            opacity: 0.6;
+            cursor: pointer;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 6rem;
+
+    .icon {
+        font-size: 4rem;
+        margin-bottom: 2rem;
+        opacity: 0.3;
+    }
+
+    h2 {
+        margin-bottom: 1rem;
+    }
+
+    p {
+        color: var(--text-color-muted);
+    }
+}
+
+@media (max-width: 991px) {
+    .account-page {
+        grid-template-columns: 1fr;
+    }
+
+    .account-sidebar {
+        position: static;
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .form-grid,
+    .form-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}

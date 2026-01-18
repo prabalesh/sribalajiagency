@@ -1,0 +1,75 @@
+<div class="cart-page container">
+    <header class="page-header">
+        <h1>Shopping Bag</h1>
+        <p *ngIf="cartService.count() > 0">You have {{ cartService.count() }} items in your bag</p>
+    </header>
+
+    @if (cartService.count() > 0) {
+    <div class="cart-layout">
+        <div class="cart-items">
+            @for (item of cartService.items(); track item.product.id) {
+            <div class="cart-item glass-card animate-fade">
+                <div class="item-img">
+                    <img [src]="item.product.imageUrls[0]" [alt]="item.product.name">
+                </div>
+                <div class="item-info">
+                    <div class="info-header">
+                        <h3>{{ item.product.name }}</h3>
+                        <button class="remove-btn" (click)="removeItem(item.product.id)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="price">₹{{ item.product.price | number }}</p>
+
+                    <div class="item-footer">
+                        <div class="qty-control glass-card">
+                            <button (click)="updateQty(item.product.id, -1, item.quantity)">-</button>
+                            <span>{{ item.quantity }}</span>
+                            <button (click)="updateQty(item.product.id, 1, item.quantity)">+</button>
+                        </div>
+                        <p class="subtotal">₹{{ (item.product.price || 0) * item.quantity | number }}</p>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+
+        <div class="cart-summary glass-card">
+            <h3>Order Summary</h3>
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span>₹{{ cartService.total() | number }}</span>
+            </div>
+            <div class="summary-row">
+                <span>Estimated Shipping</span>
+                <span class="free">FREE</span>
+            </div>
+            <div class="summary-row">
+                <span>Estimated GST (18%)</span>
+                <span>₹{{ cartService.total() * 0.18 | number:'1.0-0' }}</span>
+            </div>
+            <div class="summary-total">
+                <span>Total Amount</span>
+                <span>₹{{ cartService.total() * 1.18 | number:'1.0-0' }}</span>
+            </div>
+
+            <button class="btn-primary checkout-btn" routerLink="/request-quote">
+                Request Official Quotation
+            </button>
+            <p class="summary-note">A commercial quotation will be sent to your email with payment instructions.</p>
+        </div>
+    </div>
+    } @else {
+    <div class="empty-cart glass-card">
+        <div class="empty-icon">🛍️</div>
+        <h2>Your bag is empty</h2>
+        <p>Looks like you haven't added anything to your bag yet.</p>
+        <button class="btn-primary" routerLink="/products">Shop Catalog</button>
+    </div>
+    }
+</div>

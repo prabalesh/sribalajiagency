@@ -1,59 +1,64 @@
-<div class="products-page">
-    <!-- Breadcrumbs / Header -->
-    <header class="page-header">
-        <nav class="breadcrumbs">
-            <a routerLink="/products">All Products</a>
-            @if (currentCategory) {
-            <span> / {{ currentCategory.name }}</span>
+<div class="products-page container">
+    <aside class="sidebar glass-card">
+        <h3>Categories</h3>
+        <ul>
+            <li [class.active]="!currentCategory">
+                <a routerLink="/products">All Products</a>
+            </li>
+            @for (cat of categories; track cat.id) {
+            <li [class.active]="currentCategory?.id === cat.id">
+                <a [routerLink]="['/products', cat.slug]">{{ cat.name }}</a>
+            </li>
             }
-        </nav>
-        <h1>{{ currentCategory ? currentCategory.name : 'Our Products' }}</h1>
-    </header>
+        </ul>
 
-    <!-- Categories / Subcategories List -->
-    @if (categories.length > 0 || subCategories.length > 0) {
-    <section class="categories-list">
-        @for (cat of (isRoot ? categories : subCategories); track cat.id) {
-        <div class="category-card"
-            [routerLink]="isRoot ? ['/products', cat.slug] : ['/products', currentCategory?.slug, cat.slug]">
-            <div class="category-icon">
-                <!-- Ideally use cat.imageUrl here -->
-                <div class="placeholder-icon">{{ cat.name.charAt(0) }}</div>
-            </div>
-            <h3>{{ cat.name }}</h3>
+        <div class="sidebar-promo glass-card">
+            <h4>Summer Sale</h4>
+            <p>Up to 40% off on all LG appliances.</p>
         </div>
-        }
-    </section>
-    }
+    </aside>
 
-    <!-- Product Grid -->
-    @if (products.length > 0) {
-    <section class="product-grid">
-        @for (product of products; track product.id) {
-        <div class="product-card">
-            <div class="product-image">
-                <div class="placeholder-img">Image</div>
-            </div>
-            <div class="product-info">
-                <h3>{{ product.name }}</h3>
-                <p class="description">{{ product.description }}</p>
-                <div class="actions">
-                    @if (product.price) {
-                    <p class="price">₹{{ product.price }}</p>
-                    }
-                    <button class="btn-primary" [routerLink]="['/quotations', { productId: product.id }]">
-                        Get Quote
-                    </button>
+    <main class="products-main">
+        <header class="page-header">
+            <nav class="breadcrumbs">
+                <a routerLink="/">Home</a>
+                <span class="sep">/</span>
+                <a routerLink="/products">Catalog</a>
+                @if (currentCategory) {
+                <span class="sep">/</span>
+                <span class="current">{{ currentCategory.name }}</span>
+                }
+            </nav>
+            <h1>{{ currentCategory ? currentCategory.name : 'Everything in Store' }}</h1>
+            <p class="count">{{ products.length }} items found</p>
+        </header>
+
+        <section class="product-grid">
+            @for (product of products; track product.id) {
+            <div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]">
+                <div class="p-image">
+                    <img [src]="product.imageUrls[0]" [alt]="product.name">
+                    <div class="p-overlay">
+                        <button class="btn-primary" (click)="addToCart(product, $event)">Quick Add</button>
+                    </div>
+                </div>
+                <div class="p-info">
+                    <span class="p-brand">{{ product.brandId | uppercase }}</span>
+                    <h3>{{ product.name }}</h3>
+                    <div class="p-footer">
+                        <span class="p-price">₹{{ product.price | number }}</span>
+                        <span class="p-rating">★★★★☆</span>
+                    </div>
                 </div>
             </div>
+            }
+        </section>
+
+        @if (products.length === 0) {
+        <div class="no-results glass-card">
+            <p>Sorry, no products found in this category yet.</p>
+            <button class="btn-primary" routerLink="/products">See All Products</button>
         </div>
         }
-    </section>
-    }
-
-    @if (products.length === 0 && subCategories.length === 0) {
-    <div class="no-products">
-        <p>No products found in this category.</p>
-    </div>
-    }
+    </main>
 </div>

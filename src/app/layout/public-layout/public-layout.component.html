@@ -1,40 +1,113 @@
-<div class="public-layout">
-    <header class="main-header">
-        <div class="brand">
-            <a routerLink="/">Sri Balaji Agency</a>
-        </div>
-        <nav>
-            <ul>
-                <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
-                <li><a routerLink="/products" routerLinkActive="active">Products</a></li>
-                <li><a routerLink="/brands" routerLinkActive="active">Brands</a></li>
-                <li><a routerLink="/history" routerLinkActive="active">History</a></li>
-                <li><a routerLink="/request-quote" routerLinkActive="active">Get Quote</a></li>
-                <li><a routerLink="/my-quotes" routerLinkActive="active">My Quotes</a></li>
-                <li><a routerLink="/contact" routerLinkActive="active">Contact</a></li>
-                <li>
-                    <button class="search-toggle" (click)="toggleSearch()">
-                        <!-- Simple Search Icon SVG -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+<div class="public-layout" [attr.data-theme]="themeService.currentTheme()">
+    <header class="main-header glass-card">
+        <div class="container header-content">
+            <div class="brand" routerLink="/">
+                <span class="logo-icon">SB</span>
+                <span class="logo-text">Sri Balaji <span class="accent">Agency</span></span>
+            </div>
+
+            <nav class="desktop-nav">
+                <ul>
+                    <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+                    </li>
+                    <li><a routerLink="/products" routerLinkActive="active">Catalog</a></li>
+                    <li><a routerLink="/brands" routerLinkActive="active">Brands</a></li>
+                    <li><a routerLink="/history" routerLinkActive="active">Orders</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <button class="icon-btn search-btn" (click)="toggleSearch()" title="Search">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+
+                <button class="icon-btn theme-btn" (click)="toggleTheme()"
+                    [title]="themeService.currentTheme() === 'light' ? 'Dark Mode' : 'Light Mode'">
+                    @if (themeService.currentTheme() === 'light') {
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    } @else {
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    }
+                </button>
+
+                <div class="cart-wrapper" routerLink="/cart">
+                    <button class="icon-btn cart-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
                         </svg>
-                        <span style="margin-left: 5px;">Search</span>
                     </button>
-                </li>
-            </ul>
-        </nav>
+                    @if (cartService.count() > 0) {
+                    <span class="cart-badge">{{ cartService.count() }}</span>
+                    }
+                </div>
+
+                <div class="user-section">
+                    @if (authService.isLoggedIn()) {
+                    <button class="icon-btn user-btn" (click)="isUserDropdownOpen = !isUserDropdownOpen">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </button>
+                    @if (isUserDropdownOpen) {
+                    <div class="user-dropdown glass-card animate-fade">
+                        <div class="dropdown-header">
+                            <strong>{{ authService.user()?.name }}</strong>
+                            <span>{{ authService.user()?.email }}</span>
+                        </div>
+                        <hr>
+                        <a routerLink="/account/profile" (click)="isUserDropdownOpen = false">My Profile</a>
+                        <a routerLink="/account/orders" (click)="isUserDropdownOpen = false">My Orders</a>
+                        <a routerLink="/account/addresses" (click)="isUserDropdownOpen = false">Addresses</a>
+                        <hr>
+                        <button (click)="authService.logout(); isUserDropdownOpen = false">Sign Out</button>
+                    </div>
+                    }
+                    } @else {
+                    <button class="btn-primary login-btn" routerLink="/login">Sign In</button>
+                    }
+                </div>
+            </div>
+        </div>
     </header>
 
-    <!-- Search Overlay/Bar -->
+    <!-- Search Overlay -->
     @if (isSearchOpen) {
-    <div class="search-bar">
-        <div class="container">
-            <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" placeholder="Search for products..."
-                autoFocus>
-            <button (click)="onSearch()">Search</button>
-            <button class="close-search" (click)="toggleSearch()">Close</button>
+    <div class="search-overlay">
+        <div class="container search-container">
+            <div class="search-box glass-card">
+                <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()"
+                    placeholder="What are you looking for today?" #searchInput autoFocus>
+                <div class="search-actions">
+                    <button class="btn-primary" (click)="onSearch()">Search</button>
+                    <button class="close-btn" (click)="toggleSearch()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     }
@@ -44,9 +117,44 @@
     </main>
 
     <footer class="main-footer">
-        <p>&copy; 2024 Sri Balaji Agency. All rights reserved.</p>
-        <div class="links">
-            <a routerLink="/feedback">Feedback</a>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section brand-info">
+                    <h3>Sri Balaji Agency</h3>
+                    <p>Coimbatore's premier destination for high-quality industrial tools and home appliances.
+                        Delivering excellence since 1995.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a routerLink="/products">Our Catalog</a></li>
+                        <li><a routerLink="/brands">Top Brands</a></li>
+                        <li><a routerLink="/request-quote">Get a Quotation</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Customer Care</h4>
+                    <ul>
+                        <li><a routerLink="/contact">Contact Us</a></li>
+                        <li><a routerLink="/feedback">Give Feedback</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section socials">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-item">FB</a>
+                        <a href="#" class="social-item">TW</a>
+                        <a href="#" class="social-item">IG</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Sri Balaji Agency. All rights reserved.</p>
+                <div class="admin-link">
+                    <a routerLink="/admin/login">Staff Login</a>
+                </div>
+            </div>
         </div>
     </footer>
 </div>

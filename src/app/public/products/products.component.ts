@@ -1,56 +1,40 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Product, Category } from '../../core/models/models';
 import { ProductService } from '../../core/services/product.service';
+import { CartService } from '../../core/services/cart.service';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
 export class ProductsComponent implements OnInit {
+  private productService = inject(ProductService);
+  private cartService = inject(CartService);
+  private route = inject(ActivatedRoute);
 
   products: Product[] = [];
   categories: Category[] = [];
   currentCategory: Category | undefined;
-  subCategories: Category[] = [];
-
-  // Breadcrumb/Navigation state
-  isRoot = true;
-
-  constructor(
-    private productService: ProductService,
-    private route: ActivatedRoute
-  ) { }
+  breadcrumbCategories: Category[] = [];
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       const categorySlug = params.get('category');
-      const subcategorySlug = params.get('subcategory');
 
-      if (subcategorySlug) {
-        // Level 2: Subcategory selected
-        this.isRoot = false;
-        this.currentCategory = this.productService.getCategoryBySlug(subcategorySlug);
-        this.loadProducts(this.currentCategory?.id);
-        this.subCategories = []; // No children for now
-      } else if (categorySlug) {
-        // Level 1: Main Category selected
-        this.isRoot = false;
+      if (categorySlug) {
         this.currentCategory = this.productService.getCategoryBySlug(categorySlug);
-        this.subCategories = this.productService.getCategoriesByParentId(this.currentCategory?.id);
         this.loadProducts(this.currentCategory?.id);
       } else {
-        // Root: Show Main Categories
-        this.isRoot = true;
         this.currentCategory = undefined;
-        this.categories = this.productService.getCategoriesByParentId(undefined); // Get root categories
-        this.loadProducts(undefined); // Load all or nothing? Let's load all for now or maybe featured
+        this.loadProducts(undefined);
       }
+      this.categories = this.productService.getCategories();
     });
   }
 
@@ -58,9 +42,12 @@ export class ProductsComponent implements OnInit {
     if (categoryId) {
       this.products = this.productService.getProductsByCategory(categoryId);
     } else {
-      // If no category selected, maybe show all or just popular?
-      // For now showing all
       this.products = this.productService.getProducts();
     }
+  }
+
+  addToCart(product: Product, event: Event) {
+    event.stopPropagation();
+    this.cartService.addToCart(product);
   }
 }

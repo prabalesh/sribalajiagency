@@ -1,0 +1,68 @@
+<div class="auth-page container">
+    <div class="auth-card glass-card animate-fade">
+        <div class="auth-header text-center">
+            <span class="logo-icon">SB</span>
+            <h1>Create Account</h1>
+            <p>Join Sri Balaji Agency and get exclusive benefits.</p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" #regForm="ngForm">
+            <div *ngIf="error" class="error-badge">{{ error }}</div>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <div class="input-wrapper">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <input type="text" required [(ngModel)]="name" name="name" placeholder="Full Name / Organization"
+                        class="form-control">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <div class="input-wrapper">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <input type="email" required [(ngModel)]="email" name="email" placeholder="you@example.com"
+                        class="form-control">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" required [(ngModel)]="password" name="password" placeholder="••••••••"
+                            class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm</label>
+                    <div class="input-wrapper">
+                        <input type="password" required [(ngModel)]="confirmPassword" name="confirm"
+                            placeholder="••••••••" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <div class="terms">
+                <p>By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy
+                        Policy</a>.</p>
+            </div>
+
+            <button type="submit" class="btn-primary w-full" [disabled]="!regForm.valid || isLoading">
+                <span *ngIf="!isLoading">Register Now</span>
+                <span *ngIf="isLoading" class="spinner-small"></span>
+            </button>
+        </form>
+
+        <div class="auth-footer text-center">
+            <p>Already have an account? <a routerLink="/login">Sign in</a></p>
+        </div>
+    </div>
+</div>

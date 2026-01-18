@@ -34,6 +34,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent)
             },
             {
+                path: 'products/detail/:id',
+                loadComponent: () => import('./public/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+            },
+            {
+                path: 'cart',
+                loadComponent: () => import('./public/cart/cart.component').then(m => m.CartComponent)
+            },
+            {
                 path: 'history',
                 loadComponent: () => import('./public/history/history.component').then(m => m.HistoryComponent)
             },
@@ -48,6 +56,44 @@ export const routes: Routes = [
             {
                 path: 'contact',
                 loadComponent: () => import('./public/contact/contact.component').then(m => m.ContactComponent)
+            },
+            {
+                path: 'login',
+                loadComponent: () => import('./public/auth/login/login.component').then(m => m.LoginComponent)
+            },
+            {
+                path: 'register',
+                loadComponent: () => import('./public/auth/register/register.component').then(m => m.RegisterComponent)
+            },
+            {
+                path: 'forgot-password',
+                loadComponent: () => import('./public/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+            },
+            {
+                path: 'reset-password',
+                loadComponent: () => import('./public/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+            },
+            {
+                path: 'account',
+                children: [
+                    {
+                        path: 'profile',
+                        loadComponent: () => import('./public/account/profile/profile.component').then(m => m.ProfileComponent)
+                    },
+                    {
+                        path: 'orders',
+                        loadComponent: () => import('./public/account/orders/orders.component').then(m => m.OrdersComponent)
+                    },
+                    {
+                        path: 'addresses',
+                        loadComponent: () => import('./public/account/addresses/addresses.component').then(m => m.AddressesComponent)
+                    },
+                    {
+                        path: '',
+                        redirectTo: 'profile',
+                        pathMatch: 'full'
+                    }
+                ]
             },
             {
                 path: 'feedback',

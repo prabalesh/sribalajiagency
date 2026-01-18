@@ -20,9 +20,9 @@ export class LoginComponent {
     constructor(private authService: AuthService, private router: Router) { }
 
     login() {
-        // Mock login validation
-        if (this.credentials.username === 'admin' && this.credentials.password === 'admin') {
-            this.authService.login();
+        // Updated to use centralized AuthService
+        const success = this.authService.login('admin@sribalaji.com', 'admin123');
+        if (success) {
             this.router.navigate(['/admin/dashboard']);
         } else {
             alert('Invalid credentials');

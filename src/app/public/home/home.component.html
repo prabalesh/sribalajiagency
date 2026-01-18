@@ -1,20 +1,108 @@
-<div class="home-container">
-    <section class="hero">
-        <h1>Welcome to Sri Balaji Agency</h1>
-        <p>Your one-stop solution for industrial tools and machinery.</p>
-        <button class="btn-primary" routerLink="/products">View Products</button>
+<div class="home-wrapper">
+    <!-- Hero Showcase -->
+    <section class="hero-showcase animate-fade">
+        <div class="container hero-content">
+            <div class="hero-badge">BESTSELLER 2026</div>
+            <h1 class="text-gradient">Experience the future of Home Tech.</h1>
+            <p>Premium selection of global brands including Sony, Samsung, and Bosch. Engineered for excellence,
+                delivered with care.</p>
+            <div class="hero-actions">
+                <button class="btn-primary" [routerLink]="['/products/detail', 'p-sony-bravia']">Explore Sony
+                    Bravia</button>
+                <button class="btn-secondary" routerLink="/products">See All Products</button>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="https://placehold.co/1200x800?text=Premium+Tech+Showcase" alt="Premium Tech">
+        </div>
     </section>
 
-    <section class="featured">
-        <h2>Featured Brands</h2>
-        <!-- Placeholder for brands loop -->
-        <div class="brand-grid">
-            @for (brand of featuredBrands; track brand.name) {
-            <div class="brand-item">
-                <!-- <img [src]="brand.logo" [alt]="brand.name"> -->
-                <h3>{{ brand.name }}</h3>
+    <!-- Category Grid -->
+    <section class="category-section container">
+        <div class="section-header">
+            <h2>Shop by Category</h2>
+            <a routerLink="/products" class="view-all">Browse All</a>
+        </div>
+        <div class="category-grid">
+            @for (cat of categories; track cat.id) {
+            <div class="category-card glass-card" [routerLink]="['/products', cat.slug]">
+                <div class="cat-content">
+                    <h3>{{ cat.name }}</h3>
+                    <p>{{ cat.description }}</p>
+                </div>
+                <div class="cat-icon">{{ cat.name.charAt(0) }}</div>
             </div>
             }
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured-section bg-surface">
+        <div class="container">
+            <div class="section-header">
+                <h2>Most Popular This Month</h2>
+                <div class="slider-controls">
+                    <button class="icon-btn">←</button>
+                    <button class="icon-btn">→</button>
+                </div>
+            </div>
+
+            <div class="product-grid">
+                @for (product of featuredProducts; track product.id) {
+                <div class="product-card glass-card" [routerLink]="['/products/detail', product.id]">
+                    <div class="p-image">
+                        <img [src]="product.imageUrls[0]" [alt]="product.name">
+                        <button class="add-shortcut" (click)="addToCart(product, $event)" title="Quick Add">
+                            +
+                        </button>
+                    </div>
+                    <div class="p-info">
+                        <span class="p-brand">{{ product.brandId | uppercase }}</span>
+                        <h3>{{ product.name }}</h3>
+                        <div class="p-footer">
+                            <span class="p-price">₹{{ product.price | number }}</span>
+                            <span class="p-view">View Detail</span>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Brand Shelf -->
+    <section class="brand-shelf container">
+        <div class="brand-row">
+            @for (brand of brands; track brand.id) {
+            <div class="brand-item">
+                <span class="brand-name">{{ brand.name }}</span>
+            </div>
+            }
+        </div>
+    </section>
+
+    <!-- Trust Markers -->
+    <section class="trust-markers container">
+        <div class="marker">
+            <div class="marker-icon">🚚</div>
+            <div class="marker-text">
+                <h4>Rapid 24h Delivery</h4>
+                <p>Available on select items in major hubs.</p>
+            </div>
+        </div>
+        <div class="marker">
+            <div class="marker-icon">🛡️</div>
+            <div class="marker-text">
+                <h4>Genuine Brand Warranty</h4>
+                <p>Direct manufacturer support for all products.</p>
+            </div>
+        </div>
+        <div class="marker">
+            <div class="marker-icon">💬</div>
+            <div class="marker-text">
+                <h4>Expert Consultation</h4>
+                <p>Talk to our product specialists anytime.</p>
+            </div>
         </div>
     </section>
 </div>
