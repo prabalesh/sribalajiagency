@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Feedback } from '../../core/models/models';
+import { Feedback } from '../../core/models/feedback.model';
 
 @Component({
   selector: 'app-admin-feedback',

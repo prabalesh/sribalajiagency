@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { QuotationRequest, Message } from '../../core/models/models';
 import { QuotationService } from '../../core/services/api/quotation.service';
+import { Message, QuotationRequest } from '../../core/models/quotation.model';
 
 @Component({
   selector: 'app-admin-quotations',

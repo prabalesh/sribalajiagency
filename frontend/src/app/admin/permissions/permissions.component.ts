@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../core/services/auth.service';
-import { Role, Permission } from '../../core/models/models';
+import { AuthService } from '../../core/services/auth/auth.service';
+import { Permission, Role } from '../../core/models/auth.model';
 
 @Component({
     selector: 'app-admin-permissions',

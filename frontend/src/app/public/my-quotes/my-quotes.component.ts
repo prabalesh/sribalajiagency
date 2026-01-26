@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { QuotationRequest, Message } from '../../core/models/models';
+import { QuotationRequest, Message } from '../../core/models/quotation.model';
 import { QuotationService } from '../../core/services/api/quotation.service';
 
 @Component({

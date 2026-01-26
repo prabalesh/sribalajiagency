@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LocationService } from '../../../core/store/location.service';
-import { LocationRestriction } from '../../../core/models/models';
+import { LocationRestriction } from '../../../core/models/location.model';
 
 @Component({
     selector: 'app-admin-location-restrictions',

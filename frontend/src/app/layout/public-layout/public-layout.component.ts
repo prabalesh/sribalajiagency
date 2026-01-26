@@ -4,7 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ThemeService } from '../../core/store/theme.service';
 import { CartService } from '../../core/store/cart.service';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 
 @Component({
   selector: 'app-public-layout',

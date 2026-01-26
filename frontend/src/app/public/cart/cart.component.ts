@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../core/store/cart.service';
-import { ProductService } from '../../core/services/api/product.service';
+import { SettingsService } from '../../core/services/api/settings.service';
 
 @Component({
   selector: 'app-cart',
@@ -13,7 +13,7 @@ import { ProductService } from '../../core/services/api/product.service';
   styleUrl: './cart.component.scss'
 })
 export class CartComponent implements OnInit {
-  private productService = inject(ProductService);
+  private settingsService = inject(SettingsService);
   cartService = inject(CartService);
 
   settings: any;
@@ -21,7 +21,7 @@ export class CartComponent implements OnInit {
   isCheckoutMode = false;
 
   async ngOnInit() {
-    this.settings = await this.productService.getStoreSettings();
+    this.settings = await this.settingsService.getStoreSettings();
   }
 
   get allowedMethods() {
