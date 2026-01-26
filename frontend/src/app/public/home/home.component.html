@@ -1,0 +1,196 @@
+<div class="home-wrapper">
+    <!-- Hero Section -->
+    <section class="hero-container animate-fade">
+        @if (cms?.heroType === 'carousel' && cms?.heroSlides?.length > 0) {
+        <!-- Carousel Layout -->
+        <div class="hero-carousel">
+            <div class="carousel-container">
+                @for (slide of cms.heroSlides; track $index) {
+                <div class="carousel-slide" [class.active]="$index === currentSlideIndex">
+                    <div class="container hero-content">
+                        <div class="hero-badge">{{ slide.badge }}</div>
+                        <h1 class="text-gradient">{{ slide.title }}</h1>
+                        <p>{{ slide.subtitle }}</p>
+                        <div class="hero-actions">
+                            <button class="btn-primary" [routerLink]="slide.link">
+                                {{ slide.linkText || 'Shop Now' }}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img [src]="slide.image?.startsWith('http') ? slide.image : ('http://localhost:3000' + slide.image)"
+                            [alt]="slide.title">
+                    </div>
+                </div>
+                }
+
+                @if (cms.heroSlides.length > 1) {
+                <div class="carousel-controls">
+                    <button type="button" (click)="prevSlide()">←</button>
+                    <div class="indicators">
+                        @for (s of cms.heroSlides; track $index) {
+                        <span [class.active]="$index === currentSlideIndex" (click)="currentSlideIndex = $index"></span>
+                        }
+                    </div>
+                    <button type="button" (click)="nextSlide()">→</button>
+                </div>
+                }
+            </div>
+        </div>
+        } @else {
+        <!-- Standard Showcase Layout (Default) -->
+        <div class="hero-showcase container">
+            <div class="hero-content">
+                <div class="hero-badge">{{ cms?.heroBadge || 'AUTHORIZED DEALER' }}</div>
+                <h1 class="text-gradient">{{ cms?.heroTitle || 'Experience the Future of Home Technology' }}</h1>
+                <p>{{ cms?.heroSubtitle || 'Curated selection of global brands for your modern home.' }}</p>
+                <div class="hero-actions">
+                    <button class="btn-primary" [routerLink]="cms?.heroLink || '/products'">
+                        {{ cms?.heroLinkText || 'Explore Collection' }}
+                    </button>
+                    <button class="btn-secondary" routerLink="/products">See All Products</button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img [src]="cms?.heroImage?.startsWith('http') ? cms.heroImage : (cms?.heroImage ? 'http://localhost:3000' + cms.heroImage : 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=2000')"
+                    [alt]="cms?.heroTitle || 'Premium Home Tech'">
+            </div>
+        </div>
+        }
+    </section>
+
+    <!-- Category Grid -->
+    @if (cms?.showCategories !== false) {
+    <section class="category-section container">
+        <div class="section-header">
+            <h2>Shop by Category</h2>
+            <a routerLink="/products" class="view-all">Browse All</a>
+        </div>
+        <div class="category-grid">
+            @for (cat of categories; track cat.id) {
+            <div class="category-card glass-card" [routerLink]="['/products', cat.slug]">
+                <div class="cat-content">
+                    <h3>{{ cat.name }}</h3>
+                    <p>{{ cat.description }}</p>
+                </div>
+                <div class="cat-icon">{{ cat.name.charAt(0) }}</div>
+            </div>
+            }
+        </div>
+    </section>
+    }
+
+    <!-- Featured Products -->
+    @if (cms?.showFeatured !== false) {
+    <section class="featured-section bg-surface">
+        <div class="container">
+            <div class="section-header">
+                <h2>Most Popular This Month</h2>
+            </div>
+
+            <div class="product-grid">
+                @for (product of featuredProducts; track product.id) {
+                <div class="product-card glass-card" [routerLink]="['/products/detail', product.id]">
+                    <div class="p-image">
+                        <img [src]="product.images && product.images.length > 0 ? 'http://localhost:3000' + product.images[0].url : 'https://placehold.co/400x400?text=No+Image'"
+                            [alt]="product.name">
+                        <button *ngIf="product.stock > 0" class="add-shortcut" (click)="addToCart(product, $event)"
+                            title="Quick Add">
+                            +
+                        </button>
+                        <div *ngIf="product.stock <= 0" class="oos-badge">Out of Stock</div>
+                    </div>
+                    <div class="p-info">
+                        <span class="p-brand">{{ product.brandId | uppercase }}</span>
+                        <h3>{{ product.name }}</h3>
+                        <div class="p-footer">
+                            <span class="p-price">₹{{ product.price | number }}</span>
+                            <span class="p-view">View Detail</span>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </section>
+    }
+
+    <!-- About Section -->
+    @if (cms?.aboutContent) {
+    <section class="about-section container">
+        <div class="about-grid">
+            <div class="about-text">
+                <div class="hero-badge">OUR STORY</div>
+                <h2 class="text-gradient">{{ cms.aboutTitle }}</h2>
+                <div class="content" [innerHTML]="cms.aboutContent"></div>
+            </div>
+            @if (cms.aboutImage) {
+            <div class="about-visual">
+                <img [src]="'http://localhost:3000' + cms.aboutImage" alt="About Sri Balaji">
+            </div>
+            }
+        </div>
+    </section>
+    }
+
+    <!-- Brand Shelf -->
+    @if (cms?.showBrands !== false) {
+    <section class="brand-shelf container">
+        <div class="brand-row">
+            @for (brand of brands; track brand.id) {
+            <div class="brand-item">
+                @if (brand.image) {
+                <img [src]="'http://localhost:3000' + brand.image" [alt]="brand.name" class="brand-logo-img">
+                } @else {
+                <span class="brand-name">{{ brand.name }}</span>
+                }
+            </div>
+            }
+        </div>
+    </section>
+    }
+
+    <!-- Trust Markers -->
+    @if (cms?.showTrustMarkers !== false) {
+    <section class="trust-markers container">
+        <div class="marker">
+            <div class="marker-icon">🚚</div>
+            <div class="marker-text">
+                <h4>Rapid 24h Delivery</h4>
+                <p>Available on select items in major hubs.</p>
+            </div>
+        </div>
+        <div class="marker">
+            <div class="marker-icon">🛡️</div>
+            <div class="marker-text">
+                <h4>Genuine Brand Warranty</h4>
+                <p>Direct manufacturer support for all products.</p>
+            </div>
+        </div>
+        <div class="marker">
+            <div class="marker-icon">💬</div>
+            <div class="marker-text">
+                <h4>Expert Consultation</h4>
+                <p>Talk to our product specialists anytime.</p>
+            </div>
+        </div>
+    </section>
+    }
+
+    <!-- Social Section -->
+    @if (cms?.socialLinks?.length > 0) {
+    <section class="social-section container">
+        <div class="section-header">
+            <h2>Follow Us</h2>
+        </div>
+        <div class="social-grid">
+            @for (link of cms.socialLinks; track $index) {
+            <a [href]="link.url" target="_blank" class="social-card glass-card">
+                <span class="social-index">{{ link.platform }}</span>
+                <span class="social-arrow">↗</span>
+            </a>
+            }
+        </div>
+    </section>
+    }
+</div>

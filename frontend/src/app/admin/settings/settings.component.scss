@@ -1,0 +1,11 @@
+.settings-container {
+    .card {
+        background: var(--surface-color);
+        padding: 2rem;
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        max-width: 500px;
+        color: var(--text-color);
+    }
+}

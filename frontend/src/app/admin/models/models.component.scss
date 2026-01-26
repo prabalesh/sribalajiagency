@@ -1,0 +1,75 @@
+/* Reusing similar CRUD styles, can be moved to shared styles in future */
+.crud-container {
+    h1 {
+        margin-bottom: 2rem;
+        color: var(--text-color);
+    }
+
+    .form-card {
+        background: var(--surface-color);
+        padding: 1.5rem;
+        border-radius: var(--border-radius-md);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+
+        h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+
+            select,
+            input {
+                flex: 1;
+                padding: 10px;
+                border: 1px solid var(--border-color);
+                border-radius: var(--border-radius-sm);
+                background: var(--bg-color);
+                color: var(--text-color);
+            }
+        }
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--surface-color);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        overflow: hidden;
+
+        th,
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+            color: var(--text-color);
+        }
+
+        th {
+            background: var(--surface-color-secondary);
+            color: var(--text-color-muted);
+            font-weight: 700;
+        }
+
+        .delete {
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.1);
+            padding: 6px 12px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+
+            &:hover {
+                background: #ef4444;
+                color: white;
+            }
+        }
+    }
+}

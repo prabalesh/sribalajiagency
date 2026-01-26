@@ -1,0 +1,77 @@
+.crud-container {
+    h1 {
+        margin-bottom: 2rem;
+        color: var(--text-color);
+    }
+
+    .form-card {
+        background: var(--surface-color);
+        padding: 1.5rem;
+        border-radius: var(--border-radius-md);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+
+        h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+
+            input {
+                flex: 1;
+                padding: 10px;
+                border: 1px solid var(--border-color);
+                border-radius: var(--border-radius-sm);
+                background: var(--bg-color);
+                color: var(--text-color);
+            }
+        }
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--surface-color);
+        box-shadow: var(--shadow-sm);
+        border-radius: var(--border-radius-md);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        th {
+            background: var(--surface-color-secondary);
+            font-weight: bold;
+            color: var(--text-color-muted);
+        }
+
+        td button {
+            margin-right: 0.5rem;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+
+            &.delete {
+                background: rgba(239, 68, 68, 0.1);
+                color: #ef4444;
+                border: 1px solid rgba(239, 68, 68, 0.2);
+
+                &:hover {
+                    background: #ef4444;
+                    color: white;
+                }
+            }
+        }
+    }
+}

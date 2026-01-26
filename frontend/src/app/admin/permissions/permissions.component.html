@@ -1,0 +1,80 @@
+<div class="crud-container">
+    <header class="page-header">
+        <h1>Roles & Access Control</h1>
+        <p>Define user roles and assign granular system permissions</p>
+    </header>
+
+    <div class="form-card animate-fade">
+        <h3>{{ isEditing ? 'Modify Role' : 'Create New Security Role' }}</h3>
+        <form (ngSubmit)="saveRole()">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Role Identifier</label>
+                    <input type="text" [(ngModel)]="newRole.name" name="name" required
+                        placeholder="e.g. Content Manager">
+                </div>
+                <div class="form-group">
+                    <label>Short Description</label>
+                    <input type="text" [(ngModel)]="newRole.description" name="description"
+                        placeholder="Describe access level...">
+                </div>
+                <div class="form-group full-width">
+                    <label>Assigned Permissions</label>
+                    <div class="permissions-grid-wrapper">
+                        @for (p of permissions; track p.id) {
+                        <label class="permission-checkbox">
+                            <input type="checkbox" [checked]="newRole.permissionIds.includes(p.id)"
+                                (change)="togglePermission(p.id)">
+                            <div class="p-card">
+                                <strong>{{ p.name }}</strong>
+                                <span>{{ p.description }}</span>
+                            </div>
+                        </label>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn-primary">{{ isEditing ? 'Save Changes' : 'Create Role' }}</button>
+                @if (isEditing) {
+                <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="list-container animate-fade">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Security Level</th>
+                    <th>Permissions</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (r of roles; track r.id) {
+                <tr>
+                    <td><strong>{{ r.name | uppercase }}</strong></td>
+                    <td>{{ r.description }}</td>
+                    <td>
+                        <div class="perm-chips">
+                            @for (p of r.permissions; track p.id) {
+                            <span class="chip">{{ p.name }}</span>
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn-sm" (click)="editRole(r)">Edit</button>
+                            <button class="btn-sm delete" (click)="deleteRole(r.id)">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

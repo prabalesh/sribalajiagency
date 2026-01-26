@@ -1,0 +1,56 @@
+<div class="crud-container">
+    <header class="page-header">
+        <h1>Order Management</h1>
+        <p>Monitor customer purchases and update shipping status</p>
+    </header>
+
+    <div class="list-container animate-fade">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Total Amount</th>
+                    <th>Current Status</th>
+                    <th>Order Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (o of orders; track o.id) {
+                <tr>
+                    <td>
+                        <span class="id-badge">#{{ o.id.slice(0, 8) | uppercase }}</span>
+                    </td>
+                    <td>
+                        <div class="customer-info">
+                            <strong>{{ o.user?.name || 'Guest Customer' }}</strong>
+                            <span>{{ o.user?.email || 'N/A' }}</span>
+                        </div>
+                    </td>
+                    <td class="amount">₹{{ o.totalAmount | number }}</td>
+                    <td>
+                        <select [value]="o.status" (change)="updateStatus(o, $event)" class="status-select"
+                            [ngClass]="o.status.toLowerCase()">
+                            @for (status of statusOptions; track status) {
+                            <option [value]="status">{{ status }}</option>
+                            }
+                        </select>
+                    </td>
+                    <td class="date-cell">{{ o.createdAt | date:'MMM d, y, h:mm a' }}</td>
+                    <td>
+                        <button class="btn-sm">Details</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (orders.length === 0) {
+    <div class="empty-state glass-card">
+        <span class="icon">📦</span>
+        <p>No orders have been placed yet.</p>
+    </div>
+    }
+</div>

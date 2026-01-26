@@ -1,0 +1,68 @@
+<div class="crud-container">
+    <header class="page-header">
+        <h1>Service Areas</h1>
+        <p>Manage allowed States and Cities for agency operations</p>
+    </header>
+
+    <div class="form-card animate-fade">
+        <h3>{{ isEditing ? 'Edit Service Area' : 'Add New Location' }}</h3>
+        <form (ngSubmit)="saveLocation()">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>State Name</label>
+                    <input type="text" [(ngModel)]="newLocation.state" name="state" required
+                        placeholder="e.g. Tamil Nadu">
+                </div>
+                <div class="form-group">
+                    <label>Specific City (Optional)</label>
+                    <input type="text" [(ngModel)]="newLocation.city" name="city" placeholder="e.g. Trichy">
+                </div>
+                <div class="form-group">
+                    <label>Service Status</label>
+                    <div class="toggle-group">
+                        <input type="checkbox" [(ngModel)]="newLocation.isAllowed" name="isAllowed">
+                        <span>Operational</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn-primary">{{ isEditing ? 'Update Area' : 'Add Location' }}</button>
+                @if (isEditing) {
+                <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="list-container animate-fade">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>City / Region</th>
+                    <th>Operational Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (loc of locations; track loc.id) {
+                <tr>
+                    <td><strong>{{ loc.state }}</strong></td>
+                    <td>{{ loc.city || 'All Cities Enabled' }}</td>
+                    <td>
+                        <span class="status-badge" [class.active]="loc.isAllowed">{{ loc.isAllowed ? 'Allowed' :
+                            'Restricted' }}</span>
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn-sm" (click)="editLocation(loc)">Edit</button>
+                            <button class="btn-sm delete" (click)="deleteLocation(loc.id)">Remove</button>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

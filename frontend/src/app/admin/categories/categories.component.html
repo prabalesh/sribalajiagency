@@ -1,0 +1,63 @@
+<div class="crud-container">
+    <h1>Manage Categories</h1>
+
+    <div class="crud-layout">
+        <!-- Add Category Form -->
+        <div class="form-card">
+            <h3>{{ isEditing ? 'Edit Category' : 'Add New Category' }}</h3>
+            <form (ngSubmit)="addCategory()">
+                <div class="form-group">
+                    <label>Category Name</label>
+                    <input type="text" [(ngModel)]="newCategory.name" name="name" (input)="generateSlug()" required
+                        placeholder="e.g. Furniture">
+                </div>
+                <div class="form-group">
+                    <label>Slug</label>
+                    <input type="text" [(ngModel)]="newCategory.slug" name="slug" required placeholder="e.g. furniture">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea [(ngModel)]="newCategory.description" name="description" rows="3"></textarea>
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn-primary">{{ isEditing ? 'Update' : 'Add' }} Category</button>
+                    @if (isEditing) {
+                    <button type="button" (click)="resetForm(); isEditing = false" class="btn-secondary">Cancel</button>
+                    }
+                </div>
+            </form>
+        </div>
+
+        <!-- Categories List -->
+        <div class="list-card">
+            <h3>Existing Categories</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Slug</th>
+                        <th>Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (cat of categories; track cat.id) {
+                    <tr>
+                        <td>{{ cat.name }}</td>
+                        <td>{{ cat.slug }}</td>
+                        <td>
+                            <span class="badge" [ngClass]="{'main': !cat.parentId, 'sub': cat.parentId}">
+                                {{ cat.parentId ? 'Sub Category' : 'Main Category' }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-icon" (click)="editCategory(cat)">Edit</button>
+                            <button class="btn-icon delete" (click)="deleteCategory(cat.id)">Delete</button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

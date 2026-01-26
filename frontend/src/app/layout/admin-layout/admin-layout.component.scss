@@ -1,0 +1,381 @@
+@use "../../core/styles/glass" as *;
+
+.admin-layout {
+    display: flex;
+    height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+
+    .sidebar {
+        width: 280px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0;
+        border-right: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        z-index: 100;
+
+        .brand {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid var(--border-color);
+
+            .brand-text {
+                font-size: 1.5rem;
+                font-weight: 800;
+                background: linear-gradient(135deg, var(--primary-color) 0%, #ffa500 100%);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .brand-sub {
+                font-size: 0.85rem;
+                color: var(--text-color-muted);
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+        }
+
+        nav {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+
+            ul {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+
+                li a {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    padding: 0.85rem 1.25rem;
+                    border-radius: 12px;
+                    color: var(--text-color);
+                    transition: all 0.2s ease;
+                    font-weight: 500;
+
+                    .icon {
+                        font-size: 1.2rem;
+                    }
+
+                    &:hover {
+                        background: var(--surface-color-secondary);
+                        transform: translateX(5px);
+                    }
+
+                    &.active {
+                        background: rgba(255, 62, 0, 0.1);
+                        color: var(--primary-color);
+                        font-weight: 600;
+                    }
+                }
+
+                .logout-item {
+                    margin-top: 2rem;
+                    border-top: 1px solid var(--border-color);
+                    padding-top: 1rem;
+
+                    a {
+                        cursor: pointer;
+                        color: #ff4444;
+
+                        &:hover {
+                            background: rgba(255, 68, 68, 0.1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .main-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background-color: var(--surface-color);
+
+        .topbar {
+            height: 80px;
+            margin: 1.5rem;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 20px;
+
+            h2 {
+                font-size: 1.25rem;
+                font-weight: 700;
+            }
+
+            .topbar-actions {
+                display: flex;
+                align-items: center;
+                gap: 1.5rem;
+
+                .theme-toggle {
+                    width: 45px;
+                    height: 45px;
+                    border-radius: 14px;
+                    background: var(--surface-color-secondary);
+                    font-size: 1.2rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s ease;
+
+                    &:hover {
+                        transform: rotate(15deg) scale(1.1);
+                        background: var(--border-color);
+                    }
+                }
+
+                .user-profile {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    padding: 0.5rem 1rem;
+                    background: var(--surface-color-secondary);
+                    border-radius: 16px;
+
+                    .avatar {
+                        width: 36px;
+                        height: 36px;
+                        background: var(--primary-color);
+                        color: white;
+                        border-radius: 10px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                    }
+
+                    .user-info {
+                        display: flex;
+                        flex-direction: column;
+
+                        .user-name {
+                            font-size: 0.9rem;
+                            font-weight: 600;
+                        }
+
+                        .user-role {
+                            font-size: 0.75rem;
+                            color: var(--text-color-muted);
+                        }
+                    }
+                }
+            }
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 0 1.5rem 1.5rem;
+            overflow-y: auto;
+
+            .content-container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+        }
+    }
+}
+
+// Global Styles for Admin Components (Tables, Cards)
+::ng-deep {
+    .crud-container {
+        h1 {
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+    }
+
+    .form-card {
+        @include glass-card;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        background: var(--bg-color);
+
+        h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--surface-color-secondary);
+            padding-bottom: 0.5rem;
+        }
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            color: var(--text-color-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        tbody tr {
+            @include glass-card;
+            background: var(--bg-color);
+            transition: transform 0.2s ease;
+
+            td {
+                padding: 1.25rem 1rem;
+
+                &:first-child {
+                    border-radius: 16px 0 0 16px;
+                }
+
+                &:last-child {
+                    border-radius: 0 16px 16px 0;
+                }
+            }
+
+            &:hover {
+                transform: scale(1.01);
+                box-shadow: var(--shadow-md);
+            }
+        }
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-color-muted);
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+
+            &:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 4px rgba(255, 62, 0, 0.1);
+                background: var(--bg-color);
+            }
+        }
+    }
+}
+
+// Responsiveness
+@media (max-width: 1024px) {
+    .admin-layout {
+        .mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 90;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+
+            &.show {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        .sidebar {
+            position: fixed;
+            left: -280px;
+            top: 0;
+            bottom: 0;
+            width: 280px;
+            border-radius: 0;
+            box-shadow: var(--shadow-lg);
+
+            &.open {
+                left: 0;
+            }
+        }
+
+        .main-wrapper {
+            margin-left: 0;
+
+            .topbar {
+                margin: 1rem;
+                padding: 0 1.5rem;
+
+                .menu-toggle {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    padding: 0.5rem;
+                    margin-right: 1rem;
+
+                    span {
+                        width: 24px;
+                        height: 2px;
+                        background: var(--text-color);
+                        transition: all 0.3s ease;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-layout {
+        .main-wrapper {
+            .topbar {
+                h2 {
+                    font-size: 1rem;
+                }
+
+                .user-info {
+                    display: none;
+                }
+            }
+
+            .admin-content {
+                padding: 0 1rem 1rem;
+            }
+        }
+    }
+
+    ::ng-deep {
+        .form-card {
+            padding: 1.5rem;
+        }
+
+        .data-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    }
+}
+
+.menu-toggle {
+    display: none;
+}

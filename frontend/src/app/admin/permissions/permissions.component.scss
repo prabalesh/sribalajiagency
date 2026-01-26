@@ -1,0 +1,119 @@
+@use "../../core/styles/glass" as *;
+
+.crud-container {
+    .page-header {
+        margin-bottom: 2.5rem;
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        p {
+            color: var(--text-color-muted);
+        }
+    }
+
+    .permissions-grid-wrapper {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+        padding: 1.5rem;
+        background: var(--surface-color-secondary);
+        border-radius: 20px;
+    }
+
+    .permission-checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        cursor: pointer;
+
+        input {
+            width: 20px;
+            height: 20px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+
+        .p-card {
+            flex: 1;
+            padding: 1rem;
+            background: var(--bg-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+
+            strong {
+                display: block;
+                color: var(--primary-color);
+                font-size: 0.9rem;
+            }
+
+            span {
+                font-size: 0.75rem;
+                color: var(--text-color-muted);
+            }
+        }
+
+        &:hover .p-card {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        input:checked+.p-card {
+            background: rgba(255, 62, 0, 0.05);
+            border-color: var(--primary-color);
+        }
+    }
+
+    .list-container {
+        @include glass-card;
+        padding: 2rem;
+        background: var(--bg-color);
+        margin-top: 2rem;
+    }
+
+    .perm-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+
+        .chip {
+            padding: 4px 10px;
+            background: var(--surface-color-secondary);
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-color-muted);
+        }
+    }
+
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            margin-bottom: 1.5rem;
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            p {
+                font-size: 0.9rem;
+            }
+        }
+
+        .permissions-grid-wrapper {
+            grid-template-columns: 1fr;
+            padding: 1rem;
+        }
+
+        .list-container {
+            padding: 1rem;
+        }
+    }
+}

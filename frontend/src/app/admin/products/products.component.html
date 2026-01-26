@@ -1,0 +1,202 @@
+<div class="crud-container">
+    <header class="page-header">
+        <h1>Product Inventory</h1>
+        <p>Manage your catalog, variants, and high-quality images</p>
+    </header>
+
+    <div class="form-card animate-fade">
+        <h3>{{ isEditing ? 'Edit Existing Product' : 'Register New Product' }}</h3>
+        <form (ngSubmit)="saveProduct()">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" [(ngModel)]="newProduct.name" name="name" required
+                        placeholder="e.g. Bosch Power Drill">
+                </div>
+                <div class="form-group">
+                    <label>Brand</label>
+                    <select [(ngModel)]="newProduct.brandId" name="brandId" required>
+                        <option value="" disabled>Select Brand</option>
+                        @for (b of brands; track b.id) {
+                        <option [value]="b.id">{{ b.name }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Main Category</label>
+                    <select [(ngModel)]="selectedMainCategoryId" name="mainCategory" (change)="onMainCategoryChange()"
+                        required>
+                        <option value="" disabled>Select Category</option>
+                        @for (cat of mainCategories; track cat.id) {
+                        <option [value]="cat.id">{{ cat.name }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sub Category</label>
+                    <select [(ngModel)]="newProduct.categoryId" name="categoryId" required
+                        [disabled]="!selectedMainCategoryId">
+                        <option value="" disabled>Select Sub Category</option>
+                        @for (sub of subCategories; track sub.id) {
+                        <option [value]="sub.id">{{ sub.name }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Base Price (₹)</label>
+                    <input type="number" [(ngModel)]="newProduct.price" name="price" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label>Inventory & Controls</label>
+                    <div class="inline-fields">
+                        <div class="field">
+                            <label>Stock</label>
+                            <input type="number" [(ngModel)]="newProduct.stock" name="stock" placeholder="0">
+                        </div>
+                        <div class="field">
+                            <label>Max Order Qty</label>
+                            <input type="number" [(ngModel)]="newProduct.maxOrderQuantity" name="maxOrderQuantity"
+                                placeholder="No limit">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Status & Mode</label>
+                    <div class="toggle-row">
+                        <div class="toggle-group">
+                            <input type="checkbox" [(ngModel)]="newProduct.isAvailable" name="isAvailable">
+                            <span>Available to Shop</span>
+                        </div>
+                        <div class="toggle-group">
+                            <input type="checkbox" [(ngModel)]="newProduct.isShowcaseOnly" name="isShowcaseOnly">
+                            <span>Showcase Only</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label>Allowed Payment Methods</label>
+                    <div class="checkbox-row">
+                        <label class="check-item">
+                            <input type="checkbox" [checked]="newProduct.allowedPaymentMethods?.includes('online')"
+                                (change)="togglePaymentMethod('online')">
+                            Online Payment
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" [checked]="newProduct.allowedPaymentMethods?.includes('cod')"
+                                (change)="togglePaymentMethod('cod')">
+                            Cash on Delivery
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label>Description</label>
+                    <textarea [(ngModel)]="newProduct.description" name="description" rows="3"
+                        placeholder="Technical specifications..."></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Upload Media</label>
+                    <div class="upload-area" appDragDrop (fileDropped)="onFileDropped($event)">
+                        <div class="drop-zone">
+                            <span class="icon">📁</span>
+                            <p>Drag images here or <strong>browse files</strong></p>
+                            <div class="file-previews">
+                                @for (file of uploadedFiles; track $index) {
+                                <div class="file-item">
+                                    <span>{{ file.name }}</span>
+                                    <button type="button" class="remove-btn"
+                                        (click)="removeUploadedFile($index)">×</button>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (newProduct.images && newProduct.images.length > 0) {
+                <div class="form-group full-width">
+                    <label>Media Gallery</label>
+                    <div class="image-gallery">
+                        @for (img of newProduct.images; track img.id) {
+                        <div class="image-item glass-card">
+                            <img [src]="'http://localhost:3000' + img.url" alt="Product Image">
+                            <button type="button" class="delete-btn" (click)="removeImage(img.id)">Remove</button>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+
+                <div class="form-group full-width variants-section">
+                    <div class="section-header">
+                        <h4>Configure Variants</h4>
+                        <button type="button" class="btn-sm" (click)="addVariant()">+ Add Variant</button>
+                    </div>
+                    <div class="variants-list">
+                        @for (v of newProduct.variants; track $index) {
+                        <div class="variant-item glass-card">
+                            <input type="text" [(ngModel)]="v.name" name="vName-{{$index}}" placeholder="Variant Name"
+                                required>
+                            <input type="number" [(ngModel)]="v.price" name="vPrice-{{$index}}" placeholder="Price"
+                                required>
+                            <input type="number" [(ngModel)]="v.stock" name="vStock-{{$index}}" placeholder="Stock"
+                                required>
+                            <button type="button" class="remove-btn" (click)="removeVariant($index)">×</button>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn-primary" [disabled]="!newProduct.name || !newProduct.categoryId">
+                    {{ isEditing ? 'Update Product' : 'Add Product' }}
+                </button>
+                @if (isEditing) {
+                <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="list-container animate-fade">
+        <h3>Product Catalog</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (p of products; track p.id) {
+                <tr>
+                    <td>
+                        <div class="p-cell">
+                            <strong>{{ p.name }}</strong>
+                            <span>{{ p.brandId }}</span>
+                        </div>
+                    </td>
+                    <td>{{ p.categoryId }}</td>
+                    <td>₹{{ p.price | number }}</td>
+                    <td>
+                        <span class="stock-badge" [class.low]="(p.variants[0].stock || 0) < 10">
+                            {{ p.variants[0].stock || 0 }} units
+                        </span>
+
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn-sm" (click)="editProduct(p)">Edit</button>
+                            <button class="btn-sm delete" (click)="deleteProduct(p.id)">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

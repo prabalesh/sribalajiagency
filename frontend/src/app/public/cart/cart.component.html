@@ -1,0 +1,132 @@
+<div class="cart-page container">
+    <header class="page-header">
+        <h1>Shopping Bag</h1>
+        <p *ngIf="cartService.count() > 0">You have {{ cartService.count() }} items in your bag</p>
+    </header>
+
+    @if (cartService.count() > 0) {
+    <div class="cart-layout">
+        <div class="cart-items">
+            @for (item of cartService.items(); track item.product.id) {
+            <div class="cart-item glass-card animate-fade">
+                <div class="item-img">
+                    <img [src]="item.product.images && item.product.images.length > 0 ? 'http://localhost:3000' + item.product.images[0].url : 'https://placehold.co/100x100?text=No+Image'"
+                        [alt]="item.product.name">
+                </div>
+                <div class="item-info">
+                    <div class="info-header">
+                        <h3>{{ item.product.name }}</h3>
+                        <button class="remove-btn" (click)="removeItem(item.product.id)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="price">₹{{ item.product.price | number }}</p>
+
+                    <div class="item-footer">
+                        <div class="qty-control glass-card">
+                            <button (click)="updateQty(item.product.id, -1, item.quantity)">-</button>
+                            <span>{{ item.quantity }}</span>
+                            <button (click)="updateQty(item.product.id, 1, item.quantity)">+</button>
+                        </div>
+                        <p class="subtotal">₹{{ (item.product.price || 0) * item.quantity | number }}</p>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+
+        <div class="cart-summary glass-card">
+            <h3>Order Summary</h3>
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span>₹{{ cartService.total() | number }}</span>
+            </div>
+            <div class="summary-row">
+                <span>Estimated Shipping</span>
+                <span class="free">FREE</span>
+            </div>
+            <div class="summary-row">
+                <span>Estimated GST (18%)</span>
+                <span>₹{{ cartService.total() * 0.18 | number:'1.0-0' }}</span>
+            </div>
+            <div class="summary-total">
+                <span>Total Amount</span>
+                <span>₹{{ cartService.total() * 1.18 | number:'1.0-0' }}</span>
+            </div>
+
+            <div class="checkout-actions" *ngIf="!isCheckoutMode; else paymentSection">
+                <button class="btn-primary checkout-btn" (click)="proceedToCheckout()">
+                    Proceed to Checkout
+                </button>
+                <p class="summary-note">You will choose your payment method in the next step.</p>
+            </div>
+
+            <ng-template #paymentSection>
+                <div class="payment-selection animate-fade">
+                    <h4>Select Payment Method</h4>
+                    <div class="method-options">
+                        <label class="method-radio glass-card" *ngIf="allowedMethods.includes('online')"
+                            [class.selected]="selectedPayment === 'online'">
+                            <input type="radio" name="payment" [(ngModel)]="selectedPayment" value="online">
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                                </svg>
+                            </span>
+                            <div class="text">
+                                <strong>Online Payment</strong>
+                                <span>Cards, UPI, Netbanking</span>
+                            </div>
+                        </label>
+                        <label class="method-radio glass-card" *ngIf="allowedMethods.includes('cod')"
+                            [class.selected]="selectedPayment === 'cod'">
+                            <input type="radio" name="payment" [(ngModel)]="selectedPayment" value="cod">
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                                    <circle cx="12" cy="12" r="2"></circle>
+                                    <path d="M6 12h.01M18 12h.01"></path>
+                                </svg>
+                            </span>
+                            <div class="text">
+                                <strong>Cash on Delivery</strong>
+                                <span>Pay when you receive</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="checkout-footer">
+                        <button class="btn-primary finalize-btn" [disabled]="!selectedPayment"
+                            (click)="finalizeOrder()">
+                            Complete Order
+                        </button>
+                        <button class="btn-secondary" (click)="isCheckoutMode = false">Back to Bag</button>
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+    } @else {
+    <div class="empty-cart glass-card">
+        <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+        </div>
+        <h2>Your bag is empty</h2>
+        <p>Looks like you haven't added anything to your bag yet.</p>
+        <button class="btn-primary" routerLink="/products">Shop Catalog</button>
+    </div>
+    }
+</div>

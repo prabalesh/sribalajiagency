@@ -1,0 +1,93 @@
+@use "../../core/styles/glass" as *;
+
+.crud-container {
+    .page-header {
+        margin-bottom: 2rem;
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        p {
+            color: var(--text-color-muted);
+        }
+    }
+
+    .list-container {
+        @include glass-card;
+        padding: 2rem;
+        background: var(--bg-color);
+    }
+
+    .id-badge {
+        font-family: monospace;
+        background: var(--surface-color-secondary);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .customer-info {
+        display: flex;
+        flex-direction: column;
+
+        span {
+            font-size: 0.75rem;
+            color: var(--text-color-muted);
+        }
+    }
+
+    .amount {
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .status-select {
+        padding: 6px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: var(--bg-color);
+        color: var(--text-color);
+        cursor: pointer;
+
+        &.processing {
+            background: #fee2e2;
+            color: #ef4444;
+            border-color: #fecaca;
+        }
+
+        &.delivered {
+            background: #dcfce7;
+            color: #22c55e;
+            border-color: #bbf7d0;
+        }
+
+        &.cancelled {
+            background: #f3f4f6;
+            color: #6b7280;
+            border-color: #e5e7eb;
+        }
+    }
+
+    .date-cell {
+        font-size: 0.85rem;
+        color: var(--text-color-muted);
+    }
+
+    .empty-state {
+        margin-top: 2rem;
+        padding: 4rem;
+        text-align: center;
+        color: var(--text-color-muted);
+
+        .icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+        }
+    }
+}

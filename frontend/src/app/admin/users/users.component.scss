@@ -1,0 +1,76 @@
+@use "../../core/styles/glass" as *;
+
+.crud-container {
+    h1 {
+        margin-bottom: 2rem;
+    }
+
+    .crud-layout {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .list-card {
+        @include glass-card;
+        padding: 2rem;
+        background: var(--bg-color);
+
+        h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--surface-color-secondary);
+            padding-bottom: 0.5rem;
+        }
+    }
+
+    .badge {
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+
+        &.admin {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        &.user {
+            background: #dcfce7;
+            color: #22c55e;
+        }
+    }
+
+    .btn-icon {
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        background: var(--surface-color-secondary);
+        color: var(--text-color);
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: var(--border-color);
+        }
+
+        &.delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+
+            &:hover {
+                background: #ef4444;
+                color: white;
+            }
+        }
+    }
+}
+
+@media (max-width: 1100px) {
+    .crud-container .crud-layout {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,59 @@
+@use "../../../core/styles/glass" as *;
+
+.crud-container {
+    .page-header {
+        margin-bottom: 2.5rem;
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        p {
+            color: var(--text-color-muted);
+        }
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .toggle-group {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        height: 50px;
+
+        input {
+            width: auto;
+        }
+    }
+
+    .list-container {
+        @include glass-card;
+        padding: 2rem;
+        background: var(--bg-color);
+        margin-top: 2rem;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: var(--surface-color-secondary);
+        color: var(--text-color-muted);
+
+        &.active {
+            background: #dcfce7;
+            color: #22c55e;
+        }
+    }
+
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+}

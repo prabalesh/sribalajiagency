@@ -1,0 +1,85 @@
+<div class="account-page container">
+    <aside class="account-sidebar glass-card">
+        <div class="user-profile">
+            <div class="avatar">{{ (authService.user()?.name || 'U').charAt(0) }}</div>
+            <div class="info">
+                <h3>{{ authService.user()?.name }}</h3>
+                <p>{{ authService.user()?.email }}</p>
+            </div>
+        </div>
+        <nav>
+            <a routerLink="/account/profile" routerLinkActive="active">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                My Profile
+            </a>
+            <a routerLink="/account/orders" routerLinkActive="active">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                My Orders
+            </a>
+            <a routerLink="/account/addresses" routerLinkActive="active">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Addresses
+            </a>
+            <button (click)="logout()" class="logout-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Sign Out
+            </button>
+        </nav>
+    </aside>
+
+    <main class="account-content animate-fade">
+        <header class="content-header">
+            <h1>My Orders</h1>
+            <p>View and track your previous purchases.</p>
+        </header>
+
+        <div class="orders-list">
+            @for (order of orders; track order.id) {
+            <div class="order-item glass-card">
+                <div class="order-header">
+                    <div class="info">
+                        <h3>Order #{{ order.id }}</h3>
+                        <p>Placed on {{ order.createdAt | date:'longDate' }}</p>
+                    </div>
+                    <span class="status-badge" [ngClass]="order.status?.toLowerCase()">
+                        {{ order.status }}
+                    </span>
+                </div>
+                <div class="order-details">
+                    @for (item of order.items; track item.productName) {
+                    <div class="product-row">
+                        <span class="name"><strong>{{ item.quantity }}x</strong> {{ item.productName }}</span>
+                        <span class="price">₹{{ item.price | number }}</span>
+                    </div>
+                    }
+                </div>
+                <div class="order-footer">
+                    <span class="total-label">Order Total</span>
+                    <span class="total-amount">₹{{ order.totalAmount | number }}</span>
+                </div>
+            </div>
+            } @empty {
+            <div class="empty-state glass-card">
+                <div class="icon">🛍️</div>
+                <h2>No orders yet</h2>
+                <p>Looks like you haven't made any purchases yet.</p>
+                <button class="btn-primary" routerLink="/products">Start Shopping</button>
+            </div>
+            }
+        </div>
+    </main>
+</div>

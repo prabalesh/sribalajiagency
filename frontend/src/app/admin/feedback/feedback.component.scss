@@ -1,0 +1,63 @@
+.crud-container {
+    h1 {
+        margin-bottom: 2rem;
+        color: var(--text-color);
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--surface-color);
+        box-shadow: var(--shadow-sm);
+        border-radius: var(--border-radius-md);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+
+        th,
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+            color: var(--text-color);
+        }
+
+        th {
+            background: var(--surface-color-secondary);
+            font-weight: 700;
+            color: var(--text-color-muted);
+        }
+
+        .status-indicator {
+            font-weight: bold;
+            color: #ef4444;
+
+            &.approved {
+                color: #10b981;
+            }
+        }
+
+        button {
+            margin-right: 0.5rem;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            transition: all 0.2s ease;
+
+            &:hover {
+                filter: brightness(0.9);
+            }
+
+            &.delete {
+                background: rgba(239, 68, 68, 0.1);
+                color: #ef4444;
+                border: 1px solid rgba(239, 68, 68, 0.2);
+
+                &:hover {
+                    background: #ef4444;
+                    color: white;
+                }
+            }
+        }
+    }
+}
