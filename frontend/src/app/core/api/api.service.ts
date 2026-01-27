@@ -1,6 +1,7 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import axios, { AxiosInstance } from 'axios';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +13,7 @@ export class ApiService {
     constructor(@Inject(PLATFORM_ID) platformId: object) {
         this.isBrowser = isPlatformBrowser(platformId);
         this.axiosInstance = axios.create({
-            baseURL: 'http://localhost:3000', // Update this as per environment
+            baseURL: environment.apiUrl,
             withCredentials: true,
             headers: {
                 'Content-Type': 'application/json'
@@ -28,7 +29,7 @@ export class ApiService {
                     originalRequest._retry = true;
                     try {
                         // Refresh token is now in HttpOnly cookie, so we just call the refresh endpoint
-                        await axios.post('http://localhost:3000/auth/refresh', {}, {
+                        await axios.post(`${environment.apiUrl}/auth/refresh`, {}, {
                             withCredentials: true
                         });
 

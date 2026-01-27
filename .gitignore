@@ -6,9 +6,14 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # Environment
+# Backend: .env files are ignored, but .env.example is tracked
 .env
 .env.*
 !.env.example
+
+# Frontend: environment.ts and environment.development.ts are tracked
+# Add environment.local.ts to .gitignore if you need local overrides
+# frontend/src/environments/environment.local.ts
 
 # Build outputs
 /dist

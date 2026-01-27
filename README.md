@@ -46,8 +46,58 @@ This project is organized as a monorepo with the following structure:
    ```
 
 3. **Environment Setup:**
-   - **Backend**: Create a `.env` file in the `backend/` directory (see `.env.example` if available).
-   - **Frontend**: Configure environment variables in `frontend/src/environments/` if necessary.
+   
+   #### Backend Configuration
+   Create a `.env` file in the `backend/` directory with the following variables:
+   
+   ```env
+   # Database Configuration
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USER=your_db_user
+   DB_PASS=your_db_password
+   DB_NAME=store
+   
+   # JWT Configuration
+   JWT_ACCESS_SECRET=your-secret-access-key
+   JWT_REFRESH_SECRET=your-secret-refresh-key
+   JWT_ACCESS_EXPIRATION=15m
+   JWT_REFRESH_EXPIRATION=7d
+   
+   # Server Configuration
+   PORT=3000
+   NODE_ENV=development
+   
+   # CORS Configuration (comma-separated list of allowed origins)
+   CORS_ORIGINS=http://localhost:4200,http://localhost:3000
+   ```
+   
+   **Note**: A `.env.example` file is provided in the `backend/` directory as a template.
+   
+   #### Frontend Configuration
+   The frontend uses Angular environment files located in `frontend/src/environments/`:
+   
+   - **Development** (`environment.development.ts`): Used when running `ng serve`
+     ```typescript
+     export const environment = {
+       production: false,
+       apiUrl: 'http://localhost:3000'
+     };
+     ```
+   
+   - **Production** (`environment.ts`): Used when building for production
+     ```typescript
+     export const environment = {
+       production: true,
+       apiUrl: 'https://api.yourdomain.com'
+     };
+     ```
+   
+   > [!WARNING]
+   > **Security Note**: These frontend environment files are **tracked in git**.
+   > - Do **NOT** put any secrets (keys, passwords) in these files.
+   > - Only include public configuration like API URLs.
+   > - If you need local overrides that shouldn't be committed, create `environment.local.ts` and add it to `.gitignore`.
 
 ## 🛠 Development Scripts
 
@@ -71,7 +121,7 @@ The frontend is a Single Page Application (SPA).
     - **Vercel / Netlify**: Connect your repo and set the build command to `npm run build:frontend` and output dir to `dist/sribalajiagency/browser`.
     - **AWS S3 + CloudFront**: Upload the `dist` folder to S3.
     - **Nginx/Apache**: Serve the `dist` folder as static files.
-- **Configuration**: Ensure the frontend knows the backend API URL. Update `environment.prod.ts` or inject the API URL at build time.
+- **Configuration**: Ensure the frontend knows the backend API URL. Update `environment.ts` or inject the API URL at build time.
 
 ### 2. Backend Deployment (Node.js Server)
 The backend is a Node.js application.
@@ -83,12 +133,19 @@ The backend is a Node.js application.
 - **Configuration**: Set environment variables (DB credentials, JWT secret, CORS allowed origins) on the server.
 
 ### 📜 CORS Configuration
-When hosting on different domains (e.g., `frontend.com` and `api.backend.com`), you **must** configure CORS in the backend to allow requests from the frontend domain.
 
-Update `backend/src/main.ts`:
-```typescript
-app.enableCors({
-  origin: 'https://your-frontend-domain.com',
-  credentials: true,
-});
-```
+The backend now uses environment variables for CORS configuration, making it easy to add multiple allowed origins without code changes.
+
+**To add more CORS origins:**
+
+1. Update the `CORS_ORIGINS` variable in your `backend/.env` file:
+   ```env
+   CORS_ORIGINS=http://localhost:4200,https://frontend.com,https://www.frontend.com
+   ```
+
+2. Restart the backend server for changes to take effect.
+
+**For production deployment:**
+- Add all your frontend domains to `CORS_ORIGINS` (comma-separated)
+- Ensure `credentials: true` is maintained for cookie-based authentication
+- The backend will automatically parse and apply all origins from the environment variable
