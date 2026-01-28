@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CartComponent } from './cart.component';
-import { ProductService } from '../../core/services/api/product.service';
+import { SettingsService } from '../../core/services/api/settings.service';
 import { CartService } from '../../core/store/cart.service';
 import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
@@ -8,11 +8,11 @@ import { signal } from '@angular/core';
 describe('CartComponent', () => {
     let component: CartComponent;
     let fixture: ComponentFixture<CartComponent>;
-    let productServiceSpy: jasmine.SpyObj<ProductService>;
+    let settingsServiceSpy: jasmine.SpyObj<SettingsService>;
     let cartServiceSpy: any;
 
     beforeEach(async () => {
-        const pSpy = jasmine.createSpyObj('ProductService', ['getStoreSettings']);
+        const sSpy = jasmine.createSpyObj('SettingsService', ['getStoreSettings']);
         cartServiceSpy = {
             items: signal([]),
             count: signal(0),
@@ -25,7 +25,7 @@ describe('CartComponent', () => {
         await TestBed.configureTestingModule({
             imports: [CartComponent],
             providers: [
-                { provide: ProductService, useValue: pSpy },
+                { provide: SettingsService, useValue: sSpy },
                 { provide: CartService, useValue: cartServiceSpy },
                 provideRouter([])
             ]
@@ -33,7 +33,7 @@ describe('CartComponent', () => {
 
         fixture = TestBed.createComponent(CartComponent);
         component = fixture.componentInstance;
-        productServiceSpy = TestBed.inject(ProductService) as jasmine.SpyObj<ProductService>;
+        settingsServiceSpy = TestBed.inject(SettingsService) as jasmine.SpyObj<SettingsService>;
     });
 
     it('should create', () => {
@@ -42,11 +42,11 @@ describe('CartComponent', () => {
 
     it('should load settings on init', async () => {
         const mockSettings = { allowOnline: true, allowCod: true };
-        productServiceSpy.getStoreSettings.and.returnValue(Promise.resolve(mockSettings));
+        settingsServiceSpy.getStoreSettings.and.returnValue(Promise.resolve(mockSettings));
 
         await component.ngOnInit();
         expect(component.settings).toEqual(mockSettings);
-        expect(productServiceSpy.getStoreSettings).toHaveBeenCalled();
+        expect(settingsServiceSpy.getStoreSettings).toHaveBeenCalled();
     });
 
     it('should calculate allowed methods correctly', async () => {

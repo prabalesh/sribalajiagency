@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HeaderComponent } from './header.component';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { mockAuthService, mockThemeService, mockCartService } from '../../../core/testing/mocks';
 import { ThemeService } from '../../../core/store/theme.service';
 import { CartService } from '../../../core/store/cart.service';

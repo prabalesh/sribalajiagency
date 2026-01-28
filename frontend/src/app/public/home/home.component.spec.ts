@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HomeComponent } from './home.component';
 import { ProductService } from '../../core/services/api/product.service';
+import { CategoryService } from '../../core/services/api/category.service';
+import { BrandService } from '../../core/services/api/brand.service';
+import { CmsService } from '../../core/services/api/cms.service';
 import { CartService } from '../../core/store/cart.service';
 import { provideRouter } from '@angular/router';
 
@@ -8,17 +11,26 @@ describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
   let productServiceSpy: jasmine.SpyObj<ProductService>;
+  let categoryServiceSpy: jasmine.SpyObj<CategoryService>;
+  let brandServiceSpy: jasmine.SpyObj<BrandService>;
+  let cmsServiceSpy: jasmine.SpyObj<CmsService>;
   let cartServiceSpy: jasmine.SpyObj<CartService>;
 
   beforeEach(async () => {
-    const pSpy = jasmine.createSpyObj('ProductService', ['getCategories', 'getBrands', 'getHomeCMS', 'getProducts']);
-    const cSpy = jasmine.createSpyObj('CartService', ['addToCart']);
+    const pSpy = jasmine.createSpyObj('ProductService', ['getProducts']);
+    const catSpy = jasmine.createSpyObj('CategoryService', ['getCategories']);
+    const bSpy = jasmine.createSpyObj('BrandService', ['getBrands']);
+    const cmsSpy = jasmine.createSpyObj('CmsService', ['getHomeCMS']);
+    const cartSpy = jasmine.createSpyObj('CartService', ['addToCart']);
 
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
       providers: [
         { provide: ProductService, useValue: pSpy },
-        { provide: CartService, useValue: cSpy },
+        { provide: CategoryService, useValue: catSpy },
+        { provide: BrandService, useValue: bSpy },
+        { provide: CmsService, useValue: cmsSpy },
+        { provide: CartService, useValue: cartSpy },
         provideRouter([])
       ]
     }).compileComponents();
@@ -26,6 +38,9 @@ describe('HomeComponent', () => {
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
     productServiceSpy = TestBed.inject(ProductService) as jasmine.SpyObj<ProductService>;
+    categoryServiceSpy = TestBed.inject(CategoryService) as jasmine.SpyObj<CategoryService>;
+    brandServiceSpy = TestBed.inject(BrandService) as jasmine.SpyObj<BrandService>;
+    cmsServiceSpy = TestBed.inject(CmsService) as jasmine.SpyObj<CmsService>;
     cartServiceSpy = TestBed.inject(CartService) as jasmine.SpyObj<CartService>;
   });
 
@@ -39,9 +54,9 @@ describe('HomeComponent', () => {
     const mockCMS = { heroSlides: [{ image: '1' }] };
     const mockProds = [{ id: 'p1' } as any];
 
-    productServiceSpy.getCategories.and.returnValue(Promise.resolve(mockCats));
-    productServiceSpy.getBrands.and.returnValue(Promise.resolve(mockBrands));
-    productServiceSpy.getHomeCMS.and.returnValue(Promise.resolve(mockCMS));
+    categoryServiceSpy.getCategories.and.returnValue(Promise.resolve(mockCats));
+    brandServiceSpy.getBrands.and.returnValue(Promise.resolve(mockBrands));
+    cmsServiceSpy.getHomeCMS.and.returnValue(Promise.resolve(mockCMS));
     productServiceSpy.getProducts.and.returnValue(Promise.resolve(mockProds));
 
     await component.ngOnInit();

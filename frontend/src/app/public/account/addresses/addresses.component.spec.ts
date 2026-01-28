@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AddressesComponent } from './addresses.component';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { mockAuthService } from '../../../core/testing/mocks';
 import { FormsModule } from '@angular/forms';
 import { provideRouter } from '@angular/router';

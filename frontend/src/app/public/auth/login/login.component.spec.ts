@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { LoginComponent } from './login.component';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { Router, provideRouter } from '@angular/router';
 import { mockAuthService } from '../../../core/testing/mocks';
 import { FormsModule } from '@angular/forms';

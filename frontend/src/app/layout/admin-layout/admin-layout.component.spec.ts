@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminLayoutComponent } from './admin-layout.component';
 import { provideRouter } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 import { ThemeService } from '../../core/store/theme.service';
 import { mockAuthService, mockThemeService } from '../../core/testing/mocks';
 

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { OrdersComponent } from './orders.component';
 import { OrderService } from '../../../core/services/api/order.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { mockAuthService } from '../../../core/testing/mocks';
 import { provideRouter } from '@angular/router';
 

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard.component';
 import { ProductService } from '../../core/services/api/product.service';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 import { mockProductService, mockAuthService } from '../../core/testing/mocks';
 import { provideRouter } from '@angular/router';
 
