@@ -10,9 +10,9 @@
     </nav>
 
     <div class="product-main-grid">
-        <div class="product-gallery glass-card">
+        <div class="product-gallery">
             <div class="main-image">
-                <img [src]="product.images[0].url | imageUrl" [alt]="product.name">
+                <img [src]="(product.images.length > 0 ? product.images[0].url : '') | imageUrl" [alt]="product.name">
             </div>
         </div>
 
@@ -36,25 +36,27 @@
 
             <p class="description">{{ product.description }}</p>
 
+            <div class="limit-note"
+                *ngIf="product.maxOrderQuantity && product.maxOrderQuantity < product.stock && !product.isShowcaseOnly">
+                ⚠️ Limit {{ product.maxOrderQuantity }} per order
+            </div>
+
             <div class="purchase-actions" *ngIf="product.isAvailable && !product.isShowcaseOnly">
-                <div class="quantity-selector glass-card" *ngIf="product.stock > 0">
+                <div class="quantity-selector" *ngIf="product.stock > 0">
                     <button (click)="updateQuantity(-1)" [disabled]="quantity <= 1">-</button>
                     <span>{{ quantity }}</span>
                     <button (click)="updateQuantity(1)"
                         [disabled]="quantity >= product.stock || (product.maxOrderQuantity && quantity >= product.maxOrderQuantity)">+</button>
                 </div>
-                <div class="limit-note" *ngIf="product.maxOrderQuantity && product.maxOrderQuantity < product.stock">
-                    Limit {{ product.maxOrderQuantity }} per order
-                </div>
                 <button class="btn-primary add-to-cart" (click)="addToCart()">
-                    Add to Cart
+                    🛒 Add to Cart
                 </button>
                 <button class="btn-secondary" [routerLink]="['/request-quote', { productId: product.id }]">
-                    Get Quote
+                    💬 Get Quote
                 </button>
             </div>
 
-            <div class="showcase-only-note glass-card" *ngIf="product.isShowcaseOnly">
+            <div class="showcase-only-note" *ngIf="product.isShowcaseOnly">
                 <div class="note-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -93,25 +95,25 @@
                     Online
                 </span>
             </div>
-        </div>
 
-        <div class="specs-card glass-card">
-            <h3>Technical Details</h3>
-            <div class="spec-row">
-                <span class="label">Brand</span>
-                <span class="value">{{ brand?.name }}</span>
-            </div>
-            <div class="spec-row">
-                <span class="label">Category</span>
-                <span class="value">{{ category?.name }}</span>
-            </div>
-            <div class="spec-row">
-                <span class="label">Model ID</span>
-                <span class="value">{{ product.id.toUpperCase() }}</span>
-            </div>
-            <div class="spec-row">
-                <span class="label">Warranty</span>
-                <span class="value">1 Year Domestic</span>
+            <div class="specs-card">
+                <h3>Technical Details</h3>
+                <div class="spec-row">
+                    <span class="label">🏷️ Brand</span>
+                    <span class="value">{{ brand?.name }}</span>
+                </div>
+                <div class="spec-row">
+                    <span class="label">📦 Category</span>
+                    <span class="value">{{ category?.name }}</span>
+                </div>
+                <div class="spec-row">
+                    <span class="label">🔖 Model ID</span>
+                    <span class="value">{{ product.id.toUpperCase() }}</span>
+                </div>
+                <div class="spec-row">
+                    <span class="label">✅ Warranty</span>
+                    <span class="value">1 Year Domestic</span>
+                </div>
             </div>
         </div>
     </div>
@@ -123,7 +125,7 @@
             @for (p of relatedProducts; track p.id) {
             <div class="product-item glass-card" [routerLink]="['/products/detail', p.id]">
                 <div class="p-image">
-                    <img [src]="p.images[0].url | imageUrl" [alt]="p.name">
+                    <img [src]="(p.images.length > 0 ? p.images[0].url : '') | imageUrl" [alt]="p.name">
                 </div>
                 <div class="p-info">
                     <h4>{{ p.name }}</h4>

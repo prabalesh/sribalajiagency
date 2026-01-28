@@ -26,16 +26,16 @@ export const routes: Routes = [
                 loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent)
             },
             {
+                path: 'products/detail/:id',
+                loadComponent: () => import('./public/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+            },
+            {
                 path: 'products/:category',
                 loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent)
             },
             {
                 path: 'products/:category/:subcategory',
                 loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent)
-            },
-            {
-                path: 'products/detail/:id',
-                loadComponent: () => import('./public/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
             },
             {
                 path: 'cart',

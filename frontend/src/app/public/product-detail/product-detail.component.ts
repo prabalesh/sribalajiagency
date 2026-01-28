@@ -40,19 +40,32 @@ export class ProductDetailComponent implements OnInit {
   }
 
   async loadProduct(id: string) {
-    this.product = await this.productService.getProductById(id);
-    if (this.product) {
-      const categories = await this.categoryService.getCategories();
-      this.category = categories.find((c: Category) => c.id === this.product?.categoryId);
-      this.brand = await this.brandService.getBrandById(this.product.brandId);
+    try {
+      this.product = await this.productService.getProductById(id);
+      if (this.product) {
+        const catId = this.product.categoryId || this.product.category?.id;
+        const bId = this.product.brandId || this.product.brand?.id;
 
-      const related = await this.productService.getProductsByCategory(this.product.categoryId);
-      this.relatedProducts = related.items
-        .filter((p: Product) => p.id !== id)
-        .slice(0, 4);
+        if (catId) {
+          const categories = await this.categoryService.getCategories();
+          this.category = categories.find((c: Category) => c.id === catId);
 
-      // Reset scroll
-      window.scrollTo(0, 0);
+          const related = await this.productService.getProductsByCategory(catId);
+          this.relatedProducts = related.items
+            .filter((p: Product) => p.id !== id)
+            .slice(0, 4);
+        }
+
+        if (bId) {
+          this.brand = await this.brandService.getBrandById(bId);
+        }
+
+        // Reset scroll
+        window.scrollTo(0, 0);
+      }
+    } catch (error) {
+      console.error('ProductDetail: Failed to load product', error);
+      // Handle error (e.g., redirect to 404 or show error state)
     }
   }
 
