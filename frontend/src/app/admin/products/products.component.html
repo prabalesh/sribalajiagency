@@ -44,7 +44,17 @@
                 </div>
                 <div class="form-group">
                     <label>Base Price (₹)</label>
-                    <input type="number" [(ngModel)]="newProduct.price" name="price" placeholder="0.00">
+                    <div class="inline-fields">
+                        <div class="field">
+                            <label>Selling Price</label>
+                            <input type="number" [(ngModel)]="newProduct.price" name="price" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label>Actual Price (MRP)</label>
+                            <input type="number" [(ngModel)]="newProduct.comparisonPrice" name="comparisonPrice"
+                                placeholder="0.00">
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Inventory & Controls</label>
@@ -138,7 +148,9 @@
                             <input type="text" [(ngModel)]="v.name" name="vName-{{$index}}" placeholder="Variant Name"
                                 required>
                             <input type="number" [(ngModel)]="v.price" name="vPrice-{{$index}}" placeholder="Price"
-                                required>
+                                required title="Selling Price">
+                            <input type="number" [(ngModel)]="v.comparisonPrice" name="vCPrice-{{$index}}"
+                                placeholder="MRP" title="Actual Price (Strike)">
                             <input type="number" [(ngModel)]="v.stock" name="vStock-{{$index}}" placeholder="Stock"
                                 required>
                             <button type="button" class="remove-btn" (click)="removeVariant($index)">×</button>
@@ -181,7 +193,12 @@
                         </div>
                     </td>
                     <td>{{ p.categoryId }}</td>
-                    <td>₹{{ p.price | number }}</td>
+                    <td>
+                        <div class="price-cell">
+                            <strong>₹{{ p.price | number }}</strong>
+                            <span *ngIf="p.comparisonPrice" class="strike">₹{{ p.comparisonPrice | number }}</span>
+                        </div>
+                    </td>
                     <td>
                         <span class="stock-badge" [class.low]="(p.variants[0].stock || 0) < 10">
                             {{ p.variants[0].stock || 0 }} units

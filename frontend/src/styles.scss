@@ -71,22 +71,39 @@ body {
   color: var(--text-color);
   transition: background-color var(--transition-speed) var(--transition-curve), color var(--transition-speed) var(--transition-curve);
   line-height: 1.6;
-  font-smoothing: antialiased;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden !important;
+  /* Force no horizontal scroll */
+  width: 100%;
 }
 
 .container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1.5rem;
+  width: 100%;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .container {
-    padding: 0 1.5rem;
+    padding: 0 1rem;
   }
 }
+
+/* Base Responsive Utilities */
+.w-full {
+  width: 100%;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
 
 a {
   text-decoration: none;

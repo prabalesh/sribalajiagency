@@ -269,14 +269,23 @@
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .cart-item {
         flex-direction: column;
         gap: 1.5rem;
+        align-items: center;
+        text-align: center;
 
         .item-img {
             width: 100%;
-            height: 200px;
+            max-width: 200px;
+            height: 180px;
+        }
+
+        .item-info .info-header {
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
         }
     }
 }

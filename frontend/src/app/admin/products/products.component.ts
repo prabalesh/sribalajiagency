@@ -111,7 +111,7 @@ export class ProductsComponent implements OnInit {
   // Variant Management
   addVariant() {
     if (!this.newProduct.variants) this.newProduct.variants = [];
-    this.newProduct.variants.push({ id: '', name: '', price: this.newProduct.price, stock: 0 });
+    this.newProduct.variants.push({ id: '', name: '', price: this.newProduct.price, comparisonPrice: this.newProduct.comparisonPrice, stock: 0 });
   }
 
   removeVariant(index: number) {
@@ -148,6 +148,7 @@ export class ProductsComponent implements OnInit {
       brandId: '',
       categoryId: '',
       price: 0,
+      comparisonPrice: undefined,
       images: [],
       variants: [],
       isAvailable: true,

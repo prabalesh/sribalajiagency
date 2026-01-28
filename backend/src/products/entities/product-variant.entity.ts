@@ -12,6 +12,9 @@ export class ProductVariant {
     @Column({ type: 'decimal', precision: 12, scale: 2 })
     price: number;
 
+    @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
+    comparisonPrice: number;
+
     @Column({ nullable: true })
     sku: string;
 

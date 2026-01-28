@@ -15,6 +15,10 @@
     border-bottom: 1px solid var(--border-color);
     transition: all var(--transition-speed) var(--transition-curve);
 
+    @media (max-width: 991px) {
+        --header-height: 70px;
+    }
+
     .header-content {
         height: 100%;
         display: flex;
@@ -47,10 +51,17 @@
             font-size: 1.5rem;
             font-weight: 900;
             letter-spacing: -0.03em;
+            white-space: nowrap;
 
             .accent {
                 color: var(--primary-color);
             }
+        }
+    }
+
+    @media (max-width: 600px) {
+        .brand .logo-text {
+            font-size: 1.25rem;
         }
     }
 
@@ -126,6 +137,7 @@
             background: var(--primary-color);
             color: white;
             border: none;
+            flex-shrink: 0;
         }
     }
 
@@ -203,10 +215,10 @@
         top: 0;
         right: 0;
         width: 85%;
-        max-width: 320px;
+        max-width: 280px;
         height: 100%;
         background: var(--surface-color);
-        padding: 2rem;
+        padding: 1.5rem;
         display: flex;
         flex-direction: column;
         transform: translateX(100%);
@@ -311,7 +323,12 @@
 
 @media (max-width: 480px) {
     .main-header .brand .logo-text {
-        display: none;
+        font-size: 1.1rem;
+    }
+
+    .main-header .brand .logo-icon {
+        padding: 0.35rem;
+        font-size: 0.85rem;
     }
 }
 

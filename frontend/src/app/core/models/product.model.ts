@@ -11,6 +11,7 @@ export interface ProductVariant {
     id: string;
     name: string;
     price: number;
+    comparisonPrice?: number;
     sku?: string;
     specifications?: any;
     stock: number;
@@ -25,6 +26,7 @@ export interface Product {
     categoryId: string;
     category?: Category;
     price: number;
+    comparisonPrice?: number;
     images: ProductImage[];
     variants: ProductVariant[];
     isAvailable: boolean;

@@ -257,12 +257,21 @@
 /* Category Grid */
 .category-section {
     padding: 8rem 0;
+
+    @media (max-width: 768px) {
+        padding: 4rem 0;
+    }
 }
 
 .category-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2.5rem;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
 }
 
 .category-card {
@@ -325,12 +334,21 @@
 .featured-section {
     padding: 8rem 0;
     background-color: var(--surface-color-secondary);
+
+    @media (max-width: 768px) {
+        padding: 4rem 0;
+    }
 }
 
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 2rem;
+
+    @media (max-width: 600px) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
 }
 
 .product-card {
@@ -436,10 +454,24 @@
             border-top: 1px solid var(--border-color);
             padding-top: 1.5rem;
 
-            .p-price {
-                font-size: 1.5rem;
-                font-weight: 900;
-                color: var(--text-color);
+            .p-price-wrapper {
+                display: flex;
+                flex-direction: column;
+
+                .p-price {
+                    font-size: 1.5rem;
+                    font-weight: 900;
+                    color: var(--text-color);
+                    line-height: 1;
+                }
+
+                .p-mrp {
+                    font-size: 0.85rem;
+                    color: var(--text-color-muted);
+                    text-decoration: line-through;
+                    opacity: 0.7;
+                    margin-top: 4px;
+                }
             }
 
             .p-view {
@@ -544,6 +576,17 @@
         gap: 1.5rem;
         transition: transform 0.3s;
 
+        @media (max-width: 768px) {
+            padding: 2rem;
+            flex-direction: row;
+            text-align: left;
+            gap: 2rem;
+
+            .marker-icon {
+                font-size: 2.5rem;
+            }
+        }
+
         &:hover {
             transform: translateY(-5px);
         }
@@ -567,12 +610,21 @@
 /* Social Section */
 .social-section {
     padding-bottom: 10rem;
+
+    @media (max-width: 768px) {
+        padding-bottom: 5rem;
+    }
 }
 
 .social-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 2rem;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
 }
 
 .social-card {

@@ -18,6 +18,9 @@ export class Product {
     @Column({ type: 'decimal', precision: 12, scale: 2 })
     price: number;
 
+    @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
+    comparisonPrice: number; // MRP or Original Price (Strike-through)
+
     @OneToMany(() => ProductImage, (image) => image.product, { cascade: true })
     images: ProductImage[];
 

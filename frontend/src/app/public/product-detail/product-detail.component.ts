@@ -8,11 +8,12 @@ import { CartService } from '../../core/store/cart.service';
 import { Product } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
 import { Brand } from '../../core/models/brand.model';
+import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ImageUrlPipe],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss'
 })

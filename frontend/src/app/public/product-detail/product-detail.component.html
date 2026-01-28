@@ -12,8 +12,7 @@
     <div class="product-main-grid">
         <div class="product-gallery glass-card">
             <div class="main-image">
-                <img [src]="product.images && product.images.length > 0 ? 'http://localhost:3000' + product.images[0].url : 'https://placehold.co/800x600?text=No+Image'"
-                    [alt]="product.name">
+                <img [src]="product.images[0].url | imageUrl" [alt]="product.name">
             </div>
         </div>
 
@@ -22,7 +21,10 @@
                 <span class="brand-badge" *ngIf="brand">{{ brand.name }}</span>
                 <h1>{{ product.name }}</h1>
                 <div class="price-section">
-                    <span class="price">₹{{ product.price | number }}</span>
+                    <div class="price-stack">
+                        <span class="price">₹{{ product.price | number }}</span>
+                        <span *ngIf="product.comparisonPrice" class="mrp">₹{{ product.comparisonPrice | number }}</span>
+                    </div>
                     <span class="stock-status" [class.out]="!product.isAvailable || product.stock <= 0"
                         [class.low]="product.stock > 0 && product.stock <= 5">
                         <ng-container *ngIf="product.stock > 0; else outOfStock">
@@ -121,12 +123,14 @@
             @for (p of relatedProducts; track p.id) {
             <div class="product-item glass-card" [routerLink]="['/products/detail', p.id]">
                 <div class="p-image">
-                    <img [src]="p.images && p.images.length > 0 ? 'http://localhost:3000' + p.images[0].url : 'https://placehold.co/400x400?text=No+Image'"
-                        [alt]="p.name">
+                    <img [src]="p.images[0].url | imageUrl" [alt]="p.name">
                 </div>
                 <div class="p-info">
                     <h4>{{ p.name }}</h4>
-                    <p class="p-price">₹{{ p.price | number }}</p>
+                    <div class="p-price-row">
+                        <span class="p-price">₹{{ p.price | number }}</span>
+                        <span *ngIf="p.comparisonPrice" class="p-mrp">₹{{ p.comparisonPrice | number }}</span>
+                    </div>
                 </div>
             </div>
             }
