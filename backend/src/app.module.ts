@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './auth/entities/user.entity';
 import { Role, Permission } from './auth/entities/role.entity';
@@ -25,6 +28,15 @@ import { CommonModule } from './common/common.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 5 * 60 * 1000, // 5 minutes
+      max: 100, // maximum number of items in cache
+    }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100,
+    }]),
     CommonModule,
     AuthModule,
     ProductsModule,
@@ -43,9 +55,16 @@ import { CommonModule } from './common/common.module';
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'sribalaji'),
         entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, Order, OrderItem, Quotation, Coupon, LocationRestriction, HomeCMS],
-        synchronize: true, // Only for development!
+
+        synchronize: config.get('NODE_ENV') !== 'production',
       }),
     }),
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule { }

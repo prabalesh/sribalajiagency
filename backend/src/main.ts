@@ -4,6 +4,8 @@ import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import * as path from 'path';
+import helmet from 'helmet';
+import compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,7 +22,16 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.useGlobalPipes(new ValidationPipe());
+  // Security headers
+  app.use(helmet());
+
+  // Gzip compression
+  app.use(compression());
+
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+  }));
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
