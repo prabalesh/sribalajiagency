@@ -29,6 +29,7 @@ export class ProductDetailComponent implements OnInit {
   brand?: Brand;
   relatedProducts: Product[] = [];
   quantity: number = 1;
+  selectedImageIndex: number = 0;
 
   ngOnInit() {
     this.route.paramMap.subscribe(async params => {
@@ -41,6 +42,7 @@ export class ProductDetailComponent implements OnInit {
 
   async loadProduct(id: string) {
     try {
+      this.selectedImageIndex = 0; // Reset to first image
       this.product = await this.productService.getProductById(id);
       if (this.product) {
         const catId = this.product.categoryId || this.product.category?.id;
@@ -92,5 +94,9 @@ export class ProductDetailComponent implements OnInit {
     }
 
     this.quantity = newQty;
+  }
+
+  selectImage(index: number) {
+    this.selectedImageIndex = index;
   }
 }

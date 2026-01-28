@@ -12,7 +12,14 @@
     <div class="product-main-grid">
         <div class="product-gallery">
             <div class="main-image">
-                <img [src]="(product.images.length > 0 ? product.images[0].url : '') | imageUrl" [alt]="product.name">
+                <img [src]="(product.images.length > 0 ? product.images[selectedImageIndex]?.url : '') | imageUrl"
+                    [alt]="product.name">
+            </div>
+            <div class="image-thumbnails" *ngIf="product.images.length > 1">
+                <div *ngFor="let image of product.images; let i = index" class="thumbnail"
+                    [class.active]="i === selectedImageIndex" (click)="selectImage(i)">
+                    <img [src]="image.url | imageUrl" [alt]="product.name">
+                </div>
             </div>
         </div>
 
@@ -38,7 +45,7 @@
 
             <div class="limit-note"
                 *ngIf="product.maxOrderQuantity && product.maxOrderQuantity < product.stock && !product.isShowcaseOnly">
-                ⚠️ Limit {{ product.maxOrderQuantity }} per order
+                Limit {{ product.maxOrderQuantity }} per order
             </div>
 
             <div class="purchase-actions" *ngIf="product.isAvailable && !product.isShowcaseOnly">
@@ -48,11 +55,8 @@
                     <button (click)="updateQuantity(1)"
                         [disabled]="quantity >= product.stock || (product.maxOrderQuantity && quantity >= product.maxOrderQuantity)">+</button>
                 </div>
-                <button class="btn-primary add-to-cart" (click)="addToCart()">
-                    🛒 Add to Cart
-                </button>
-                <button class="btn-secondary" [routerLink]="['/request-quote', { productId: product.id }]">
-                    💬 Get Quote
+                <button class="btn-primary" (click)="addToCart()">
+                    Add to Cart
                 </button>
             </div>
 
@@ -99,19 +103,19 @@
             <div class="specs-card">
                 <h3>Technical Details</h3>
                 <div class="spec-row">
-                    <span class="label">🏷️ Brand</span>
+                    <span class="label">Brand</span>
                     <span class="value">{{ brand?.name }}</span>
                 </div>
                 <div class="spec-row">
-                    <span class="label">📦 Category</span>
+                    <span class="label">Category</span>
                     <span class="value">{{ category?.name }}</span>
                 </div>
                 <div class="spec-row">
-                    <span class="label">🔖 Model ID</span>
+                    <span class="label">Model ID</span>
                     <span class="value">{{ product.id.toUpperCase() }}</span>
                 </div>
                 <div class="spec-row">
-                    <span class="label">✅ Warranty</span>
+                    <span class="label">Warranty</span>
                     <span class="value">1 Year Domestic</span>
                 </div>
             </div>
