@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { QuotationService } from './quotation.service';
-import { ApiService } from '../api/api.service';
-import { QuotationRequest } from '../models/models';
+import { ApiService } from '../../api/api.service';
+import { QuotationRequest } from '../../models/quotation.model';
 
 describe('QuotationService', () => {
   let service: QuotationService;

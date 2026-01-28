@@ -1,39 +1,38 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { CategoriesComponent } from './categories.component';
-import { ProductService } from '../../core/services/api/product.service';
+import { CategoryService } from '../../core/services/api/category.service';
 import { FormsModule } from '@angular/forms';
-import { mockProductService } from '../../core/testing/mocks';
 
 describe('CategoriesComponent', () => {
   let component: CategoriesComponent;
   let fixture: ComponentFixture<CategoriesComponent>;
-  let productServiceSpy: any;
+  let categoryServiceSpy: jasmine.SpyObj<CategoryService>;
 
   beforeEach(async () => {
-    productServiceSpy = {
-      ...mockProductService,
-      getCategories: jasmine.createSpy().and.returnValue(Promise.resolve([])),
-      addCategory: jasmine.createSpy().and.returnValue(Promise.resolve({ id: 'c1', name: 'C1' })),
-      updateCategory: jasmine.createSpy().and.returnValue(Promise.resolve({ id: 'c1', name: 'Updated' })),
-      deleteCategory: jasmine.createSpy().and.returnValue(Promise.resolve())
-    };
+    const spy = jasmine.createSpyObj('CategoryService', ['getCategories', 'addCategory', 'updateCategory', 'deleteCategory']);
 
     await TestBed.configureTestingModule({
       imports: [CategoriesComponent, FormsModule],
       providers: [
-        { provide: ProductService, useValue: productServiceSpy }
+        { provide: CategoryService, useValue: spy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CategoriesComponent);
     component = fixture.componentInstance;
+    categoryServiceSpy = TestBed.inject(CategoryService) as jasmine.SpyObj<CategoryService>;
+
+    categoryServiceSpy.getCategories.and.returnValue(Promise.resolve([]));
+    categoryServiceSpy.addCategory.and.returnValue(Promise.resolve({ id: 'c1', name: 'C1' } as any));
+    categoryServiceSpy.updateCategory.and.returnValue(Promise.resolve({ id: 'c1', name: 'Updated' } as any));
+    categoryServiceSpy.deleteCategory.and.returnValue(Promise.resolve());
+
     fixture.detectChanges();
   });
 
   it('should load categories on init', fakeAsync(() => {
-    component.ngOnInit();
     tick();
-    expect(productServiceSpy.getCategories).toHaveBeenCalled();
+    expect(categoryServiceSpy.getCategories).toHaveBeenCalled();
   }));
 
   it('should generate slug from name', () => {
@@ -46,7 +45,7 @@ describe('CategoriesComponent', () => {
     component.newCategory = { name: 'Cat', slug: 'cat' };
     component.addCategory();
     tick();
-    expect(productServiceSpy.addCategory).toHaveBeenCalled();
+    expect(categoryServiceSpy.addCategory).toHaveBeenCalled();
   }));
 
   it('should update an existing category', fakeAsync(() => {
@@ -54,13 +53,13 @@ describe('CategoriesComponent', () => {
     component.isEditing = true;
     component.addCategory();
     tick();
-    expect(productServiceSpy.updateCategory).toHaveBeenCalled();
+    expect(categoryServiceSpy.updateCategory).toHaveBeenCalled();
   }));
 
   it('should delete category after confirm', fakeAsync(() => {
     spyOn(window, 'confirm').and.returnValue(true);
     component.deleteCategory('c1');
     tick();
-    expect(productServiceSpy.deleteCategory).toHaveBeenCalledWith('c1');
+    expect(categoryServiceSpy.deleteCategory).toHaveBeenCalledWith('c1');
   }));
 });

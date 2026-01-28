@@ -9,6 +9,8 @@ import compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.use(cookieParser());
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 

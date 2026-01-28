@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { QuotationsComponent } from './quotations.component';
 import { QuotationService } from '../../core/services/api/quotation.service';
 import { FormsModule } from '@angular/forms';
-import { QuotationRequest } from '../../core/models/models';
+import { QuotationRequest } from '../../core/models/quotation.model';
 
 describe('QuotationsComponent', () => {
   let component: QuotationsComponent;

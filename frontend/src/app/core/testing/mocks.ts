@@ -1,6 +1,14 @@
 import { signal } from '@angular/core';
 import { of } from 'rxjs';
 
+export const mockApiService = {
+    get: jasmine.createSpy('get').and.returnValue(Promise.resolve({ data: [] })),
+    post: jasmine.createSpy('post').and.returnValue(Promise.resolve({ data: {} })),
+    put: jasmine.createSpy('put').and.returnValue(Promise.resolve({ data: {} })),
+    patch: jasmine.createSpy('patch').and.returnValue(Promise.resolve({ data: {} })),
+    delete: jasmine.createSpy('delete').and.returnValue(Promise.resolve({ data: {} }))
+};
+
 export const mockProductService = {
     getProducts: () => Promise.resolve([]),
     getProductById: () => Promise.resolve({}),

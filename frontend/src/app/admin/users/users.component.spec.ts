@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { UsersComponent } from './users.component';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { FormsModule } from '@angular/forms';
-import { User } from '../../core/models/models';
+import { User } from '../../core/models/auth.model';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;

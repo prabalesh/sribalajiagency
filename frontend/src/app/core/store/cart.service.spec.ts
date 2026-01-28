@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { CartService } from './cart.service';
 import { PLATFORM_ID } from '@angular/core';
-import { Product } from '../models/models';
+import { Product } from '../models/product.model';
 
 describe('CartService', () => {
     let service: CartService;

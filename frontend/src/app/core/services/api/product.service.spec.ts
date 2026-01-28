@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { ProductService } from './product.service';
-import { ApiService } from '../api/api.service';
-import { Product, Category, Brand } from '../models/models';
+import { ApiService } from '../../api/api.service';
+import { Product } from '../../models/product.model';
 
 describe('ProductService', () => {
     let service: ProductService;
     let apiServiceSpy: jasmine.SpyObj<ApiService>;
 
     beforeEach(() => {
-        const spy = jasmine.createSpyObj('ApiService', ['get', 'post', 'put', 'patch', 'delete']);
+        const spy = jasmine.createSpyObj('ApiService', ['get', 'post', 'put', 'delete']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -31,7 +31,16 @@ describe('ProductService', () => {
 
         const result = await service.getProducts();
         expect(result).toEqual(mockProducts);
-        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products', undefined);
+        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products');
+    });
+
+    it('should get product by id', async () => {
+        const mockProduct = { id: '1', name: 'P1' } as any;
+        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: mockProduct } as any));
+
+        const result = await service.getProductById('1');
+        expect(result).toEqual(mockProduct);
+        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products/1');
     });
 
     it('should add a product', async () => {
@@ -49,75 +58,36 @@ describe('ProductService', () => {
 
         const result = await service.updateProduct(product);
         expect(result.name).toBe('Updated');
+        expect(apiServiceSpy.put).toHaveBeenCalledWith('/products/1', product);
     });
 
     it('should delete a product', async () => {
-        apiServiceSpy.delete.and.returnValue(Promise.resolve());
+        apiServiceSpy.delete.and.returnValue(Promise.resolve({} as any));
         await service.deleteProduct('1');
         expect(apiServiceSpy.delete).toHaveBeenCalledWith('/products/1');
     });
 
-    it('should fetch categories', async () => {
-        const mockCats: Category[] = [{ id: 'c1', name: 'C1' } as any];
-        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: mockCats } as any));
-
-        const result = await service.getCategories();
-        expect(result.length).toBe(1);
-    });
-
-    it('should add a category', async () => {
-        const cat = { name: 'New Cat' } as any;
-        apiServiceSpy.post.and.returnValue(Promise.resolve({ data: cat } as any));
-        await service.addCategory(cat);
-        expect(apiServiceSpy.post).toHaveBeenCalledWith('/categories', cat);
-    });
-
-    it('should update a category', async () => {
-        const cat = { id: 'c1', name: 'Updated' } as any;
-        apiServiceSpy.put.and.returnValue(Promise.resolve({ data: cat } as any));
-        await service.updateCategory(cat);
-        expect(apiServiceSpy.put).toHaveBeenCalledWith('/categories/c1', cat);
-    });
-
-    it('should delete a category', async () => {
-        apiServiceSpy.delete.and.returnValue(Promise.resolve());
-        await service.deleteCategory('c1');
-        expect(apiServiceSpy.delete).toHaveBeenCalledWith('/categories/c1');
-    });
-
-    it('should fetch brands', async () => {
-        const mockBrands: Brand[] = [{ id: 'b1', name: 'B1' } as any];
-        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: mockBrands } as any));
-        const res = await service.getBrands();
-        expect(res.length).toBe(1);
-    });
-
-    it('should add a brand', async () => {
-        const brand = { name: 'B' } as any;
-        apiServiceSpy.post.and.returnValue(Promise.resolve({ data: brand } as any));
-        await service.addBrand(brand);
-        expect(apiServiceSpy.post).toHaveBeenCalledWith('/brands', brand);
-    });
-
-    it('should upload brand image', async () => {
-        apiServiceSpy.post.and.returnValue(Promise.resolve({ data: { id: 'b1', image: 'url' } } as any));
-        await service.uploadBrandImage('b1', new File([], 'f.png'));
+    it('should upload image', async () => {
+        apiServiceSpy.post.and.returnValue(Promise.resolve({ data: {} } as any));
+        await service.uploadImage('1', new File([], 'img.png'), true);
         expect(apiServiceSpy.post).toHaveBeenCalled();
     });
 
-    it('should fetch and update CMS', async () => {
-        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: {} } as any));
-        await service.getHomeCMS();
-        expect(apiServiceSpy.get).toHaveBeenCalledWith('/cms/home');
+    it('should delete image', async () => {
+        apiServiceSpy.delete.and.returnValue(Promise.resolve({} as any));
+        await service.deleteImage('img1');
+        expect(apiServiceSpy.delete).toHaveBeenCalledWith('/products/images/img1');
+    });
 
-        apiServiceSpy.put.and.returnValue(Promise.resolve({ data: {} } as any));
-        await service.updateHomeCMS({});
-        expect(apiServiceSpy.put).toHaveBeenCalledWith('/cms/home', {});
+    it('should get products by category', async () => {
+        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: [] } as any));
+        await service.getProductsByCategory('cat1');
+        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products', { categoryId: 'cat1' });
     });
 
     it('should search products', async () => {
         apiServiceSpy.get.and.returnValue(Promise.resolve({ data: [] } as any));
         await service.searchProducts('query');
-        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products/search', { q: 'query' });
+        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products', { q: 'query' });
     });
 });

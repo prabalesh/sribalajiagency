@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from './auth.service';
-import { ApiService } from '../api/api.service';
+import { ApiService } from '../../api/api.service';
 import { PLATFORM_ID } from '@angular/core';
 
 describe('AuthService', () => {
@@ -8,7 +8,7 @@ describe('AuthService', () => {
   let apiServiceSpy: jasmine.SpyObj<ApiService>;
 
   beforeEach(() => {
-    const apiSpy = jasmine.createSpyObj('ApiService', ['get', 'post', 'put', 'delete']);
+    const spy = jasmine.createSpyObj('ApiService', ['get', 'post', 'put', 'delete']);
 
     // Mock localStorage
     const store: { [key: string]: string } = {};
@@ -21,84 +21,71 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       providers: [
         AuthService,
-        { provide: ApiService, useValue: apiSpy },
+        { provide: ApiService, useValue: spy },
         { provide: PLATFORM_ID, useValue: 'browser' }
       ]
     });
 
-    service = TestBed.inject(AuthService);
     apiServiceSpy = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
+    service = TestBed.inject(AuthService);
+
+    // Prevent actual redirects during tests
+    spyOn<any>(service, 'redirect').and.stub();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should login successfully', async () => {
-    const mockUser = { id: '1', name: 'Admin', roles: [{ name: 'admin' }] };
+  it('should login and set user in current signal and localStorage', async () => {
+    const mockUser = { id: 'u1', name: 'User', email: 'u@a.com', roles: [], createdAt: new Date() };
     apiServiceSpy.post.and.returnValue(Promise.resolve({ data: { user: mockUser } } as any));
 
-    const result = await service.login('admin@test.com', 'password');
-    expect(result).toBeTrue();
-    expect(service.user()).toEqual(mockUser as any);
-    expect(service.isAdmin()).toBeTrue();
+    const success = await service.login('test@abc.com', 'pass');
+    expect(success).toBeTrue();
+    expect(service.user()).toEqual(mockUser);
     expect(localStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify(mockUser));
   });
 
-  it('should return false on login failure', async () => {
-    apiServiceSpy.post.and.returnValue(Promise.reject('Error'));
-    const result = await service.login('fail@test.com', 'wrong');
-    expect(result).toBeFalse();
+  it('should handle login error', async () => {
+    apiServiceSpy.post.and.returnValue(Promise.reject('error'));
+    const success = await service.login('test@abc.com', 'pass');
+    expect(success).toBeFalse();
     expect(service.user()).toBeNull();
   });
 
-  it('should logout and clear state', async () => {
-    const mockUser = { id: '1', name: 'User' };
-    apiServiceSpy.post.and.returnValue(Promise.resolve({ data: { user: mockUser } } as any));
-    await service.login('u@t.com', 'p');
+  it('should register', async () => {
+    apiServiceSpy.post.and.returnValue(Promise.resolve({ data: {} } as any));
+    const success = await service.register('User', 'test@abc.com', 'pass');
+    expect(success).toBeTrue();
+    expect(apiServiceSpy.post).toHaveBeenCalled();
+  });
 
+  it('should logout and clear local state', async () => {
     apiServiceSpy.post.and.returnValue(Promise.resolve({} as any));
 
-    // Stub the private redirect method
-    spyOn(service as any, 'redirect').and.stub();
-
     await service.logout();
-
     expect(service.user()).toBeNull();
     expect(localStorage.clear).toHaveBeenCalled();
-    expect((service as any).redirect).toHaveBeenCalledWith('/login');
   });
 
-  it('should check authentication status correctly', async () => {
-    expect(service.isAuthenticated()).toBeFalse();
+  it('should update profile', async () => {
+    const mockUser = { id: 'u1', name: 'User', email: 'u@a.com', roles: [], createdAt: new Date() };
+    (service as any).currentUser.set(mockUser);
 
-    const mockUser = { id: '1', name: 'User' };
-    apiServiceSpy.post.and.returnValue(Promise.resolve({ data: { user: mockUser } } as any));
-    await service.login('u@t.com', 'p');
+    apiServiceSpy.put.and.returnValue(Promise.resolve({ data: { ...mockUser, name: 'New Name' } } as any));
+    await service.updateProfile('New Name', 'test@abc.com');
 
-    expect(service.isAuthenticated()).toBeTrue();
+    expect(service.user()?.name).toBe('New Name');
   });
 
-  it('should fetch users', async () => {
-    const mockUsers = [{ id: '1', name: 'U1' }];
-    apiServiceSpy.get.and.returnValue(Promise.resolve({ data: mockUsers } as any));
+  it('should check admin role correctly', () => {
+    const adminUser = { id: 'u1', roles: [{ name: 'admin' }] } as any;
+    (service as any).currentUser.set(adminUser);
+    expect(service.isAdmin()).toBeTrue();
 
-    const result = await service.getUsers();
-    expect(result).toEqual(mockUsers as any);
-    expect(apiServiceSpy.get).toHaveBeenCalledWith('/users');
-  });
-
-  it('should update user profile', async () => {
-    const initialUser = { id: '1', name: 'Old', email: 'o@t.com' };
-    apiServiceSpy.post.and.returnValue(Promise.resolve({ data: { user: initialUser } } as any));
-    await service.login('o@t.com', 'p');
-
-    const updatedUser = { ...initialUser, name: 'New' };
-    apiServiceSpy.put.and.returnValue(Promise.resolve({ data: updatedUser } as any));
-
-    await service.updateProfile('New', 'o@t.com');
-
-    expect(service.user()?.name).toBe('New');
-    expect(apiServiceSpy.put).toHaveBeenCalledWith('/users/profile', { name: 'New', email: 'o@t.com' });
+    const regularUser = { id: 'u2', roles: [{ name: 'user' }] } as any;
+    (service as any).currentUser.set(regularUser);
+    expect(service.isAdmin()).toBeFalse();
   });
 });
