@@ -1,20 +1,23 @@
 <div class="products-page container">
-    <aside class="sidebar glass-card">
-        <h3>Categories</h3>
-        <ul>
-            <li [class.active]="!currentCategory">
-                <a routerLink="/products">All Products</a>
-            </li>
-            @for (cat of categories; track cat.id) {
-            <li [class.active]="currentCategory?.id === cat.id">
-                <a [routerLink]="['/products', cat.slug]">{{ cat.name }}</a>
-            </li>
-            }
-        </ul>
+    <aside class="sidebar" [class.mobile-hidden]="true">
+        <div class="sidebar-inner glass-card">
+            <h3>Categories</h3>
+            <ul>
+                <li [class.active]="!currentCategory">
+                    <a routerLink="/products">All Products</a>
+                </li>
+                @for (cat of categories; track cat.id) {
+                <li [class.active]="currentCategory?.id === cat.id">
+                    <a [routerLink]="['/products', cat.slug]">{{ cat.name }}</a>
+                </li>
+                }
+            </ul>
 
-        <div class="sidebar-promo glass-card">
-            <h4>Summer Sale</h4>
-            <p>Up to 40% off on all LG appliances.</p>
+            <div class="sidebar-promo">
+                <h4>Support</h4>
+                <p>Need help finding a tool? Contact our experts.</p>
+                <button class="btn-secondary" routerLink="/contact">Talk to Us</button>
+            </div>
         </div>
     </aside>
 
@@ -23,13 +26,9 @@
             <nav class="breadcrumbs">
                 <a routerLink="/">Home</a>
                 <span class="sep">/</span>
-                <a routerLink="/products">Catalog</a>
-                @if (currentCategory) {
-                <span class="sep">/</span>
-                <span class="current">{{ currentCategory.name }}</span>
-                }
+                <span class="current">{{ currentCategory ? currentCategory.name : 'Catalog' }}</span>
             </nav>
-            <h1>{{ currentCategory ? currentCategory.name : 'Everything in Store' }}</h1>
+            <h1 class="text-gradient">{{ currentCategory ? currentCategory.name : 'Product Catalog' }}</h1>
             <p class="count">{{ products.length }} items found</p>
         </header>
 
@@ -37,13 +36,20 @@
             @for (product of products; track product.id) {
             <div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]">
                 <div class="p-image">
-                    <img [src]="product.images && product.images.length > 0 ? 'http://localhost:3000' + product.images[0].url : 'https://placehold.co/400x400?text=No+Image'"
-                        [alt]="product.name">
+                    <img [src]="product.images[0]?.url | imageUrl" [alt]="product.name">
                     <div class="p-overlay">
                         <button *ngIf="product.stock > 0; else outOfStock" class="btn-primary"
-                            (click)="addToCart(product, $event)">Quick Add</button>
+                            (click)="addToCart(product, $event)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <path d="M16 10a4 4 0 0 1-8 0"></path>
+                            </svg>
+                            Add to Cart
+                        </button>
                         <ng-template #outOfStock>
-                            <span class="oos-text">Out of Stock</span>
+                            <span class="oos-text">Sold Out</span>
                         </ng-template>
                     </div>
                 </div>
@@ -52,7 +58,7 @@
                     <h3>{{ product.name }}</h3>
                     <div class="p-footer">
                         <span class="p-price">₹{{ product.price | number }}</span>
-                        <span class="p-rating">★★★★☆</span>
+                        <span class="p-rating">★★★★</span>
                     </div>
                 </div>
             </div>
@@ -61,8 +67,8 @@
 
         @if (products.length === 0) {
         <div class="no-results glass-card">
-            <p>Sorry, no products found in this category yet.</p>
-            <button class="btn-primary" routerLink="/products">See All Products</button>
+            <p>We couldn't find any products in this category.</p>
+            <button class="btn-primary" routerLink="/products">Explore Catalog</button>
         </div>
         }
     </main>

@@ -86,9 +86,54 @@
                     <button class="btn-primary login-btn" routerLink="/login">Sign In</button>
                     }
                 </div>
+
+                <button class="icon-btn mobile-menu-btn" (click)="isMobileMenuOpen = !isMobileMenuOpen">
+                    <svg *ngIf="!isMobileMenuOpen" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                    <svg *ngIf="isMobileMenuOpen" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
         </div>
     </header>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" [class.open]="isMobileMenuOpen" (click)="isMobileMenuOpen = false">
+        <nav class="mobile-nav glass-card" (click)="$event.stopPropagation()">
+            <div class="mobile-nav-header">
+                <div class="brand">
+                    <span class="logo-icon">SB</span>
+                    <span class="logo-text">Sri Balaji</span>
+                </div>
+                <button class="close-btn" (click)="isMobileMenuOpen = false">×</button>
+            </div>
+            <ul>
+                <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                        (click)="isMobileMenuOpen = false">Home</a></li>
+                <li><a routerLink="/products" routerLinkActive="active" (click)="isMobileMenuOpen = false">Catalog</a>
+                </li>
+                <li><a routerLink="/brands" routerLinkActive="active" (click)="isMobileMenuOpen = false">Brands</a></li>
+                <li><a routerLink="/history" routerLinkActive="active" (click)="isMobileMenuOpen = false">Orders</a>
+                </li>
+            </ul>
+            <div class="mobile-nav-footer">
+                @if (!authService.isLoggedIn()) {
+                <button class="btn-primary w-full" routerLink="/login" (click)="isMobileMenuOpen = false">Sign
+                    In</button>
+                } @else {
+                <button class="btn-secondary w-full" (click)="authService.logout(); isMobileMenuOpen = false">Sign
+                    Out</button>
+                }
+            </div>
+        </nav>
+    </div>
 
     <!-- Search Overlay -->
     @if (isSearchOpen) {

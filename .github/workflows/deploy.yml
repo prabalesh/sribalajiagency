@@ -1,0 +1,93 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    # ----------------------------------------------------------------
+    # BACKEND BUILD
+    # ----------------------------------------------------------------
+    - name: Setup Node.js (Backend)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install Backend Dependencies
+      run: |
+        cd backend
+        npm ci
+
+    - name: Build Backend
+      run: |
+        cd backend
+        npm run build
+        # Prune dev dependencies to save space/bandwidth
+        npm prune --production
+
+    # ----------------------------------------------------------------
+    # FRONTEND BUILD
+    # ----------------------------------------------------------------
+    - name: Setup Node.js (Frontend)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install Frontend Dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Build Frontend
+      run: |
+        cd frontend
+        # Assuming "production" configuration is set in angular.json
+        npm run build
+
+    # ----------------------------------------------------------------
+    # DEPLOYMENT (RSYNC)
+    # ----------------------------------------------------------------
+    - name: Install SSH Key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: unnecessary
+        if_key_exists: replace
+
+    - name: Adding Known Hosts
+      run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to Server
+      run: |
+        # Define target directory on server
+        TARGET_DIR="/var/www/sribalajiagency"
+        
+        # Sync Backend (Dist + Node Modules + Package.json + Ecosystem)
+        # Note: We are syncing node_modules because we pruned them earlier. 
+        # Alternatively, you can run npm install on server, but this is faster for low-CPU servers.
+        rsync -avz --delete ./backend/dist/ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:$TARGET_DIR/backend/dist/
+        rsync -avz --delete ./backend/node_modules/ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:$TARGET_DIR/backend/node_modules/
+        rsync -avz ./backend/package.json ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:$TARGET_DIR/backend/
+        rsync -avz ./ecosystem.config.js ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:$TARGET_DIR/
+        
+        # Sync Frontend (Dist folder)
+        # Adjust 'frontend/dist/sribalajiagency/browser' based on your actual Angular output path
+        # angular.json output path: dist/sribalajiagency
+        # Usually for SSR/Prerender it might be dist/sribalajiagency/browser or just dist/sribalajiagency
+        # Let's check the structure: usually standard build puts it in dist/sribalajiagency/browser if SSR is on, or just dist/sribalajiagency
+        # Based on typical Angular 17+ SSR: we want the browser folder for Nginx static serve
+        rsync -avz --delete ./frontend/dist/sribalajiagency/browser/ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:$TARGET_DIR/frontend/
+
+    - name: Restart Backend with PM2
+      run: |
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "cd /var/www/sribalajiagency && pm2 reload ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production"

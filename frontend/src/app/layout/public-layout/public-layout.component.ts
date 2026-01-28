@@ -22,6 +22,7 @@ export class PublicLayoutComponent {
   searchQuery: string = '';
   isSearchOpen = false;
   isUserDropdownOpen = false;
+  isMobileMenuOpen = false;
 
   toggleSearch() {
     this.isSearchOpen = !this.isSearchOpen;

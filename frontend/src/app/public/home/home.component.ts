@@ -9,11 +9,12 @@ import { CartService } from '../../core/store/cart.service';
 import { Category } from '../../core/models/category.model';
 import { Product } from '../../core/models/product.model';
 import { Brand } from '../../core/models/brand.model';
+import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ImageUrlPipe],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })

@@ -7,11 +7,12 @@ import { Category } from '../../core/models/category.model';
 import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
 import { CartService } from '../../core/store/cart.service';
+import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, ImageUrlPipe],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
