@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
@@ -6,10 +6,12 @@ import * as express from 'express';
 import * as path from 'path';
 import helmet from 'helmet';
 import compression from 'compression';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
-  // app.getHttpAdapter().getInstance().set('trust proxy', 1);
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   app.use(cookieParser());
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
@@ -35,9 +37,11 @@ async function bootstrap() {
     whitelist: true,
   }));
 
+  app.useGlobalInterceptors(new LoggingInterceptor());
+
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`Backend server is running on http://localhost:${port}`);
+  logger.log(`Backend server is running on http://localhost:${port}`);
 }
 bootstrap();
 

@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import { AppModule } from '../app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,6 +13,7 @@ import { Coupon } from '../coupons/entities/coupon.entity';
 import * as bcrypt from 'bcrypt';
 
 async function bootstrap() {
+    const logger = new Logger('Seed');
     const app = await NestFactory.createApplicationContext(AppModule);
 
     const roleRepo = app.get<Repository<Role>>(getRepositoryToken(Role));
@@ -23,7 +25,7 @@ async function bootstrap() {
     const variantRepo = app.get<Repository<ProductVariant>>(getRepositoryToken(ProductVariant));
     const couponRepo = app.get<Repository<Coupon>>(getRepositoryToken(Coupon));
 
-    console.log('Seed: Starting complex seeding process...');
+    logger.log('Seed: Starting complex seeding process...');
 
     // 1. Create Permissions
     const permissions = [
@@ -73,7 +75,7 @@ async function bootstrap() {
             roles: [adminRole as any]
         } as any) as unknown as User;
         adminUser = await userRepo.save(newAdmin);
-        console.log('Seed: Admin user created');
+        logger.log('Seed: Admin user created');
     }
 
     // 4. Categories & Brands
@@ -160,7 +162,7 @@ async function bootstrap() {
         }
     }
 
-    console.log(`Seed: Created ${productTemplates.length} products with variants.`);
+    logger.log(`Seed: Created ${productTemplates.length} products with variants.`);
 
     // 6. Coupons
     const coupons = [
@@ -184,7 +186,7 @@ async function bootstrap() {
         }
     }
 
-    console.log('Seed: Process completed successfully!');
+    logger.log('Seed: Process completed successfully!');
     await app.close();
 }
 

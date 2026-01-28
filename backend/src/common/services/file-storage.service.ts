@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { existsSync, mkdirSync } from 'fs';
@@ -13,6 +13,7 @@ export interface StorageProvider {
 
 @Injectable()
 export class FileStorageService implements StorageProvider {
+    private readonly logger = new Logger(FileStorageService.name);
     private readonly uploadPath = 'uploads';
 
     constructor() {
@@ -48,7 +49,7 @@ export class FileStorageService implements StorageProvider {
                 await fs.unlink(fullPath);
             }
         } catch (error) {
-            console.error(`Failed to delete file: ${fullPath}`, error);
+            this.logger.error(`Failed to delete file: ${fullPath}`, error);
         }
     }
 }
