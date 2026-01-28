@@ -36,7 +36,7 @@
             @for (product of products; track product.id) {
             <div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]">
                 <div class="p-image">
-                    <img [src]="product.images[0]?.url | imageUrl" [alt]="product.name">
+                    <img [src]="(product.images[0] && product.images[0].url) | imageUrl" [alt]="product.name">
                     <div class="p-overlay">
                         <button *ngIf="product.stock > 0; else outOfStock" class="btn-primary"
                             (click)="addToCart(product, $event)">
