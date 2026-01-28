@@ -78,7 +78,16 @@
             border-radius: 20px;
             background: var(--surface-color);
             transition: all 0.3s ease;
-            cursor: pointer;
+
+            .browse-link {
+                color: var(--primary-color);
+                text-decoration: underline;
+                cursor: pointer;
+
+                &:hover {
+                    color: var(--primary-color-hover);
+                }
+            }
 
             .icon {
                 font-size: 2rem;

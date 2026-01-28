@@ -8,6 +8,7 @@ import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
 import { BrandService } from '../../core/services/api/brand.service';
 import { DragDropDirective } from '../../shared/directives/drag-drop.directive';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-admin-products',
@@ -33,7 +34,8 @@ export class ProductsComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private categoryService: CategoryService,
-    private brandService: BrandService
+    private brandService: BrandService,
+    private toastService: ToastService
   ) { }
 
   async ngOnInit() {
@@ -60,33 +62,42 @@ export class ProductsComponent implements OnInit {
   }
 
   async saveProduct() {
+    console.log('AdminProducts: Attempting to save product', this.newProduct);
     if (this.newProduct.name && this.newProduct.categoryId) {
-      let savedProduct: Product;
-      if (this.isEditing) {
-        savedProduct = await this.productService.updateProduct(this.newProduct);
-      } else {
-        savedProduct = await this.productService.addProduct(this.newProduct);
-      }
-
-      // Handle Image Uploads
-      if (this.uploadedFiles.length > 0) {
-        for (let i = 0; i < this.uploadedFiles.length; i++) {
-          await this.productService.uploadImage(savedProduct.id, this.uploadedFiles[i], i === 0 && !savedProduct.images?.some(img => img.isPrimary));
+      try {
+        let savedProduct: Product;
+        if (this.isEditing) {
+          savedProduct = await this.productService.updateProduct(this.newProduct);
+        } else {
+          savedProduct = await this.productService.addProduct(this.newProduct);
         }
-      }
 
-      // Refresh list
-      this.products = (await this.productService.getProducts({ limit: 100 })).items;
-      this.resetForm();
+        // Handle Image Uploads
+        if (this.uploadedFiles.length > 0) {
+          for (let i = 0; i < this.uploadedFiles.length; i++) {
+            await this.productService.uploadImage(savedProduct.id, this.uploadedFiles[i], i === 0 && !savedProduct.images?.some(img => img.isPrimary));
+          }
+        }
+
+        // Refresh list
+        this.products = (await this.productService.getProducts({ limit: 100 })).items;
+        this.resetForm();
+        this.toastService.success(`Product ${this.isEditing ? 'updated' : 'added'} successfully!`);
+      } catch (err) {
+        console.error('AdminProducts: Failed to save product', err);
+        this.toastService.error('Failed to save product. Check backend logs.');
+      }
     } else {
-      alert('Please fill all required fields including Category');
+      this.toastService.warning('Please fill all required fields including Category');
     }
   }
 
   async editProduct(product: Product) {
     this.newProduct = {
       ...product,
-      variants: product.variants ? [...product.variants] : []
+      variants: product.variants ? [...product.variants] : [],
+      categoryId: product.categoryId || product.category?.id || '',
+      brandId: product.brandId || product.brand?.id || ''
     };
     this.isEditing = true;
 
@@ -163,6 +174,17 @@ export class ProductsComponent implements OnInit {
     for (let i = 0; i < files.length; i++) {
       this.uploadedFiles.push(files[i]);
     }
+  }
+
+  onFileSelected(event: any) {
+    const files = event.target.files;
+    if (files) {
+      for (let i = 0; i < files.length; i++) {
+        this.uploadedFiles.push(files[i]);
+      }
+    }
+    // Reset the input so the same file can be picked again if needed
+    event.target.value = '';
   }
 }
 

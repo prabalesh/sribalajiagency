@@ -108,8 +108,11 @@
                     <label>Upload Media</label>
                     <div class="upload-area" appDragDrop (fileDropped)="onFileDropped($event)">
                         <div class="drop-zone">
+                            <input type="file" #fileInput (change)="onFileSelected($event)" multiple hidden
+                                accept="image/*">
                             <span class="icon">📁</span>
-                            <p>Drag images here or <strong>browse files</strong></p>
+                            <p>Drag images here or <strong class="browse-link" (click)="fileInput.click()">browse
+                                    files</strong></p>
                             <div class="file-previews">
                                 @for (file of uploadedFiles; track $index) {
                                 <div class="file-item">

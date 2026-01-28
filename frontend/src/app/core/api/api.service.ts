@@ -14,10 +14,7 @@ export class ApiService {
         this.isBrowser = isPlatformBrowser(platformId);
         this.axiosInstance = axios.create({
             baseURL: environment.apiUrl,
-            withCredentials: true,
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            withCredentials: true
         });
 
         // Response interceptor to handle token refresh

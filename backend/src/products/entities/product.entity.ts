@@ -48,8 +48,14 @@ export class Product {
     @ManyToOne(() => Category)
     category: Category;
 
+    @Column({ nullable: true })
+    categoryId: string;
+
     @ManyToOne(() => Brand)
     brand: Brand;
+
+    @Column({ nullable: true })
+    brandId: string;
 
     @CreateDateColumn()
     createdAt: Date;

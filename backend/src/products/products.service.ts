@@ -89,7 +89,7 @@ export class ProductsService {
     }
 
     async updateProduct(id: string, data: any) {
-        const { variants, ...productData } = data;
+        const { variants, images, brand, category, ...productData } = data;
         await this.productRepo.update(id, productData);
 
         if (variants) {
