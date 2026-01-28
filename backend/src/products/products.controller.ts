@@ -10,8 +10,20 @@ export class ProductsController {
     constructor(private productsService: ProductsService) { }
 
     @Get()
-    findAll() {
-        return this.productsService.findAll();
+    findAll(
+        @Query('page') page: string = '1',
+        @Query('limit') limit: string = '20',
+        @Query('categoryId') categoryId?: string,
+        @Query('brandId') brandId?: string,
+        @Query('q') q?: string,
+        @Query('isFeatured') isFeatured?: string
+    ) {
+        return this.productsService.findAll(+page, +limit, {
+            categoryId,
+            brandId,
+            q,
+            isFeatured: isFeatured === 'true' ? true : (isFeatured === 'false' ? false : undefined)
+        });
     }
 
     @Get('categories')

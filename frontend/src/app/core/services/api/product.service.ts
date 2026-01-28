@@ -8,8 +8,8 @@ import { Product } from '../../models/product.model';
 export class ProductService {
   private api = inject(ApiService);
 
-  async getProducts() {
-    const res = await this.api.get<Product[]>('/products');
+  async getProducts(params: { page?: number, limit?: number, categoryId?: string, brandId?: string, q?: string, isFeatured?: boolean } = {}) {
+    const res = await this.api.get<{ items: Product[], total: number, page: number, limit: number }>('/products', params);
     return res.data;
   }
 
@@ -44,14 +44,12 @@ export class ProductService {
     await this.api.delete(`/products/images/${imageId}`);
   }
 
-  async getProductsByCategory(categoryId: string) {
-    const res = await this.api.get<Product[]>('/products', { categoryId });
-    return res.data;
+  async getProductsByCategory(categoryId: string, page: number = 1, limit: number = 20) {
+    return this.getProducts({ categoryId, page, limit });
   }
 
-  async searchProducts(query: string) {
-    const res = await this.api.get<Product[]>('/products', { q: query });
-    return res.data;
+  async searchProducts(query: string, page: number = 1, limit: number = 20) {
+    return this.getProducts({ q: query, page, limit });
   }
 }
 

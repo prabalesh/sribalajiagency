@@ -10,7 +10,7 @@ export const mockApiService = {
 };
 
 export const mockProductService = {
-    getProducts: () => Promise.resolve([]),
+    getProducts: () => Promise.resolve({ items: [], total: 0, page: 1, limit: 20 }),
     getProductById: () => Promise.resolve({}),
     getCategories: () => Promise.resolve([]),
     getBrands: () => Promise.resolve([]),
@@ -18,9 +18,9 @@ export const mockProductService = {
     getStoreSettings: () => Promise.resolve({}),
     getCategoriesByParentId: () => Promise.resolve([]),
     getBrandById: () => Promise.resolve({}),
-    getProductsByCategory: () => Promise.resolve([]),
+    getProductsByCategory: () => Promise.resolve({ items: [], total: 0, page: 1, limit: 20 }),
     getCategoryBySlug: () => Promise.resolve({}),
-    searchProducts: () => Promise.resolve([])
+    searchProducts: () => Promise.resolve({ items: [], total: 0, page: 1, limit: 20 })
 };
 
 export const mockAuthService = {

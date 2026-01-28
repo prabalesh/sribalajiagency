@@ -33,7 +33,7 @@ export class DashboardComponent implements OnInit {
       this.quotationService.getRequests()
     ]);
 
-    this.stats[0].value = products.length;
+    this.stats[0].value = products.total;
     this.stats[1].value = orders.length;
     this.stats[2].value = users.length;
     this.stats[3].value = quotes.length;

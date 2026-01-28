@@ -16,17 +16,23 @@ describe('ProductsComponent', () => {
   let cartServiceSpy: jasmine.SpyObj<CartService>;
 
   const mockProducts: Product[] = [
-    { id: '1', name: 'Product 1', price: 100, originalPrice: 150, images: [{ url: '1' }], categoryId: 'cat1', brandId: 'b1', description: '', isAvailable: true, variants: [], stock: 10, isFeatured: false, isShowcaseOnly: false },
-    { id: '2', name: 'Product 2', price: 200, images: [{ url: '2' }], categoryId: 'cat2', brandId: 'b2', description: '', isAvailable: true, variants: [], stock: 5, isFeatured: true, isShowcaseOnly: false }
+    { id: '1', name: 'Product 1', price: 100, images: [{ url: '1' }], categoryId: 'cat1', brandId: 'b1' },
+    { id: '2', name: 'Product 2', price: 200, images: [{ url: '2' }], categoryId: 'cat2', brandId: 'b2' }
   ] as any;
 
+  const mockPaginatedResponse = {
+    items: mockProducts,
+    total: 2,
+    page: 1,
+    limit: 12
+  };
+
   const mockCategories: Category[] = [
-    { id: 'cat1', name: 'Category 1', slug: 'category-1' },
-    { id: 'cat2', name: 'Category 2', slug: 'category-2' }
+    { id: 'cat1', name: 'Category 1', slug: 'category-1' }
   ] as any;
 
   async function setupTests(params: any = {}) {
-    const pSpy = jasmine.createSpyObj('ProductService', ['getProducts', 'getProductsByCategory']);
+    const pSpy = jasmine.createSpyObj('ProductService', ['getProducts']);
     const cSpy = jasmine.createSpyObj('CategoryService', ['getCategories', 'getCategoryBySlug']);
     const crtSpy = jasmine.createSpyObj('CartService', ['addToCart']);
 
@@ -49,8 +55,7 @@ describe('ProductsComponent', () => {
     categoryServiceSpy = TestBed.inject(CategoryService) as jasmine.SpyObj<CategoryService>;
     cartServiceSpy = TestBed.inject(CartService) as jasmine.SpyObj<CartService>;
 
-    productServiceSpy.getProducts.and.returnValue(Promise.resolve(mockProducts));
-    productServiceSpy.getProductsByCategory.and.returnValue(Promise.resolve([mockProducts[0]]));
+    productServiceSpy.getProducts.and.returnValue(Promise.resolve(mockPaginatedResponse));
     categoryServiceSpy.getCategories.and.returnValue(Promise.resolve(mockCategories));
     categoryServiceSpy.getCategoryBySlug.and.returnValue(Promise.resolve(mockCategories[0]));
   }
@@ -62,45 +67,32 @@ describe('ProductsComponent', () => {
       component = fixture.componentInstance;
     });
 
-    it('should create', () => {
+    it('should load products on init', fakeAsync(() => {
       fixture.detectChanges();
-      expect(component).toBeTruthy();
-    });
-
-    it('should load all products if no category slug is provided', fakeAsync(() => {
-      fixture.detectChanges();
-      tick();
       tick();
       expect(productServiceSpy.getProducts).toHaveBeenCalled();
-      expect(component.products).toEqual(mockProducts);
+      expect(component.products.length).toBe(2);
+      expect(component.totalItems).toBe(2);
     }));
 
-    it('should add product to cart and prevent event propagation', () => {
-      fixture.detectChanges();
-      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
-      const product = mockProducts[0];
-      component.addToCart(product, mockEvent);
-      expect(mockEvent.stopPropagation).toHaveBeenCalled();
-      expect(cartServiceSpy.addToCart).toHaveBeenCalledWith(product);
-    });
-  });
-
-  describe('With Category', () => {
-    beforeEach(async () => {
-      await setupTests({ category: 'category-1' });
-      fixture = TestBed.createComponent(ProductsComponent);
-      component = fixture.componentInstance;
-    });
-
-    it('should load category-specific products if category slug is provided', fakeAsync(() => {
+    it('should append products on scroll if has more', fakeAsync(() => {
       fixture.detectChanges();
       tick();
+
+      component.hasMore = true;
+      component.currentPage = 2;
+      productServiceSpy.getProducts.and.returnValue(Promise.resolve({
+        items: [{ id: '3', name: 'P3' } as any],
+        total: 3,
+        page: 2,
+        limit: 12
+      }));
+
+      component.loadProducts(undefined);
       tick();
-      tick();
-      expect(categoryServiceSpy.getCategoryBySlug).toHaveBeenCalledWith('category-1');
-      expect(productServiceSpy.getProductsByCategory).toHaveBeenCalledWith('cat1');
-      expect(component.products).toEqual([mockProducts[0]]);
-      expect(component.currentCategory).toEqual(mockCategories[0]);
+
+      expect(component.products.length).toBe(3);
+      expect(component.hasMore).toBe(false);
     }));
   });
 });

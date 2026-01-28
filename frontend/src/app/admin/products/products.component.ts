@@ -37,7 +37,7 @@ export class ProductsComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-    this.products = await this.productService.getProducts();
+    this.products = (await this.productService.getProducts({ limit: 100 })).items;
     this.brands = await this.brandService.getBrands();
     this.mainCategories = await this.categoryService.getCategoriesByParentId(undefined);
   }
@@ -76,7 +76,7 @@ export class ProductsComponent implements OnInit {
       }
 
       // Refresh list
-      this.products = await this.productService.getProducts();
+      this.products = (await this.productService.getProducts({ limit: 100 })).items;
       this.resetForm();
     } else {
       alert('Please fill all required fields including Category');

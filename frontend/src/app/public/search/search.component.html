@@ -18,11 +18,10 @@
         @for (product of products; track product.id) {
         <div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]">
             <div class="p-image">
-                <img [src]="product.images && product.images.length > 0 ? 'http://localhost:3000' + product.images[0].url : 'https://placehold.co/400x400?text=No+Image'"
-                    [alt]="product.name">
+                <img [src]="product.images[0]?.url | imageUrl" [alt]="product.name">
             </div>
             <div class="p-info">
-                <span class="p-brand">{{ product.brandId | uppercase }}</span>
+                <span class="p-brand">{{ product.brand?.name || 'Generic' | uppercase }}</span>
                 <h3>{{ product.name }}</h3>
                 <div class="p-footer">
                     <span class="p-price">₹{{ product.price | number }}</span>

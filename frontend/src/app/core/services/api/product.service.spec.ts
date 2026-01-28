@@ -27,11 +27,12 @@ describe('ProductService', () => {
 
     it('should fetch products', async () => {
         const mockProducts: Product[] = [{ id: '1', name: 'P1' } as any];
-        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: mockProducts } as any));
+        const mockResponse = { items: mockProducts, total: 1, page: 1, limit: 20 };
+        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: mockResponse } as any));
 
         const result = await service.getProducts();
-        expect(result).toEqual(mockProducts);
-        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products');
+        expect(result).toEqual(mockResponse);
+        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products', Object({}));
     });
 
     it('should get product by id', async () => {
@@ -80,14 +81,16 @@ describe('ProductService', () => {
     });
 
     it('should get products by category', async () => {
-        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: [] } as any));
+        const mockResponse = { items: [], total: 0, page: 1, limit: 20 };
+        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: mockResponse } as any));
         await service.getProductsByCategory('cat1');
-        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products', { categoryId: 'cat1' });
+        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products', { categoryId: 'cat1', page: 1, limit: 20 });
     });
 
     it('should search products', async () => {
-        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: [] } as any));
+        const mockResponse = { items: [], total: 0, page: 1, limit: 20 };
+        apiServiceSpy.get.and.returnValue(Promise.resolve({ data: mockResponse } as any));
         await service.searchProducts('query');
-        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products', { q: 'query' });
+        expect(apiServiceSpy.get).toHaveBeenCalledWith('/products', { q: 'query', page: 1, limit: 20 });
     });
 });

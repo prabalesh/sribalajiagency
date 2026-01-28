@@ -57,7 +57,12 @@ describe('HomeComponent', () => {
     categoryServiceSpy.getCategories.and.returnValue(Promise.resolve(mockCats));
     brandServiceSpy.getBrands.and.returnValue(Promise.resolve(mockBrands));
     cmsServiceSpy.getHomeCMS.and.returnValue(Promise.resolve(mockCMS));
-    productServiceSpy.getProducts.and.returnValue(Promise.resolve(mockProds));
+    productServiceSpy.getProducts.and.returnValue(Promise.resolve({
+      items: mockProds,
+      total: mockProds.length,
+      page: 1,
+      limit: 8
+    }));
 
     await component.ngOnInit();
 

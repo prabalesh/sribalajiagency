@@ -25,8 +25,38 @@ export class ProductsService {
         private fileStorageService: FileStorageService,
     ) { }
 
-    findAll() {
-        return this.productRepo.find({ relations: ['category', 'brand', 'images', 'variants'] });
+    async findAll(page: number = 1, limit: number = 20, filters: { categoryId?: string, brandId?: string, q?: string, isFeatured?: boolean } = {}) {
+        const skip = (page - 1) * limit;
+        const query: any = {
+            relations: ['category', 'brand', 'images', 'variants'],
+            order: { name: 'ASC' },
+            take: limit,
+            skip: skip,
+            where: {}
+        };
+
+        if (filters.categoryId) {
+            query.where.category = { id: filters.categoryId };
+        }
+        if (filters.brandId) {
+            query.where.brand = { id: filters.brandId };
+        }
+        if (filters.isFeatured !== undefined) {
+            query.where.isFeatured = filters.isFeatured;
+        }
+        if (filters.q) {
+            // Basic search in name and description
+            // For production, consider using a full-to-text search engine or ILIKE
+            // TypeORM's Like operator can be used here.
+            const { ILike } = require('typeorm');
+            query.where = [
+                { ...query.where, name: ILike(`%${filters.q}%`) },
+                { ...query.where, description: ILike(`%${filters.q}%`) }
+            ];
+        }
+
+        const [items, total] = await this.productRepo.findAndCount(query);
+        return { items, total, page, limit };
     }
 
     findOne(id: string) {

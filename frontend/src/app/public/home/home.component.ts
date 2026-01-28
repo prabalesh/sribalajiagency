@@ -39,8 +39,8 @@ export class HomeComponent implements OnInit {
       this.cmsService.getHomeCMS()
     ]);
 
-    const products = await this.productService.getProducts();
-    this.featuredProducts = products.slice(0, 8);
+    const result = await this.productService.getProducts({ page: 1, limit: 8 });
+    this.featuredProducts = result.items;
 
     if (this.cms?.heroSlides?.length > 1) {
       this.startSlideShow();

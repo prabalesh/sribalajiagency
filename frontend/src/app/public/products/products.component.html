@@ -29,14 +29,14 @@
                 <span class="current">{{ currentCategory ? currentCategory.name : 'Catalog' }}</span>
             </nav>
             <h1 class="text-gradient">{{ currentCategory ? currentCategory.name : 'Product Catalog' }}</h1>
-            <p class="count">{{ products.length }} items found</p>
+            <p class="count">{{ products.length }} of {{ totalItems }} items loaded</p>
         </header>
 
         <section class="product-grid">
             @for (product of products; track product.id) {
             <div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]">
                 <div class="p-image">
-                    <img [src]="product.images[0].url | imageUrl" [alt]="product.name">
+                    <img [src]="product.images[0]?.url | imageUrl" [alt]="product.name">
                     <div class="p-overlay">
                         <button *ngIf="product.stock > 0; else outOfStock" class="btn-primary"
                             (click)="addToCart(product, $event)">
@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <div class="p-info">
-                    <span class="p-brand">{{ product.brandId | uppercase }}</span>
+                    <span class="p-brand">{{ product.brand?.name || 'Generic' | uppercase }}</span>
                     <h3>{{ product.name }}</h3>
                     <div class="p-footer">
                         <div class="p-price-wrapper">
@@ -69,7 +69,19 @@
             }
         </section>
 
-        @if (products.length === 0) {
+        <div class="scroll-status">
+            @if (isLoading) {
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <span>Loading more products...</span>
+            </div>
+            }
+            @if (!hasMore && products.length > 0) {
+            <p class="no-more">You've reached the end of the catalog.</p>
+            }
+        </div>
+
+        @if (products.length === 0 && !isLoading) {
         <div class="no-results glass-card">
             <p>We couldn't find any products in this category.</p>
             <button class="btn-primary" routerLink="/products">Explore Catalog</button>

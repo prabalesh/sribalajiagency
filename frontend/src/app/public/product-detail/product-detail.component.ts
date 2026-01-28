@@ -47,7 +47,7 @@ export class ProductDetailComponent implements OnInit {
       this.brand = await this.brandService.getBrandById(this.product.brandId);
 
       const related = await this.productService.getProductsByCategory(this.product.categoryId);
-      this.relatedProducts = related
+      this.relatedProducts = related.items
         .filter((p: Product) => p.id !== id)
         .slice(0, 4);
 

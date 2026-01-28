@@ -101,7 +101,7 @@
                 @for (product of featuredProducts; track product.id) {
                 <div class="product-card glass-card" [routerLink]="['/products/detail', product.id]">
                     <div class="p-image">
-                        <img [src]="product.images[0].url | imageUrl" [alt]="product.name">
+                        <img [src]="product.images[0]?.url | imageUrl" [alt]="product.name">
                         <button *ngIf="product.stock > 0" class="add-shortcut" (click)="addToCart(product, $event)"
                             title="Quick Add">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -113,7 +113,7 @@
                         <div *ngIf="product.stock <= 0" class="oos-badge">Out of Stock</div>
                     </div>
                     <div class="p-info">
-                        <span class="p-brand">{{ product.brandId | uppercase }}</span>
+                        <span class="p-brand">{{ product.brand?.name || 'Generic' | uppercase }}</span>
                         <h3>{{ product.name }}</h3>
                         <div class="p-footer">
                             <div class="p-price-wrapper">
