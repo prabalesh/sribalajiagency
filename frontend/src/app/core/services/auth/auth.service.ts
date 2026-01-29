@@ -65,7 +65,11 @@ export class AuthService {
 
     this.currentUser.set(null);
     if (this.isBrowser) {
+      const savedTheme = localStorage.getItem('theme');
       localStorage.clear();
+      if (savedTheme) {
+        localStorage.setItem('theme', savedTheme);
+      }
       this.redirect('/login');
     }
   }
