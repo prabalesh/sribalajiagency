@@ -8,11 +8,13 @@ import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
 import { CartService } from '../../core/store/cart.service';
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
+
 
 @Component({
     selector: 'app-products',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, ImageUrlPipe],
+    imports: [CommonModule, RouterModule, FormsModule, ImageUrlPipe, SkeletonComponent],
     templateUrl: './products.component.html',
     styleUrl: './products.component.scss'
 })

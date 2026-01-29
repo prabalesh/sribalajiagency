@@ -33,6 +33,21 @@
         </header>
 
         <section class="product-grid">
+            @if (isLoading && products.length === 0) {
+            @for (i of [1,2,3,4,5,6,7,8]; track i) {
+            <div class="product-card skeleton-card glass-card">
+                <app-skeleton height="200px" width="100%"></app-skeleton>
+                <div class="p-info" style="padding: 1rem;">
+                    <app-skeleton height="14px" width="40%" style="margin-bottom: 8px;"></app-skeleton>
+                    <app-skeleton height="20px" width="80%" style="margin-bottom: 12px;"></app-skeleton>
+                    <div class="p-footer" style="display: flex; justify-content: space-between;">
+                        <app-skeleton height="20px" width="30%"></app-skeleton>
+                        <app-skeleton height="20px" width="20%"></app-skeleton>
+                    </div>
+                </div>
+            </div>
+            }
+            }
             @for (product of products; track product.id) {
             <div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]">
                 <div class="p-image">

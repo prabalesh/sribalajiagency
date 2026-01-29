@@ -1,14 +1,18 @@
-import { Injectable, signal, computed, Inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, signal, computed, Inject, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Product } from '../models/product.model';
 import { CartItem } from '../models/cart.model';
+import { ToastService } from '../services/toast.service';
+
 
 @Injectable({
     providedIn: 'root'
 })
 export class CartService {
     private cartItems = signal<CartItem[]>([]);
+    private toast = inject(ToastService);
     private isBrowser: boolean;
+
 
     constructor(@Inject(PLATFORM_ID) platformId: object) {
         this.isBrowser = isPlatformBrowser(platformId);
@@ -37,7 +41,7 @@ export class CartService {
 
     addToCart(product: Product, quantity: number = 1) {
         if (product.isShowcaseOnly) {
-            alert('This product is for showcase only and cannot be purchased online.');
+            this.toast.warning('This product is for showcase only and cannot be purchased online.');
             return;
         }
 
@@ -52,12 +56,12 @@ export class CartService {
         const maxAllowed = Math.min(stockLimit, orderLimit);
 
         if (newTotalQty > maxAllowed) {
-            alert(`Sorry, you can only order up to ${maxAllowed} of this item (current in cart: ${currentQty}).`);
+            this.toast.error(`Sorry, you can only order up to ${maxAllowed} of this item.`);
             return;
         }
 
         if (newTotalQty > product.stock) {
-            alert(`Sorry, only ${product.stock} items are available in stock.`);
+            this.toast.error(`Sorry, only ${product.stock} items are available in stock.`);
             return;
         }
 
@@ -70,6 +74,7 @@ export class CartService {
         } else {
             this.cartItems.set([...current, { product, quantity }]);
         }
+        this.toast.success(`${product.name} added to cart!`);
         this.save();
     }
 
@@ -92,7 +97,7 @@ export class CartService {
             const maxAllowed = Math.min(stockLimit, orderLimit);
 
             if (quantity > maxAllowed) {
-                alert(`Maximum allowed quantity is ${maxAllowed}`);
+                this.toast.warning(`Maximum allowed quantity is ${maxAllowed}`);
                 return;
             }
         }

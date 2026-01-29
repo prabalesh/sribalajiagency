@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
+
 
 @Component({
   selector: 'app-profile',
@@ -13,7 +15,9 @@ import { AuthService } from '../../../core/services/auth/auth.service';
 })
 export class ProfileComponent {
   authService = inject(AuthService);
+  private toast = inject(ToastService);
   private router = inject(Router);
+
 
   name = this.authService.user()?.name || '';
   email = this.authService.user()?.email || '';
@@ -23,12 +27,12 @@ export class ProfileComponent {
   async saveProfile() {
     await this.authService.updateProfile(this.name, this.email);
     this.isEditing = false;
-    this.message = 'Profile updated successfully!';
-    setTimeout(() => this.message = '', 3000);
+    this.toast.success('Profile updated successfully!');
   }
 
   logout() {
     this.authService.logout();
+    this.toast.info('Logged out successfully');
     this.router.navigate(['/login']);
   }
 }

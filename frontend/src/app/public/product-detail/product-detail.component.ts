@@ -9,11 +9,13 @@ import { Product } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
 import { Brand } from '../../core/models/brand.model';
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
+
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ImageUrlPipe],
+  imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss'
 })
@@ -30,6 +32,8 @@ export class ProductDetailComponent implements OnInit {
   relatedProducts: Product[] = [];
   quantity: number = 1;
   selectedImageIndex: number = 0;
+  isLoading = false;
+
 
   ngOnInit() {
     this.route.paramMap.subscribe(async params => {
@@ -41,6 +45,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   async loadProduct(id: string) {
+    this.isLoading = true;
     try {
       this.selectedImageIndex = 0; // Reset to first image
       this.product = await this.productService.getProductById(id);

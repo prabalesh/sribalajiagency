@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { inject } from '@angular/core';
+import { ToastService } from '../../../core/services/toast.service';
+
 
 @Component({
   selector: 'app-forgot-password',
@@ -11,6 +14,8 @@ import { RouterModule } from '@angular/router';
   styleUrl: './forgot-password.component.scss'
 })
 export class ForgotPasswordComponent {
+  private toastService = inject(ToastService);
+
   email = '';
   isSubmitted = false;
   isLoading = false;
@@ -23,6 +28,7 @@ export class ForgotPasswordComponent {
     setTimeout(() => {
       this.isSubmitted = true;
       this.isLoading = false;
+      this.toastService.success('Reset link sent to your email.');
     }, 1500);
   }
 }

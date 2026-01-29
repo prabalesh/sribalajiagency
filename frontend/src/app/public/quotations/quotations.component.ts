@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../core/services/api/product.service';
 import { CartService } from '../../core/store/cart.service';
 import { QuotationService } from '../../core/services/api/quotation.service';
+import { ToastService } from '../../core/services/toast.service';
+
 
 @Component({
   selector: 'app-quotations',
@@ -19,6 +21,8 @@ export class QuotationsComponent implements OnInit {
   private productService = inject(ProductService);
   private cartService = inject(CartService);
   private quotationService = inject(QuotationService);
+  private toast = inject(ToastService);
+
 
   quoteForm = {
     name: '',
@@ -54,11 +58,12 @@ export class QuotationsComponent implements OnInit {
         productName: this.quoteForm.productName,
         message: this.quoteForm.message
       });
-      alert('Your quotation request has been sent! We will reach out within 24 hours with a formal PDF quote.');
+      this.toast.success('Your quotation request has been sent! We will reach out within 24 hours with a formal PDF quote.');
+
       this.cartService.clearCart();
       this.router.navigate(['/']);
     } catch (e) {
-      alert('Error submitting quotation request. Please try again.');
+      this.toast.error('Error submitting quotation request. Please try again.');
     }
   }
 }

@@ -4,11 +4,13 @@ import { AuthService } from '../../core/services/auth/auth.service';
 import { OrderService } from '../../core/services/api/order.service';
 import { QuotationService } from '../../core/services/api/quotation.service';
 import { CommonModule } from '@angular/common';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
+
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SkeletonComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -17,6 +19,8 @@ export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private orderService = inject(OrderService);
   private quotationService = inject(QuotationService);
+  isLoading = false;
+
 
   stats = [
     { label: 'Products', value: 0, icon: '📦', color: '#ff3e00' },
@@ -26,17 +30,21 @@ export class DashboardComponent implements OnInit {
   ];
 
   async ngOnInit() {
-    const [products, orders, users, quotes] = await Promise.all([
-      this.productService.getProducts(),
-      this.orderService.getAllOrders(),
-      this.authService.getUsers(),
-      this.quotationService.getRequests()
-    ]);
+    this.isLoading = true;
+    try {
+      const [products, orders, users, quotes] = await Promise.all([
+        this.productService.getProducts(),
+        this.orderService.getAllOrders(),
+        this.authService.getUsers(),
+        this.quotationService.getRequests()
+      ]);
 
-    this.stats[0].value = products.total;
-    this.stats[1].value = orders.length;
-    this.stats[2].value = users.length;
-    this.stats[3].value = quotes.length;
+      this.stats[0].value = products.total;
+      this.stats[1].value = orders.length;
+      this.stats[2].value = users.length;
+      this.stats[3].value = quotes.length;
+    } finally {
+      this.isLoading = false;
+    }
   }
 }
-

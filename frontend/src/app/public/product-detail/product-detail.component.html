@@ -145,6 +145,34 @@
     }
 </div>
 
-<div class="loading-state" *ngIf="!product">
-    <p>Loading premium product details...</p>
+<div class="product-detail-page container" *ngIf="isLoading">
+    <div class="breadcrumbs">
+        <app-skeleton width="200px" height="20px"></app-skeleton>
+    </div>
+
+    <div class="product-main-grid">
+        <div class="product-gallery">
+            <app-skeleton width="100%" height="500px"></app-skeleton>
+            <div class="image-thumbnails" style="display: flex; gap: 10px; margin-top: 15px;">
+                <app-skeleton width="80px" height="80px"></app-skeleton>
+                <app-skeleton width="80px" height="80px"></app-skeleton>
+                <app-skeleton width="80px" height="80px"></app-skeleton>
+            </div>
+        </div>
+
+        <div class="product-info">
+            <app-skeleton width="150px" height="24px" style="margin-bottom: 20px;"></app-skeleton>
+            <app-skeleton width="80%" height="48px" style="margin-bottom: 20px;"></app-skeleton>
+            <app-skeleton width="200px" height="40px" style="margin-bottom: 30px;"></app-skeleton>
+
+            <app-skeleton width="100%" height="100px" style="margin-bottom: 30px;"></app-skeleton>
+
+            <div style="display: flex; gap: 20px; margin-bottom: 40px;">
+                <app-skeleton width="120px" height="48px"></app-skeleton>
+                <app-skeleton width="180px" height="48px"></app-skeleton>
+            </div>
+
+            <app-skeleton width="100%" height="200px"></app-skeleton>
+        </div>
+    </div>
 </div>

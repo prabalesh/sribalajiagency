@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
+
 
 @Component({
   selector: 'app-register',
@@ -13,7 +15,9 @@ import { AuthService } from '../../../core/services/auth/auth.service';
 })
 export class RegisterComponent {
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
+
 
   name = '';
   email = '';
@@ -25,6 +29,7 @@ export class RegisterComponent {
   async onSubmit() {
     if (this.password !== this.confirmPassword) {
       this.error = 'Passwords do not match';
+      this.toastService.warning(this.error);
       return;
     }
 
@@ -34,12 +39,15 @@ export class RegisterComponent {
     try {
       const success = await this.authService.register(this.name, this.email, this.password);
       if (success) {
-        this.router.navigate(['/']);
+        this.toastService.success('Registration successful! Please login.');
+        this.router.navigate(['/login']);
       } else {
         this.error = 'Registration failed. Please try again.';
+        this.toastService.error(this.error);
       }
     } catch (e) {
       this.error = 'An error occurred during registration.';
+      this.toastService.error(this.error);
     } finally {
       this.isLoading = false;
     }
