@@ -138,40 +138,48 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transition: all 0.5s var(--transition-curve);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 
     &:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border-color: rgba(255, 62, 0, 0.2);
+
         .p-image {
             img {
-                transform: scale(1.1);
+                transform: scale(1.08);
             }
 
             .p-overlay {
                 opacity: 1;
-                backdrop-filter: blur(4px);
+                backdrop-filter: blur(8px);
             }
         }
     }
 
     .p-image {
         position: relative;
-        height: 260px;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        aspect-ratio: 4/3;
+        height: auto;
+        background: transparent;
+        display: block;
         overflow: hidden;
+        padding: 0;
+        margin: 0;
 
         img {
-            max-width: 70%;
-            max-height: 70%;
-            object-fit: contain;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
             transition: transform 0.6s var(--transition-curve);
         }
 
         .p-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
