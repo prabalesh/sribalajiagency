@@ -1,12 +1,19 @@
 <div class="brands-container">
     <h1>Our Brands</h1>
     <div class="brand-grid">
-        @for (brand of brands; track brand.name) {
+        @for (brand of brands; track brand.id) {
         <div class="brand-card">
             <div class="logo-area">
-                <h3>{{ brand.name }}</h3>
+                @if (brand.image) {
+                <img [src]="brand.image | imageUrl" [alt]="brand.name">
+                } @else {
+                <div class="brand-placeholder">{{ brand.name.charAt(0) }}</div>
+                }
             </div>
-            <p>{{ brand.description }}</p>
+            <div class="brand-info">
+                <h3>{{ brand.name }}</h3>
+                <p>{{ brand.description || 'No description available' }}</p>
+            </div>
         </div>
         }
     </div>

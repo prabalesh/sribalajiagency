@@ -1,19 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { BrandService } from '../../core/services/api/brand.service';
+import { Brand } from '../../core/models/brand.model';
+import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 
 @Component({
-  selector: 'app-brand', // Updated selector to match folder name context, or keep as BrandComponent
+  selector: 'app-brand',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ImageUrlPipe],
   templateUrl: './brand.component.html',
   styleUrl: './brand.component.scss'
 })
-export class BrandComponent {
-  brands = [
-    { name: 'Bosch', description: 'German multinational engineering and technology company.', logo: 'assets/bosch.png' },
-    { name: 'Makita', description: 'Japanese manufacturer of power tools.', logo: 'assets/makita.png' },
-    { name: 'DeWalt', description: 'American worldwide brand of power tools.', logo: 'assets/dewalt.png' },
-    { name: 'Hitachi', description: 'Japanese multinational conglomerate.', logo: 'assets/hitachi.png' },
-    { name: 'Stanley', description: 'Hand tools, power tools, and accessories.', logo: 'assets/stanley.png' }
-  ];
+export class BrandComponent implements OnInit {
+  private brandService = inject(BrandService);
+  brands: Brand[] = [];
+
+  async ngOnInit() {
+    this.brands = await this.brandService.getBrands();
+  }
 }
