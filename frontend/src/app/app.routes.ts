@@ -107,14 +107,14 @@ export const routes: Routes = [
     },
 
 
-    // Admin Routes
+    // Management Routes (formerly Admin)
     {
-        path: 'admin',
+        path: 'dashboard',
         component: AdminLayoutComponent,
         canMatch: [adminGuard],
         children: [
             {
-                path: 'dashboard',
+                path: '',
                 loadComponent: () => import('./admin/dashboard/dashboard.component').then(m => m.DashboardComponent)
             },
             {
@@ -168,13 +168,7 @@ export const routes: Routes = [
             {
                 path: 'settings/locations',
                 loadComponent: () => import('./admin/settings/location-restrictions/location-restrictions.component').then(m => m.LocationRestrictionsComponent)
-            },
-            {
-                path: '',
-                redirectTo: 'dashboard',
-                pathMatch: 'full'
             }
-
         ]
     },
 

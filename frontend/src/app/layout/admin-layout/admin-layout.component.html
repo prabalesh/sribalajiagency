@@ -8,7 +8,7 @@
         </div>
         <nav>
             <ul>
-                <li><a routerLink="/admin/dashboard" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -18,7 +18,7 @@
                             </svg>
                         </span> Dashboard</a></li>
                 @if (authService.hasPermission('VIEW_USERS')) {
-                <li><a routerLink="/admin/users" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/users" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -30,7 +30,7 @@
                         </span> Users</a></li>
                 }
                 @if (authService.hasPermission('VIEW_CATEGORIES')) {
-                <li><a routerLink="/admin/categories" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/categories" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -40,7 +40,7 @@
                         </span> Categories</a></li>
                 }
                 @if (authService.hasPermission('VIEW_BRANDS')) {
-                <li><a routerLink="/admin/brands" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/brands" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -52,7 +52,7 @@
                         </span> Brands</a></li>
                 }
                 @if (authService.hasPermission('VIEW_PRODUCTS')) {
-                <li><a routerLink="/admin/products" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/products" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -65,7 +65,7 @@
                         </span> Products</a></li>
                 }
                 @if (authService.hasPermission('VIEW_ORDERS')) {
-                <li><a routerLink="/admin/orders" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/orders" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -76,7 +76,7 @@
                         </span> Orders</a></li>
                 }
                 @if (authService.hasPermission('VIEW_QUOTATIONS')) {
-                <li><a routerLink="/admin/quotations" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/quotations" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -88,7 +88,7 @@
                         </span> Quotations</a></li>
                 }
                 @if (authService.hasPermission('VIEW_PRODUCTS')) {
-                <li><a routerLink="/admin/coupons" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/coupons" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -99,7 +99,7 @@
                         </span> Coupons</a></li>
                 }
                 @if (authService.hasPermission('MANAGE_ROLES')) {
-                <li><a routerLink="/admin/permissions" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/permissions" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -109,7 +109,7 @@
                         </span> Permissions</a></li>
                 }
                 @if (authService.hasPermission('VIEW_CMS')) {
-                <li><a routerLink="/admin/home-cms" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/home-cms" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -119,7 +119,8 @@
                         </span> Home CMS</a></li>
                 }
                 @if (authService.hasPermission('VIEW_LOCATIONS')) {
-                <li><a routerLink="/admin/settings/locations" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/settings/locations" routerLinkActive="active"
+                        (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -129,7 +130,7 @@
                         </span> Locations</a></li>
                 }
                 @if (authService.hasPermission('VIEW_REPORTS')) {
-                <li><a routerLink="/admin/feedback" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/feedback" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -138,7 +139,7 @@
                         </span> Feedback</a></li>
                 }
                 @if (authService.hasPermission('VIEW_SETTINGS')) {
-                <li><a routerLink="/admin/settings" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard/settings" routerLinkActive="active" (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">

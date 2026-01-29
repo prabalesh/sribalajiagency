@@ -107,11 +107,23 @@ export class AuthService {
     }
 
     async updateUser(id: string, data: any) {
-        if (data.password) {
-            data.password = await this.hashData(data.password);
+        const { roleIds, ...userData } = data;
+        const user = await this.userRepository.findOne({ where: { id }, relations: ['roles'] });
+        if (!user) throw new UnauthorizedException('User not found');
+
+        if (userData.password) {
+            userData.password = await this.hashData(userData.password);
         }
-        await this.userRepository.update(id, data);
-        return this.userRepository.findOne({ where: { id }, relations: ['roles'] });
+
+        Object.assign(user, userData);
+
+        if (roleIds) {
+            user.roles = await this.roleRepository.find({
+                where: { id: In(roleIds) }
+            });
+        }
+
+        return this.userRepository.save(user);
     }
 
     deleteUser(id: string) {

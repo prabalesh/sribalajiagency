@@ -14,27 +14,33 @@ import { User } from '../../core/models/auth.model';
 export class UsersComponent implements OnInit {
 
   users: User[] = [];
+  roles: any[] = [];
   newUser: any = this.getEmptyUser();
   isEditing = false;
 
   constructor(private authService: AuthService) { }
 
-  ngOnInit() {
-    this.loadUsers();
+  async ngOnInit() {
+    await Promise.all([
+      this.loadUsers(),
+      this.loadRoles()
+    ]);
   }
 
   async loadUsers() {
     this.users = await this.authService.getUsers();
   }
 
+  async loadRoles() {
+    this.roles = await this.authService.getRoles();
+  }
+
   async saveUser() {
-    if (this.newUser.name && this.newUser.email && this.newUser.role) {
+    if (this.newUser.name && this.newUser.email) {
       const userToSave: any = {
         name: this.newUser.name,
         email: this.newUser.email,
-        // Backend expects roles array or handles role string if specific endpoint used
-        // Our addUser/updateUser in AuthService should handle this mapping if needed
-        roles: [{ name: this.newUser.role }]
+        roleIds: Array.isArray(this.newUser.roleIds) ? this.newUser.roleIds : [this.newUser.roleIds]
       };
 
       if (this.isEditing && this.newUser.id) {
@@ -52,7 +58,7 @@ export class UsersComponent implements OnInit {
   editUser(user: User) {
     this.newUser = {
       ...user,
-      role: user.roles && user.roles.length > 0 ? user.roles[0].name : 'user'
+      roleIds: user.roles?.map(r => r.id) || []
     };
     this.isEditing = true;
   }
@@ -73,7 +79,7 @@ export class UsersComponent implements OnInit {
     return {
       name: '',
       email: '',
-      role: 'user'
+      roleIds: []
     };
   }
 }

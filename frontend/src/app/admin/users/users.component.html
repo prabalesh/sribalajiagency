@@ -16,15 +16,20 @@
                         placeholder="john@example.com">
                 </div>
                 <div class="form-group">
-                    <label>Role</label>
-                    <select [(ngModel)]="newUser.role" name="role" required>
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
+                    <label>Assigned Roles</label>
+                    <select [(ngModel)]="newUser.roleIds" name="roleIds" required multiple class="multi-select">
+                        @for (role of roles; track role.id) {
+                        <option [value]="role.id">{{ role.name | uppercase }}</option>
+                        }
                     </select>
+                    <small>Hold Ctrl (Cmd) to select multiple</small>
                 </div>
 
                 <div class="actions">
-                    <button type="submit" class="btn-primary">{{ isEditing ? 'Update User' : 'Add User' }}</button>
+                    <button type="submit" class="btn-primary"
+                        [disabled]="!newUser.name || !newUser.email || newUser.roleIds.length === 0">
+                        {{ isEditing ? 'Update User' : 'Add User' }}
+                    </button>
                     @if (isEditing) {
                     <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
                     }
@@ -34,29 +39,36 @@
 
         <!-- Users List -->
         <div class="list-card">
-            <h3>Existing Users</h3>
+            <h3>Security Directory</h3>
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Actions</th>
+                        <th>Identitiy</th>
+                        <th>Email Contact</th>
+                        <th>Assigned Roles</th>
+                        <th>Management</th>
                     </tr>
                 </thead>
                 <tbody>
                     @for (user of users; track user.id) {
                     <tr>
-                        <td>{{ user.name }}</td>
+                        <td><strong>{{ user.name }}</strong></td>
                         <td>{{ user.email }}</td>
                         <td>
-                            <span class="badge" [ngClass]="user.roles[0].name">{{ user.roles[0].name || 'user'
-                                }}</span>
-
+                            <div class="role-badges">
+                                @for (role of user.roles; track role.id) {
+                                <span class="badge" [ngClass]="role.name">{{ role.name }}</span>
+                                }
+                                @if (!user.roles || user.roles.length === 0) {
+                                <span class="badge user">user</span>
+                                }
+                            </div>
                         </td>
                         <td>
-                            <button class="btn-icon" (click)="editUser(user)">Edit</button>
-                            <button class="btn-icon delete" (click)="deleteUser(user.id)">Delete</button>
+                            <div class="table-actions">
+                                <button class="btn-sm" (click)="editUser(user)">Modify</button>
+                                <button class="btn-sm delete" (click)="deleteUser(user.id)">Revoke</button>
+                            </div>
                         </td>
                     </tr>
                     }

@@ -5,7 +5,7 @@ import { AuthService } from '../services/auth/auth.service';
 export const adminGuard: CanMatchFn = (route, segments) => {
     const authService = inject(AuthService);
 
-    if (authService.isAuthenticated() && authService.isAdmin()) {
+    if (authService.isAuthenticated() && authService.hasPermission('ACCESS_DASHBOARD')) {
         return true;
     } else {
         return false;

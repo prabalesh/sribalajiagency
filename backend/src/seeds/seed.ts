@@ -89,6 +89,7 @@ async function bootstrap() {
         { name: 'UPDATE_SETTINGS', description: 'Modify operational parameters' },
 
         // Others
+        { name: 'ACCESS_DASHBOARD', description: 'Can access the management dashboard' },
         { name: 'MANAGE_ROLES', description: 'Can manage roles and permissions' },
         { name: 'VIEW_REPORTS', description: 'Can view business reports' },
     ];
@@ -106,13 +107,14 @@ async function bootstrap() {
             name: 'staff',
             description: 'Staff access',
             perms: [
+                'ACCESS_DASHBOARD',
                 'VIEW_PRODUCTS', 'CREATE_PRODUCT', 'UPDATE_PRODUCT',
                 'VIEW_ORDERS', 'UPDATE_ORDER',
                 'VIEW_QUOTATIONS', 'UPDATE_QUOTATION',
                 'VIEW_CATEGORIES', 'VIEW_BRANDS'
             ]
         },
-        { name: 'delivery', description: 'Delivery personnel access', perms: ['VIEW_ORDERS', 'UPDATE_ORDER'] },
+        { name: 'delivery', description: 'Delivery personnel access', perms: ['ACCESS_DASHBOARD', 'VIEW_ORDERS', 'UPDATE_ORDER'] },
         { name: 'user', description: 'Regular customer', perms: [] },
     ];
 
