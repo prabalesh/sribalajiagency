@@ -1,3 +1,5 @@
+@use "../../core/styles/glass" as *;
+
 .cart-page {
     padding: 3rem 0 6rem;
 }
@@ -29,6 +31,7 @@
 }
 
 .cart-item {
+    @include glass-card;
     display: flex;
     gap: 2rem;
     padding: 1.5rem;
@@ -39,7 +42,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: white; // Common for products
+        background-color: var(--surface-color-secondary);
         border-radius: var(--border-radius-sm);
 
         img {
@@ -68,7 +71,7 @@
                 color: var(--text-color-muted);
 
                 &:hover {
-                    color: #ef4444;
+                    color: var(--danger-color);
                 }
             }
         }
@@ -113,6 +116,7 @@
 }
 
 .cart-summary {
+    @include glass-card;
     padding: 2rem;
     position: sticky;
     top: 100px;
@@ -130,7 +134,7 @@
         font-weight: 500;
 
         .free {
-            color: #10b981;
+            color: var(--success-color);
             font-weight: 700;
         }
     }
@@ -184,13 +188,13 @@
             border: 2px solid transparent;
 
             &:hover {
-                background: var(--bg-color);
+                background: var(--surface-color-secondary);
                 border-color: var(--border-color);
             }
 
             &.selected {
                 border-color: var(--primary-color);
-                background: var(--bg-color);
+                background: var(--surface-color-secondary);
                 box-shadow: var(--shadow-md);
             }
 

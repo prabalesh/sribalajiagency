@@ -12,15 +12,17 @@
         gap: 2rem;
 
         .brand-card {
-            background: #fff;
+            background: var(--surface-color);
             padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-sm);
             text-align: center;
             transition: transform 0.3s;
+            border: 1px solid var(--border-color);
 
             &:hover {
                 transform: translateY(-5px);
+                box-shadow: var(--shadow-md);
             }
 
             .logo-area {
@@ -28,17 +30,17 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: #f5f5f5;
-                border-radius: 4px;
+                background: var(--surface-color-secondary);
+                border-radius: var(--border-radius-sm);
                 margin-bottom: 1rem;
 
                 h3 {
-                    color: var(--color-primary-dark, #333);
+                    color: var(--primary-color);
                 }
             }
 
             p {
-                color: #666;
+                color: var(--text-color-muted);
             }
         }
     }

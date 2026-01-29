@@ -26,7 +26,7 @@
             .brand-text {
                 font-size: 1.5rem;
                 font-weight: 800;
-                background: linear-gradient(135deg, var(--primary-color) 0%, #ffa500 100%);
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
                 -webkit-background-clip: text;
                 background-clip: text;
                 -webkit-text-fill-color: transparent;
@@ -70,7 +70,7 @@
                     }
 
                     &.active {
-                        background: rgba(255, 62, 0, 0.1);
+                        background: rgba(var(--primary-color-rgb), 0.1);
                         color: var(--primary-color);
                         font-weight: 600;
                     }
@@ -83,10 +83,10 @@
 
                     a {
                         cursor: pointer;
-                        color: #ff4444;
+                        color: var(--danger-color);
 
                         &:hover {
-                            background: rgba(255, 68, 68, 0.1);
+                            background: rgba(var(--danger-color-rgb), 0.1);
                         }
                     }
                 }

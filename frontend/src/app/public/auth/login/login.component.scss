@@ -1,3 +1,5 @@
+@use "../../../core/styles/glass" as *;
+
 .auth-page {
     min-height: calc(100vh - var(--header-height));
     display: flex;
@@ -7,6 +9,7 @@
 }
 
 .auth-card {
+    @include glass-card;
     width: 100%;
     max-width: 480px;
     padding: 3.5rem;
@@ -43,14 +46,14 @@
     }
 
     .error-badge {
-        background-color: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
+        background-color: rgba(var(--danger-color-rgb), 0.1);
+        color: var(--danger-color);
         padding: 0.75rem 1rem;
         border-radius: var(--border-radius-sm);
         font-size: 0.9rem;
         font-weight: 600;
         text-align: center;
-        border: 1px solid rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(var(--danger-color-rgb), 0.2);
     }
 
     .form-group {
@@ -105,7 +108,7 @@
                 &:focus {
                     outline: none;
                     border-color: var(--primary-color);
-                    box-shadow: 0 0 0 3px rgba(255, 62, 0, 0.1);
+                    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
                     background-color: var(--bg-color);
                 }
             }

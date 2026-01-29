@@ -1,3 +1,5 @@
+@use "../../core/styles/glass" as *;
+
 .history-page {
     padding: 3rem 0 6rem;
 }
@@ -23,6 +25,7 @@
 }
 
 .order-card {
+    @include glass-card;
     padding: 2rem;
 
     .order-header {
@@ -59,18 +62,18 @@
             letter-spacing: 0.05em;
 
             &.delivered {
-                background-color: rgba(16, 185, 129, 0.1);
-                color: #10b981;
+                background-color: rgba(var(--success-color-rgb), 0.1);
+                color: var(--success-color);
             }
 
             &.processing {
-                background-color: rgba(59, 130, 246, 0.1);
-                color: #3b82f6;
+                background-color: rgba(var(--info-color-rgb), 0.1);
+                color: var(--info-color);
             }
 
             &.cancelled {
-                background-color: rgba(239, 68, 68, 0.1);
-                color: #ef4444;
+                background-color: rgba(var(--danger-color-rgb), 0.1);
+                color: var(--danger-color);
             }
         }
     }

@@ -44,7 +44,7 @@
             border-radius: 10px;
             font-weight: 800;
             font-size: 1rem;
-            box-shadow: 0 4px 10px rgba(255, 62, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(var(--primary-color-rgb), 0.2);
         }
 
         .logo-text {
@@ -465,7 +465,7 @@
                 background-color: var(--primary-color);
                 color: white;
                 transform: translateY(-5px);
-                box-shadow: 0 5px 15px rgba(255, 62, 0, 0.3);
+                box-shadow: 0 5px 15px rgba(var(--primary-color-rgb), 0.3);
             }
         }
     }

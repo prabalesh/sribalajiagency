@@ -1,3 +1,5 @@
+@use "../../../core/styles/glass" as *;
+
 .account-page {
     display: grid;
     grid-template-columns: 320px 1fr;
@@ -74,7 +76,7 @@
             }
 
             &.active {
-                background-color: rgba(255, 62, 0, 0.1);
+                background-color: rgba(var(--primary-color-rgb), 0.1);
                 color: var(--primary-color);
 
                 svg {
@@ -85,10 +87,10 @@
 
         .logout-btn {
             margin-top: 2rem;
-            color: #ef4444;
+            color: var(--danger-color);
 
             &:hover {
-                background-color: rgba(239, 68, 68, 0.05);
+                background-color: rgba(var(--danger-color-rgb), 0.05);
             }
         }
     }
@@ -118,6 +120,7 @@
 }
 
 .order-item {
+    @include glass-card;
     padding: 2rem;
 
     .order-header {
@@ -147,18 +150,18 @@
             letter-spacing: 0.05em;
 
             &.delivered {
-                background-color: rgba(16, 185, 129, 0.1);
-                color: #10b981;
+                background-color: rgba(var(--success-color-rgb), 0.1);
+                color: var(--success-color);
             }
 
             &.shipped {
-                background-color: rgba(59, 130, 246, 0.1);
-                color: #3b82f6;
+                background-color: rgba(var(--info-color-rgb), 0.1);
+                color: var(--info-color);
             }
 
             &.pending {
-                background-color: rgba(245, 158, 11, 0.1);
-                color: #f59e0b;
+                background-color: rgba(var(--warning-color-rgb), 0.1);
+                color: var(--warning-color);
             }
         }
     }

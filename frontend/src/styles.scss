@@ -1,3 +1,5 @@
+@use "app/core/styles/glass" as *;
+
 :root {
   /* Common variables */
   --transition-speed: 0.4s;
@@ -17,6 +19,7 @@
   --text-color-muted: #64748b;
   /* Slate 500 */
   --primary-color: #ff3e00;
+  --primary-color-rgb: 255, 62, 0;
   --primary-color-hover: #e63700;
   --accent-color: #ccff00;
   --border-color: #e2e8f0;
@@ -25,6 +28,16 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Status Colors (Light) */
+  --success-color: #10b981;
+  --success-color-rgb: 16, 185, 129;
+  --danger-color: #ef4444;
+  --danger-color-rgb: 239, 68, 68;
+  --warning-color: #f59e0b;
+  --warning-color-rgb: 245, 158, 11;
+  --info-color: #3b82f6;
+  --info-color-rgb: 59, 130, 246;
 
   /* Hero Section Adaptive Vars */
   --hero-bg: radial-gradient(circle at 70% 30%, #ffffff 0%, #f1f5f9 100%);
@@ -44,12 +57,23 @@
   --text-color: #f8fafc;
   --text-color-muted: #94a3b8;
   --primary-color: #ff5722;
+  --primary-color-rgb: 255, 87, 34;
   --primary-color-hover: #ff7043;
   --border-color: #1e293b;
   --nav-bg: rgba(2, 6, 23, 0.85);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.8);
+
+  /* Status Colors (Dark) */
+  --success-color: #34d399;
+  --success-color-rgb: 52, 211, 153;
+  --danger-color: #f87171;
+  --danger-color-rgb: 248, 113, 113;
+  --warning-color: #fbbf24;
+  --warning-color-rgb: 251, 191, 36;
+  --info-color: #60a5fa;
+  --info-color-rgb: 96, 165, 250;
 
   /* Hero Section Adaptive Vars (Dark) */
   --hero-bg: radial-gradient(circle at 70% 30%, #0f172a 0%, #020617 100%);
@@ -153,6 +177,7 @@ button {
   padding: 0.875rem 2rem;
   border-radius: var(--border-radius-sm);
   font-weight: 700;
+  border: 1px solid var(--border-color);
 
   &:hover {
     background-color: var(--border-color);
@@ -160,15 +185,9 @@ button {
   }
 }
 
+
 .glass-card {
-  background: var(--nav-bg);
-  backdrop-filter: var(--glass-effect);
-  -webkit-backdrop-filter: var(--glass-effect);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  /* Even subtler */
-  border-radius: var(--border-radius-md);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 12px 40px -4px rgba(0, 0, 0, 0.02);
-  /* More ethereal */
+  @include glass-card;
 }
 
 .text-gradient {

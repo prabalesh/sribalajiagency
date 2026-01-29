@@ -1,3 +1,5 @@
+@use "../../core/styles/glass" as *;
+
 .products-page {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -17,7 +19,7 @@
         position: sticky;
         top: calc(var(--header-height) + 2rem);
         padding: 2.5rem;
-        background: var(--surface-color);
+        @include glass-card;
     }
 
     @media (max-width: 991px) {
@@ -57,7 +59,7 @@
             &.active a {
                 background: var(--primary-color);
                 color: white;
-                box-shadow: 0 4px 10px rgba(255, 62, 0, 0.2);
+                box-shadow: 0 4px 10px rgba(var(--primary-color-rgb), 0.2);
             }
         }
     }
@@ -133,18 +135,18 @@
 }
 
 .product-card {
-    background: var(--surface-color);
+    @include glass-card;
     border-radius: var(--border-radius-md);
     overflow: hidden;
     display: flex;
     flex-direction: column;
     transition: all 0.5s var(--transition-curve);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
 
     &:hover {
         transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        border-color: rgba(255, 62, 0, 0.2);
+        box-shadow: var(--shadow-lg);
+        border-color: rgba(var(--primary-color-rgb), 0.2);
 
         .p-image {
             img {

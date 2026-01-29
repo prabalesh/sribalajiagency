@@ -1,3 +1,5 @@
+@use "../../core/styles/glass" as *;
+
 .feedback-container {
     max-width: 800px;
     margin: 0 auto;
@@ -9,10 +11,8 @@
     }
 
     .feedback-form-section {
-        background: #fff;
+        @include glass-card;
         padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         margin-bottom: 3rem;
 
         .form-group {
@@ -27,19 +27,26 @@
             .form-control {
                 width: 100%;
                 padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
+                background: var(--surface-color);
+                border: 1px solid var(--border-color);
+                color: var(--text-color);
+                border-radius: var(--border-radius-sm);
+
+                &:focus {
+                    outline: none;
+                    border-color: var(--primary-color);
+                    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+                }
             }
         }
     }
 
     .recent-feedbacks {
         .review-card {
-            background: #f9f9f9;
+            @include glass-card;
             padding: 1.5rem;
-            border-radius: 8px;
             margin-bottom: 1rem;
-            border-left: 4px solid var(--color-primary);
+            border-left: 4px solid var(--primary-color);
 
             .header {
                 display: flex;
@@ -48,13 +55,13 @@
                 font-weight: bold;
 
                 .rating {
-                    color: orange;
+                    color: var(--accent-color);
                 }
             }
 
             p {
                 margin: 0;
-                color: #555;
+                color: var(--text-color);
             }
         }
     }

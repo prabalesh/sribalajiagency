@@ -1,3 +1,5 @@
+@use "../../../core/styles/glass" as *;
+
 .account-page {
     display: grid;
     grid-template-columns: 320px 1fr;
@@ -74,7 +76,7 @@
             }
 
             &.active {
-                background-color: rgba(255, 62, 0, 0.1);
+                background-color: rgba(var(--primary-color-rgb), 0.1);
                 color: var(--primary-color);
 
                 svg {
@@ -85,10 +87,10 @@
 
         .logout-btn {
             margin-top: 2rem;
-            color: #ef4444;
+            color: var(--danger-color);
 
             &:hover {
-                background-color: rgba(239, 68, 68, 0.05);
+                background-color: rgba(var(--danger-color-rgb), 0.05);
             }
         }
     }
@@ -118,6 +120,7 @@
 }
 
 .address-form {
+    @include glass-card;
     padding: 2.5rem;
     margin-bottom: 3rem;
     display: flex;
@@ -177,6 +180,7 @@
 }
 
 .address-card {
+    @include glass-card;
     padding: 2.5rem;
     display: flex;
     flex-direction: column;
@@ -249,7 +253,7 @@
         .btn-delete {
             background: none;
             border: none;
-            color: #ef4444;
+            color: var(--danger-color);
             opacity: 0.6;
             cursor: pointer;
 
