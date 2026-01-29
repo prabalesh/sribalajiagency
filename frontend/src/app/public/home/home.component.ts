@@ -10,15 +10,31 @@ import { Category } from '../../core/models/category.model';
 import { Product } from '../../core/models/product.model';
 import { Brand } from '../../core/models/brand.model';
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
+import { LucideAngularModule, ChevronLeft, ChevronRight, Truck, ShieldCheck, MessageCircle, ExternalLink, ArrowRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, ImageUrlPipe],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ImageUrlPipe,
+    LucideAngularModule
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit {
+  readonly icons = {
+    ChevronLeft,
+    ChevronRight,
+    Truck,
+    ShieldCheck,
+    MessageCircle,
+    ExternalLink,
+    ArrowRight
+  };
+
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);

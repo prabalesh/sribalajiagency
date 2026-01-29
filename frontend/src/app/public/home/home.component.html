@@ -27,14 +27,18 @@
                 @if (cms.heroSlides.length > 1) {
                 <div class="carousel-controls container">
                     <div class="controls-wrapper">
-                        <button type="button" class="ctrl-btn" (click)="prevSlide()">←</button>
+                        <button type="button" class="ctrl-btn" (click)="prevSlide()">
+                            <lucide-icon [img]="icons.ChevronLeft" [size]="24" strokeWidth="2.5"></lucide-icon>
+                        </button>
                         <div class="indicators">
                             @for (s of cms.heroSlides; track $index) {
                             <span [class.active]="$index === currentSlideIndex"
                                 (click)="currentSlideIndex = $index"></span>
                             }
                         </div>
-                        <button type="button" class="ctrl-btn" (click)="nextSlide()">→</button>
+                        <button type="button" class="ctrl-btn" (click)="nextSlide()">
+                            <lucide-icon [img]="icons.ChevronRight" [size]="24" strokeWidth="2.5"></lucide-icon>
+                        </button>
                     </div>
                 </div>
                 }
@@ -77,7 +81,9 @@
                 <div class="cat-content">
                     <h3>{{ cat.name }}</h3>
                     <p>{{ cat.description }}</p>
-                    <span class="explore-btn">Explore →</span>
+                    <span class="explore-btn">
+                        Explore <lucide-icon [img]="icons.ArrowRight" [size]="16" class="ml-1"></lucide-icon>
+                    </span>
                 </div>
                 <div class="cat-icon">{{ cat.name.charAt(0) }}</div>
             </div>
@@ -121,7 +127,9 @@
                                 <span *ngIf="product.comparisonPrice" class="p-mrp">₹{{ product.comparisonPrice | number
                                     }}</span>
                             </div>
-                            <span class="p-view">View →</span>
+                            <span class="p-view">
+                                View <lucide-icon [img]="icons.ArrowRight" [size]="16"></lucide-icon>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -171,21 +179,27 @@
     @if (cms?.showTrustMarkers !== false) {
     <section class="trust-markers container">
         <div class="marker glass-card">
-            <div class="marker-icon">🚚</div>
+            <div class="marker-icon">
+                <lucide-icon [img]="icons.Truck" [size]="32" color="#3b82f6"></lucide-icon>
+            </div>
             <div class="marker-text">
                 <h4>Rapid 24h Delivery</h4>
                 <p>Available on select items in major hubs.</p>
             </div>
         </div>
         <div class="marker glass-card">
-            <div class="marker-icon">🛡️</div>
+            <div class="marker-icon">
+                <lucide-icon [img]="icons.ShieldCheck" [size]="32" color="#3b82f6"></lucide-icon>
+            </div>
             <div class="marker-text">
                 <h4>Genuine Brand Warranty</h4>
                 <p>Direct manufacturer support for all products.</p>
             </div>
         </div>
         <div class="marker glass-card">
-            <div class="marker-icon">💬</div>
+            <div class="marker-icon">
+                <lucide-icon [img]="icons.MessageCircle" [size]="32" color="#3b82f6"></lucide-icon>
+            </div>
             <div class="marker-text">
                 <h4>Expert Consultation</h4>
                 <p>Talk to our product specialists anytime.</p>
@@ -207,7 +221,9 @@
             @for (link of cms.socialLinks; track $index) {
             <a [href]="link.url" target="_blank" class="social-card glass-card">
                 <span class="social-index">{{ link.platform }}</span>
-                <span class="social-arrow">↗</span>
+                <span class="social-arrow">
+                    <lucide-icon [img]="icons.ExternalLink" [size]="20"></lucide-icon>
+                </span>
             </a>
             }
         </div>
