@@ -3,80 +3,125 @@
 }
 
 /* Hero Section */
+.hero-container {
+    position: relative;
+    background: var(--hero-bg);
+    overflow: hidden;
+
+    .hero-bg-blobs {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        filter: blur(80px);
+        opacity: 0.6;
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            animation: blobFloat 20s infinite ease-in-out;
+        }
+
+        .blob-1 {
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 62, 0, 0.15);
+            top: -100px;
+            left: -100px;
+        }
+
+        .blob-2 {
+            width: 600px;
+            height: 600px;
+            background: rgba(59, 130, 246, 0.1);
+            bottom: -200px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            width: 400px;
+            height: 400px;
+            background: rgba(204, 255, 0, 0.1);
+            top: 20%;
+            right: 20%;
+            animation-delay: -10s;
+        }
+    }
+}
+
 .hero-carousel,
 .hero-showcase {
     position: relative;
-    min-height: 600px;
-    height: 85vh;
-    background: var(--hero-bg);
+    min-height: 700px;
+    height: 90vh;
     display: flex;
     align-items: center;
     overflow: hidden;
+    z-index: 1;
 
     @media (max-width: 991px) {
         height: auto;
         min-height: auto;
-        padding-top: 4rem;
+        padding: 6rem 0;
         flex-direction: column;
     }
 }
 
-.hero-content-wrapper {
-    z-index: 10;
-    pointer-events: none;
-
-    @media (max-width: 991px) {
-        padding: 0;
-    }
-}
-
 .hero-content {
-    max-width: 680px;
-    pointer-events: auto;
-    padding: 3rem;
-    background: var(--hero-glass);
-    backdrop-filter: blur(20px);
+    max-width: 720px;
+    z-index: 10;
+    padding: 4.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
     border-radius: var(--border-radius-lg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    margin-left: 2rem;
 
     @media (max-width: 991px) {
-        max-width: 100%;
-        border-radius: 0;
+        max-width: 92%;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+        text-align: center;
         background: transparent;
+        border: none;
         backdrop-filter: none;
         box-shadow: none;
-        text-align: center;
-        padding: 2rem 1.5rem;
     }
 
     .hero-badge {
         display: inline-block;
         background: linear-gradient(135deg, var(--primary-color), #ff8c00);
         color: white;
-        padding: 0.6rem 1.5rem;
+        padding: 0.75rem 1.75rem;
         border-radius: 50px;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         font-weight: 800;
-        letter-spacing: 0.15em;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 15px rgba(255, 62, 0, 0.3);
+        letter-spacing: 0.2em;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 10px 20px rgba(255, 62, 0, 0.2);
+        animation: fadeInDown 0.8s var(--transition-curve) backwards;
     }
 
     h1 {
-        font-size: clamp(2.5rem, 6vw, 4.5rem);
-        line-height: 1.1;
-        font-weight: 900;
-        margin-bottom: 1.5rem;
-        letter-spacing: -0.04em;
+        font-size: clamp(3rem, 8vw, 5.5rem);
+        line-height: 1;
+        font-weight: 950;
+        margin-bottom: 2rem;
+        letter-spacing: -0.05em;
+        animation: fadeInUp 0.8s var(--transition-curve) 0.1s backwards;
     }
 
     p {
-        font-size: clamp(1rem, 2vw, 1.25rem);
+        font-size: clamp(1.1rem, 2.5vw, 1.4rem);
         color: var(--hero-subtitle);
         line-height: 1.6;
-        margin-bottom: 3rem;
-        max-width: 550px;
+        margin-bottom: 3.5rem;
+        max-width: 600px;
+        font-weight: 500;
+        animation: fadeInUp 0.8s var(--transition-curve) 0.2s backwards;
 
         @media (max-width: 991px) {
             margin-left: auto;
@@ -86,43 +131,55 @@
 
     .hero-actions {
         display: flex;
-        gap: 1.5rem;
+        gap: 2rem;
+        animation: fadeInUp 0.8s var(--transition-curve) 0.3s backwards;
 
         @media (max-width: 600px) {
             flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            padding: 1.25rem 3.5rem;
+            font-size: 1.1rem;
+        }
+
+        .btn-secondary {
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.25rem 3.5rem;
+            font-size: 1.1rem;
         }
     }
 }
 
 .hero-image {
     position: absolute;
-    right: 0;
+    right: -5%;
     top: 0;
-    width: 60%;
+    width: 65%;
     height: 100%;
     z-index: 1;
+    pointer-events: none;
 
     @media (max-width: 991px) {
         position: relative;
         width: 100%;
-        height: 400px;
-        margin-top: 2rem;
+        height: 450px;
+        right: 0;
+        margin-top: 3rem;
     }
 
     img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
-        mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
-        -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
-        filter: var(--hero-img-filter);
-        animation: float 8s ease-in-out infinite;
+        object-fit: contain;
+        filter: var(--hero-img-filter) drop-shadow(0 20px 50px rgba(0, 0, 0, 0.15));
+        animation: heroFloat 8s ease-in-out infinite;
 
         @media (max-width: 991px) {
-            mask-image: none;
-            -webkit-mask-image: none;
-            object-fit: contain;
             padding: 2rem;
+            mask-image: none;
         }
     }
 }
@@ -158,20 +215,20 @@
 
 .carousel-controls {
     position: absolute;
-    bottom: 3rem;
+    bottom: 4rem;
     z-index: 20;
 
     @media (max-width: 991px) {
         position: relative;
         bottom: 0;
-        margin-top: 2rem;
+        margin-top: 3rem;
         padding-bottom: 4rem;
     }
 
     .controls-wrapper {
         display: flex;
         align-items: center;
-        gap: 2rem;
+        gap: 3rem;
 
         @media (max-width: 991px) {
             justify-content: center;
@@ -179,38 +236,99 @@
     }
 
     .ctrl-btn {
-        width: 48px;
-        height: 48px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
-        background: var(--surface-color);
-        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         color: var(--text-color);
-        font-size: 1.2rem;
-        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.4s var(--transition-curve);
 
         &:hover {
             background: var(--primary-color);
+            border-color: var(--primary-color);
             color: white;
-            transform: scale(1.1);
+            transform: scale(1.15);
+            box-shadow: 0 10px 30px rgba(255, 62, 0, 0.4);
         }
     }
 
     .indicators {
         display: flex;
-        gap: 0.75rem;
+        gap: 1rem;
 
         span {
-            width: 32px;
+            width: 40px;
             height: 4px;
-            background: rgba(128, 128, 128, 0.2);
+            background: rgba(128, 128, 128, 0.3);
             border-radius: 10px;
-            transition: all 0.4s var(--transition-curve);
+            transition: all 0.5s var(--transition-curve);
+            cursor: pointer;
 
             &.active {
                 background: var(--primary-color);
-                width: 64px;
+                width: 80px;
+                box-shadow: 0 0 20px rgba(255, 62, 0, 0.5);
             }
         }
+    }
+}
+
+/* Animations */
+@keyframes blobFloat {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+
+    33% {
+        transform: translate(100px, -50px) rotate(120deg) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-50px, 100px) rotate(240deg) scale(0.9);
+    }
+}
+
+@keyframes heroFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(1deg);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
