@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Brand } from '../../core/models/brand.model';
 import { BrandService } from '../../core/services/api/brand.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 
 @Component({
   selector: 'app-admin-brands',
@@ -17,7 +18,10 @@ export class BrandsComponent implements OnInit {
   selectedFile: File | null = null;
   isEditing = false;
 
-  constructor(private brandService: BrandService) { }
+  constructor(
+    private brandService: BrandService,
+    public authService: AuthService
+  ) { }
 
   async ngOnInit() {
     this.brands = await this.brandService.getBrands();

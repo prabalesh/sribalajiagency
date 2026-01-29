@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CmsService } from '../../core/services/api/cms.service';
 import { SettingsService } from '../../core/services/api/settings.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 
 @Component({
     selector: 'app-admin-home-cms',
@@ -14,6 +15,7 @@ import { SettingsService } from '../../core/services/api/settings.service';
 export class HomeCMSComponent implements OnInit {
     private cmsService = inject(CmsService);
     private settingsService = inject(SettingsService);
+    public authService = inject(AuthService);
 
     cms: any = {
         heroSlides: [],

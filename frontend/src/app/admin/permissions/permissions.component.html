@@ -4,6 +4,7 @@
         <p>Define user roles and assign granular system permissions</p>
     </header>
 
+    @if (authService.hasPermission('MANAGE_ROLES')) {
     <div class="form-card animate-fade">
         <h3>{{ isEditing ? 'Modify Role' : 'Create New Security Role' }}</h3>
         <form (ngSubmit)="saveRole()">
@@ -36,13 +37,15 @@
             </div>
 
             <div class="actions">
-                <button type="submit" class="btn-primary">{{ isEditing ? 'Save Changes' : 'Create Role' }}</button>
+                <button type="submit" class="btn-primary" [disabled]="!newRole.name">{{ isEditing ? 'Save Changes' :
+                    'Create Role' }}</button>
                 @if (isEditing) {
                 <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
                 }
             </div>
         </form>
     </div>
+    }
 
     <div class="list-container animate-fade">
         <table class="data-table">
@@ -68,8 +71,10 @@
                     </td>
                     <td>
                         <div class="table-actions">
+                            @if (authService.hasPermission('MANAGE_ROLES')) {
                             <button class="btn-sm" (click)="editRole(r)">Edit</button>
                             <button class="btn-sm delete" (click)="deleteRole(r.id)">Delete</button>
+                            }
                         </div>
                     </td>
                 </tr>

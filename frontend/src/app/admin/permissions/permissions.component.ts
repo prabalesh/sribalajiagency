@@ -12,7 +12,7 @@ import { Permission, Role } from '../../core/models/auth.model';
     styleUrl: './permissions.component.scss'
 })
 export class PermissionsComponent implements OnInit {
-    private authService = inject(AuthService);
+    public authService = inject(AuthService);
 
     roles: Role[] = [];
     permissions: Permission[] = [];

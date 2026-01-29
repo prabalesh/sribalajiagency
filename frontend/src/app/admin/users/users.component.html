@@ -3,6 +3,7 @@
 
     <div class="crud-layout">
         <!-- Add/Edit User Form -->
+        @if (authService.hasPermission('CREATE_USER') || (isEditing && authService.hasPermission('UPDATE_USER'))) {
         <div class="form-card">
             <h3>{{ isEditing ? 'Edit User' : 'Add New User' }}</h3>
             <form (ngSubmit)="saveUser()">
@@ -36,6 +37,7 @@
                 </div>
             </form>
         </div>
+        }
 
         <!-- Users List -->
         <div class="list-card">
@@ -66,8 +68,12 @@
                         </td>
                         <td>
                             <div class="table-actions">
+                                @if (authService.hasPermission('UPDATE_USER')) {
                                 <button class="btn-sm" (click)="editUser(user)">Modify</button>
+                                }
+                                @if (authService.hasPermission('DELETE_USER')) {
                                 <button class="btn-sm delete" (click)="deleteUser(user.id)">Revoke</button>
+                                }
                             </div>
                         </td>
                     </tr>

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { CategoryService } from '../../core/services/api/category.service';
 import { Category } from '../../core/models/category.model';
 
+import { AuthService } from '../../core/services/auth/auth.service';
+
 @Component({
   selector: 'app-admin-categories',
   standalone: true,
@@ -20,7 +22,10 @@ export class CategoriesComponent implements OnInit {
     description: '',
   };
 
-  constructor(private categoryService: CategoryService) { }
+  constructor(
+    private categoryService: CategoryService,
+    public authService: AuthService
+  ) { }
 
   ngOnInit() {
     this.loadCategories();

@@ -4,6 +4,7 @@
         <p>Create and manage discount codes for your customers</p>
     </header>
 
+    @if (authService.hasPermission('CREATE_COUPON') || (isEditing && authService.hasPermission('UPDATE_COUPON'))) {
     <div class="form-card animate-fade">
         <h3>{{ isEditing ? 'Edit Coupon' : 'Create New Offer' }}</h3>
         <form (ngSubmit)="saveCoupon()">
@@ -13,6 +14,7 @@
                     <input type="text" [(ngModel)]="newCoupon.name" name="name" required
                         placeholder="e.g. Summer Sale 2026">
                 </div>
+                <!-- ... other form groups ... -->
                 <div class="form-group">
                     <label>Discount Code</label>
                     <input type="text" [(ngModel)]="newCoupon.code" name="code" required placeholder="SUMMER20">
@@ -50,16 +52,20 @@
             </div>
 
             <div class="actions">
-                <button type="submit" class="btn-primary">{{ isEditing ? 'Update Coupon' : 'Create Coupon' }}</button>
+                <button type="submit" class="btn-primary" [disabled]="!newCoupon.name || !newCoupon.code">
+                    {{ isEditing ? 'Update Coupon' : 'Create Coupon' }}
+                </button>
                 @if (isEditing) {
                 <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
                 }
             </div>
         </form>
     </div>
+    }
 
     <div class="list-container animate-fade">
         <table class="data-table">
+            <!-- ... table head ... -->
             <thead>
                 <tr>
                     <th>Code</th>
@@ -84,8 +90,12 @@
                     </td>
                     <td>
                         <div class="table-actions">
+                            @if (authService.hasPermission('UPDATE_COUPON')) {
                             <button class="btn-sm" (click)="editCoupon(c)">Edit</button>
+                            }
+                            @if (authService.hasPermission('DELETE_COUPON')) {
                             <button class="btn-sm delete" (click)="deleteCoupon(c.id)">Delete</button>
+                            }
                         </div>
                     </td>
                 </tr>

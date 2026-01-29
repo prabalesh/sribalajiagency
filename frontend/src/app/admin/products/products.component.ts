@@ -9,6 +9,7 @@ import { CategoryService } from '../../core/services/api/category.service';
 import { BrandService } from '../../core/services/api/brand.service';
 import { DragDropDirective } from '../../shared/directives/drag-drop.directive';
 import { ToastService } from '../../core/services/toast.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 
 @Component({
   selector: 'app-admin-products',
@@ -35,7 +36,8 @@ export class ProductsComponent implements OnInit {
     private productService: ProductService,
     private categoryService: CategoryService,
     private brandService: BrandService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    public authService: AuthService
   ) { }
 
   async ngOnInit() {

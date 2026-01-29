@@ -18,7 +18,7 @@ export class UsersComponent implements OnInit {
   newUser: any = this.getEmptyUser();
   isEditing = false;
 
-  constructor(private authService: AuthService) { }
+  constructor(public authService: AuthService) { }
 
   async ngOnInit() {
     await Promise.all([

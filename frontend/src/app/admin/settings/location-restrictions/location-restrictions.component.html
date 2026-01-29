@@ -4,6 +4,7 @@
         <p>Manage allowed States and Cities for agency operations</p>
     </header>
 
+    @if (authService.hasPermission('CREATE_LOCATION') || (isEditing && authService.hasPermission('UPDATE_LOCATION'))) {
     <div class="form-card animate-fade">
         <h3>{{ isEditing ? 'Edit Service Area' : 'Add New Location' }}</h3>
         <form (ngSubmit)="saveLocation()">
@@ -27,13 +28,15 @@
             </div>
 
             <div class="actions">
-                <button type="submit" class="btn-primary">{{ isEditing ? 'Update Area' : 'Add Location' }}</button>
+                <button type="submit" class="btn-primary" [disabled]="!newLocation.state">{{ isEditing ? 'Update Area' :
+                    'Add Location' }}</button>
                 @if (isEditing) {
                 <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
                 }
             </div>
         </form>
     </div>
+    }
 
     <div class="list-container animate-fade">
         <table class="data-table">
@@ -56,8 +59,12 @@
                     </td>
                     <td>
                         <div class="table-actions">
+                            @if (authService.hasPermission('UPDATE_LOCATION')) {
                             <button class="btn-sm" (click)="editLocation(loc)">Edit</button>
+                            }
+                            @if (authService.hasPermission('DELETE_LOCATION')) {
                             <button class="btn-sm delete" (click)="deleteLocation(loc.id)">Remove</button>
+                            }
                         </div>
                     </td>
                 </tr>

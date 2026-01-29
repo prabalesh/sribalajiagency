@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LocationService } from '../../../core/store/location.service';
 import { LocationRestriction } from '../../../core/models/location.model';
+import { AuthService } from '../../../core/services/auth/auth.service';
 
 @Component({
     selector: 'app-admin-location-restrictions',
@@ -13,6 +14,7 @@ import { LocationRestriction } from '../../../core/models/location.model';
 })
 export class LocationRestrictionsComponent implements OnInit {
     private locationService = inject(LocationService);
+    public authService = inject(AuthService);
 
     locations: LocationRestriction[] = [];
     newLocation: any = this.getEmptyLocation();

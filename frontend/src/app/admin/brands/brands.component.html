@@ -1,6 +1,7 @@
 <div class="crud-container">
   <h1>Manage Brands</h1>
 
+  @if (authService.hasPermission('CREATE_BRAND') || (isEditing && authService.hasPermission('UPDATE_BRAND'))) {
   <div class="form-card">
     <h3>{{ isEditing ? 'Edit Brand' : 'Add New Brand' }}</h3>
     <form (ngSubmit)="addBrand()">
@@ -8,13 +9,15 @@
         <input type="text" [(ngModel)]="newBrand.name" name="name" placeholder="Brand Name" required>
         <input type="text" [(ngModel)]="newBrand.description" name="description" placeholder="Description">
         <input type="file" (change)="onFileSelected($event)" accept="image/*" class="file-input">
-        <button type="submit" class="btn-primary">{{ isEditing ? 'Update' : 'Add' }}</button>
+        <button type="submit" class="btn-primary" [disabled]="!newBrand.name">{{ isEditing ? 'Update' : 'Add'
+          }}</button>
         @if (isEditing) {
         <button type="button" (click)="resetForm()">Cancel</button>
         }
       </div>
     </form>
   </div>
+  }
 
   <table class="data-table">
     <thead>
@@ -35,8 +38,14 @@
         <td>{{ brand.name }}</td>
         <td>{{ brand.description }}</td>
         <td>
-          <button (click)="editBrand(brand)">Edit</button>
-          <button (click)="deleteBrand(brand.id)" class="delete">Delete</button>
+          <div class="table-actions">
+            @if (authService.hasPermission('UPDATE_BRAND')) {
+            <button class="btn-sm" (click)="editBrand(brand)">Edit</button>
+            }
+            @if (authService.hasPermission('DELETE_BRAND')) {
+            <button class="btn-sm delete" (click)="deleteBrand(brand.id)">Delete</button>
+            }
+          </div>
         </td>
       </tr>
       }

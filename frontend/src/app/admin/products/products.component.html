@@ -4,15 +4,18 @@
         <p>Manage your catalog, variants, and high-quality images</p>
     </header>
 
+    @if (authService.hasPermission('CREATE_PRODUCT') || (isEditing && authService.hasPermission('UPDATE_PRODUCT'))) {
     <div class="form-card animate-fade">
         <h3>{{ isEditing ? 'Edit Existing Product' : 'Register New Product' }}</h3>
         <form (ngSubmit)="saveProduct()">
+            <!-- ... existing form grid ... -->
             <div class="form-grid">
                 <div class="form-group">
                     <label>Product Name</label>
                     <input type="text" [(ngModel)]="newProduct.name" name="name" required
                         placeholder="e.g. Bosch Power Drill">
                 </div>
+                <!-- ... brands, categories, price, stock, toggle-group, allowed-payment, description, upload area, media gallery, variants-section ... -->
                 <div class="form-group">
                     <label>Brand</label>
                     <select [(ngModel)]="newProduct.brandId" name="brandId" required>
@@ -173,6 +176,7 @@
             </div>
         </form>
     </div>
+    }
 
     <div class="list-container animate-fade">
         <h3>Product Catalog</h3>
@@ -210,8 +214,12 @@
                     </td>
                     <td>
                         <div class="table-actions">
+                            @if (authService.hasPermission('UPDATE_PRODUCT')) {
                             <button class="btn-sm" (click)="editProduct(p)">Edit</button>
+                            }
+                            @if (authService.hasPermission('DELETE_PRODUCT')) {
                             <button class="btn-sm delete" (click)="deleteProduct(p.id)">Delete</button>
+                            }
                         </div>
                     </td>
                 </tr>
