@@ -3,6 +3,7 @@ import { PublicLayoutComponent } from './layout/public-layout/public-layout.comp
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { NotFoundComponent } from './shared/components/not-found/not-found.component';
 
 
 export const routes: Routes = [
@@ -105,17 +106,12 @@ export const routes: Routes = [
         ]
     },
 
-    // Admin Login (No Layout or separate layout)
-    {
-        path: 'admin/login',
-        loadComponent: () => import('./admin/login/login.component').then(m => m.LoginComponent)
-    },
 
     // Admin Routes
     {
         path: 'admin',
         component: AdminLayoutComponent,
-        canActivate: [adminGuard],
+        canMatch: [adminGuard],
         children: [
             {
                 path: 'dashboard',
@@ -182,9 +178,8 @@ export const routes: Routes = [
         ]
     },
 
-    // Fallback
     {
         path: '**',
-        redirectTo: ''
+        component: NotFoundComponent
     }
 ];
