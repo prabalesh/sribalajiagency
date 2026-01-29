@@ -22,7 +22,7 @@ export class OrdersController {
 
     @Get()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('VIEW_REPORTS')
+    @Permissions('VIEW_ORDERS')
     findAll() {
         return this.ordersService.findAll();
     }
@@ -35,7 +35,7 @@ export class OrdersController {
 
     @Patch(':id/status')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_ORDER')
     updateStatus(@Param('id') id: string, @Body('status') status: string) {
         return this.ordersService.updateStatus(id, status);
     }

@@ -64,7 +64,7 @@ export class HomeCMSController {
 
     @Put()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_CMS')
     async updateCMS(@Body() data: any) {
         let cms = await this.getCMS();
         Object.assign(cms, data);
@@ -73,7 +73,7 @@ export class HomeCMSController {
 
     @Post('upload')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPLOAD_CMS_ASSETS')
     @UseInterceptors(FileInterceptor('file'))
     async uploadImage(@UploadedFile() file: Express.Multer.File) {
         const url = await this.fileStorageService.saveFile(file, 'cms');
@@ -82,7 +82,7 @@ export class HomeCMSController {
 
     @Post('delete-file')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_CMS')
     async deleteFile(@Body('url') url: string) {
         if (url) {
             await this.fileStorageService.deleteFile(url.replace('/uploads/', ''));

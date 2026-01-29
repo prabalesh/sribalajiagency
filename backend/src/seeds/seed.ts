@@ -31,10 +31,66 @@ async function bootstrap() {
 
     // 1. Create Permissions
     const permissions = [
-        { name: 'MANAGE_PRODUCTS', description: 'Can create, edit, delete products' },
-        { name: 'MANAGE_USERS', description: 'Can manage all users' },
-        { name: 'VIEW_REPORTS', description: 'Can view business reports' },
+        // Users
+        { name: 'CREATE_USER', description: 'Can create new users' },
+        { name: 'VIEW_USERS', description: 'Can view user list and details' },
+        { name: 'UPDATE_USER', description: 'Can update user information' },
+        { name: 'DELETE_USER', description: 'Can delete users' },
+
+        // Products
+        { name: 'CREATE_PRODUCT', description: 'Can create new products' },
+        { name: 'VIEW_PRODUCTS', description: 'Can view product list and details' },
+        { name: 'UPDATE_PRODUCT', description: 'Can update product information' },
+        { name: 'DELETE_PRODUCT', description: 'Can delete products' },
+
+        // Categories
+        { name: 'CREATE_CATEGORY', description: 'Can create new categories' },
+        { name: 'VIEW_CATEGORIES', description: 'Can view category list and details' },
+        { name: 'UPDATE_CATEGORY', description: 'Can update category information' },
+        { name: 'DELETE_CATEGORY', description: 'Can delete categories' },
+
+        // Brands
+        { name: 'CREATE_BRAND', description: 'Can create new brands' },
+        { name: 'VIEW_BRANDS', description: 'Can view brand list and details' },
+        { name: 'UPDATE_BRAND', description: 'Can update brand information' },
+        { name: 'DELETE_BRAND', description: 'Can delete brands' },
+
+        // Orders
+        { name: 'CREATE_ORDER', description: 'Can place new orders' },
+        { name: 'VIEW_ORDERS', description: 'Can view and track orders' },
+        { name: 'UPDATE_ORDER', description: 'Can update order status and details' },
+        { name: 'DELETE_ORDER', description: 'Can delete orders' },
+
+        // Quotations
+        { name: 'CREATE_QUOTATION', description: 'Can request quotations' },
+        { name: 'VIEW_QUOTATIONS', description: 'Can view quotation requests' },
+        { name: 'UPDATE_QUOTATION', description: 'Can update quotation status' },
+        { name: 'DELETE_QUOTATION', description: 'Can delete quotation requests' },
+
+        // Coupons
+        { name: 'CREATE_COUPON', description: 'Create and issue discount codes' },
+        { name: 'VIEW_COUPONS', description: 'Access list of active coupons' },
+        { name: 'UPDATE_COUPON', description: 'Modify discount values and dates' },
+        { name: 'DELETE_COUPON', description: 'Remove coupons from system' },
+
+        // Locations
+        { name: 'CREATE_LOCATION', description: 'Define new delivery zones' },
+        { name: 'VIEW_LOCATIONS', description: 'View current delivery restrictions' },
+        { name: 'UPDATE_LOCATION', description: 'Modify zone parameters' },
+        { name: 'DELETE_LOCATION', description: 'Remove delivery zones' },
+
+        // Home CMS
+        { name: 'VIEW_CMS', description: 'Preview home page content' },
+        { name: 'UPDATE_CMS', description: 'Publish changes to home page' },
+        { name: 'UPLOAD_CMS_ASSETS', description: 'Upload hero images and banners' },
+
+        // Settings
+        { name: 'VIEW_SETTINGS', description: 'Access global system settings' },
+        { name: 'UPDATE_SETTINGS', description: 'Modify operational parameters' },
+
+        // Others
         { name: 'MANAGE_ROLES', description: 'Can manage roles and permissions' },
+        { name: 'VIEW_REPORTS', description: 'Can view business reports' },
     ];
 
     for (const p of permissions) {
@@ -46,7 +102,17 @@ async function bootstrap() {
     const adminPerms = permissions.map(p => p.name);
     const roles = [
         { name: 'admin', description: 'Full system access', perms: adminPerms },
-        { name: 'staff', description: 'Staff access', perms: ['MANAGE_PRODUCTS'] },
+        {
+            name: 'staff',
+            description: 'Staff access',
+            perms: [
+                'VIEW_PRODUCTS', 'CREATE_PRODUCT', 'UPDATE_PRODUCT',
+                'VIEW_ORDERS', 'UPDATE_ORDER',
+                'VIEW_QUOTATIONS', 'UPDATE_QUOTATION',
+                'VIEW_CATEGORIES', 'VIEW_BRANDS'
+            ]
+        },
+        { name: 'delivery', description: 'Delivery personnel access', perms: ['VIEW_ORDERS', 'UPDATE_ORDER'] },
         { name: 'user', description: 'Regular customer', perms: [] },
     ];
 

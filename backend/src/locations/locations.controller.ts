@@ -20,28 +20,28 @@ export class LocationsController {
 
     @Get(':id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('VIEW_LOCATIONS')
     findOne(@Param('id') id: string) {
         return this.locationsService.findOne(id);
     }
 
     @Post()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('CREATE_LOCATION')
     create(@Body() data: any) {
         return this.locationsService.create(data);
     }
 
     @Put(':id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_LOCATION')
     update(@Param('id') id: string, @Body() data: any) {
         return this.locationsService.update(id, data);
     }
 
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('DELETE_LOCATION')
     delete(@Param('id') id: string) {
         return this.locationsService.delete(id);
     }

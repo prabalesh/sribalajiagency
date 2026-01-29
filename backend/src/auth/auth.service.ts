@@ -63,7 +63,8 @@ export class AuthService {
     async login(dto: any) {
         const user = await this.userRepository.findOne({
             where: { email: dto.email },
-            select: ['id', 'email', 'password'],
+            relations: ['roles', 'roles.permissions'],
+            select: ['id', 'email', 'password', 'name'],
         } as any);
 
         if (!user) throw new ForbiddenException('Access Denied');
@@ -73,7 +74,9 @@ export class AuthService {
 
         const tokens = await this.getTokens(user.id, user.email);
         await this.updateRefreshTokenHash(user.id, tokens.refresh_token);
-        return { user, ...tokens };
+
+        const { password: _, ...userWithoutPassword } = user as any;
+        return { user: userWithoutPassword, ...tokens };
     }
 
     async updateRefreshTokenHash(userId: string, refreshToken: string) {

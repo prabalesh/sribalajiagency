@@ -38,21 +38,21 @@ export class ProductsController {
 
     @Post()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('CREATE_PRODUCT')
     create(@Body() data: any) {
         return this.productsService.createProduct(data);
     }
 
     @Put(':id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_PRODUCT')
     update(@Param('id') id: string, @Body() data: any) {
         return this.productsService.updateProduct(id, data);
     }
 
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('DELETE_PRODUCT')
     delete(@Param('id') id: string) {
         return this.productsService.deleteProduct(id);
     }
@@ -60,7 +60,7 @@ export class ProductsController {
     // Image Uploads
     @Post(':id/images')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_PRODUCT')
     @UseInterceptors(FileInterceptor('file'))
     uploadImage(
         @Param('id') id: string,
@@ -72,56 +72,56 @@ export class ProductsController {
 
     @Delete('images/:imageId')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_PRODUCT')
     removeImage(@Param('imageId') imageId: string) {
         return this.productsService.removeProductImage(imageId);
     }
 
     @Post('categories')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('CREATE_CATEGORY')
     createCategory(@Body() data: any) {
         return this.productsService.createCategory(data);
     }
 
     @Put('categories/:id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_CATEGORY')
     updateCategory(@Param('id') id: string, @Body() data: any) {
         return this.productsService.updateCategory(id, data);
     }
 
     @Delete('categories/:id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('DELETE_CATEGORY')
     deleteCategory(@Param('id') id: string) {
         return this.productsService.deleteCategory(id);
     }
 
     @Post('brands')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('CREATE_BRAND')
     createBrand(@Body() data: any) {
         return this.productsService.createBrand(data);
     }
 
     @Put('brands/:id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_BRAND')
     updateBrand(@Param('id') id: string, @Body() data: any) {
         return this.productsService.updateBrand(id, data);
     }
 
     @Delete('brands/:id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('DELETE_BRAND')
     deleteBrand(@Param('id') id: string) {
         return this.productsService.deleteBrand(id);
     }
 
     @Post('brands/:id/image')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_BRAND')
     @UseInterceptors(FileInterceptor('file'))
     uploadBrandImage(
         @Param('id') id: string,

@@ -25,7 +25,7 @@ export class SettingsController {
 
     @Put()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS') // Using product permission for now
+    @Permissions('UPDATE_SETTINGS') // Using product permission for now
     async updateSettings(@Body() data: any) {
         let settings = await this.getSettings();
         Object.assign(settings, data);

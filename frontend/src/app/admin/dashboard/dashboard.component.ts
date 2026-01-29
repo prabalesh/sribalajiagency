@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { ProductService } from '../../core/services/api/product.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { OrderService } from '../../core/services/api/order.service';
@@ -23,20 +23,24 @@ export class DashboardComponent implements OnInit {
 
 
   stats = [
-    { label: 'Products', value: 0, icon: '📦', color: '#ff3e00' },
-    { label: 'Orders', value: 0, icon: '🛒', color: '#ffa500' },
-    { label: 'Customers', value: 0, icon: '👥', color: '#4caf50' },
-    { label: 'Quotations', value: 0, icon: '📄', color: '#2196f3' }
+    { label: 'Products', value: 0, icon: '📦', color: '#ff3e00', perm: 'VIEW_PRODUCTS' },
+    { label: 'Orders', value: 0, icon: '🛒', color: '#ffa500', perm: 'VIEW_ORDERS' },
+    { label: 'Customers', value: 0, icon: '👥', color: '#4caf50', perm: 'VIEW_USERS' },
+    { label: 'Quotations', value: 0, icon: '📄', color: '#2196f3', perm: 'VIEW_QUOTATIONS' }
   ];
+
+  filteredStats = computed(() => {
+    return this.stats.filter(s => !s.perm || this.authService.hasPermission(s.perm));
+  });
 
   async ngOnInit() {
     this.isLoading = true;
     try {
       const [products, orders, users, quotes] = await Promise.all([
-        this.productService.getProducts(),
-        this.orderService.getAllOrders(),
-        this.authService.getUsers(),
-        this.quotationService.getRequests()
+        this.authService.hasPermission('VIEW_PRODUCTS') ? this.productService.getProducts() : Promise.resolve({ total: 0 }),
+        this.authService.hasPermission('VIEW_ORDERS') ? this.orderService.getAllOrders() : Promise.resolve([]),
+        this.authService.hasPermission('VIEW_USERS') ? this.authService.getUsers() : Promise.resolve([]),
+        this.authService.hasPermission('VIEW_QUOTATIONS') ? this.quotationService.getRequests() : Promise.resolve([])
       ]);
 
       this.stats[0].value = products.total;

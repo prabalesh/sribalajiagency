@@ -10,19 +10,19 @@ export class UsersController {
     constructor(private authService: AuthService) { }
 
     @Get()
-    @Permissions('MANAGE_USERS')
+    @Permissions('VIEW_USERS')
     findAll() {
         return this.authService.findAllUsers();
     }
 
     @Put(':id')
-    @Permissions('MANAGE_USERS')
+    @Permissions('UPDATE_USER')
     update(@Param('id') id: string, @Body() data: any) {
         return this.authService.updateUser(id, data);
     }
 
     @Delete(':id')
-    @Permissions('MANAGE_USERS')
+    @Permissions('DELETE_USER')
     delete(@Param('id') id: string) {
         return this.authService.deleteUser(id);
     }

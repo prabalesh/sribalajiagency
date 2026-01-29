@@ -29,6 +29,20 @@ export class AuthService {
   user = this.currentUser.asReadonly();
   isLoggedIn = computed(() => this.currentUser() !== null);
   isAdmin = computed(() => this.currentUser()?.roles?.some(r => r.name === 'admin'));
+  permissions = computed(() => {
+    const user = this.currentUser();
+    if (!user) return [];
+    if (user.roles?.some(r => r.name === 'admin')) {
+      // Admin has all permissions conceptually, but let's flatmap what's there
+      // or return a special '*' if you prefer. For now, flatmap.
+    }
+    return user.roles?.flatMap(r => r.permissions?.map(p => p.name)) || [];
+  });
+
+  hasPermission(permission: string): boolean {
+    if (this.isAdmin()) return true;
+    return this.permissions().includes(permission);
+  }
 
   async login(email: string, password: string) {
     try {

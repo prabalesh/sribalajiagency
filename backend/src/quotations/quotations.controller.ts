@@ -16,21 +16,21 @@ export class QuotationsController {
 
     @Get()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('VIEW_REPORTS')
+    @Permissions('VIEW_QUOTATIONS')
     findAll() {
         return this.quotationsService.findAll();
     }
 
     @Get(':id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('VIEW_REPORTS')
+    @Permissions('VIEW_QUOTATIONS')
     findOne(@Param('id') id: string) {
         return this.quotationsService.findOne(id);
     }
 
     @Patch(':id/status')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_QUOTATION')
     updateStatus(@Param('id') id: string, @Body('status') status: string) {
         return this.quotationsService.updateStatus(id, status);
     }

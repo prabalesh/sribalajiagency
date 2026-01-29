@@ -14,7 +14,7 @@
         </div>
         }
         } @else {
-        @for (item of stats; track item.label) {
+        @for (item of filteredStats(); track item.label) {
         <div class="stat-card glass-card" [style.border-top]="'3px solid ' + item.color">
             <div class="stat-icon">{{ item.icon }}</div>
             <div class="stat-value text-gradient">{{ item.value | number }}</div>

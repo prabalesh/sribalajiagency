@@ -10,7 +10,7 @@ export class CouponsController {
 
     @Get()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('VIEW_COUPONS')
     findAll() {
         return this.couponsService.findAll();
     }
@@ -22,28 +22,28 @@ export class CouponsController {
 
     @Get(':id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('VIEW_COUPONS')
     findOne(@Param('id') id: string) {
         return this.couponsService.findOne(id);
     }
 
     @Post()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('CREATE_COUPON')
     create(@Body() data: any) {
         return this.couponsService.create(data);
     }
 
     @Put(':id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('UPDATE_COUPON')
     update(@Param('id') id: string, @Body() data: any) {
         return this.couponsService.update(id, data);
     }
 
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('MANAGE_PRODUCTS')
+    @Permissions('DELETE_COUPON')
     delete(@Param('id') id: string) {
         return this.couponsService.delete(id);
     }
