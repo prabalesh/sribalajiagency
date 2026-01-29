@@ -12,7 +12,7 @@
     <div class="product-main-grid">
         <div class="product-gallery">
             <div class="main-image">
-                <img [src]="(product.images.length > 0 ? product.images[selectedImageIndex]?.url : '') | imageUrl"
+                <img [src]="(product.images.length > 0 ? product.images[selectedImageIndex].url : '') | imageUrl"
                     [alt]="product.name">
             </div>
             <div class="image-thumbnails" *ngIf="product.images.length > 1">

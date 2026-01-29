@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CouponService } from '../../core/services/api/coupon.service';
 import { Coupon } from '../../core/models/coupon.model';
+import { AuthService } from '../../core/services/auth/auth.service';
 
 @Component({
     selector: 'app-admin-coupons',
@@ -13,6 +14,7 @@ import { Coupon } from '../../core/models/coupon.model';
 })
 export class CouponsComponent implements OnInit {
     private couponService = inject(CouponService);
+    public authService = inject(AuthService);
 
     coupons: Coupon[] = [];
     newCoupon: any = this.getEmptyCoupon();
