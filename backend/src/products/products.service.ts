@@ -26,6 +26,7 @@ export class ProductsService {
     ) { }
 
     async findAll(page: number = 1, limit: number = 20, filters: { categoryId?: string, brandId?: string, q?: string, isFeatured?: boolean } = {}) {
+        if (limit > 20) limit = 20;
         const skip = (page - 1) * limit;
         const query: any = {
             relations: ['category', 'brand', 'images', 'variants'],

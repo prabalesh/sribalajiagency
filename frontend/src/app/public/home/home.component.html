@@ -50,21 +50,33 @@
             </div>
         </div>
         } @else {
-        <div class="hero-showcase container">
-            <div class="hero-content">
-                <div class="hero-badge">{{ cms?.heroBadge || 'AUTHORIZED DEALER' }}</div>
-                <h1 class="text-gradient">{{ cms?.heroTitle || 'Experience the Future of Home Technology' }}</h1>
-                <p>{{ cms?.heroSubtitle || 'Curated selection of global brands for your modern home.' }}</p>
-                <div class="hero-actions">
-                    <button class="btn-primary" [routerLink]="cms?.heroLink || '/products'">
-                        {{ cms?.heroLinkText || 'Explore Collection' }}
-                    </button>
-                    <button class="btn-secondary" routerLink="/products">See All Products</button>
+        <div class="hero-showcase-wrapper">
+            <div class="hero-content-grid">
+                <div class="hero-content">
+                    <span class="hero-badge" role="text">
+                        {{ cms?.heroBadge || 'AUTHORIZED DEALER' }}
+                    </span>
+                    <h1 class="hero-title text-gradient">
+                        {{ cms?.heroTitle || 'Experience the Future of Home Technology' }}
+                    </h1>
+                    <p class="hero-subtitle">
+                        {{ cms?.heroSubtitle || 'Curated selection of global brands for your modern home.' }}
+                    </p>
+                    <div class="hero-actions">
+                        <a class="btn-primary" [routerLink]="cms?.heroLink || '/products'"
+                            aria-label="Explore our collection">
+                            {{ cms?.heroLinkText || 'Explore Collection' }}
+                        </a>
+                        <a class="btn-secondary" routerLink="/products" aria-label="View all available products">
+                            See All Products
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="hero-image">
-                <img [src]="cms?.heroImage | imageUrl:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=2000'"
-                    [alt]="cms?.heroTitle || 'Premium Home Tech'">
+                <div class="hero-image-static">
+                    <img [src]="cms?.heroImage | imageUrl:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=2000'"
+                        [alt]="cms?.heroTitle || 'Premium Home Tech'" loading="eager" fetchpriority="high" width="800"
+                        height="600">
+                </div>
             </div>
         </div>
         }
