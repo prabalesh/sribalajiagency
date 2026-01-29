@@ -34,7 +34,9 @@ export class ApiService {
                     } catch (refreshError) {
                         // Logout user or redirect to login
                         if (this.isBrowser) {
+                            const theme = localStorage.getItem('theme');
                             localStorage.clear();
+                            if (theme) localStorage.setItem('theme', theme);
                             this.redirect('/login');
                         }
                         return Promise.reject(refreshError);
