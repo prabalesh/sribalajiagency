@@ -1,6 +1,7 @@
 <div class="home-wrapper">
     <!-- Hero Section -->
     <section class="hero-container animate-fade">
+        <div class="hero-noise"></div>
         <div class="hero-bg-blobs">
             <div class="blob blob-1"></div>
             <div class="blob blob-2"></div>
@@ -50,8 +51,8 @@
             </div>
         </div>
         } @else {
-        <div class="hero-showcase-wrapper">
-            <div class="hero-content-grid">
+        <section class="hero-showcase" aria-label="Hero section">
+            <div class="hero-container">
                 <div class="hero-content">
                     <span class="hero-badge" role="text">
                         {{ cms?.heroBadge || 'AUTHORIZED DEALER' }}
@@ -63,22 +64,23 @@
                         {{ cms?.heroSubtitle || 'Curated selection of global brands for your modern home.' }}
                     </p>
                     <div class="hero-actions">
-                        <a class="btn-primary" [routerLink]="cms?.heroLink || '/products'"
+                        <a class="btn btn-primary" [routerLink]="cms?.heroLink || '/products'"
                             aria-label="Explore our collection">
                             {{ cms?.heroLinkText || 'Explore Collection' }}
                         </a>
-                        <a class="btn-secondary" routerLink="/products" aria-label="View all available products">
+                        <a class="btn btn-secondary" routerLink="/products" aria-label="View all available products">
                             See All Products
                         </a>
                     </div>
                 </div>
-                <div class="hero-image-static">
+                <div class="hero-image-wrapper">
                     <img [src]="cms?.heroImage | imageUrl:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=2000'"
                         [alt]="cms?.heroTitle || 'Premium Home Tech'" loading="eager" fetchpriority="high" width="800"
                         height="600">
                 </div>
             </div>
-        </div>
+        </section>
+
         }
     </section>
 
