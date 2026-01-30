@@ -14,12 +14,14 @@ export class ProductsController {
         @Query('page') page: string = '1',
         @Query('limit') limit: string = '20',
         @Query('categoryId') categoryId?: string,
+        @Query('categorySlug') categorySlug?: string,
         @Query('brandId') brandId?: string,
         @Query('q') q?: string,
         @Query('isFeatured') isFeatured?: string
     ) {
         return this.productsService.findAll(+page, +limit, {
             categoryId,
+            categorySlug,
             brandId,
             q,
             isFeatured: isFeatured === 'true' ? true : (isFeatured === 'false' ? false : undefined)

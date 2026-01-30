@@ -8,7 +8,7 @@ import { Product } from '../../models/product.model';
 export class ProductService {
   private api = inject(ApiService);
 
-  async getProducts(params: { page?: number, limit?: number, categoryId?: string, brandId?: string, q?: string, isFeatured?: boolean } = {}) {
+  async getProducts(params: { page?: number, limit?: number, categoryId?: string, categorySlug?: string, brandId?: string, q?: string, isFeatured?: boolean } = {}) {
     const res = await this.api.get<{ items: Product[], total: number, page: number, limit: number }>('/products', params);
     return res.data;
   }

@@ -49,7 +49,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
             switchMap(params => {
                 const subcategorySlug = params.get('subcategory');
                 const categorySlug = params.get('category');
-                const activeSlug = subcategorySlug || categorySlug;
+                const activeSlug = subcategorySlug ?? categorySlug ?? undefined;
 
                 // Reset state for new route
                 this.products = [];
@@ -58,31 +58,30 @@ export class ProductsComponent implements OnInit, OnDestroy {
                 this.isCategoryNotFound = false;
                 this.isLoading = true;
 
-                if (activeSlug) {
-                    return this.categoryService.getCategoryBySlug(activeSlug).then(category => ({
-                        category,
-                        isSlugProvided: true
-                    }));
-                } else {
-                    return Promise.resolve({ category: undefined, isSlugProvided: false });
-                }
-            }),
-            switchMap(async ({ category, isSlugProvided }) => {
-                this.currentCategory = category;
-
-                if (isSlugProvided && !category) {
-                    this.isCategoryNotFound = true;
-                    this.isLoading = false;
-                    return { items: [], total: 0 };
+                // Derive current category from existing list (if loaded)
+                if (activeSlug && this.categories.length > 0) {
+                    this.currentCategory = this.categories.find(c => c.slug === activeSlug);
                 }
 
-                return this.loadProductsData(category?.id);
+                return this.loadProductsData(undefined, activeSlug);
             })
         ).subscribe(result => {
             this.products = result.items;
             this.totalItems = result.total;
             this.hasMore = this.products.length < this.totalItems;
             if (this.hasMore) this.currentPage++;
+
+            // If we have products, sync the currentCategory if it wasn't found yet
+            if (this.products.length > 0 && !this.currentCategory) {
+                this.currentCategory = this.products[0].category;
+            } else if (!this.currentCategory && this.route.snapshot.paramMap.has('category')) {
+                // If slug provided but no products and no category found in list
+                // We might need to handle the case where categories list isn't loaded yet
+                this.isCategoryNotFound = this.categories.length > 0 && !this.categories.find(c =>
+                    c.slug === (this.route.snapshot.paramMap.get('subcategory') || this.route.snapshot.paramMap.get('category'))
+                );
+            }
+
             this.isLoading = false;
         });
     }
@@ -95,17 +94,23 @@ export class ProductsComponent implements OnInit, OnDestroy {
     async loadInitialData() {
         try {
             this.categories = await this.categoryService.getCategories();
+            // sync currentCategory if it's already filtered but list just arrived
+            const activeSlug = this.route.snapshot.paramMap.get('subcategory') || this.route.snapshot.paramMap.get('category');
+            if (activeSlug && !this.currentCategory) {
+                this.currentCategory = this.categories.find(c => c.slug === activeSlug);
+            }
         } catch (error) {
             console.error('Error loading categories:', error);
         }
     }
 
-    private async loadProductsData(categoryId: string | undefined) {
+    private async loadProductsData(categoryId: string | undefined, categorySlug?: string) {
         try {
             return await this.productService.getProducts({
                 page: this.currentPage,
                 limit: this.pageSize,
-                categoryId: categoryId
+                categoryId: categoryId,
+                categorySlug: categorySlug
             });
         } catch (error) {
             console.error('Error loading products:', error);

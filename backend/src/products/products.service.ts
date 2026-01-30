@@ -25,7 +25,7 @@ export class ProductsService {
         private fileStorageService: FileStorageService,
     ) { }
 
-    async findAll(page: number = 1, limit: number = 20, filters: { categoryId?: string, brandId?: string, q?: string, isFeatured?: boolean } = {}) {
+    async findAll(page: number = 1, limit: number = 20, filters: { categoryId?: string, categorySlug?: string, brandId?: string, q?: string, isFeatured?: boolean } = {}) {
         if (limit > 20) limit = 20;
         const skip = (page - 1) * limit;
         const query: any = {
@@ -38,6 +38,9 @@ export class ProductsService {
 
         if (filters.categoryId) {
             query.where.category = { id: filters.categoryId };
+        }
+        if (filters.categorySlug) {
+            query.where.category = { slug: filters.categorySlug };
         }
         if (filters.brandId) {
             query.where.brand = { id: filters.brandId };
