@@ -359,10 +359,12 @@ async function bootstrap() {
 
         for (let i = 0; i < config.brands; i++) {
             const name = i < popularBrands.length ? popularBrands[i] : faker.company.name();
-            const exists = await brandRepo.findOneBy({ name });
+            const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            const exists = await brandRepo.findOneBy({ slug });
             if (!exists) {
                 await brandRepo.save(brandRepo.create({
                     name,
+                    slug,
                     description: faker.company.catchPhrase()
                 } as any));
             }

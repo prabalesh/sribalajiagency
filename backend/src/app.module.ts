@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './auth/entities/user.entity';
 import { Role, Permission } from './auth/entities/role.entity';
 import { AuthModule } from './auth/auth.module';
+import { UserAddress } from './auth/entities/user-address.entity';
 import { ProductsModule } from './products/products.module';
 import { Product } from './products/entities/product.entity';
 import { Category } from './products/entities/category.entity';
@@ -56,7 +57,7 @@ import { CommonModule } from './common/common.module';
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'sribalaji'),
-        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Quotation, Coupon, LocationRestriction, HomeCMS],
+        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Quotation, Coupon, LocationRestriction, HomeCMS, UserAddress],
 
         synchronize: config.get('NODE_ENV') !== 'production',
       }),

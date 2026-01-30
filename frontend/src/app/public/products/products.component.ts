@@ -47,6 +47,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
         this.route.paramMap.pipe(
             takeUntil(this.destroy$),
             switchMap(params => {
+                const brandSlug = params.get('brand');
                 const subcategorySlug = params.get('subcategory');
                 const categorySlug = params.get('category');
                 const activeSlug = subcategorySlug ?? categorySlug ?? undefined;
@@ -63,7 +64,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
                     this.currentCategory = this.categories.find(c => c.slug === activeSlug);
                 }
 
-                return this.loadProductsData(undefined, activeSlug);
+                return this.loadProductsData(undefined, activeSlug, brandSlug ?? undefined);
             })
         ).subscribe(result => {
             this.products = result.items;
@@ -104,13 +105,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
         }
     }
 
-    private async loadProductsData(categoryId: string | undefined, categorySlug?: string) {
+    private async loadProductsData(categoryId: string | undefined, categorySlug?: string, brandSlug?: string) {
         try {
             return await this.productService.getProducts({
                 page: this.currentPage,
                 limit: this.pageSize,
                 categoryId: categoryId,
-                categorySlug: categorySlug
+                categorySlug: categorySlug,
+                brandSlug: brandSlug
             });
         } catch (error) {
             console.error('Error loading products:', error);

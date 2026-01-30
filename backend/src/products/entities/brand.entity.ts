@@ -8,6 +8,9 @@ export class Brand {
     @Column()
     name: string;
 
+    @Column({ unique: true })
+    slug: string;
+
     @Column({ nullable: true })
     image?: string;
 

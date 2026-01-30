@@ -2,7 +2,7 @@
     <h1>Our Brands</h1>
     <div class="brand-grid">
         @for (brand of brands; track brand.id) {
-        <div class="brand-card">
+        <div class="brand-card glass-card clickable" [routerLink]="['/brands', brand.slug]">
             <div class="logo-area">
                 @if (brand.image) {
                 <img [src]="brand.image | imageUrl" [alt]="brand.name">

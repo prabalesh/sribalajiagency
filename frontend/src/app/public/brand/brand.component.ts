@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { BrandService } from '../../core/services/api/brand.service';
 import { Brand } from '../../core/models/brand.model';
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
@@ -7,7 +8,7 @@ import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 @Component({
   selector: 'app-brand',
   standalone: true,
-  imports: [CommonModule, ImageUrlPipe],
+  imports: [CommonModule, RouterModule, ImageUrlPipe],
   templateUrl: './brand.component.html',
   styleUrl: './brand.component.scss'
 })

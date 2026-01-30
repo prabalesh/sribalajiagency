@@ -25,6 +25,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./public/brand/brand.component').then(m => m.BrandComponent)
             },
             {
+                path: 'brands/:brand',
+                loadComponent: () => import('./public/brand-detail/brand-detail.component').then(m => m.BrandDetailComponent)
+            },
+            {
+                path: 'brands/:brand/:category',
+                loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent)
+            },
+            {
                 path: 'products',
                 loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent)
             },

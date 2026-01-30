@@ -14,7 +14,7 @@ import { AuthService } from '../../core/services/auth/auth.service';
 })
 export class BrandsComponent implements OnInit {
   brands: Brand[] = [];
-  newBrand: Brand = { id: '', name: '', description: '' };
+  newBrand: Brand = { id: '', name: '', slug: '', description: '' };
   selectedFile: File | null = null;
   isEditing = false;
 
@@ -29,6 +29,9 @@ export class BrandsComponent implements OnInit {
 
   async addBrand() {
     if (this.newBrand.name) {
+      if (!this.newBrand.slug) {
+        this.newBrand.slug = this.generateSlug(this.newBrand.name);
+      }
       let result: Brand;
       if (this.isEditing) {
         result = await this.brandService.updateBrand(this.newBrand);
@@ -67,8 +70,16 @@ export class BrandsComponent implements OnInit {
   }
 
   resetForm() {
-    this.newBrand = { id: '', name: '', description: '' };
+    this.newBrand = { id: '', name: '', slug: '', description: '' };
     this.selectedFile = null;
     this.isEditing = false;
+  }
+
+  generateSlug(name: string): string {
+    return name.toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 }

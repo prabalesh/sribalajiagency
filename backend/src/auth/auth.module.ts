@@ -11,16 +11,19 @@ import { UsersController } from './users.controller';
 import { AtStrategy } from './strategies/at.strategy';
 import { RtStrategy } from './strategies/rt.strategy';
 import { PermissionsGuard } from './guards/permissions.guard';
+import { UserAddress } from './entities/user-address.entity';
+import { UserAddressesService } from './user-addresses.service';
+import { UserAddressesController } from './user-addresses.controller';
 
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User, Role, Permission]),
+        TypeOrmModule.forFeature([User, Role, Permission, UserAddress]),
         PassportModule,
         JwtModule.register({}),
     ],
-    providers: [AuthService, AtStrategy, RtStrategy, PermissionsGuard],
-    controllers: [AuthController, RolesController, UsersController],
+    providers: [AuthService, AtStrategy, RtStrategy, PermissionsGuard, UserAddressesService],
+    controllers: [AuthController, RolesController, UsersController, UserAddressesController],
     exports: [AuthService],
 })
 export class AuthModule { }

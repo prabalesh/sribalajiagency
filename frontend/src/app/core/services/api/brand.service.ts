@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../../api/api.service';
 import { Brand } from '../../models/brand.model';
+import { Category } from '../../models/category.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,16 @@ export class BrandService {
 
   async getBrands() {
     const res = await this.api.get<Brand[]>('/products/brands');
+    return res.data;
+  }
+
+  async getBrandBySlug(slug: string) {
+    const res = await this.api.get<Brand>(`/products/brands/slug/${slug}`);
+    return res.data;
+  }
+
+  async getCategoriesByBrand(brandSlug: string) {
+    const res = await this.api.get<Category[]>(`/products/brands/${brandSlug}/categories`);
     return res.data;
   }
 

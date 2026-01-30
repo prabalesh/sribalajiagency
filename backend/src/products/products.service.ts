@@ -25,7 +25,7 @@ export class ProductsService {
         private fileStorageService: FileStorageService,
     ) { }
 
-    async findAll(page: number = 1, limit: number = 20, filters: { categoryId?: string, categorySlug?: string, brandId?: string, q?: string, isFeatured?: boolean } = {}) {
+    async findAll(page: number = 1, limit: number = 20, filters: { categoryId?: string, categorySlug?: string, brandId?: string, brandSlug?: string, q?: string, isFeatured?: boolean } = {}) {
         if (limit > 20) limit = 20;
         const skip = (page - 1) * limit;
         const query: any = {
@@ -44,6 +44,9 @@ export class ProductsService {
         }
         if (filters.brandId) {
             query.where.brand = { id: filters.brandId };
+        }
+        if (filters.brandSlug) {
+            query.where.brand = { slug: filters.brandSlug };
         }
         if (filters.isFeatured !== undefined) {
             query.where.isFeatured = filters.isFeatured;
@@ -178,6 +181,23 @@ export class ProductsService {
         const url = await this.fileStorageService.saveFile(file, `brands/${brandId}`);
         brand.image = url;
         return this.brandRepo.save(brand);
+    }
+
+    async getBrandBySlug(slug: string) {
+        return this.brandRepo.findOneBy({ slug });
+    }
+
+    async findCategoriesByBrand(brandSlug: string) {
+        const result = await this.productRepo.find({
+            where: { brand: { slug: brandSlug } },
+            relations: ['category']
+        });
+
+        const categories = result.map(p => p.category);
+        const uniqueCategories = Array.from(new Set(categories.map(c => c.id)))
+            .map(id => categories.find(c => c.id === id));
+
+        return uniqueCategories;
     }
 }
 

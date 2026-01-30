@@ -163,17 +163,17 @@ async function bootstrap() {
     }
 
     const brandData = [
-        { name: 'Philips', desc: 'Global leader in lighting' },
-        { name: 'Bosch', desc: 'Engineered power tools' },
-        { name: 'Samsung', desc: 'Premium appliances' },
-        { name: 'Havells', desc: 'Electrical excellence' },
-        { name: 'LG', desc: 'Life\'s Good appliances' },
-        { name: 'Orient', desc: 'Smart cooling solutions' }
+        { name: 'Philips', slug: 'philips', desc: 'Global leader in lighting' },
+        { name: 'Bosch', slug: 'bosch', desc: 'Engineered power tools' },
+        { name: 'Samsung', slug: 'samsung', desc: 'Premium appliances' },
+        { name: 'Havells', slug: 'havells', desc: 'Electrical excellence' },
+        { name: 'LG', slug: 'lg', desc: 'Life\'s Good appliances' },
+        { name: 'Orient', slug: 'orient', desc: 'Smart cooling solutions' }
     ];
 
     for (const b of brandData) {
-        const exists = await brandRepo.findOneBy({ name: b.name });
-        if (!exists) await brandRepo.save(brandRepo.create({ name: b.name, description: b.desc } as any));
+        const exists = await brandRepo.findOneBy({ slug: b.slug });
+        if (!exists) await brandRepo.save(brandRepo.create({ name: b.name, slug: b.slug, description: b.desc } as any));
     }
 
     // 5. Products & Variants (20 products)

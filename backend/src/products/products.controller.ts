@@ -16,6 +16,7 @@ export class ProductsController {
         @Query('categoryId') categoryId?: string,
         @Query('categorySlug') categorySlug?: string,
         @Query('brandId') brandId?: string,
+        @Query('brandSlug') brandSlug?: string,
         @Query('q') q?: string,
         @Query('isFeatured') isFeatured?: string
     ) {
@@ -23,9 +24,20 @@ export class ProductsController {
             categoryId,
             categorySlug,
             brandId,
+            brandSlug,
             q,
             isFeatured: isFeatured === 'true' ? true : (isFeatured === 'false' ? false : undefined)
         });
+    }
+
+    @Get('brands/slug/:slug')
+    findBrandBySlug(@Param('slug') slug: string) {
+        return this.productsService.getBrandBySlug(slug);
+    }
+
+    @Get('brands/:slug/categories')
+    findCategoriesByBrand(@Param('slug') slug: string) {
+        return this.productsService.findCategoriesByBrand(slug);
     }
 
     @Get('categories')
