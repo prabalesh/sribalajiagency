@@ -112,7 +112,13 @@
             }
         </div>
 
-        @if (products.length === 0 && !isLoading) {
+        @if (isCategoryNotFound) {
+        <div class="no-results glass-card">
+            <h2>Category Not Found</h2>
+            <p>We couldn't find the category you're looking for.</p>
+            <button class="btn-primary" routerLink="/products">Back to Catalog</button>
+        </div>
+        } @else if (products.length === 0 && !isLoading) {
         <div class="no-results glass-card">
             <p>We couldn't find any products in this category.</p>
             <button class="btn-primary" routerLink="/products">Explore Catalog</button>
