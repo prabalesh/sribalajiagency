@@ -54,59 +54,61 @@
     @include glass-card;
     position: sticky;
     top: 2rem;
-    padding: 3rem;
+    padding: 0;
+    overflow: hidden;
 
     .main-image {
         aspect-ratio: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--surface-color-secondary);
-        border-radius: var(--border-radius-sm);
-        padding: 2rem;
-        border: 1px solid var(--border-color);
+        background: transparent;
+        padding: 0;
+        border: none;
 
         img {
-            max-width: 100%;
-            max-height: 100%;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
-            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
+            transition: transform 0.3s ease;
         }
     }
 
     .image-thumbnails {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 0.75rem;
+        gap: 1rem;
         margin-top: 1.5rem;
+        padding: 0 1rem 1rem;
 
         .thumbnail {
             aspect-ratio: 1;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0;
             cursor: pointer;
-            transition: all 0.2s;
-            background: var(--surface-color-secondary);
+            transition: all 0.3s;
+            background: rgba(var(--surface-color-rgb), 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
 
             &:hover {
                 border-color: var(--primary-color);
+                background: var(--surface-color);
                 transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.2);
             }
 
             &.active {
                 border-color: var(--primary-color);
-                border-width: 3px;
-                box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+                border-width: 2px;
+                background: var(--surface-color);
             }
 
             img {
-                max-width: 100%;
-                max-height: 100%;
+                width: 100%;
+                height: 100%;
                 object-fit: contain;
             }
         }
@@ -453,7 +455,7 @@
 
     .product-item {
         @include glass-card;
-        padding: 1.5rem;
+        padding: 0;
         cursor: pointer;
         text-align: center;
         transition: all 0.3s;
@@ -470,21 +472,26 @@
         }
 
         .p-image {
-            height: 180px;
+            height: 220px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1.5rem;
-            background: var(--surface-color-secondary);
-            border-radius: 12px;
+            margin-bottom: 0;
+            background: transparent;
+            border-radius: 0;
             overflow: hidden;
 
             img {
-                max-width: 90%;
-                max-height: 90%;
-                object-fit: contain;
-                transition: transform 0.3s;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                padding: 0;
             }
+        }
+
+        .p-info {
+            padding: 1.5rem;
         }
 
         h4 {

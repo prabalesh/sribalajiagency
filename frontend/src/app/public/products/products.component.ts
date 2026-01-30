@@ -32,58 +32,57 @@ export class ProductsComponent implements OnInit, OnDestroy {
     currentCategory: Category | undefined;
     isCategoryNotFound = false;
 
-    // Pagination State
+    // Pagination & Filter State
     currentPage = 1;
     pageSize = 12;
     totalItems = 0;
     isLoading = false;
     hasMore = true;
 
-    ngOnInit() {
-        // 1. Fetch Categories once
-        this.loadInitialData();
+    // Filters
+    minPrice: number | undefined;
+    maxPrice: number | undefined;
+    sortBy: string = 'name';
+    sortOrder: 'ASC' | 'DESC' = 'ASC';
 
-        // 2. Reactive Route Handling
-        this.route.paramMap.pipe(
+    ngOnInit() {
+        // 1. Fetch Categories and handle route reactively
+        combineLatest([
+            this.categoryService.getCategories(),
+            this.route.paramMap
+        ]).pipe(
             takeUntil(this.destroy$),
-            switchMap(params => {
+            switchMap(([categories, params]) => {
+                this.categories = categories;
                 const brandSlug = params.get('brand');
                 const subcategorySlug = params.get('subcategory');
                 const categorySlug = params.get('category');
                 const activeSlug = subcategorySlug ?? categorySlug ?? undefined;
 
                 // Reset state for new route
-                this.products = [];
-                this.currentPage = 1;
-                this.hasMore = true;
+                this.resetFilters();
                 this.isCategoryNotFound = false;
                 this.isLoading = true;
 
-                // Derive current category from existing list (if loaded)
-                if (activeSlug && this.categories.length > 0) {
+                // Set current category
+                if (activeSlug) {
                     this.currentCategory = this.categories.find(c => c.slug === activeSlug);
+                    if (!this.currentCategory) this.isCategoryNotFound = true;
+                } else {
+                    this.currentCategory = undefined;
                 }
 
-                return this.loadProductsData(undefined, activeSlug, brandSlug ?? undefined);
+                return this.loadProductsData({ categorySlug: activeSlug, brandSlug: brandSlug ?? undefined });
             })
-        ).subscribe(result => {
-            this.products = result.items;
-            this.totalItems = result.total;
-            this.hasMore = this.products.length < this.totalItems;
-            if (this.hasMore) this.currentPage++;
-
-            // If we have products, sync the currentCategory if it wasn't found yet
-            if (this.products.length > 0 && !this.currentCategory) {
-                this.currentCategory = this.products[0].category;
-            } else if (!this.currentCategory && this.route.snapshot.paramMap.has('category')) {
-                // If slug provided but no products and no category found in list
-                // We might need to handle the case where categories list isn't loaded yet
-                this.isCategoryNotFound = this.categories.length > 0 && !this.categories.find(c =>
-                    c.slug === (this.route.snapshot.paramMap.get('subcategory') || this.route.snapshot.paramMap.get('category'))
-                );
+        ).subscribe({
+            next: result => {
+                this.handleProductsResult(result);
+                this.isLoading = false;
+            },
+            error: err => {
+                console.error('Error in product stream:', err);
+                this.isLoading = false;
             }
-
-            this.isLoading = false;
         });
     }
 
@@ -92,27 +91,66 @@ export class ProductsComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-    async loadInitialData() {
-        try {
-            this.categories = await this.categoryService.getCategories();
-            // sync currentCategory if it's already filtered but list just arrived
-            const activeSlug = this.route.snapshot.paramMap.get('subcategory') || this.route.snapshot.paramMap.get('category');
-            if (activeSlug && !this.currentCategory) {
-                this.currentCategory = this.categories.find(c => c.slug === activeSlug);
-            }
-        } catch (error) {
-            console.error('Error loading categories:', error);
-        }
+    resetFilters() {
+        this.products = [];
+        this.currentPage = 1;
+        this.hasMore = true;
+        this.minPrice = undefined;
+        this.maxPrice = undefined;
+        this.sortBy = 'name';
+        this.sortOrder = 'ASC';
     }
 
-    private async loadProductsData(categoryId: string | undefined, categorySlug?: string, brandSlug?: string) {
+    async applyFilters() {
+        this.products = [];
+        this.currentPage = 1;
+        this.hasMore = true;
+        this.isLoading = true;
+
+        const params: any = {
+            brandSlug: this.route.snapshot.paramMap.get('brand') || undefined,
+            categorySlug: this.route.snapshot.paramMap.get('subcategory') || this.route.snapshot.paramMap.get('category') || undefined
+        };
+
+        const result = await this.loadProductsData(params);
+        this.handleProductsResult(result);
+        this.isLoading = false;
+    }
+
+    onSortChange(event: any) {
+        const val = event.target.value;
+        if (val === 'price_asc') {
+            this.sortBy = 'price';
+            this.sortOrder = 'ASC';
+        } else if (val === 'price_desc') {
+            this.sortBy = 'price';
+            this.sortOrder = 'DESC';
+        } else {
+            this.sortBy = 'name';
+            this.sortOrder = 'ASC';
+        }
+        this.applyFilters();
+    }
+
+    private handleProductsResult(result: any) {
+        this.products = result.items;
+        this.totalItems = result.total;
+        this.hasMore = this.products.length < this.totalItems;
+        if (this.hasMore) this.currentPage++;
+    }
+
+    private async loadProductsData(params: { categoryId?: string, categorySlug?: string, brandSlug?: string }) {
         try {
             return await this.productService.getProducts({
                 page: this.currentPage,
                 limit: this.pageSize,
-                categoryId: categoryId,
-                categorySlug: categorySlug,
-                brandSlug: brandSlug
+                categoryId: params.categoryId,
+                categorySlug: params.categorySlug,
+                brandSlug: params.brandSlug,
+                minPrice: this.minPrice,
+                maxPrice: this.maxPrice,
+                sortBy: this.sortBy,
+                sortOrder: this.sortOrder
             });
         } catch (error) {
             console.error('Error loading products:', error);
@@ -125,7 +163,11 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
         this.isLoading = true;
         try {
-            const result = await this.loadProductsData(this.currentCategory?.id);
+            const params = {
+                categoryId: this.currentCategory?.id,
+                brandSlug: this.route.snapshot.paramMap.get('brand') || undefined
+            };
+            const result = await this.loadProductsData(params);
             this.products = [...this.products, ...result.items];
             this.totalItems = result.total;
             this.hasMore = this.products.length < this.totalItems;
@@ -138,6 +180,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
         } finally {
             this.isLoading = false;
         }
+    }
+
+    scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     addToCart(product: Product, event: Event) {

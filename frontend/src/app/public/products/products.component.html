@@ -1,26 +1,4 @@
 <div class="products-page container">
-    <aside class="sidebar" [class.mobile-hidden]="true">
-        <div class="sidebar-inner glass-card">
-            <h3>Categories</h3>
-            <ul>
-                <li [class.active]="!currentCategory">
-                    <a routerLink="/products">All Products</a>
-                </li>
-                @for (cat of categories; track cat.id) {
-                <li [class.active]="currentCategory?.id === cat.id">
-                    <a [routerLink]="['/products', cat.slug]">{{ cat.name }}</a>
-                </li>
-                }
-            </ul>
-
-            <div class="sidebar-promo">
-                <h4>Support</h4>
-                <p>Need help finding a tool? Contact our experts.</p>
-                <button class="btn-secondary" routerLink="/contact">Talk to Us</button>
-            </div>
-        </div>
-    </aside>
-
     <main class="products-main">
         <header class="page-header">
             <nav class="breadcrumbs">
@@ -28,11 +6,14 @@
                 <span class="sep">/</span>
                 <span class="current">{{ currentCategory ? currentCategory.name : 'Catalog' }}</span>
             </nav>
-            <h1 class="text-gradient">{{ currentCategory ? currentCategory.name : 'Product Catalog' }}</h1>
 
-            <!-- New Horizontal Categories Bar -->
-            <div class="categories-bar-wrapper glass-card">
-                <div class="categories-bar">
+            <div class="header-content">
+                <h1 class="text-gradient">{{ currentCategory ? currentCategory.name : 'Product Catalog' }}</h1>
+                <p class="count">{{ totalItems }} products found</p>
+            </div>
+
+            <div class="horizontal-controls glass-card">
+                <div class="categories-nav">
                     <a [class.active]="!currentCategory" routerLink="/products" class="cat-link">
                         All Products
                     </a>
@@ -43,9 +24,33 @@
                     </a>
                     }
                 </div>
-            </div>
 
-            <p class="count">{{ products.length }} of {{ totalItems }} items loaded</p>
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label>Price Range:</label>
+                        <div class="price-inputs">
+                            <input type="number" [(ngModel)]="minPrice" placeholder="Min" (change)="applyFilters()">
+                            <span class="range-sep">-</span>
+                            <input type="number" [(ngModel)]="maxPrice" placeholder="Max" (change)="applyFilters()">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Sort By:</label>
+                        <select class="glass-select" (change)="onSortChange($event)">
+                            <option value="name" [selected]="sortBy === 'name'">Name (A-Z)</option>
+                            <option value="price_asc" [selected]="sortBy === 'price' && sortOrder === 'ASC'">Price (Low
+                                to High)</option>
+                            <option value="price_desc" [selected]="sortBy === 'price' && sortOrder === 'DESC'">Price
+                                (High to Low)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-reset" *ngIf="minPrice || maxPrice" (click)="resetFilters(); applyFilters()">
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
         </header>
 
         <section class="product-grid">
@@ -53,47 +58,60 @@
             @for (i of [1,2,3,4,5,6,7,8]; track i) {
             <div class="product-card skeleton-card glass-card">
                 <app-skeleton height="200px" width="100%"></app-skeleton>
-                <div class="p-info" style="padding: 1rem;">
+                <div class="p-info" style="padding: 1.5rem;">
                     <app-skeleton height="14px" width="40%" style="margin-bottom: 8px;"></app-skeleton>
-                    <app-skeleton height="20px" width="80%" style="margin-bottom: 12px;"></app-skeleton>
-                    <div class="p-footer" style="display: flex; justify-content: space-between;">
-                        <app-skeleton height="20px" width="30%"></app-skeleton>
-                        <app-skeleton height="20px" width="20%"></app-skeleton>
+                    <app-skeleton height="24px" width="80%" style="margin-bottom: 15px;"></app-skeleton>
+                    <div class="p-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                        <app-skeleton height="24px" width="30%"></app-skeleton>
+                        <app-skeleton height="36px" width="36px" borderRadius="10px"></app-skeleton>
                     </div>
                 </div>
             </div>
             }
             }
+
             @for (product of products; track product.id) {
             <div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]">
                 <div class="p-image">
-                    <img [src]="(product.images[0] && product.images[0].url) | imageUrl" [alt]="product.name">
-                    <div class="p-overlay">
-                        <button *ngIf="product.stock > 0; else outOfStock" class="btn-primary"
-                            (click)="addToCart(product, $event)">
+                    <img [src]="(product.images[0] && product.images[0].url) | imageUrl" [alt]="product.name"
+                        loading="lazy">
+
+                    <div class="p-badges">
+                        <span class="badge in-stock" *ngIf="product.stock > 0">In Stock</span>
+                        <span class="badge out-of-stock" *ngIf="product.stock <= 0">Out of Stock</span>
+                        <span class="badge featured" *ngIf="product.isFeatured">Featured</span>
+                    </div>
+
+                    <div class="p-actions">
+                        <button *ngIf="product.stock > 0" class="btn-icon-cart" (click)="addToCart(product, $event)"
+                            title="Add to Cart">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5">
                                 <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
                                 <line x1="3" y1="6" x2="21" y2="6"></line>
                                 <path d="M16 10a4 4 0 0 1-8 0"></path>
                             </svg>
-                            Add to Cart
                         </button>
-                        <ng-template #outOfStock>
-                            <span class="oos-text">Sold Out</span>
-                        </ng-template>
                     </div>
                 </div>
+
                 <div class="p-info">
-                    <span class="p-brand">{{ product.brand?.name || 'Generic' | uppercase }}</span>
+                    <div class="p-meta">
+                        <span class="p-brand">{{ product.brand?.name || 'SBA' }}</span>
+                        <span class="p-category" *ngIf="!currentCategory">{{ product.category?.name }}</span>
+                    </div>
                     <h3>{{ product.name }}</h3>
+
                     <div class="p-footer">
-                        <div class="p-price-wrapper">
+                        <div class="p-price-area">
                             <span class="p-price">₹{{ product.price | number }}</span>
                             <span *ngIf="product.comparisonPrice" class="p-mrp">₹{{ product.comparisonPrice | number
                                 }}</span>
                         </div>
-                        <span class="p-rating">★★★★</span>
+                        <div class="p-rating">
+                            <span class="stars">★★★★★</span>
+                            <span class="reviews">(12)</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -104,24 +122,30 @@
             @if (isLoading) {
             <div class="loading-spinner">
                 <div class="spinner"></div>
-                <span>Loading more products...</span>
+                <span>Discovering more...</span>
             </div>
             }
             @if (!hasMore && products.length > 0) {
-            <p class="no-more">You've reached the end of the catalog.</p>
+            <div class="end-catalog glass-card">
+                <p>You've explored the entire collection.</p>
+                <button class="btn-text" (click)="scrollToTop()">Back to Top ↑</button>
+            </div>
             }
         </div>
 
         @if (isCategoryNotFound) {
-        <div class="no-results glass-card">
+        <div class="no-results glass-card animate-slide-up">
+            <div class="icon">🔍</div>
             <h2>Category Not Found</h2>
-            <p>We couldn't find the category you're looking for.</p>
-            <button class="btn-primary" routerLink="/products">Back to Catalog</button>
+            <p>We couldn't find the specific category you're looking for.</p>
+            <button class="btn-primary" routerLink="/products">View All Products</button>
         </div>
         } @else if (products.length === 0 && !isLoading) {
-        <div class="no-results glass-card">
-            <p>We couldn't find any products in this category.</p>
-            <button class="btn-primary" routerLink="/products">Explore Catalog</button>
+        <div class="no-results glass-card animate-slide-up">
+            <div class="icon">🛒</div>
+            <h2>No Products Found</h2>
+            <p>No products match your current filters or selection.</p>
+            <button class="btn-primary" (click)="resetFilters(); applyFilters()">Clear Filters</button>
         </div>
         }
     </main>

@@ -29,6 +29,7 @@ interface SeederConfig {
     orders: number;
     quotations: number;
     coupons: number;
+    highAvailability: boolean;
 }
 
 async function bootstrap() {
@@ -82,6 +83,7 @@ async function bootstrap() {
         orders: 0,
         quotations: 0,
         coupons: 0,
+        highAvailability: true,
     };
 
     // Ask for quantities
@@ -175,6 +177,16 @@ async function bootstrap() {
         ]);
         config.coupons = couponAnswer.count;
     }
+
+    const availabilityAnswer = await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'highAvailability',
+            message: 'Seed with high availability? (Majority of products in stock)',
+            default: true,
+        },
+    ]);
+    config.highAvailability = availabilityAnswer.highAvailability;
 
     console.log('\n📊 Seeding Configuration:');
     console.log(JSON.stringify(config, null, 2));
@@ -395,7 +407,7 @@ async function bootstrap() {
                         price,
                         category: category as any,
                         brand: brand as any,
-                        isAvailable: faker.datatype.boolean(0.9), // 90% available
+                        isAvailable: config.highAvailability ? faker.datatype.boolean(0.95) : faker.datatype.boolean(0.7),
                         isFeatured: faker.datatype.boolean(0.3), // 30% featured
                         allowedPaymentMethods: faker.helpers.arrayElements(['online', 'cod'], { min: 1, max: 2 })
                     } as any) as unknown as Product);
@@ -415,11 +427,15 @@ async function bootstrap() {
                     const variantCount = faker.number.int({ min: 1, max: 3 });
                     const variantNames = ['Standard', 'Premium', 'Deluxe', 'Economy', 'Pro'];
                     for (let k = 0; k < variantCount; k++) {
+                        const stock = config.highAvailability
+                            ? faker.number.int({ min: (i % 8 === 0) ? 0 : 5, max: 200 })
+                            : faker.number.int({ min: 0, max: 100 });
+
                         await variantRepo.save(variantRepo.create({
                             name: variantNames[k % variantNames.length],
                             price: price + (k * 500),
                             sku: `${brand.name.substring(0, 3).toUpperCase()}-${faker.string.alphanumeric(6).toUpperCase()}`,
-                            stock: faker.number.int({ min: 0, max: 200 }),
+                            stock,
                             product: product as any
                         } as any));
                     }

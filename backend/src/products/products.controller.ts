@@ -18,7 +18,11 @@ export class ProductsController {
         @Query('brandId') brandId?: string,
         @Query('brandSlug') brandSlug?: string,
         @Query('q') q?: string,
-        @Query('isFeatured') isFeatured?: string
+        @Query('isFeatured') isFeatured?: string,
+        @Query('minPrice') minPrice?: string,
+        @Query('maxPrice') maxPrice?: string,
+        @Query('sortBy') sortBy?: string,
+        @Query('sortOrder') sortOrder?: 'ASC' | 'DESC'
     ) {
         return this.productsService.findAll(+page, +limit, {
             categoryId,
@@ -26,7 +30,11 @@ export class ProductsController {
             brandId,
             brandSlug,
             q,
-            isFeatured: isFeatured === 'true' ? true : (isFeatured === 'false' ? false : undefined)
+            isFeatured: isFeatured === 'true' ? true : (isFeatured === 'false' ? false : undefined),
+            minPrice: minPrice ? +minPrice : undefined,
+            maxPrice: maxPrice ? +maxPrice : undefined,
+            sortBy,
+            sortOrder
         });
     }
 

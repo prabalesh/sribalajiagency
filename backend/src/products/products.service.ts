@@ -25,44 +25,67 @@ export class ProductsService {
         private fileStorageService: FileStorageService,
     ) { }
 
-    async findAll(page: number = 1, limit: number = 20, filters: { categoryId?: string, categorySlug?: string, brandId?: string, brandSlug?: string, q?: string, isFeatured?: boolean } = {}) {
-        if (limit > 20) limit = 20;
+    async findAll(
+        page: number = 1,
+        limit: number = 20,
+        filters: {
+            categoryId?: string,
+            categorySlug?: string,
+            brandId?: string,
+            brandSlug?: string,
+            q?: string,
+            isFeatured?: boolean,
+            minPrice?: number,
+            maxPrice?: number,
+            sortBy?: string,
+            sortOrder?: 'ASC' | 'DESC'
+        } = {}
+    ) {
+        if (limit > 50) limit = 50;
         const skip = (page - 1) * limit;
-        const query: any = {
-            relations: ['category', 'brand', 'images', 'variants'],
-            order: { name: 'ASC' },
-            take: limit,
-            skip: skip,
-            where: {}
-        };
 
-        if (filters.categoryId) {
-            query.where.category = { id: filters.categoryId };
+        const { Between, MoreThanOrEqual, LessThanOrEqual, ILike } = require('typeorm');
+
+        let order: any = { isAvailable: 'DESC' }; // Prioritize in-stock/available products
+        if (filters.sortBy) {
+            order[filters.sortBy] = filters.sortOrder || 'ASC';
+        } else {
+            order.name = 'ASC';
         }
-        if (filters.categorySlug) {
-            query.where.category = { slug: filters.categorySlug };
+
+        const where: any = {};
+
+        if (filters.categoryId) where.category = { id: filters.categoryId };
+        if (filters.categorySlug) where.category = { slug: filters.categorySlug };
+        if (filters.brandId) where.brand = { id: filters.brandId };
+        if (filters.brandSlug) where.brand = { slug: filters.brandSlug };
+        if (filters.isFeatured !== undefined) where.isFeatured = filters.isFeatured;
+
+        // Price Filtering
+        if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
+            where.price = Between(filters.minPrice, filters.maxPrice);
+        } else if (filters.minPrice !== undefined) {
+            where.price = MoreThanOrEqual(filters.minPrice);
+        } else if (filters.maxPrice !== undefined) {
+            where.price = LessThanOrEqual(filters.maxPrice);
         }
-        if (filters.brandId) {
-            query.where.brand = { id: filters.brandId };
-        }
-        if (filters.brandSlug) {
-            query.where.brand = { slug: filters.brandSlug };
-        }
-        if (filters.isFeatured !== undefined) {
-            query.where.isFeatured = filters.isFeatured;
-        }
+
+        let whereClause = where;
         if (filters.q) {
-            // Basic search in name and description
-            // For production, consider using a full-to-text search engine or ILIKE
-            // TypeORM's Like operator can be used here.
-            const { ILike } = require('typeorm');
-            query.where = [
-                { ...query.where, name: ILike(`%${filters.q}%`) },
-                { ...query.where, description: ILike(`%${filters.q}%`) }
+            whereClause = [
+                { ...where, name: ILike(`%${filters.q}%`) },
+                { ...where, description: ILike(`%${filters.q}%`) }
             ];
         }
 
-        const [items, total] = await this.productRepo.findAndCount(query);
+        const [items, total] = await this.productRepo.findAndCount({
+            relations: ['category', 'brand', 'images', 'variants'],
+            order,
+            take: limit,
+            skip: skip,
+            where: whereClause
+        });
+
         return { items, total, page, limit };
     }
 

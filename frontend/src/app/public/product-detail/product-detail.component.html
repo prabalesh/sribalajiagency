@@ -55,7 +55,7 @@
                     <button (click)="updateQuantity(1)"
                         [disabled]="quantity >= product.stock || (product.maxOrderQuantity && quantity >= product.maxOrderQuantity)">+</button>
                 </div>
-                <button class="btn-primary" (click)="addToCart()">
+                <button class="btn-primary" (click)="addToCart()" *ngIf="product.stock > 0">
                     Add to Cart
                 </button>
             </div>
