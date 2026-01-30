@@ -23,10 +23,10 @@ export class DashboardComponent implements OnInit {
 
 
   stats = [
-    { label: 'Products', value: 0, icon: '📦', color: '#ff3e00', perm: 'VIEW_PRODUCTS' },
-    { label: 'Orders', value: 0, icon: '🛒', color: '#ffa500', perm: 'VIEW_ORDERS' },
-    { label: 'Customers', value: 0, icon: '👥', color: '#4caf50', perm: 'VIEW_USERS' },
-    { label: 'Quotations', value: 0, icon: '📄', color: '#2196f3', perm: 'VIEW_QUOTATIONS' }
+    { label: 'Products', value: 0, icon: '📦', color: 'var(--primary-color)', perm: 'VIEW_PRODUCTS' },
+    { label: 'Orders', value: 0, icon: '🛒', color: 'var(--warning-color)', perm: 'VIEW_ORDERS' },
+    { label: 'Customers', value: 0, icon: '👥', color: 'var(--success-color)', perm: 'VIEW_USERS' },
+    { label: 'Quotations', value: 0, icon: '📄', color: 'var(--info-color)', perm: 'VIEW_QUOTATIONS' }
   ];
 
   filteredStats = computed(() => {

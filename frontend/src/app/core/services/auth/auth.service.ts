@@ -9,6 +9,7 @@ import { User } from '../../models/auth.model';
 export class AuthService {
   private api = inject(ApiService);
   private currentUser = signal<User | null>(null);
+  public isInitialCheckDone = signal<boolean>(false);
 
   private isBrowser: boolean;
 
@@ -24,6 +25,7 @@ export class AuthService {
         }
       }
     }
+    this.isInitialCheckDone.set(true);
   }
 
   user = this.currentUser.asReadonly();
@@ -32,10 +34,6 @@ export class AuthService {
   permissions = computed(() => {
     const user = this.currentUser();
     if (!user) return [];
-    if (user.roles?.some(r => r.name === 'admin')) {
-      // Admin has all permissions conceptually, but let's flatmap what's there
-      // or return a special '*' if you prefer. For now, flatmap.
-    }
     return user.roles?.flatMap(r => r.permissions?.map(p => p.name)) || [];
   });
 
@@ -155,4 +153,3 @@ export class AuthService {
     return res.data;
   }
 }
-

@@ -55,21 +55,21 @@
         cursor: pointer;
 
         &.processing {
-            background: #fee2e2;
-            color: #ef4444;
-            border-color: #fecaca;
+            background: rgba(var(--danger-color-rgb), 0.1);
+            color: var(--danger-color);
+            border-color: rgba(var(--danger-color-rgb), 0.2);
         }
 
         &.delivered {
-            background: #dcfce7;
-            color: #22c55e;
-            border-color: #bbf7d0;
+            background: rgba(var(--success-color-rgb), 0.1);
+            color: var(--success-color);
+            border-color: rgba(var(--success-color-rgb), 0.2);
         }
 
         &.cancelled {
-            background: #f3f4f6;
-            color: #6b7280;
-            border-color: #e5e7eb;
+            background: var(--surface-color-secondary);
+            color: var(--text-color-muted);
+            border-color: var(--border-color);
         }
     }
 

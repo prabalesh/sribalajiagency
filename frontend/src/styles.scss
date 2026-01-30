@@ -39,6 +39,10 @@
   --info-color: #3b82f6;
   --info-color-rgb: 59, 130, 246;
 
+  /* Skeleton Colors (Light) */
+  --skeleton-bg: #e2e8f0;
+  --skeleton-shimmer: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+
   /* Hero Section Adaptive Vars */
   --hero-bg: radial-gradient(circle at 70% 30%, #ffffff 0%, #f1f5f9 100%);
   --hero-text: #0f172a;
@@ -74,6 +78,10 @@
   --warning-color-rgb: 251, 191, 36;
   --info-color: #60a5fa;
   --info-color-rgb: 96, 165, 250;
+
+  /* Skeleton Colors (Dark) */
+  --skeleton-bg: #1e293b;
+  --skeleton-shimmer: linear-gradient(90deg, #1e293b 25%, #334155 37%, #1e293b 63%);
 
   /* Hero Section Adaptive Vars (Dark) */
   --hero-bg: radial-gradient(circle at 70% 30%, #0f172a 0%, #020617 100%);

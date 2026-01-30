@@ -132,7 +132,7 @@
                 position: absolute;
                 top: 5px;
                 right: 5px;
-                background: #ff4444;
+                background: var(--danger-color);
                 color: white;
                 border-radius: 50%;
                 width: 24px;
@@ -190,7 +190,7 @@
                 }
 
                 .remove-btn {
-                    color: #ff4444;
+                    color: var(--danger-color);
                     font-size: 1.5rem;
                     font-weight: 800;
                     justify-self: end;
@@ -276,13 +276,13 @@
         border-radius: 8px;
         font-size: 0.75rem;
         font-weight: 700;
-        background: #dcfce7;
-        color: #22c55e;
+        background: rgba(var(--success-color-rgb), 0.1);
+        color: var(--success-color);
         white-space: nowrap;
 
         &.low {
-            background: #fee2e2;
-            color: #ef4444;
+            background: rgba(var(--danger-color-rgb), 0.1);
+            color: var(--danger-color);
         }
     }
 
@@ -301,10 +301,10 @@
     white-space: nowrap;
 
     &.delete {
-        color: #ff4444;
+        color: var(--danger-color);
 
         &:hover {
-            background: #ff4444;
+            background: var(--danger-color);
             color: white;
         }
     }

@@ -64,11 +64,11 @@
 
             &.delete {
                 background: rgba(239, 68, 68, 0.1);
-                color: #ef4444;
+                color: var(--danger-color);
                 border: 1px solid rgba(239, 68, 68, 0.2);
 
                 &:hover {
-                    background: #ef4444;
+                    background: var(--danger-color);
                     color: white;
                 }
             }
