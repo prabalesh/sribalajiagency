@@ -29,6 +29,22 @@
                 <span class="current">{{ currentCategory ? currentCategory.name : 'Catalog' }}</span>
             </nav>
             <h1 class="text-gradient">{{ currentCategory ? currentCategory.name : 'Product Catalog' }}</h1>
+
+            <!-- New Horizontal Categories Bar -->
+            <div class="categories-bar-wrapper glass-card">
+                <div class="categories-bar">
+                    <a [class.active]="!currentCategory" routerLink="/products" class="cat-link">
+                        All Products
+                    </a>
+                    @for (cat of categories; track cat.id) {
+                    <a [class.active]="currentCategory?.id === cat.id" [routerLink]="['/products', cat.slug]"
+                        class="cat-link">
+                        {{ cat.name }}
+                    </a>
+                    }
+                </div>
+            </div>
+
             <p class="count">{{ products.length }} of {{ totalItems }} items loaded</p>
         </header>
 

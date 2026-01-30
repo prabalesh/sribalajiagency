@@ -1,9 +1,7 @@
 @use "../../core/styles/glass" as *;
 
 .products-page {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 3rem;
+    display: block; // Change from grid to block since we're removing sidebar
     padding-top: 4rem;
     padding-bottom: 8rem;
 
@@ -15,76 +13,7 @@
 }
 
 .sidebar {
-    .sidebar-inner {
-        position: sticky;
-        top: calc(var(--header-height) + 2rem);
-        padding: 2.5rem;
-        @include glass-card;
-    }
-
-    @media (max-width: 991px) {
-        display: none;
-    }
-
-    h3 {
-        font-size: 1.25rem;
-        font-weight: 800;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    ul {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        margin-bottom: 3rem;
-
-        li {
-            a {
-                display: block;
-                padding: 0.75rem 1rem;
-                border-radius: 12px;
-                font-weight: 600;
-                color: var(--text-color-muted);
-                transition: all 0.3s var(--transition-curve);
-
-                &:hover {
-                    background: var(--surface-color-secondary);
-                    color: var(--text-color);
-                    padding-left: 1.25rem;
-                }
-            }
-
-            &.active a {
-                background: var(--primary-color);
-                color: white;
-                box-shadow: 0 4px 10px rgba(var(--primary-color-rgb), 0.2);
-            }
-        }
-    }
-
-    .sidebar-promo {
-        padding-top: 2rem;
-        border-top: 1px solid var(--border-color);
-
-        h4 {
-            margin-bottom: 1rem;
-            font-weight: 800;
-        }
-
-        p {
-            color: var(--text-color-muted);
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-
-        .btn-secondary {
-            width: 100%;
-            padding: 0.75rem;
-        }
-    }
+    display: none; // Hiding sidebar in favor of horizontal bar
 }
 
 .products-main {
@@ -124,6 +53,70 @@
         .count {
             color: var(--text-color-muted);
             font-weight: 600;
+        }
+
+        /* Category Bar Styling */
+        .categories-bar-wrapper {
+            position: sticky;
+            top: var(--header-height);
+            z-index: 100;
+            margin: 2rem 0;
+            padding: 0.75rem;
+            @include glass-card;
+            border-radius: 16px;
+            overflow: hidden;
+
+            &::after {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                width: 40px;
+                background: linear-gradient(to left, var(--surface-color), transparent);
+                pointer-events: none;
+                z-index: 2;
+            }
+        }
+
+        .categories-bar {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-right: 40px;
+            /* Space for gradient */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+
+            &::-webkit-scrollbar {
+                display: none;
+                /* Chrome/Safari */
+            }
+
+            .cat-link {
+                white-space: nowrap;
+                padding: 0.6rem 1.25rem;
+                border-radius: 12px;
+                font-weight: 700;
+                font-size: 0.9rem;
+                color: var(--text-color-muted);
+                transition: all 0.3s var(--transition-curve);
+                background: var(--surface-color-secondary);
+
+                &:hover {
+                    color: var(--text-color);
+                    background: var(--border-color);
+                    transform: translateY(-2px);
+                }
+
+                &.active {
+                    background: var(--primary-color);
+                    color: white;
+                    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+                }
+            }
         }
     }
 }
