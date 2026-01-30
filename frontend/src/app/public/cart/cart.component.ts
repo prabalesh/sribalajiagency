@@ -4,17 +4,40 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../core/store/cart.service';
 import { SettingsService } from '../../core/services/api/settings.service';
+import { LucideAngularModule, Trash2, Minus, Plus, Truck, Lock, ShieldCheck, CreditCard, Banknote, CheckCircle, Sparkles, ArrowLeft, ShoppingBag, TrendingUp, Tag, ShoppingCart } from 'lucide-angular';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    LucideAngularModule
+  ],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.scss'
 })
 export class CartComponent implements OnInit {
   private settingsService = inject(SettingsService);
   cartService = inject(CartService);
+
+  // Register Lucide icons
+  readonly Trash2 = Trash2;
+  readonly Minus = Minus;
+  readonly Plus = Plus;
+  readonly Truck = Truck;
+  readonly Lock = Lock;
+  readonly ShieldCheck = ShieldCheck;
+  readonly CreditCard = CreditCard;
+  readonly Banknote = Banknote;
+  readonly CheckCircle = CheckCircle;
+  readonly Sparkles = Sparkles;
+  readonly ArrowLeft = ArrowLeft;
+  readonly ShoppingBag = ShoppingBag;
+  readonly TrendingUp = TrendingUp;
+  readonly Tag = Tag;
+  readonly ShoppingCart = ShoppingCart;
 
   settings: any;
   selectedPayment: 'online' | 'cod' | '' = '';
@@ -61,7 +84,6 @@ export class CartComponent implements OnInit {
       alert('Please select a payment method');
       return;
     }
-    // Finalize order logic (mocking for now)
     alert(`Order placed successfully using ${this.selectedPayment.toUpperCase()}! Our team will contact you shortly.`);
     this.cartService.clearCart();
     this.isCheckoutMode = false;
