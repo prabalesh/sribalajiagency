@@ -38,14 +38,16 @@ export class DashboardComponent implements OnInit {
     try {
       const [products, orders, users, quotes] = await Promise.all([
         this.authService.hasPermission('VIEW_PRODUCTS') ? this.productService.getProducts() : Promise.resolve({ total: 0 }),
-        this.authService.hasPermission('VIEW_ORDERS') ? this.orderService.getAllOrders() : Promise.resolve([]),
-        this.authService.hasPermission('VIEW_USERS') ? this.authService.getUsers() : Promise.resolve([]),
+        this.authService.hasPermission('VIEW_ORDERS') ? this.orderService.getAllOrders() : Promise.resolve({ total: 0, items: [] }),
+        this.authService.hasPermission('VIEW_USERS') ? this.authService.getUsers() : Promise.resolve({ total: 0, items: [] }),
         this.authService.hasPermission('VIEW_QUOTATIONS') ? this.quotationService.getRequests() : Promise.resolve([])
       ]);
 
       this.stats[0].value = products.total;
-      this.stats[1].value = orders.length;
-      this.stats[2].value = users.length;
+      // @ts-ignore - type mismatch fix
+      this.stats[1].value = orders.total || orders.length || 0;
+      // @ts-ignore - type mismatch fix
+      this.stats[2].value = users.total || users.length || 0;
       this.stats[3].value = quotes.length;
     } finally {
       this.isLoading = false;

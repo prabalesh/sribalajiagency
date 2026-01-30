@@ -1,0 +1,211 @@
+.order-confirmation {
+    padding: 4rem 0;
+    min-height: 70vh;
+}
+
+.loading,
+.error {
+    text-align: center;
+    padding: 4rem 2rem;
+    font-size: 1.2rem;
+}
+
+.confirmation-card {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem;
+    text-align: center;
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem;
+    background: var(--success-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.order-id {
+    font-size: 1.1rem;
+    color: var(--text-color-muted);
+    margin-bottom: 1rem;
+}
+
+.thank-you {
+    font-size: 1.1rem;
+    color: var(--text-color-muted);
+    margin-bottom: 3rem;
+}
+
+.order-details {
+    text-align: left;
+    margin-bottom: 2rem;
+
+    h2 {
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+    }
+}
+
+.detail-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--surface-color-secondary);
+    border-radius: var(--border-radius-md);
+
+    p {
+        margin: 0.5rem 0;
+    }
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--surface-color);
+    border-radius: var(--border-radius-sm);
+
+    .item-name {
+        flex: 1;
+    }
+
+    .item-qty {
+        margin: 0 1rem;
+        color: var(--text-color-muted);
+    }
+
+    .item-price {
+        font-weight: 700;
+    }
+}
+
+.status-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 1rem;
+
+    .timeline-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        margin-top: 0.25rem;
+        flex-shrink: 0;
+
+        &.success {
+            background: var(--success-color);
+        }
+
+        &.warning {
+            background: var(--warning-color);
+        }
+
+        &.info {
+            background: var(--info-color);
+        }
+
+        &.primary {
+            background: var(--primary-color);
+        }
+
+        &.danger {
+            background: var(--danger-color);
+        }
+    }
+
+    .timeline-content {
+        flex: 1;
+
+        strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        p {
+            margin: 0.25rem 0;
+            color: var(--text-color-muted);
+        }
+
+        small {
+            color: var(--text-color-muted);
+            font-size: 0.85rem;
+        }
+    }
+}
+
+.total-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--surface-color-secondary);
+    border-radius: var(--border-radius-md);
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.5rem;
+
+        strong {
+            color: var(--primary-color);
+        }
+    }
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+
+    button {
+        padding: 1rem 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .confirmation-card {
+        padding: 2rem 1.5rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+
+        button {
+            width: 100%;
+        }
+    }
+}

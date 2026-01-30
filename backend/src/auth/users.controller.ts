@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { PermissionsGuard } from './guards/permissions.guard';
@@ -11,8 +11,11 @@ export class UsersController {
 
     @Get()
     @Permissions('VIEW_USERS')
-    findAll() {
-        return this.authService.findAllUsers();
+    findAll(
+        @Query('page') page: string = '1',
+        @Query('limit') limit: string = '20'
+    ) {
+        return this.authService.findAllUsers(+page, +limit);
     }
 
     @Put(':id')

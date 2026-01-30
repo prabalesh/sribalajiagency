@@ -1,9 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../core/store/cart.service';
 import { SettingsService } from '../../core/services/api/settings.service';
+import { OrderService } from '../../core/services/api/order.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 import { LucideAngularModule, Trash2, Minus, Plus, Truck, Lock, ShieldCheck, CreditCard, Banknote, CheckCircle, Sparkles, ArrowLeft, ShoppingBag, TrendingUp, Tag, ShoppingCart } from 'lucide-angular';
 
 @Component({
@@ -20,6 +22,9 @@ import { LucideAngularModule, Trash2, Minus, Plus, Truck, Lock, ShieldCheck, Cre
 })
 export class CartComponent implements OnInit {
   private settingsService = inject(SettingsService);
+  private orderService = inject(OrderService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
   cartService = inject(CartService);
 
   // Register Lucide icons
@@ -42,6 +47,12 @@ export class CartComponent implements OnInit {
   settings: any;
   selectedPayment: 'online' | 'cod' | '' = '';
   isCheckoutMode = false;
+
+  // Delivery information
+  deliveryAddress: string = '';
+  deliveryPhone: string = '';
+  deliveryNotes: string = '';
+  isProcessingOrder = false;
 
   async ngOnInit() {
     this.settings = await this.settingsService.getStoreSettings();
@@ -72,6 +83,13 @@ export class CartComponent implements OnInit {
   }
 
   async proceedToCheckout() {
+    // Check if user is logged in
+    if (!this.authService.isLoggedIn()) {
+      alert('Please login to proceed with checkout');
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+      return;
+    }
+
     if (this.allowedMethods.length === 0) {
       alert('No compatible payment method found for this combination of products. Please contact support.');
       return;
@@ -84,8 +102,45 @@ export class CartComponent implements OnInit {
       alert('Please select a payment method');
       return;
     }
-    alert(`Order placed successfully using ${this.selectedPayment.toUpperCase()}! Our team will contact you shortly.`);
-    this.cartService.clearCart();
-    this.isCheckoutMode = false;
+
+    if (!this.deliveryAddress.trim()) {
+      alert('Please enter your delivery address');
+      return;
+    }
+
+    if (!this.deliveryPhone.trim()) {
+      alert('Please enter your phone number');
+      return;
+    }
+
+    this.isProcessingOrder = true;
+
+    try {
+      const items = this.cartService.items().map(item => ({
+        productId: item.product.id,
+        productName: item.product.name,
+        price: item.product.price || 0,
+        quantity: item.quantity
+      }));
+
+      const order = await this.orderService.createOrder({
+        items,
+        paymentMethod: this.selectedPayment,
+        deliveryAddress: this.deliveryAddress,
+        deliveryPhone: this.deliveryPhone,
+        deliveryNotes: this.deliveryNotes
+      });
+
+      // Clear cart
+      this.cartService.clearCart();
+
+      // Navigate to order confirmation
+      this.router.navigate(['/order-confirmation', order.id]);
+    } catch (error: any) {
+      console.error('Order creation failed:', error);
+      alert(error.message || 'Failed to create order. Please try again.');
+    } finally {
+      this.isProcessingOrder = false;
+    }
   }
 }

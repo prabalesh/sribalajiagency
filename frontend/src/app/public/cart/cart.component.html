@@ -116,6 +116,37 @@
 
             <ng-template #paymentSection>
                 <div class="payment-selection animate-fade">
+                    <!-- Delivery Information Section -->
+                    <div class="delivery-section">
+                        <div class="delivery-header">
+                            <lucide-icon [img]="Truck" [size]="22"></lucide-icon>
+                            <h4>Delivery Information</h4>
+                        </div>
+
+                        <div class="delivery-form">
+                            <div class="form-group">
+                                <label for="deliveryAddress">Delivery Address *</label>
+                                <textarea id="deliveryAddress" [(ngModel)]="deliveryAddress"
+                                    placeholder="Enter your complete delivery address" rows="3" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="deliveryPhone">Phone Number *</label>
+                                <input type="tel" id="deliveryPhone" [(ngModel)]="deliveryPhone"
+                                    placeholder="Enter your contact number" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="deliveryNotes">Delivery Notes (Optional)</label>
+                                <textarea id="deliveryNotes" [(ngModel)]="deliveryNotes"
+                                    placeholder="Any special instructions for delivery?" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Payment Method Section -->
                     <div class="payment-header">
                         <lucide-icon [img]="CreditCard" [size]="22"></lucide-icon>
                         <h4>Choose Payment Method</h4>
@@ -160,13 +191,15 @@
                     </div>
 
                     <div class="checkout-footer">
-                        <button class="btn-primary finalize-btn" [disabled]="!selectedPayment"
+                        <button class="btn-primary finalize-btn"
+                            [disabled]="!selectedPayment || !deliveryAddress.trim() || !deliveryPhone.trim() || isProcessingOrder"
                             (click)="finalizeOrder()">
                             <lucide-icon [img]="Sparkles" [size]="18"></lucide-icon>
-                            <span>Complete Order</span>
+                            <span>{{ isProcessingOrder ? 'Processing...' : 'Complete Order' }}</span>
                             <div class="btn-shine"></div>
                         </button>
-                        <button class="btn-secondary back-btn" (click)="isCheckoutMode = false">
+                        <button class="btn-secondary back-btn" (click)="isCheckoutMode = false"
+                            [disabled]="isProcessingOrder">
                             <lucide-icon [img]="ArrowLeft" [size]="16"></lucide-icon>
                             <span>Back to Cart</span>
                         </button>

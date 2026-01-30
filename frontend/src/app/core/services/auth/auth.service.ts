@@ -97,8 +97,8 @@ export class AuthService {
     return this.isLoggedIn();
   }
 
-  async getUsers() {
-    const res = await this.api.get<User[]>('/users');
+  async getUsers(page: number = 1, limit: number = 20) {
+    const res = await this.api.get<{ items: User[], total: number, page: number, limit: number }>('/users', { page, limit });
     return res.data;
   }
 

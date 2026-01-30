@@ -45,8 +45,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./public/cart/cart.component').then(m => m.CartComponent)
             },
             {
+                path: 'order-confirmation/:id',
+                canActivate: [authGuard],
+                loadComponent: () => import('./public/order-confirmation/order-confirmation.component').then(m => m.OrderConfirmationComponent)
+            },
+            {
                 path: 'history',
-                loadComponent: () => import('./public/history/history.component').then(m => m.HistoryComponent)
+                redirectTo: 'account/orders',
+                pathMatch: 'full'
             },
             {
                 path: 'request-quote',
@@ -87,6 +93,10 @@ export const routes: Routes = [
                     {
                         path: 'orders',
                         loadComponent: () => import('./public/account/orders/orders.component').then(m => m.OrdersComponent)
+                    },
+                    {
+                        path: 'orders/:id',
+                        loadComponent: () => import('./public/account/orders/order-detail/order-detail.component').then(m => m.UserOrderDetailComponent)
                     },
                     {
                         path: 'addresses',
@@ -152,6 +162,10 @@ export const routes: Routes = [
             {
                 path: 'orders',
                 loadComponent: () => import('./admin/orders/orders.component').then(m => m.OrdersComponent)
+            },
+            {
+                path: 'orders/:id',
+                loadComponent: () => import('./admin/orders/order-detail/order-detail.component').then(m => m.AdminOrderDetailComponent)
             },
             {
                 path: 'coupons',

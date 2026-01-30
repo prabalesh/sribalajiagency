@@ -102,8 +102,16 @@ export class AuthService {
     }
 
     // User Management
-    findAllUsers() {
-        return this.userRepository.find({ relations: ['roles', 'roles.permissions'] });
+    async findAllUsers(page: number = 1, limit: number = 20) {
+        if (limit > 50) limit = 50;
+        const skip = (page - 1) * limit;
+
+        const [items, total] = await this.userRepository.findAndCount({
+            relations: ['roles', 'roles.permissions'],
+            take: limit,
+            skip: skip
+        });
+        return { items, total, page, limit };
     }
 
     async updateUser(id: string, data: any) {

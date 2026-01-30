@@ -43,33 +43,97 @@
 
     <main class="account-content animate-fade">
         <header class="content-header">
-            <h1>My Orders</h1>
-            <p>View and track your previous purchases.</p>
+            <div>
+                <h1>My Orders</h1>
+                <p>View and track your previous purchases.</p>
+            </div>
+            <div class="filter-controls">
+                <div class="search-box">
+                    <input type="text" [(ngModel)]="searchQuery" placeholder="Search by Order ID or Product..."
+                        class="search-input">
+                </div>
+                <select [(ngModel)]="statusFilter" (change)="filterOrders()" class="status-select">
+                    <option value="All">All Orders</option>
+                    @for (status of statusOptions; track status) {
+                    <option [value]="status">{{ status }}</option>
+                    }
+                </select>
+            </div>
         </header>
 
+        @if (isLoading) {
+        <div class="loading">Loading orders...</div>
+        } @else {
         <div class="orders-list">
-            @for (order of orders; track order.id) {
+            @for (order of filteredOrders; track order.id) {
             <div class="order-item glass-card">
                 <div class="order-header">
                     <div class="info">
-                        <h3>Order #{{ order.id }}</h3>
+                        <h3>
+                            <a [routerLink]="['/account/orders', order.id]" class="order-link">Order #{{
+                                order.id.substring(0, 8) }}</a>
+                        </h3>
                         <p>Placed on {{ order.createdAt | date:'longDate' }}</p>
                     </div>
-                    <span class="status-badge" [ngClass]="order.status?.toLowerCase()">
+                    <span class="status-badge" [ngClass]="getStatusColor(order.status)">
                         {{ order.status }}
                     </span>
                 </div>
-                <div class="order-details">
-                    @for (item of order.items; track item.productName) {
-                    <div class="product-row">
-                        <span class="name"><strong>{{ item.quantity }}x</strong> {{ item.productName }}</span>
-                        <span class="price">₹{{ item.price | number }}</span>
+
+
+
+                <!-- Progress Bar in List -->
+                <div class="progress-track">
+                    @for (step of getProgressSteps(order); track step.status) {
+                    <div class="progress-step" [class.completed]="step.completed" [class.active]="step.active"
+                        [title]="step.label + (step.date ? ' - ' + (step.date | date:'shortDate') : '')">
+                        <div class="step-icon">
+                            @if (step.completed) { ✓ } @else { {{ step.index }} }
+                        </div>
+                        <div class="step-label">{{ step.label }}</div>
                     </div>
                     }
                 </div>
+
+                <div class="order-details">
+                    <div class="section">
+                        <h4>Items</h4>
+                        @for (item of order.items; track item.productId) {
+                        <div class="product-row clickable" (click)="viewProduct(item.productId)">
+                            <span class="name">
+                                <strong>{{ item.quantity }}x</strong> {{ item.productName }}
+                            </span>
+                            <span class="price">₹{{ item.price * item.quantity | number }}</span>
+                        </div>
+                        }
+                    </div>
+
+                    @if (order.deliveryAddress) {
+                    <div class="section">
+                        <h4>Delivery Information</h4>
+                        <p class="delivery-info">
+                            <strong>Address:</strong> {{ order.deliveryAddress }}<br>
+                            <strong>Phone:</strong> {{ order.deliveryPhone }}
+                        </p>
+                    </div>
+                    }
+
+                    @if (order.paymentMethod) {
+                    <div class="section">
+                        <h4>Payment Method</h4>
+                        <p>{{ order.paymentMethod === 'online' ? 'Online Payment' : 'Cash on Delivery' }}</p>
+                    </div>
+                    }
+                </div>
+
                 <div class="order-footer">
                     <span class="total-label">Order Total</span>
                     <span class="total-amount">₹{{ order.totalAmount | number }}</span>
+                </div>
+
+                <div class="action-bar">
+                    <a [routerLink]="['/account/orders', order.id]" class="btn-secondary">View Full Details & History
+                        →</a>
                 </div>
             </div>
             } @empty {
@@ -80,6 +144,38 @@
                 <button class="btn-primary" routerLink="/products">Start Shopping</button>
             </div>
             }
+
+            @if (totalPages > 1) {
+            <div class="pagination">
+                <button class="page-btn prev" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Previous
+                </button>
+
+                <div class="page-numbers">
+                    @for (page of pages; track $index) {
+                    @if (page === '...') {
+                    <span class="ellipsis">{{ page }}</span>
+                    } @else {
+                    <button class="page-num" [class.active]="page === currentPage" (click)="onPageChange(page)">
+                        {{ page }}
+                    </button>
+                    }
+                    }
+                </div>
+
+                <button class="page-btn next" [disabled]="currentPage === totalPages"
+                    (click)="onPageChange(currentPage + 1)">
+                    Next
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+            }
         </div>
+        }
     </main>
 </div>

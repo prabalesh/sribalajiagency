@@ -1,56 +1,147 @@
-<div class="crud-container">
+<div class="admin-orders-page">
     <header class="page-header">
         <h1>Order Management</h1>
-        <p>Monitor customer purchases and update shipping status</p>
+        <p>Manage and track all orders</p>
     </header>
 
-    <div class="list-container animate-fade">
-        <table class="data-table">
+    <!-- Queue Tabs -->
+    <div class="queue-tabs">
+        <button class="tab-btn" [class.active]="activeTab === 'orders'" (click)="switchTab('orders')">
+            Orders Queue
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'delivery'" (click)="switchTab('delivery')">
+            Delivery Queue
+        </button>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="filters-bar glass-card">
+        <div class="search-group">
+            <span class="search-icon">🔍</span>
+            <input type="text" [(ngModel)]="searchTerm" placeholder="Search orders, customers, phone..."
+                class="search-input">
+        </div>
+
+        <div class="filter-group">
+            <select [(ngModel)]="statusFilter" class="filter-select">
+                <option value="All">All Statuses</option>
+                @for (status of statusOptions; track status) {
+                <option [value]="status">{{ status }}</option>
+                }
+            </select>
+
+            <input type="date" [(ngModel)]="startDate" class="filter-date" placeholder="Start Date">
+            <input type="date" [(ngModel)]="endDate" class="filter-date" placeholder="End Date">
+
+            <button class="btn-secondary btn-sm" (click)="resetFilters()">
+                Reset Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    @if (isLoading) {
+    <div class="loading">Loading orders...</div>
+    } @else {
+    <div class="table-container glass-card">
+        <table class="orders-table">
             <thead>
                 <tr>
                     <th>Order ID</th>
+                    <th>Date</th>
                     <th>Customer</th>
-                    <th>Total Amount</th>
-                    <th>Current Status</th>
-                    <th>Order Date</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @for (o of orders; track o.id) {
+                @for (order of paginatedOrders; track order.id) {
                 <tr>
-                    <td>
-                        <span class="id-badge">#{{ o.id.slice(0, 8) | uppercase }}</span>
+                    <td class="id-col" title="{{ order.id }}">
+                        <a [routerLink]="['/dashboard/orders', order.id]" class="id-link">#{{ order.id.substring(0, 8)
+                            }}</a>
                     </td>
+                    <td>{{ order.createdAt | date:'mediumDate' }}</td>
                     <td>
                         <div class="customer-info">
-                            <strong>{{ o.user?.name || 'Guest Customer' }}</strong>
-                            <span>{{ o.user?.email || 'N/A' }}</span>
+                            <span class="name">{{ order.user?.name || 'Guest' }}</span>
+                            <span class="email">{{ order.user?.email }}</span>
                         </div>
                     </td>
-                    <td class="amount">₹{{ o.totalAmount | number }}</td>
+                    <td class="amount">₹{{ order.totalAmount | number }}</td>
                     <td>
-                        <select [value]="o.status" (change)="updateStatus(o, $event)" class="status-select"
-                            [ngClass]="o.status.toLowerCase()">
-                            @for (status of statusOptions; track status) {
-                            <option [value]="status">{{ status }}</option>
-                            }
-                        </select>
+                        <span class="payment-badge" [class.cod]="order.paymentMethod === 'cod'">
+                            {{ order.paymentMethod === 'online' ? 'Online' : 'COD' }}
+                        </span>
                     </td>
-                    <td class="date-cell">{{ o.createdAt | date:'MMM d, y, h:mm a' }}</td>
                     <td>
-                        <button class="btn-sm">Details</button>
+                        <span class="status-badge" [ngClass]="getStatusColor(order.status)">
+                            {{ order.status }}
+                        </span>
                     </td>
+                    <td>
+                        <button class="btn-icon" (click)="openStatusModal(order)" title="Update Status">
+                            ✏️
+                        </button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="7" class="empty-state">No orders found matching your filters.</td>
                 </tr>
                 }
             </tbody>
         </table>
-    </div>
 
-    @if (orders.length === 0) {
-    <div class="empty-state glass-card">
-        <span class="icon">📦</span>
-        <p>No orders have been placed yet.</p>
+        <!-- Pagination -->
+        <app-pagination [currentPage]="currentPage" [totalItems]="totalItems" [itemsPerPage]="itemsPerPage"
+            (pageChange)="onPageChange($event)">
+        </app-pagination>
+    </div>
+    }
+
+    <!-- Status Update Modal -->
+    @if (showStatusModal && selectedOrder) {
+    <div class="modal-overlay" (click)="closeStatusModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Update Status</h2>
+                <button class="close-btn" (click)="closeStatusModal()">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="order-summary">
+                    <p><strong>Order #{{ selectedOrder.id.substring(0, 8) }}</strong></p>
+                    <p class="customer">Customer: {{ selectedOrder.user?.name }}</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="status">New Status</label>
+                    <select id="status" [(ngModel)]="newStatus" class="form-control">
+                        <option value="">Select Status</option>
+                        @for (status of statusOptions; track status) {
+                        <option [value]="status">{{ status }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Status Message (Optional)</label>
+                    <textarea id="message" [(ngModel)]="statusMessage"
+                        placeholder="Add a message regarding this status update..." rows="3"
+                        class="form-control"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" (click)="closeStatusModal()">Cancel</button>
+                <button class="btn-primary" (click)="updateStatus()" [disabled]="!newStatus">
+                    Update Status
+                </button>
+            </div>
+        </div>
     </div>
     }
 </div>

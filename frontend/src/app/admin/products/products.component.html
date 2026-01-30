@@ -227,4 +227,9 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination -->
+    <app-pagination [currentPage]="currentPage" [totalItems]="totalItems" [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)">
+    </app-pagination>
 </div>

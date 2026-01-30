@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { User } from '../../core/models/auth.model';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss'
 })
@@ -17,6 +18,11 @@ export class UsersComponent implements OnInit {
   roles: any[] = [];
   newUser: any = this.getEmptyUser();
   isEditing = false;
+
+  // Pagination
+  currentPage = 1;
+  totalItems = 0;
+  itemsPerPage = 10;
 
   constructor(public authService: AuthService) { }
 
@@ -28,7 +34,9 @@ export class UsersComponent implements OnInit {
   }
 
   async loadUsers() {
-    this.users = await this.authService.getUsers();
+    const data = await this.authService.getUsers(this.currentPage, this.itemsPerPage);
+    this.users = data.items;
+    this.totalItems = data.total;
   }
 
   async loadRoles() {
@@ -81,5 +89,10 @@ export class UsersComponent implements OnInit {
       email: '',
       roleIds: []
     };
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.loadUsers();
   }
 }

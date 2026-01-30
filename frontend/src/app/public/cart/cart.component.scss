@@ -653,6 +653,80 @@
         }
     }
 
+    // Delivery Information Section
+    .delivery-section {
+        margin-bottom: 2rem;
+
+        .delivery-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+
+            lucide-icon {
+                color: var(--primary-color);
+            }
+
+            h4 {
+                font-size: 1.1rem;
+                font-weight: 800;
+                margin: 0;
+            }
+        }
+
+        .delivery-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+
+                label {
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    color: var(--text-color);
+                }
+
+                input,
+                textarea {
+                    padding: 0.875rem 1rem;
+                    border: 2px solid var(--border-color);
+                    border-radius: var(--border-radius-sm);
+                    background: var(--surface-color);
+                    color: var(--text-color);
+                    font-size: 0.95rem;
+                    transition: all 0.3s ease;
+                    font-family: inherit;
+
+                    &:focus {
+                        outline: none;
+                        border-color: var(--primary-color);
+                        box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.1);
+                    }
+
+                    &::placeholder {
+                        color: var(--text-color-muted);
+                        opacity: 0.6;
+                    }
+                }
+
+                textarea {
+                    resize: vertical;
+                    min-height: 80px;
+                }
+            }
+        }
+    }
+
+    .section-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-color) 50%, transparent);
+        margin: 2rem 0;
+    }
+
     .checkout-footer {
         display: flex;
         flex-direction: column;

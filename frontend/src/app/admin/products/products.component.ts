@@ -10,11 +10,12 @@ import { BrandService } from '../../core/services/api/brand.service';
 import { DragDropDirective } from '../../shared/directives/drag-drop.directive';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth/auth.service';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropDirective],
+  imports: [CommonModule, FormsModule, DragDropDirective, PaginationComponent],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
@@ -23,6 +24,11 @@ export class ProductsComponent implements OnInit {
   newProduct: Product = this.getEmptyProduct();
   isEditing = false;
   uploadedFiles: any[] = [];
+
+  // Pagination
+  currentPage = 1;
+  totalItems = 0;
+  itemsPerPage = 10;
 
   // Dropdown Data
   brands: Brand[] = [];
@@ -41,7 +47,7 @@ export class ProductsComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-    this.products = (await this.productService.getProducts({ limit: 100 })).items;
+    await this.loadProducts();
     this.brands = await this.brandService.getBrands();
     this.mainCategories = await this.categoryService.getCategoriesByParentId(undefined);
   }
@@ -82,7 +88,8 @@ export class ProductsComponent implements OnInit {
         }
 
         // Refresh list
-        this.products = (await this.productService.getProducts({ limit: 100 })).items;
+        // Refresh list
+        await this.loadProducts();
         this.resetForm();
         this.toastService.success(`Product ${this.isEditing ? 'updated' : 'added'} successfully!`);
       } catch (err) {
@@ -187,6 +194,19 @@ export class ProductsComponent implements OnInit {
     }
     // Reset the input so the same file can be picked again if needed
     event.target.value = '';
+  }
+  async loadProducts() {
+    const data = await this.productService.getProducts({
+      page: this.currentPage,
+      limit: this.itemsPerPage
+    });
+    this.products = data.items;
+    this.totalItems = data.total;
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.loadProducts();
   }
 }
 

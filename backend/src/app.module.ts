@@ -13,6 +13,7 @@ import { Category } from './products/entities/category.entity';
 import { Brand } from './products/entities/brand.entity';
 import { ProductImage } from './products/entities/product-image.entity';
 import { ProductVariant } from './products/entities/product-variant.entity';
+import { SiteSettings } from './products/entities/settings.entity';
 import { OrdersModule } from './orders/orders.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { Coupon } from './coupons/entities/coupon.entity';
@@ -21,6 +22,7 @@ import { LocationRestriction } from './locations/entities/location-restriction.e
 import { QuotationsModule } from './quotations/quotations.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
+import { OrderStatusHistory } from './orders/entities/order-status-history.entity';
 import { Quotation } from './quotations/entities/quotation.entity';
 import { HomeCMS } from './products/entities/home-cms.entity';
 import { CommonModule } from './common/common.module';
@@ -54,7 +56,7 @@ import { CommonModule } from './common/common.module';
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'sribalaji'),
-        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, Order, OrderItem, Quotation, Coupon, LocationRestriction, HomeCMS],
+        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Quotation, Coupon, LocationRestriction, HomeCMS],
 
         synchronize: config.get('NODE_ENV') !== 'production',
       }),

@@ -9,12 +9,13 @@ import { CategoryService } from '../../core/services/api/category.service';
 import { CartService } from '../../core/store/cart.service';
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
+import { InfiniteScrollDirective } from '../../shared/directives/infinite-scroll.directive';
 
 
 @Component({
     selector: 'app-products',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, ImageUrlPipe, SkeletonComponent],
+    imports: [CommonModule, RouterModule, FormsModule, ImageUrlPipe, SkeletonComponent, InfiniteScrollDirective],
     templateUrl: './products.component.html',
     styleUrl: './products.component.scss'
 })
@@ -81,15 +82,8 @@ export class ProductsComponent implements OnInit {
         }
     }
 
-    @HostListener('window:scroll', [])
     onScroll() {
-        const pos = (document.documentElement.scrollTop || document.body.scrollTop) + document.documentElement.offsetHeight;
-        const max = document.documentElement.scrollHeight;
-
-        // If we're within 200px of the bottom, load more
-        if (pos >= max - 200) {
-            this.loadProducts(this.currentCategory?.id);
-        }
+        this.loadProducts(this.currentCategory?.id);
     }
 
     addToCart(product: Product, event: Event) {
