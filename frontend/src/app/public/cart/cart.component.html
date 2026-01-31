@@ -24,7 +24,7 @@
                 <div class="item-badge">#{{ i + 1 }}</div>
                 <div class="item-img">
                     <div class="img-glow"></div>
-                    <img [src]="item.product.images && item.product.images.length > 0 ? 'http://localhost:3000' + item.product.images[0].url : 'https://placehold.co/100x100?text=No+Image'"
+                    <img [src]="item.product.images && item.product.images.length > 0 ? item.product.images[0].url : 'https://placehold.co/100x100?text=No+Image'"
                         [alt]="item.product.name">
                 </div>
                 <div class="item-info">

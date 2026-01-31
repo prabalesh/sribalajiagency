@@ -145,8 +145,7 @@
         left: 1rem;
         width: 32px;
         height: 32px;
-        background: linear-gradient(135deg, var(--primary-color), var(--info-color));
-        color: white;
+        background: var(--primary-color);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -163,8 +162,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--surface-color-secondary);
-        border-radius: var(--border-radius-md);
         flex-shrink: 0;
         position: relative;
         overflow: hidden;
