@@ -3,12 +3,13 @@
 
     <aside class="sidebar glass-card" [class.open]="isSidebarOpen">
         <div class="brand">
-            <span class="brand-text">Admin</span>
+            <span class="brand-text">Management</span>
             <span class="brand-sub">Sri Balaji Agency</span>
         </div>
         <nav>
             <ul>
-                <li><a routerLink="/dashboard" routerLinkActive="active" (click)="isSidebarOpen = false">
+                <li><a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                        (click)="isSidebarOpen = false">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -171,7 +172,7 @@
                     <span></span>
                     <span></span>
                 </button>
-                <h2>Admin Management</h2>
+                <h2>Agency Management</h2>
             </div>
             <div class="topbar-actions">
                 <button (click)="themeService.toggleTheme()" class="theme-toggle">
@@ -184,7 +185,7 @@
                     @if (authService.user()) {
                     <div class="user-info">
                         <span class="user-name">{{ authService.user()?.name }}</span>
-                        <span class="user-role">{{ authService.isAdmin() ? 'Super Admin' :
+                        <span class="user-role">{{ authService.isAdmin() ? 'Lead Manager' :
                             (authService.user()?.roles?.[0]?.name | titlecase) }}</span>
                     </div>
                     }
