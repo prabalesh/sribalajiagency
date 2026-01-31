@@ -5,6 +5,7 @@ import { LocationService } from '../../../core/store/location.service';
 import { LocationRestriction } from '../../../core/models/location.model';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { STATES, CITIES_BY_STATE } from '../../../core/constants/location.constants';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
     selector: 'app-admin-location-restrictions',
@@ -16,6 +17,7 @@ import { STATES, CITIES_BY_STATE } from '../../../core/constants/location.consta
 export class LocationRestrictionsComponent implements OnInit {
     private locationService = inject(LocationService);
     public authService = inject(AuthService);
+    private toastService = inject(ToastService);
 
     locations: LocationRestriction[] = [];
     newLocation: any = this.getEmptyLocation();
@@ -41,26 +43,44 @@ export class LocationRestrictionsComponent implements OnInit {
                     const postOffice = data[0].PostOffice[0];
                     this.newLocation.state = postOffice.State;
                     this.newLocation.city = postOffice.District;
+                    this.toastService.success(`Location auto-filled for ${zip}`);
+                } else {
+                    this.toastService.warning('PIN code information not found');
                 }
             } catch (error) {
                 console.error('Error fetching PIN code details:', error);
+                this.toastService.error('Failed to fetch PIN code information');
             }
         }
     }
 
     async loadLocations() {
-        this.locations = await this.locationService.getLocations();
+        try {
+            this.locations = await this.locationService.getLocations();
+        } catch (error: any) {
+            console.error('Error loading locations:', error);
+            const message = error.response?.data?.message || 'Error loading locations';
+            this.toastService.error(message);
+        }
     }
 
     async saveLocation() {
         if (this.newLocation.state) {
-            if (this.isEditing) {
-                await this.locationService.updateLocation(this.newLocation);
-            } else {
-                await this.locationService.addLocation(this.newLocation);
+            try {
+                if (this.isEditing) {
+                    await this.locationService.updateLocation(this.newLocation);
+                    this.toastService.success('Location updated successfully');
+                } else {
+                    await this.locationService.addLocation(this.newLocation);
+                    this.toastService.success('Location added successfully');
+                }
+                this.resetForm();
+                this.loadLocations();
+            } catch (error: any) {
+                const message = error.response?.data?.message || 'Error saving location';
+                this.toastService.error(message);
+                console.error('Error saving location:', error);
             }
-            this.resetForm();
-            this.loadLocations();
         }
     }
 
@@ -71,8 +91,14 @@ export class LocationRestrictionsComponent implements OnInit {
 
     async deleteLocation(id: string) {
         if (confirm('Remove this restriction?')) {
-            await this.locationService.deleteLocation(id);
-            this.loadLocations();
+            try {
+                await this.locationService.deleteLocation(id);
+                this.toastService.success('Location removed successfully');
+                this.loadLocations();
+            } catch (error: any) {
+                const message = error.response?.data?.message || 'Error deleting location';
+                this.toastService.error(message);
+            }
         }
     }
 

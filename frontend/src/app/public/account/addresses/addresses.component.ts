@@ -6,6 +6,7 @@ import { AuthService } from '../../../core/services/auth/auth.service';
 import { AddressService } from '../../../core/services/api/address.service';
 import { Address } from '../../../core/models/address.model';
 import { STATES, CITIES_BY_STATE } from '../../../core/constants/location.constants';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-addresses',
@@ -20,6 +21,7 @@ export class AddressesComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   addresses: Address[] = [];
   isAdding = false;
@@ -248,25 +250,27 @@ export class AddressesComponent implements OnInit {
 
   async saveAddress() {
     if (!this.isValidZip()) {
-      alert('Please enter a valid 6-digit Indian ZIP code.');
+      this.toastService.warning('Please enter a valid 6-digit Indian ZIP code.');
       return;
     }
 
     if (!this.isValidPhone(this.newAddress.phonePrimary)) {
-      alert('Please enter a valid 10-digit primary phone number.');
+      this.toastService.warning('Please enter a valid 10-digit primary phone number.');
       return;
     }
 
     if (this.newAddress.phoneSecondary && !this.isValidPhone(this.newAddress.phoneSecondary)) {
-      alert('Please enter a valid 10-digit secondary phone number.');
+      this.toastService.warning('Please enter a valid 10-digit secondary phone number.');
       return;
     }
 
     try {
       if (this.isEditingAddress && this.editingAddressId) {
         await this.addressService.updateAddress(this.editingAddressId, this.newAddress);
+        this.toastService.success('Address updated successfully');
       } else {
         await this.addressService.addAddress(this.newAddress);
+        this.toastService.success('Address added successfully');
       }
 
       this.isAdding = false;
@@ -282,8 +286,10 @@ export class AddressesComponent implements OnInit {
       } else {
         await this.loadAddresses();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving address:', error);
+      const message = error.response?.data?.message || 'Error saving address';
+      this.toastService.error(message);
     }
   }
 
@@ -291,9 +297,12 @@ export class AddressesComponent implements OnInit {
     if (confirm('Are you sure you want to delete this address?')) {
       try {
         await this.addressService.deleteAddress(id);
+        this.toastService.success('Address deleted successfully');
         await this.loadAddresses();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error deleting address:', error);
+        const message = error.response?.data?.message || 'Error deleting address';
+        this.toastService.error(message);
       }
     }
   }
@@ -301,9 +310,12 @@ export class AddressesComponent implements OnInit {
   async setDefault(id: string) {
     try {
       await this.addressService.setDefault(id);
+      this.toastService.success('Default address updated');
       await this.loadAddresses();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error setting default address:', error);
+      const message = error.response?.data?.message || 'Error setting default address';
+      this.toastService.error(message);
     }
   }
 
