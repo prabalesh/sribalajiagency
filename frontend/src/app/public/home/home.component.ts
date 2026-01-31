@@ -12,6 +12,8 @@ import { Brand } from '../../core/models/brand.model';
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import { LucideAngularModule, ChevronLeft, ChevronRight, Truck, ShieldCheck, MessageCircle, ExternalLink, ArrowRight } from 'lucide-angular';
 
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -19,7 +21,8 @@ import { LucideAngularModule, ChevronLeft, ChevronRight, Truck, ShieldCheck, Mes
     CommonModule,
     RouterModule,
     ImageUrlPipe,
-    LucideAngularModule
+    LucideAngularModule,
+    ProductCardComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
@@ -87,8 +90,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  addToCart(product: Product, event: Event) {
-    event.stopPropagation();
+  addToCart(product: Product) {
     this.cartService.addToCart(product);
   }
 }

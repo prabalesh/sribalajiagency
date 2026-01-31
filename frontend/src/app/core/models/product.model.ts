@@ -35,4 +35,6 @@ export interface Product {
     maxOrderQuantity?: number;
     isShowcaseOnly: boolean;
     allowedPaymentMethods?: string[];
+    rating?: number;
+    reviewCount?: number;
 }

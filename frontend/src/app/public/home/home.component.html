@@ -123,34 +123,8 @@
 
             <div class="product-grid">
                 @for (product of featuredProducts; track product.id) {
-                <div class="product-card glass-card" [routerLink]="['/products/detail', product.id]">
-                    <div class="p-image">
-                        <img [src]="(product.images[0] && product.images[0].url) | imageUrl" [alt]="product.name">
-                        <button *ngIf="product.stock > 0" class="add-shortcut" (click)="addToCart(product, $event)"
-                            title="Quick Add">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="3">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                        </button>
-                        <div *ngIf="product.stock <= 0" class="oos-badge">Out of Stock</div>
-                    </div>
-                    <div class="p-info">
-                        <span class="p-brand">{{ product.brand?.name || 'Generic' | uppercase }}</span>
-                        <h3>{{ product.name }}</h3>
-                        <div class="p-footer">
-                            <div class="p-price-wrapper">
-                                <span class="p-price">₹{{ product.price | number }}</span>
-                                <span *ngIf="product.comparisonPrice" class="p-mrp">₹{{ product.comparisonPrice | number
-                                    }}</span>
-                            </div>
-                            <span class="p-view">
-                                View <lucide-icon [img]="icons.ArrowRight" [size]="16"></lucide-icon>
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                <app-product-card [product]="product" (addToCart)="addToCart($event)">
+                </app-product-card>
                 }
             </div>
         </div>

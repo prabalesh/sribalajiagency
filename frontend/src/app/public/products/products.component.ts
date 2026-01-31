@@ -9,14 +9,15 @@ import { Category } from '../../core/models/category.model';
 import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
 import { CartService } from '../../core/store/cart.service';
-import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
+// ImageUrlPipe removed as it is now used in ProductCardComponent
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { InfiniteScrollDirective } from '../../shared/directives/infinite-scroll.directive';
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 
 @Component({
     selector: 'app-products',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, ImageUrlPipe, SkeletonComponent, InfiniteScrollDirective],
+    imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent, InfiniteScrollDirective, ProductCardComponent],
     templateUrl: './products.component.html',
     styleUrl: './products.component.scss'
 })
@@ -186,8 +187,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    addToCart(product: Product, event: Event) {
-        event.stopPropagation();
+    addToCart(product: Product) {
         this.cartService.addToCart(product);
     }
 }

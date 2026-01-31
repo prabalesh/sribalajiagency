@@ -12,10 +12,13 @@ import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 
 
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
+
+
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent],
+  imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent, ProductCardComponent],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss'
 })
@@ -103,5 +106,9 @@ export class ProductDetailComponent implements OnInit {
 
   selectImage(index: number) {
     this.selectedImageIndex = index;
+  }
+
+  onCardAddToCart(product: Product) {
+    this.cartService.addToCart(product);
   }
 }

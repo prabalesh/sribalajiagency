@@ -1,1 +1,47 @@
-<p>product-card works!</p>
+<div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]">
+    <div class="p-image">
+        <img [src]="(product.images[0] && product.images[0].url) | imageUrl" [alt]="product.name" loading="lazy">
+
+        <div class="p-badges">
+            <span class="badge in-stock" *ngIf="product.stock > 0">In Stock</span>
+            <span class="badge out-of-stock" *ngIf="product.stock <= 0">Out of Stock</span>
+            <span class="badge featured" *ngIf="product.isFeatured">Featured</span>
+        </div>
+
+        <div class="p-actions">
+            <button *ngIf="product.stock > 0" class="btn-icon-cart" (click)="onAddToCart($event)" title="Add to Cart">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="p-info">
+        <div class="p-meta">
+            <span class="p-brand">{{ product.brand?.name || 'SBA' }}</span>
+            <span class="p-category">{{ product.category?.name }}</span>
+        </div>
+        <h3>{{ product.name }}</h3>
+
+        <div class="p-footer">
+            <div class="p-price-area">
+                <span class="p-price">₹{{ product.price | number }}</span>
+                <span *ngIf="product.comparisonPrice" class="p-mrp">₹{{ product.comparisonPrice | number }}</span>
+            </div>
+            <div class="p-rating">
+                <ng-container *ngIf="product.rating; else noRating">
+                    <span class="stars" [title]="product.rating + ' Stars'">
+                        ★ {{ product.rating }}
+                    </span>
+                    <span class="reviews">({{ product.reviewCount || 0 }})</span>
+                </ng-container>
+                <ng-template #noRating>
+                    <span class="reviews">NA</span>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

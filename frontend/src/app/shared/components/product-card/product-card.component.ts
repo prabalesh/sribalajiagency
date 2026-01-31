@@ -1,11 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { Product } from '../../../core/models/product.model';
+import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 
 @Component({
   selector: 'app-product-card',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, RouterModule, ImageUrlPipe],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.scss'
 })
 export class ProductCardComponent {
+  @Input() product!: Product;
+  @Output() addToCart = new EventEmitter<Product>();
 
+  onAddToCart(event: Event): void {
+    event.stopPropagation();
+    this.addToCart.emit(this.product);
+  }
 }

@@ -45,6 +45,12 @@ export class Product {
     @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
     gstRate: number;
 
+    @Column({ type: 'decimal', precision: 3, scale: 1, nullable: true, default: 0 })
+    rating: number;
+
+    @Column({ default: 0 })
+    reviewCount: number;
+
     @Column({ default: false })
     isFeatured: boolean;
 

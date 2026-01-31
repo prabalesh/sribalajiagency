@@ -409,7 +409,9 @@ async function bootstrap() {
                         brand: brand as any,
                         isAvailable: config.highAvailability ? faker.datatype.boolean(0.95) : faker.datatype.boolean(0.7),
                         isFeatured: faker.datatype.boolean(0.3), // 30% featured
-                        allowedPaymentMethods: faker.helpers.arrayElements(['online', 'cod'], { min: 1, max: 2 })
+                        allowedPaymentMethods: faker.helpers.arrayElements(['online', 'cod'], { min: 1, max: 2 }),
+                        rating: parseFloat((Math.random() * (5.0 - 3.5) + 3.5).toFixed(1)),
+                        reviewCount: Math.floor(Math.random() * (100 - 5) + 5)
                     } as any) as unknown as Product);
 
                     // Add 2-4 product images

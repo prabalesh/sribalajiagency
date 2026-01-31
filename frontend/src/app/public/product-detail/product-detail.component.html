@@ -127,18 +127,8 @@
         <h2>You Might Also Like</h2>
         <div class="product-grid">
             @for (p of relatedProducts; track p.id) {
-            <div class="product-item glass-card" [routerLink]="['/products/detail', p.id]">
-                <div class="p-image">
-                    <img [src]="(p.images.length > 0 ? p.images[0].url : '') | imageUrl" [alt]="p.name">
-                </div>
-                <div class="p-info">
-                    <h4>{{ p.name }}</h4>
-                    <div class="p-price-row">
-                        <span class="p-price">₹{{ p.price | number }}</span>
-                        <span *ngIf="p.comparisonPrice" class="p-mrp">₹{{ p.comparisonPrice | number }}</span>
-                    </div>
-                </div>
-            </div>
+            <app-product-card [product]="p" (addToCart)="onCardAddToCart($event)">
+            </app-product-card>
             }
         </div>
     </section>

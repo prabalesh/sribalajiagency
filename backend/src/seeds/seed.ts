@@ -216,7 +216,9 @@ async function bootstrap() {
                     category: cat as any,
                     brand: brand as any,
                     isAvailable: true,
-                    isFeatured: Math.random() > 0.5
+                    isFeatured: Math.random() > 0.5,
+                    rating: parseFloat((Math.random() * (5.0 - 3.5) + 3.5).toFixed(1)),
+                    reviewCount: Math.floor(Math.random() * (100 - 5) + 5)
                 } as any) as unknown as Product;
                 product = await productRepo.save(newProduct);
 
@@ -239,6 +241,12 @@ async function bootstrap() {
                     stock: 50 + Math.floor(Math.random() * 100),
                     product: product as any
                 } as any));
+            }
+        } else {
+            if (!product.rating || product.rating === 0) {
+                product.rating = parseFloat((Math.random() * (5.0 - 3.5) + 3.5).toFixed(1));
+                product.reviewCount = Math.floor(Math.random() * (100 - 5) + 5);
+                await productRepo.save(product);
             }
         }
     }
