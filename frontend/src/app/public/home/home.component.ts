@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProductService } from '../../core/services/api/product.service';
@@ -24,7 +24,7 @@ import { LucideAngularModule, ChevronLeft, ChevronRight, Truck, ShieldCheck, Mes
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   readonly icons = {
     ChevronLeft,
     ChevronRight,
@@ -60,6 +60,12 @@ export class HomeComponent implements OnInit {
 
     if (this.cms?.heroSlides?.length > 1) {
       this.startSlideShow();
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.slideInterval) {
+      clearInterval(this.slideInterval);
     }
   }
 

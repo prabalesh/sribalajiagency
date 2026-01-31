@@ -5,7 +5,7 @@
   /* Common variables */
   --transition-speed: 0.4s;
   --transition-curve: cubic-bezier(0.4, 0, 0.2, 1);
-  --container-max-width: 1440px;
+  --container-max-width: 100%;
   --header-height: 80px;
   --border-radius-sm: 12px;
   --border-radius-md: 20px;
@@ -98,6 +98,16 @@
   padding: 0;
 }
 
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  /* Prevent horizontal scroll from overflowing elements */
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-color);
@@ -106,9 +116,6 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden !important;
-  /* Force no horizontal scroll */
-  width: 100%;
 }
 
 .container {
@@ -116,6 +123,16 @@ body {
   margin: 0 auto;
   padding: 0 1.5rem;
   width: 100%;
+  /* Ensure it takes full width up to max-width */
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 1.25rem;
+    max-width: 100%;
+    /* Ensure full width on smaller screens */
+  }
 }
 
 @media (max-width: 600px) {
