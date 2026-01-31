@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +15,7 @@ import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.com
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.scss'
 })
-export class PublicLayoutComponent implements OnInit {
+export class PublicLayoutComponent {
   private router = inject(Router);
   themeService = inject(ThemeService);
   cartService = inject(CartService);
@@ -27,11 +27,10 @@ export class PublicLayoutComponent implements OnInit {
   isMobileMenuOpen = false;
   isLoading = signal(true);
 
-  ngOnInit() {
-    // Set loading to false after a short delay to ensure all services are initialized
-    setTimeout(() => {
+  constructor() {
+    afterNextRender(() => {
       this.isLoading.set(false);
-    }, 100);
+    });
   }
 
   toggleSearch() {
