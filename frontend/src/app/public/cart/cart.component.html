@@ -86,19 +86,35 @@
                     </span>
                     <span class="free-badge">FREE</span>
                 </div>
-                <div class="summary-row">
-                    <span>GST (18%)</span>
+                <div class="summary-row" *ngIf="!taxBreakdown">
+                    <span>GST (Estimated)</span>
                     <span class="value">₹{{ cartService.total() * 0.18 | number:'1.0-0' }}</span>
                 </div>
+
+                <ng-container *ngIf="taxBreakdown">
+                    <div class="summary-row tax-detail" *ngIf="taxBreakdown.breakdown.cgst > 0">
+                        <span>CGST</span>
+                        <span class="value">₹{{ taxBreakdown.breakdown.cgst | number }}</span>
+                    </div>
+                    <div class="summary-row tax-detail" *ngIf="taxBreakdown.breakdown.sgst > 0">
+                        <span>SGST</span>
+                        <span class="value">₹{{ taxBreakdown.breakdown.sgst | number }}</span>
+                    </div>
+                    <div class="summary-row tax-detail" *ngIf="taxBreakdown.breakdown.igst > 0">
+                        <span>IGST</span>
+                        <span class="value">₹{{ taxBreakdown.breakdown.igst | number }}</span>
+                    </div>
+                </ng-container>
 
                 <div class="summary-divider"></div>
 
                 <div class="summary-total">
                     <div class="total-label">
                         <span>Total Amount</span>
-                        <span class="savings">You're saving ₹0</span>
+                        <span class="savings">Inclusive of all taxes</span>
                     </div>
-                    <div class="total-amount">₹{{ cartService.total() * 1.18 | number:'1.0-0' }}</div>
+                    <div class="total-amount">₹{{ (taxBreakdown ? taxBreakdown.grandTotal : (cartService.total() *
+                        1.18)) | number:'1.0-0' }}</div>
                 </div>
             </div>
 
@@ -119,27 +135,79 @@
                     <!-- Delivery Information Section -->
                     <div class="delivery-section">
                         <div class="delivery-header">
-                            <lucide-icon [img]="Truck" [size]="22"></lucide-icon>
-                            <h4>Delivery Information</h4>
+                            <div class="header-main">
+                                <lucide-icon [img]="MapPin" [size]="24"></lucide-icon>
+                                <h4>Shipping Details</h4>
+                            </div>
+                            <button class="btn-add-address" (click)="navigateToAddresses()"
+                                title="Add a new shipping address">
+                                <lucide-icon [img]="PlusCircle" [size]="18"></lucide-icon>
+                                <span>New Address</span>
+                            </button>
                         </div>
 
-                        <div class="delivery-form">
-                            <div class="form-group">
-                                <label for="deliveryAddress">Delivery Address *</label>
-                                <textarea id="deliveryAddress" [(ngModel)]="deliveryAddress"
-                                    placeholder="Enter your complete delivery address" rows="3" required></textarea>
+                        <!-- Address Selection List -->
+                        <div class="address-list">
+                            <div *ngFor="let address of addresses; let i = index"
+                                class="address-card glass-card animate-slide-in" [style.animation-delay]="i * 0.1 + 's'"
+                                [class.selected]="selectedAddressId === address.id" (click)="selectAddress(address)">
+                                <div class="card-radio">
+                                    <div class="radio-outer">
+                                        <div class="radio-inner"></div>
+                                    </div>
+                                </div>
+                                <div class="address-details">
+                                    <div class="address-type">
+                                        <lucide-icon [img]="address.type === 'Home' ? Home : Briefcase"
+                                            [size]="14"></lucide-icon>
+                                        <span>{{ address.type }}</span>
+                                    </div>
+                                    <p class="address-name">{{ address.name }}</p>
+                                    <p class="address-text">{{ address.street }}, {{ address.city }}, {{ address.state
+                                        }} - {{ address.zip }}</p>
+                                    <div class="address-phone">
+                                        <lucide-icon [img]="Phone" [size]="16"></lucide-icon>
+                                        <span>{{ address.phonePrimary }}</span>
+                                    </div>
+                                </div>
+                                <div class="selection-indicator">
+                                    <lucide-icon [img]="CheckCircle" [size]="24"></lucide-icon>
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="deliveryPhone">Phone Number *</label>
-                                <input type="tel" id="deliveryPhone" [(ngModel)]="deliveryPhone"
-                                    placeholder="Enter your contact number" required />
+                            <div *ngIf="addresses.length === 0" class="no-address-state glass-card">
+                                <div class="empty-address-icon">
+                                    <lucide-icon [img]="MapPin" [size]="48" style="opacity: 0.2;"></lucide-icon>
+                                </div>
+                                <p>You haven't saved any addresses yet.</p>
+                                <button class="btn-primary" (click)="navigateToAddresses()">
+                                    <lucide-icon [img]="PlusCircle" [size]="20"></lucide-icon>
+                                    <span>Add Shipping Address</span>
+                                </button>
                             </div>
+                        </div>
 
+                        <!-- Eligibility Check Status -->
+                        <div class="eligibility-status" *ngIf="selectedAddressId && !checkingEligibility">
+                            <div class="status-box" [class.eligible]="isLocationEligible"
+                                [class.not-eligible]="!isLocationEligible">
+                                <lucide-icon [img]="isLocationEligible ? CheckCircle : XCircle"
+                                    [size]="20"></lucide-icon>
+                                <span>{{ isLocationEligible ? 'Verified: We deliver to this location!' : 'Sorry:
+                                    Location currently outside delivery zone' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="eligibility-loader" *ngIf="checkingEligibility">
+                            <div class="spinner-small"></div>
+                            <span>Verifying delivery network...</span>
+                        </div>
+
+                        <div class="notes-section">
                             <div class="form-group">
-                                <label for="deliveryNotes">Delivery Notes (Optional)</label>
+                                <label for="deliveryNotes">Special Delivery Instructions</label>
                                 <textarea id="deliveryNotes" [(ngModel)]="deliveryNotes"
-                                    placeholder="Any special instructions for delivery?" rows="2"></textarea>
+                                    placeholder="e.g. Gate code, near landmark, etc." rows="2"></textarea>
                             </div>
                         </div>
                     </div>
@@ -191,13 +259,20 @@
                     </div>
 
                     <div class="checkout-footer">
-                        <button class="btn-primary finalize-btn"
-                            [disabled]="!selectedPayment || !deliveryAddress.trim() || !deliveryPhone.trim() || isProcessingOrder"
+                        <button *ngIf="isLocationEligible" class="btn-primary finalize-btn"
+                            [disabled]="!selectedPayment || !selectedAddressId || isProcessingOrder || checkingEligibility"
                             (click)="finalizeOrder()">
                             <lucide-icon [img]="Sparkles" [size]="18"></lucide-icon>
                             <span>{{ isProcessingOrder ? 'Processing...' : 'Complete Order' }}</span>
                             <div class="btn-shine"></div>
                         </button>
+
+                        <div *ngIf="!isLocationEligible && selectedAddressId && !checkingEligibility"
+                            class="delivery-unavailable-warning">
+                            <lucide-icon [img]="XCircle" [size]="20"></lucide-icon>
+                            <span>We currently do not deliver to the selected location</span>
+                        </div>
+
                         <button class="btn-secondary back-btn" (click)="isCheckoutMode = false"
                             [disabled]="isProcessingOrder">
                             <lucide-icon [img]="ArrowLeft" [size]="16"></lucide-icon>

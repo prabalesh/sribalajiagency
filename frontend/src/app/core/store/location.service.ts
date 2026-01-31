@@ -27,8 +27,8 @@ export class LocationService {
         await this.api.delete(`/locations/${id}`);
     }
 
-    async checkLocation(state: string, city?: string) {
-        const res = await this.api.get<boolean>(`/locations/check`, { state, city });
+    async checkLocation(state: string, city?: string, zipcode?: string) {
+        const res = await this.api.get<boolean>(`/locations/check`, { state, city, zipcode });
         return res.data;
     }
 }

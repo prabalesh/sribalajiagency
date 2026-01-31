@@ -1,10 +1,11 @@
 import { Component, inject, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { AddressService } from '../../../core/services/api/address.service';
 import { Address } from '../../../core/models/address.model';
+import { STATES, CITIES_BY_STATE } from '../../../core/constants/location.constants';
 
 @Component({
   selector: 'app-addresses',
@@ -17,6 +18,8 @@ export class AddressesComponent implements OnInit {
   authService = inject(AuthService);
   addressService = inject(AddressService);
   private platformId = inject(PLATFORM_ID);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   addresses: Address[] = [];
   isAdding = false;
@@ -36,53 +39,11 @@ export class AddressesComponent implements OnInit {
     isDefault: false
   };
 
-  states = [
-    'Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
-    'Chandigarh', 'Chhattisgarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Goa',
-    'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand', 'Karnataka',
-    'Kerala', 'Ladakh', 'Lakshadweep', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya',
-    'Mizoram', 'Nagaland', 'Odisha', 'Puducherry', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
-    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
-  ];
+  states = STATES;
 
-  cities: { [key: string]: string[] } = {
-    'Andaman and Nicobar Islands': ['Port Blair'],
-    'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Nellore', 'Kurnool', 'Rajahmundry', 'Tirupati', 'Kakinada', 'Anantapur', 'Kadapa'],
-    'Arunachal Pradesh': ['Itanagar', 'Naharlagun'],
-    'Assam': ['Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Nagaon', 'Tinsukia'],
-    'Bihar': ['Patna', 'Gaya', 'Bhagalpur', 'Muzaffarpur', 'Purnia', 'Darbhanga', 'Arrah', 'Begusarai'],
-    'Chandigarh': ['Chandigarh'],
-    'Chhattisgarh': ['Raipur', 'Bhilai', 'Bilaspur', 'Korba', 'Rajnandgaon'],
-    'Dadra and Nagar Haveli and Daman and Diu': ['Daman', 'Diu', 'Silvassa'],
-    'Delhi': ['New Delhi', 'North Delhi', 'South Delhi', 'East Delhi', 'West Delhi', 'Dwarka', 'Rohini'],
-    'Goa': ['Panaji', 'Margao', 'Vasco da Gama', 'Mapusa'],
-    'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Jamnagar', 'Junagadh', 'Gandhinagar', 'Anand'],
-    'Haryana': ['Faridabad', 'Gurugram', 'Panipat', 'Ambala', 'Yamunanagar', 'Rohtak', 'Hisar', 'Karnal'],
-    'Himachal Pradesh': ['Shimla', 'Dharamshala', 'Solan', 'Mandi'],
-    'Jammu and Kashmir': ['Srinagar', 'Jammu', 'Anantnag'],
-    'Jharkhand': ['Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro', 'Deoghar', 'Hazaribagh'],
-    'Karnataka': ['Bengaluru', 'Mysuru', 'Hubballi-Dharwad', 'Mangaluru', 'Belagavi', 'Kalaburagi', 'Ballari', 'Vijayapura', 'Shivamogga'],
-    'Kerala': ['Kochi', 'Thiruvananthapuram', 'Kozhikode', 'Thrissur', 'Kollam', 'Alappuzha', 'Palakkad', 'Kannur', 'Kottayam'],
-    'Ladakh': ['Leh', 'Kargil'],
-    'Lakshadweep': ['Kavaratti'],
-    'Madhya Pradesh': ['Indore', 'Bhopal', 'Jabalpur', 'Gwalior', 'Ujjain', 'Sagar', 'Dewas', 'Satna', 'Ratlam'],
-    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Kalyan-Dombivli', 'Vasai-Virar', 'Aurangabad', 'Navi Mumbai', 'Solapur', 'Mira-Bhayandar', 'Bhiwandi', 'Amravati', 'Nanded', 'Kolhapur', 'Akola', 'Panvel'],
-    'Manipur': ['Imphal'],
-    'Meghalaya': ['Shillong', 'Tura'],
-    'Mizoram': ['Aizawl'],
-    'Nagaland': ['Kohima', 'Dimapur'],
-    'Odisha': ['Bhubaneswar', 'Cuttack', 'Rourkela', 'Berhampur', 'Sambalpur', 'Puri', 'Balasore'],
-    'Puducherry': ['Puducherry', 'Karaikal', 'Mahe', 'Yanam'],
-    'Punjab': ['Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Bathinda', 'Mohali'],
-    'Rajasthan': ['Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Ajmer', 'Udaipur', 'Bhilwara', 'Alwar', 'Sikar'],
-    'Sikkim': ['Gangtok'],
-    'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 'Tiruppur', 'Erode', 'Vellore', 'Thoothukudi', 'Nagercoil', 'Thanjavur', 'Dindigul', 'Hosur', 'Sivakasi', 'Karur', 'Kanchipuram', 'Kumbakonam'],
-    'Telangana': ['Hyderabad', 'Warangal', 'Nizamabad', 'Khammam', 'Karimnagar', 'Ramagundam'],
-    'Tripura': ['Agartala'],
-    'Uttar Pradesh': ['Lucknow', 'Kanpur', 'Ghaziabad', 'Agra', 'Meerut', 'Varanasi', 'Prayagraj', 'Bareilly', 'Aligarh', 'Moradabad', 'Saharanpur', 'Gorakhpur', 'Noida', 'Firozabad', 'Jhansi', 'Muzaffarnagar', 'Mathura'],
-    'Uttarakhand': ['Dehradun', 'Haridwar', 'Roorkee', 'Haldwani'],
-    'West Bengal': ['Kolkata', 'Howrah', 'Durgapur', 'Asansol', 'Siliguri', 'Maheshtala', 'Rajpur Sonarpur', 'Gopalpur', 'Bhatpara', 'Panihati']
-  };
+  get availableCities(): string[] {
+    return CITIES_BY_STATE[this.newAddress.state || ''] || [];
+  }
 
   private map: any;
   private marker: any;
@@ -90,6 +51,15 @@ export class AddressesComponent implements OnInit {
 
   async ngOnInit() {
     await this.loadAddresses();
+    this.checkQueryParams();
+  }
+
+  checkQueryParams() {
+    this.route.queryParams.subscribe(params => {
+      if (params['action'] === 'add') {
+        this.isAdding = true;
+      }
+    });
   }
 
   async loadAddresses() {
@@ -103,9 +73,6 @@ export class AddressesComponent implements OnInit {
     }
   }
 
-  get availableCities(): string[] {
-    return this.cities[this.newAddress.state || ''] || [];
-  }
 
   async toggleAdd() {
     this.isAdding = !this.isAdding;
@@ -259,7 +226,15 @@ export class AddressesComponent implements OnInit {
       await this.addressService.addAddress(this.newAddress);
       this.isAdding = false;
       this.destroyMap();
-      await this.loadAddresses();
+
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+      const checkout = this.route.snapshot.queryParams['checkout'];
+
+      if (returnUrl) {
+        this.router.navigate([returnUrl], { queryParams: { checkout: checkout } });
+      } else {
+        await this.loadAddresses();
+      }
     } catch (error) {
       console.error('Error adding address:', error);
     }

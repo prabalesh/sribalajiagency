@@ -42,6 +42,9 @@ export class Product {
     @Column({ type: 'jsonb', nullable: true })
     allowedPaymentMethods: string[]; // e.g., ['online', 'cod']
 
+    @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+    gstRate: number;
+
     @Column({ default: false })
     isFeatured: boolean;
 

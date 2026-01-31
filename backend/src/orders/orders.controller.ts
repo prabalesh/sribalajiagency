@@ -10,6 +10,11 @@ import type { OrderStatus } from './entities/order.entity';
 export class OrdersController {
     constructor(private ordersService: OrdersService) { }
 
+    @Post('calculate-tax')
+    calculateTax(@Body() data: { items: { productId: string, quantity: number }[], state: string }) {
+        return this.ordersService.calculateTax(data.items, data.state);
+    }
+
     @Post()
     @UseGuards(AuthGuard('jwt'))
     create(@Req() req: any, @Body() createOrderDto: CreateOrderDto) {

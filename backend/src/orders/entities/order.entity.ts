@@ -19,6 +19,12 @@ export class Order {
     @Column({ type: 'decimal', precision: 12, scale: 2 })
     totalAmount: number;
 
+    @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+    taxAmount: number;
+
+    @Column({ type: 'jsonb', nullable: true })
+    taxDetails: any;
+
     @Column({ default: 'Pending' })
     status: OrderStatus;
 

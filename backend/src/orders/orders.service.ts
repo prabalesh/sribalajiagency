@@ -5,6 +5,8 @@ import { Order, OrderStatus } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { OrderStatusHistory } from './entities/order-status-history.entity';
 import { User } from '../auth/entities/user.entity';
+import { Product } from '../products/entities/product.entity';
+import { Category } from '../products/entities/category.entity';
 
 export interface CreateOrderDto {
     items: {
@@ -16,6 +18,7 @@ export interface CreateOrderDto {
     paymentMethod: string;
     deliveryAddress: string;
     deliveryPhone: string;
+    deliveryState: string;
     deliveryNotes?: string;
 }
 
@@ -28,12 +31,19 @@ export class OrdersService {
         private orderItemRepo: Repository<OrderItem>,
         @InjectRepository(OrderStatusHistory)
         private statusHistoryRepo: Repository<OrderStatusHistory>,
+        @InjectRepository(Product)
+        private productRepo: Repository<Product>,
+        @InjectRepository(Category)
+        private categoryRepo: Repository<Category>,
     ) { }
 
     async create(userId: string, createOrderDto: CreateOrderDto) {
-        let totalAmount = 0;
+        const taxResults = await this.calculateTax(
+            createOrderDto.items.map(i => ({ productId: i.productId, quantity: i.quantity })),
+            createOrderDto.deliveryState
+        );
+
         const orderItems = createOrderDto.items.map(item => {
-            totalAmount += item.price * item.quantity;
             return this.orderItemRepo.create({
                 product: { id: item.productId },
                 productName: item.productName,
@@ -45,7 +55,9 @@ export class OrdersService {
         const order = this.orderRepo.create({
             user: { id: userId },
             items: orderItems,
-            totalAmount,
+            totalAmount: taxResults.grandTotal,
+            taxAmount: taxResults.totalTax,
+            taxDetails: taxResults.breakdown,
             status: 'Pending',
             paymentMethod: createOrderDto.paymentMethod,
             deliveryAddress: createOrderDto.deliveryAddress,
@@ -155,5 +167,54 @@ export class OrdersService {
             relations: ['changedBy'],
             order: { createdAt: 'ASC' },
         });
+    }
+
+    async calculateTax(items: { productId: string, quantity: number }[], state: string) {
+        let subtotal = 0;
+        let totalTax = 0;
+        const STORE_STATE = 'Tamil Nadu';
+        const isIntraState = state.toLowerCase().trim() === STORE_STATE.toLowerCase().trim();
+
+        const productIds = items.map(i => i.productId);
+        const products = await this.productRepo.find({
+            where: { id: In(productIds) },
+            relations: ['category']
+        });
+
+        const taxBreakdown = items.map(item => {
+            const product = products.find(p => p.id === item.productId);
+            if (!product) return null;
+
+            const rate = +(product.gstRate !== null && product.gstRate !== undefined
+                ? product.gstRate
+                : (product.category?.gstRate ?? 18));
+            const itemSubtotal = +product.price * item.quantity;
+            const itemTax = (itemSubtotal * rate) / 100;
+
+            subtotal += itemSubtotal;
+            totalTax += itemTax;
+
+            return {
+                productId: product.id,
+                productName: product.name,
+                rate,
+                subtotal: itemSubtotal,
+                tax: itemTax
+            };
+        }).filter(Boolean);
+
+        const result = {
+            subtotal,
+            totalTax: Math.round(totalTax),
+            grandTotal: Math.round(subtotal + totalTax),
+            isInterState: !isIntraState,
+            breakdown: {
+                cgst: isIntraState ? Math.round(totalTax / 2) : 0,
+                sgst: isIntraState ? Math.round(totalTax / 2) : 0,
+                igst: !isIntraState ? Math.round(totalTax) : 0,
+            }
+        };
+
+        return result;
     }
 }

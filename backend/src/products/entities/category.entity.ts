@@ -14,6 +14,9 @@ export class Category {
     @Column({ nullable: true })
     image?: string;
 
+    @Column({ type: 'decimal', precision: 5, scale: 2, default: 18 })
+    gstRate: number;
+
     @ManyToOne(() => Category, (category) => category.children)
     parent?: Category;
 

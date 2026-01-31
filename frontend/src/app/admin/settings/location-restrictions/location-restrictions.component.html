@@ -11,12 +11,27 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>State Name</label>
-                    <input type="text" [(ngModel)]="newLocation.state" name="state" required
-                        placeholder="e.g. Tamil Nadu">
+                    <select [(ngModel)]="newLocation.state" name="state" required class="form-control">
+                        <option value="">Select State</option>
+                        @for (state of states; track state) {
+                        <option [value]="state">{{ state }}</option>
+                        }
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Specific City (Optional)</label>
-                    <input type="text" [(ngModel)]="newLocation.city" name="city" placeholder="e.g. Trichy">
+                    <select [(ngModel)]="newLocation.city" name="city" class="form-control"
+                        [disabled]="!newLocation.state">
+                        <option value="">All Cities</option>
+                        @for (city of availableCities; track city) {
+                        <option [value]="city">{{ city }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Zipcode (Optional)</label>
+                    <input type="text" [(ngModel)]="newLocation.zipcode" name="zipcode" placeholder="e.g. 641001"
+                        class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Service Status</label>
@@ -44,6 +59,7 @@
                 <tr>
                     <th>State</th>
                     <th>City / Region</th>
+                    <th>Zipcode</th>
                     <th>Operational Status</th>
                     <th>Actions</th>
                 </tr>
@@ -53,6 +69,7 @@
                 <tr>
                     <td><strong>{{ loc.state }}</strong></td>
                     <td>{{ loc.city || 'All Cities Enabled' }}</td>
+                    <td>{{ loc.zipcode || 'Any' }}</td>
                     <td>
                         <span class="status-badge" [class.active]="loc.isAllowed">{{ loc.isAllowed ? 'Allowed' :
                             'Restricted' }}</span>

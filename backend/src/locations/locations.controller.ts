@@ -14,8 +14,12 @@ export class LocationsController {
     }
 
     @Get('check')
-    check(@Query('state') state: string, @Query('city') city?: string) {
-        return this.locationsService.isLocationAllowed(state, city);
+    check(
+        @Query('state') state: string,
+        @Query('city') city?: string,
+        @Query('zipcode') zipcode?: string
+    ) {
+        return this.locationsService.isLocationAllowed(state, city, zipcode);
     }
 
     @Get(':id')

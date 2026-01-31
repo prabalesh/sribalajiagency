@@ -44,4 +44,9 @@ export class OrderService {
         const res = await this.api.patch<Order>(`/orders/${id}/status`, { status, message });
         return res.data;
     }
+
+    async calculateTax(items: { productId: string, quantity: number }[], state: string) {
+        const res = await this.api.post<any>('/orders/calculate-tax', { items, state });
+        return res.data;
+    }
 }

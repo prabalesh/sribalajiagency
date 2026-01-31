@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LocationService } from '../../../core/store/location.service';
 import { LocationRestriction } from '../../../core/models/location.model';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { STATES, CITIES_BY_STATE } from '../../../core/constants/location.constants';
 
 @Component({
     selector: 'app-admin-location-restrictions',
@@ -19,9 +20,14 @@ export class LocationRestrictionsComponent implements OnInit {
     locations: LocationRestriction[] = [];
     newLocation: any = this.getEmptyLocation();
     isEditing = false;
+    states = STATES;
 
     async ngOnInit() {
         this.loadLocations();
+    }
+
+    get availableCities(): string[] {
+        return CITIES_BY_STATE[this.newLocation.state] || [];
     }
 
     async loadLocations() {
@@ -61,6 +67,7 @@ export class LocationRestrictionsComponent implements OnInit {
         return {
             state: '',
             city: '',
+            zipcode: '',
             isAllowed: true
         };
     }

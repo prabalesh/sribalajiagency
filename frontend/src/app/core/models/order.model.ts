@@ -46,5 +46,6 @@ export interface CreateOrderDto {
     paymentMethod: string;
     deliveryAddress: string;
     deliveryPhone: string;
+    deliveryState: string;
     deliveryNotes?: string;
 }
