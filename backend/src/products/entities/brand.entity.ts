@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
 
 @Entity('brands')
 export class Brand {
@@ -8,7 +8,7 @@ export class Brand {
     @Column()
     name: string;
 
-    @Column({ unique: true })
+    @Column({ unique: true, nullable: true })
     slug: string;
 
     @Column({ nullable: true })
@@ -22,4 +22,17 @@ export class Brand {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    generateSlug() {
+        if (!this.slug && this.name) {
+            this.slug = this.name
+                .toLowerCase()
+                .trim()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/[\s_-]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+    }
 }
