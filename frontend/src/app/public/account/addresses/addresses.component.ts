@@ -26,6 +26,8 @@ export class AddressesComponent implements OnInit {
   isLoading = true;
   showMap = false;
   verificationStatus: 'none' | 'pending' | 'verified' | 'mismatch' = 'none';
+  isEditingAddress = false;
+  editingAddressId: string | null = null;
 
   newAddress: Partial<Address> = {
     type: 'Home',
@@ -76,6 +78,8 @@ export class AddressesComponent implements OnInit {
 
   async toggleAdd() {
     this.isAdding = !this.isAdding;
+    this.isEditingAddress = false;
+    this.editingAddressId = null;
     if (this.isAdding) {
       this.newAddress = {
         type: 'Home', name: '', street: '', city: '', state: 'Tamil Nadu',
@@ -86,6 +90,42 @@ export class AddressesComponent implements OnInit {
       this.destroyMap();
     } else {
       this.destroyMap();
+    }
+  }
+
+  async onZipChange() {
+    const zip = this.newAddress.zip;
+    if (zip && zip.length === 6 && this.isValidZip()) {
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${zip}`);
+        const data = await response.json();
+
+        if (data && data[0] && data[0].Status === 'Success') {
+          const postOffice = data[0].PostOffice[0];
+          this.newAddress.city = postOffice.District;
+          this.newAddress.state = postOffice.State;
+        }
+      } catch (error) {
+        console.error('Error fetching PIN code details:', error);
+      }
+    }
+  }
+
+  async editAddress(address: Address) {
+    this.isAdding = true;
+    this.isEditingAddress = true;
+    this.editingAddressId = address.id;
+    this.newAddress = { ...address };
+    this.showMap = !!(address.lat && address.lng);
+    this.verificationStatus = this.showMap ? 'verified' : 'none';
+
+    if (this.showMap) {
+      setTimeout(() => {
+        this.initMap().then(() => {
+          this.setMarker(address.lat!, address.lng!);
+          this.map.setView([address.lat, address.lng], 15);
+        });
+      }, 100);
     }
   }
 
@@ -206,7 +246,7 @@ export class AddressesComponent implements OnInit {
     return /^[6-9][0-9]{9}$/.test(phone);
   }
 
-  async addAddress() {
+  async saveAddress() {
     if (!this.isValidZip()) {
       alert('Please enter a valid 6-digit Indian ZIP code.');
       return;
@@ -223,8 +263,15 @@ export class AddressesComponent implements OnInit {
     }
 
     try {
-      await this.addressService.addAddress(this.newAddress);
+      if (this.isEditingAddress && this.editingAddressId) {
+        await this.addressService.updateAddress(this.editingAddressId, this.newAddress);
+      } else {
+        await this.addressService.addAddress(this.newAddress);
+      }
+
       this.isAdding = false;
+      this.isEditingAddress = false;
+      this.editingAddressId = null;
       this.destroyMap();
 
       const returnUrl = this.route.snapshot.queryParams['returnUrl'];
@@ -236,7 +283,7 @@ export class AddressesComponent implements OnInit {
         await this.loadAddresses();
       }
     } catch (error) {
-      console.error('Error adding address:', error);
+      console.error('Error saving address:', error);
     }
   }
 

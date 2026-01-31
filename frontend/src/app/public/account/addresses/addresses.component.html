@@ -54,7 +54,7 @@
 
         @if (isAdding) {
         <section class="address-form glass-card animate-slide-up">
-            <h2>New Address</h2>
+            <h2>{{ isEditingAddress ? 'Edit Address' : 'New Address' }}</h2>
             <div class="form-grid">
                 <div class="form-group">
                     <label>Location Name (e.g. Home, Office)</label>
@@ -111,8 +111,8 @@
                 </div>
                 <div class="form-group">
                     <label>ZIP Code</label>
-                    <input type="text" [(ngModel)]="newAddress.zip" placeholder="641001" class="form-control"
-                        [class.is-invalid]="newAddress.zip && !isValidZip()">
+                    <input type="text" [(ngModel)]="newAddress.zip" (blur)="onZipChange()" placeholder="641001"
+                        class="form-control" [class.is-invalid]="newAddress.zip && !isValidZip()">
                     <span class="error-text" *ngIf="newAddress.zip && !isValidZip()">Enter 6 digits</span>
                 </div>
             </div>
@@ -159,9 +159,10 @@
             </div>
             <div class="form-actions">
                 <button class="btn-secondary" (click)="toggleAdd()">Cancel</button>
-                <button class="btn-primary" (click)="addAddress()"
-                    [disabled]="!newAddress.name || !newAddress.street || !newAddress.city || !newAddress.zip || !isValidZip()">Save
-                    Address</button>
+                <button class="btn-primary" (click)="saveAddress()"
+                    [disabled]="!newAddress.name || !newAddress.street || !newAddress.city || !newAddress.zip || !isValidZip()">
+                    {{ isEditingAddress ? 'Update Address' : 'Save Address' }}
+                </button>
             </div>
         </section>
         }
@@ -209,6 +210,7 @@
                     }
                 </div>
                 <div class="card-footer">
+                    <button (click)="editAddress(addr)" class="btn-link">Edit</button>
                     <button *ngIf="!addr.isDefault" (click)="setDefault(addr.id)" class="btn-link">Set as
                         Default</button>
                     <button (click)="deleteAddress(addr.id)" class="btn-delete">
