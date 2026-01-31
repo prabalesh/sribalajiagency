@@ -13,7 +13,6 @@
 .hero-showcase {
     position: relative;
     min-height: 750px;
-    height: 95vh;
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -29,11 +28,10 @@
         max-width: var(--container-max-width);
         margin: 0 auto;
         padding: 0 2rem;
-        gap: 6rem;
 
         @media (max-width: 991px) {
             grid-template-columns: 1fr;
-            padding: 8rem 1.5rem 4rem;
+            padding: 2rem;
             text-align: center;
             gap: 4rem;
         }
@@ -47,9 +45,10 @@
 
 .hero-content {
     max-width: 620px;
-    padding: 3.5rem;
+    padding: 2rem;
     border-radius: var(--border-radius-lg);
     position: relative;
+    gap: 3rem;
 
     @media (max-width: 991px) {
         max-width: 100%;
@@ -177,7 +176,7 @@
         max-width: var(--container-max-width);
         margin: 0 auto;
         padding: 0 2rem;
-        gap: 6rem;
+        gap: 3rem;
 
         @media (max-width: 991px) {
             grid-template-columns: 1fr;
@@ -337,7 +336,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-bottom: 4rem;
+    margin-bottom: 2.5rem;
 
 
     .sub-header {
@@ -380,7 +379,7 @@
 
 /* Category Grid */
 .category-section {
-    padding: 8rem 0;
+    padding: 4rem 0;
 
 
     @media (max-width: 768px) {
@@ -392,7 +391,7 @@
 .category-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2.5rem;
+    gap: 1.5rem;
 
 
     @media (max-width: 600px) {
@@ -403,7 +402,7 @@
 
 
 .category-card {
-    padding: 3.5rem;
+    padding: 2rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -468,7 +467,7 @@
 
 /* Featured Products */
 .featured-section {
-    padding: 8rem 0;
+    padding: 4rem 0;
     background-color: var(--surface-color-secondary);
 
 
@@ -488,6 +487,10 @@
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
     }
+
+    @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+    }
 }
 
 
@@ -496,13 +499,13 @@
 
 /* About Section */
 .about-section {
-    padding: 10rem 0;
+    padding: 5rem 0;
 
 
     .about-grid {
         display: grid;
         grid-template-columns: 1.1fr 0.9fr;
-        gap: 6rem;
+        gap: 3rem;
         align-items: center;
 
 
@@ -538,7 +541,7 @@
 
 /* Brand Shelf */
 .brand-shelf {
-    padding: 6rem 0;
+    padding: 3rem 0;
     border-top: 1px solid var(--border-color);
 }
 
@@ -581,7 +584,7 @@
 
 /* Trust Markers */
 .trust-markers {
-    padding: 8rem 0;
+    padding: 4rem 0;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 3rem;
@@ -593,7 +596,7 @@
 
 
     .marker {
-        padding: 3rem;
+        padding: 2rem;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -641,7 +644,7 @@
 
 /* Social Section */
 .social-section {
-    padding-bottom: 10rem;
+    padding-bottom: 5rem;
 
 
     @media (max-width: 768px) {

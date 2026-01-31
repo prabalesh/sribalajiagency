@@ -331,7 +331,37 @@
         padding: 0.35rem;
         font-size: 0.85rem;
     }
+
+    /* Small Screen Optimizations */
+    .main-header {
+        .header-actions {
+            gap: 0.5rem;
+
+            .theme-btn {
+                display: none;
+                /* Moved to mobile menu */
+            }
+        }
+
+        .icon-btn {
+            width: 38px;
+            height: 38px;
+
+            svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+
+        /* Ensure User Dropdown is aligned correctly on small screens */
+        .user-section .user-dropdown {
+            width: 240px;
+            right: -10px;
+            /* Adjust for tight edge */
+        }
+    }
 }
+
 
 .search-overlay {
     position: fixed;
@@ -384,6 +414,42 @@
 
             &:hover {
                 color: var(--text-color);
+            }
+        }
+    }
+
+    @media (max-width: 600px) {
+        padding-top: 60px;
+
+        .search-container {
+            padding: 0 1rem;
+        }
+
+        .search-box {
+            padding: 1rem;
+            gap: 0.75rem;
+            flex-direction: column;
+            /* Stack on very small screens if needed, or keep row but tighter */
+            align-items: stretch;
+            /* Full width items */
+
+            input {
+                width: 100%;
+                text-align: center;
+                margin-bottom: 0.5rem;
+                font-size: 1.1rem;
+            }
+
+            .search-actions {
+                width: 100%;
+                justify-content: center;
+                gap: 1rem;
+
+                .btn-primary {
+                    width: 100%;
+                    /* Full width search button */
+                    padding: 0.75rem;
+                }
             }
         }
     }
