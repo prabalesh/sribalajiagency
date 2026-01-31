@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, IsNull } from 'typeorm';
 import { LocationRestriction } from './entities/location-restriction.entity';
@@ -20,7 +20,50 @@ export class LocationsService {
         return location;
     }
 
-    create(data: any) {
+    async validateConsistency(data: any) {
+        if (!data.zipcode) return; // Zipcode is optional
+
+        const zip = data.zipcode;
+        if (!/^[1-9][0-9]{5}$/.test(zip)) {
+            throw new BadRequestException('Invalid 6-digit Indian Zipcode');
+        }
+
+        try {
+            const response = await fetch(`https://api.postalpincode.in/pincode/${zip}`);
+            const results = await response.json();
+
+            if (!results || !results[0] || results[0].Status !== 'Success') {
+                throw new BadRequestException('Invalid or non-existent Zipcode');
+            }
+
+            const postOffice = results[0].PostOffice[0];
+            const apiState = postOffice.State.toLowerCase();
+            const inputState = data.state.toLowerCase();
+
+            // Strict State Check
+            if (apiState !== inputState) {
+                throw new BadRequestException(`Zipcode ${zip} belongs to ${postOffice.State}, not ${data.state}`);
+            }
+
+            // Loose City Check (since districts and cities can have multiple names)
+            if (data.city) {
+                const apiDistrict = postOffice.District.toLowerCase();
+                const inputCity = data.city.toLowerCase();
+                if (!apiDistrict.includes(inputCity) && !inputCity.includes(apiDistrict)) {
+                    // Just a warning in logs if mismatching city, but maybe not block unless it's way off
+                    console.warn(`City mismatch: Input ${data.city} vs Zipcode District ${postOffice.District}`);
+                }
+            }
+
+        } catch (error) {
+            if (error instanceof BadRequestException) throw error;
+            console.error('Consistency validation failed:', error);
+            // Allow if API is down, but log it
+        }
+    }
+
+    async create(data: any) {
+        await this.validateConsistency(data);
         if (data.city === '') data.city = null;
         if (data.zipcode === '') data.zipcode = null;
         const location = this.locationRepo.create(data);
@@ -28,6 +71,7 @@ export class LocationsService {
     }
 
     async update(id: string, data: any) {
+        await this.validateConsistency(data);
         if (data.city === '') data.city = null;
         if (data.zipcode === '') data.zipcode = null;
         await this.locationRepo.update(id, data);

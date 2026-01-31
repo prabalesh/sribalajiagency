@@ -30,6 +30,24 @@ export class LocationRestrictionsComponent implements OnInit {
         return CITIES_BY_STATE[this.newLocation.state] || [];
     }
 
+    async onZipChange() {
+        const zip = this.newLocation.zipcode;
+        if (zip && zip.length === 6 && /^[1-9][0-9]{5}$/.test(zip)) {
+            try {
+                const response = await fetch(`https://api.postalpincode.in/pincode/${zip}`);
+                const data = await response.json();
+
+                if (data && data[0] && data[0].Status === 'Success') {
+                    const postOffice = data[0].PostOffice[0];
+                    this.newLocation.state = postOffice.State;
+                    this.newLocation.city = postOffice.District;
+                }
+            } catch (error) {
+                console.error('Error fetching PIN code details:', error);
+            }
+        }
+    }
+
     async loadLocations() {
         this.locations = await this.locationService.getLocations();
     }

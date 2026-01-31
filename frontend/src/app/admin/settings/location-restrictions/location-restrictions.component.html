@@ -30,8 +30,8 @@
                 </div>
                 <div class="form-group">
                     <label>Zipcode (Optional)</label>
-                    <input type="text" [(ngModel)]="newLocation.zipcode" name="zipcode" placeholder="e.g. 641001"
-                        class="form-control">
+                    <input type="text" [(ngModel)]="newLocation.zipcode" (blur)="onZipChange()" name="zipcode"
+                        placeholder="e.g. 641001" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>Service Status</label>
