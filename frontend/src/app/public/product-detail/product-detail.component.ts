@@ -55,12 +55,10 @@ export class ProductDetailComponent implements OnInit {
   }
 
   async loadProduct(id: string) {
-    console.log('ProductDetailComponent: loadProduct start', id);
     this.isLoading = true;
     try {
       this.selectedImageIndex = 0; // Reset to first image
       this.product = await this.productService.getProductById(id);
-      console.log('ProductDetailComponent: product loaded', this.product);
 
       if (this.product) {
         // Build Breadcrumbs immediately
@@ -75,7 +73,6 @@ export class ProductDetailComponent implements OnInit {
         if (catId) {
           const categories = await this.categoryService.getCategories();
           this.category = categories.find((c: Category) => c.id === catId);
-          console.log('ProductDetailComponent: category loaded', this.category);
 
           if (this.category) {
             this.breadcrumbItems.push({
@@ -95,7 +92,6 @@ export class ProductDetailComponent implements OnInit {
         }
 
         this.breadcrumbItems.push({ label: this.product.name });
-        console.log('Breadcrumbs final array:', this.breadcrumbItems);
 
         if (bId) {
           try {

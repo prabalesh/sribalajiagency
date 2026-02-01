@@ -13,15 +13,32 @@ export interface BreadcrumbItem {
   imports: [CommonModule, RouterModule],
   template: `
     <nav class="breadcrumbs">
-      @for (item of items; track item.label; let last = $last) {
-        @if (item.url && !last) {
-          <a [routerLink]="item.url">{{ item.label }}</a>
-        } @else {
-          <span [class.current]="last">{{ item.label }}</span>
-        }
-        @if (!last) {
-          <span class="sep">/</span>
-        }
+      <!-- First Item (Home) -->
+      @if (items.length > 0) {
+        <a [routerLink]="items[0].url" class="home-link">
+          <span class="text">Home</span>
+          <span class="icon">🏠</span> 
+        </a>
+        <span class="sep">/</span>
+      }
+
+      <!-- Middle Items: Hidden on Mobile if > 2 items total -->
+      @for (item of items.slice(1, -1); track item.label) {
+        <ng-container>
+          <a [routerLink]="item.url" class="middle-item">{{ item.label }}</a>
+          <span class="sep middle-sep">/</span>
+        </ng-container>
+      }
+
+      <!-- Ellipsis: Visible ONLY on Mobile if we have middle items -->
+      @if (items.length > 2) {
+        <span class="mobile-ellipsis">...</span>
+        <span class="sep mobile-sep">/</span>
+      }
+
+      <!-- Last Item (Current Page) -->
+      @if (items.length > 1) {
+        <span class="current">{{ items[items.length - 1].label }}</span>
       }
     </nav>
   `,

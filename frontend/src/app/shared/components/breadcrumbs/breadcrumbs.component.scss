@@ -16,6 +16,7 @@
         color: var(--text-color-muted);
         text-decoration: none;
         transition: color 0.2s;
+        white-space: nowrap;
 
         &:hover {
             color: var(--primary-color);
@@ -29,5 +30,74 @@
     .current {
         color: var(--text-color);
         font-weight: 600;
+        white-space: nowrap;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        vertical-align: bottom;
+    }
+
+    // Base Styles
+    .home-link {
+        display: flex;
+        align-items: center;
+
+        .icon {
+            display: none;
+        }
+
+        .text {
+            display: inline;
+        }
+    }
+
+    .mobile-ellipsis,
+    .mobile-sep {
+        display: none; // Hidden by default (Desktop)
+    }
+
+    // Mobile Styles (Max 768px)
+    @media (max-width: 768px) {
+        flex-wrap: nowrap;
+
+        // Hide "Home" text and show Icon
+        .home-link {
+            .text {
+                display: none;
+            }
+
+            .icon {
+                display: inline-block;
+                font-size: 1.1rem;
+                line-height: 1;
+                filter: grayscale(1);
+                opacity: 0.7;
+            }
+        }
+
+        // Hide Middle Items
+        .middle-item,
+        .middle-sep {
+            display: none;
+        }
+
+        // Show Ellipsis
+        .mobile-ellipsis {
+            display: inline-block;
+            color: var(--text-color-muted);
+        }
+
+        .mobile-sep {
+            display: inline-block;
+            opacity: 0.5;
+        }
+
+        // Adjust text size or spacing for mobile if needed
+        font-size: 0.85rem;
+
+        .current {
+            max-width: 150px; // Tighter truncation on mobile
+        }
     }
 }
