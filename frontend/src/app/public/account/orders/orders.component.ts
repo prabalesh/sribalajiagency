@@ -6,11 +6,12 @@ import { OrderService } from '../../../core/services/api/order.service';
 import { Order, OrderStatus } from '../../../core/models/order.model';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AccountSidebarComponent } from '../../../shared/components/account-sidebar/account-sidebar.component';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, AccountSidebarComponent],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.scss'
 })
@@ -158,7 +159,5 @@ export class OrdersComponent implements OnInit {
     return colors[status] || 'secondary';
   }
 
-  logout() {
-    this.authService.logout();
-  }
+
 }

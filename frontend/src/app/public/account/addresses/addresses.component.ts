@@ -7,11 +7,12 @@ import { AddressService } from '../../../core/services/api/address.service';
 import { Address } from '../../../core/models/address.model';
 import { STATES, CITIES_BY_STATE } from '../../../core/constants/location.constants';
 import { ToastService } from '../../../core/services/toast.service';
+import { AccountSidebarComponent } from '../../../shared/components/account-sidebar/account-sidebar.component';
 
 @Component({
   selector: 'app-addresses',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AccountSidebarComponent],
   templateUrl: './addresses.component.html',
   styleUrl: './addresses.component.scss'
 })

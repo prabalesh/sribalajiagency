@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { AccountSidebarComponent } from '../../../shared/components/account-sidebar/account-sidebar.component';
 
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AccountSidebarComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
