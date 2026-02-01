@@ -28,10 +28,16 @@
                 <div class="filters-row">
                     <div class="filter-group">
                         <label>Price Range:</label>
-                        <div class="price-inputs">
-                            <input type="number" [(ngModel)]="minPrice" placeholder="Min" (change)="applyFilters()">
-                            <span class="range-sep">-</span>
-                            <input type="number" [(ngModel)]="maxPrice" placeholder="Max" (change)="applyFilters()">
+                        <div class="range-slider">
+                            <input type="range" [(ngModel)]="minPrice" [min]="sliderMin" [max]="sliderMax"
+                                (change)="validateRange()" class="range-input min-range">
+                            <input type="range" [(ngModel)]="maxPrice" [min]="sliderMin" [max]="sliderMax"
+                                (change)="validateRange()" class="range-input max-range">
+                            <div class="slider-track-bg"></div>
+                            <div class="price-values">
+                                <span>₹{{minPrice}}</span>
+                                <span>₹{{maxPrice}}{{maxPrice >= sliderMax ? '+' : ''}}</span>
+                            </div>
                         </div>
                     </div>
 

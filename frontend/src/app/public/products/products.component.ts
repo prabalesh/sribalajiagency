@@ -41,8 +41,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
     hasMore = true;
 
     // Filters
-    minPrice: number | undefined;
-    maxPrice: number | undefined;
+    minPrice: number = 0;
+    maxPrice: number = 50000;
+    sliderMin = 0;
+    sliderMax = 50000;
     sortBy: string = 'name';
     sortOrder: 'ASC' | 'DESC' = 'ASC';
 
@@ -96,8 +98,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
         this.products = [];
         this.currentPage = 1;
         this.hasMore = true;
-        this.minPrice = undefined;
-        this.maxPrice = undefined;
+        this.minPrice = this.sliderMin;
+        this.maxPrice = this.sliderMax;
         this.sortBy = 'name';
         this.sortOrder = 'ASC';
     }
@@ -133,6 +135,15 @@ export class ProductsComponent implements OnInit, OnDestroy {
         this.applyFilters();
     }
 
+    validateRange() {
+        if (this.minPrice > this.maxPrice) {
+            const temp = this.minPrice;
+            this.minPrice = this.maxPrice;
+            this.maxPrice = temp;
+        }
+        this.applyFilters();
+    }
+
     private handleProductsResult(result: any) {
         this.products = result.items;
         this.totalItems = result.total;
@@ -142,6 +153,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
     private async loadProductsData(params: { categoryId?: string, categorySlug?: string, brandSlug?: string }) {
         try {
+            // If maxPrice is at the slider's max, treat it as unlimited (undefined)
+            const isMax = this.maxPrice >= this.sliderMax;
             return await this.productService.getProducts({
                 page: this.currentPage,
                 limit: this.pageSize,
@@ -149,7 +162,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
                 categorySlug: params.categorySlug,
                 brandSlug: params.brandSlug,
                 minPrice: this.minPrice,
-                maxPrice: this.maxPrice,
+                maxPrice: isMax ? undefined : this.maxPrice,
                 sortBy: this.sortBy,
                 sortOrder: this.sortOrder
             });
