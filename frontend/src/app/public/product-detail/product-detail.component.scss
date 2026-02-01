@@ -5,31 +5,7 @@
     max-width: 100%;
     margin: 0 auto;
 
-    .breadcrumbs {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem;
-        font-size: 0.85rem;
-        color: var(--text-color-muted);
-
-        a {
-            transition: color 0.2s;
-
-            &:hover {
-                color: var(--primary-color);
-            }
-        }
-
-        .sep {
-            opacity: 0.5;
-        }
-
-        .current {
-            color: var(--text-color);
-            font-weight: 600;
-        }
-    }
+    /* Breadcrumbs moved to shared component */
 }
 
 .product-main-grid {

@@ -1,13 +1,5 @@
 <div class="product-detail-page container" *ngIf="product">
-    <nav class="breadcrumbs">
-        <a routerLink="/">Home</a>
-        <span class="sep">/</span>
-        <a routerLink="/products">Catalog</a>
-        <span class="sep" *ngIf="category">/</span>
-        <a *ngIf="category" [routerLink]="['/products', category.slug]">{{ category.name }}</a>
-        <span class="sep">/</span>
-        <span class="current">{{ product.name }}</span>
-    </nav>
+    <app-breadcrumbs [items]="breadcrumbItems"></app-breadcrumbs>
 
     <div class="product-main-grid">
         <div class="product-gallery">

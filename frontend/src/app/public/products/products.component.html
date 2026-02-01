@@ -1,11 +1,7 @@
 <div class="products-page container">
     <main class="products-main">
         <header class="page-header">
-            <nav class="breadcrumbs">
-                <a routerLink="/">Home</a>
-                <span class="sep">/</span>
-                <span class="current">{{ currentCategory ? currentCategory.name : 'Catalog' }}</span>
-            </nav>
+            <app-breadcrumbs [items]="breadcrumbItems"></app-breadcrumbs>
 
             <div class="header-content">
                 <h1 class="text-gradient">{{ currentCategory ? currentCategory.name : 'Product Catalog' }}</h1>

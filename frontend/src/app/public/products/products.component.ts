@@ -13,11 +13,12 @@ import { CartService } from '../../core/store/cart.service';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { InfiniteScrollDirective } from '../../shared/directives/infinite-scroll.directive';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
+import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 
 @Component({
     selector: 'app-products',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent, InfiniteScrollDirective, ProductCardComponent],
+    imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent, InfiniteScrollDirective, ProductCardComponent, BreadcrumbsComponent],
     templateUrl: './products.component.html',
     styleUrl: './products.component.scss'
 })
@@ -32,6 +33,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     categories: Category[] = [];
     currentCategory: Category | undefined;
     isCategoryNotFound = false;
+    breadcrumbItems: BreadcrumbItem[] = [];
 
     // Pagination & Filter State
     currentPage = 1;
@@ -74,6 +76,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
                 } else {
                     this.currentCategory = undefined;
                 }
+
+                // Update Breadcrumbs
+                this.updateBreadcrumbs();
 
                 return this.loadProductsData({ categorySlug: activeSlug, brandSlug: brandSlug ?? undefined });
             })
@@ -198,6 +203,17 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
     scrollToTop() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    private updateBreadcrumbs() {
+        this.breadcrumbItems = [
+            { label: 'Home', url: '/' },
+            { label: 'Catalog', url: '/products' }
+        ];
+
+        if (this.currentCategory) {
+            this.breadcrumbItems.push({ label: this.currentCategory.name });
+        }
     }
 
     addToCart(product: Product) {

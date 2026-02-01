@@ -12,13 +12,14 @@ import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 
 
+import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent, ProductCardComponent],
+  imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent, ProductCardComponent, BreadcrumbsComponent],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss'
 })
@@ -36,38 +37,72 @@ export class ProductDetailComponent implements OnInit {
   quantity: number = 1;
   selectedImageIndex: number = 0;
   isLoading = false;
+  breadcrumbItems: BreadcrumbItem[] = [];
 
 
   ngOnInit() {
+    console.log('ProductDetailComponent: ngOnInit');
     this.route.paramMap.subscribe(async params => {
+      console.log('ProductDetailComponent: params', params);
       const id = params.get('id');
+      console.log('ProductDetailComponent: id', id);
       if (id) {
         await this.loadProduct(id);
+      } else {
+        console.warn('ProductDetailComponent: No ID found in route');
       }
     });
   }
 
   async loadProduct(id: string) {
+    console.log('ProductDetailComponent: loadProduct start', id);
     this.isLoading = true;
     try {
       this.selectedImageIndex = 0; // Reset to first image
       this.product = await this.productService.getProductById(id);
+      console.log('ProductDetailComponent: product loaded', this.product);
+
       if (this.product) {
+        // Build Breadcrumbs immediately
+        this.breadcrumbItems = [
+          { label: 'Home', url: '/' },
+          { label: 'Catalog', url: '/products' }
+        ];
+
         const catId = this.product.categoryId || this.product.category?.id;
         const bId = this.product.brandId || this.product.brand?.id;
 
         if (catId) {
           const categories = await this.categoryService.getCategories();
           this.category = categories.find((c: Category) => c.id === catId);
+          console.log('ProductDetailComponent: category loaded', this.category);
 
-          const related = await this.productService.getProductsByCategory(catId);
-          this.relatedProducts = related.items
-            .filter((p: Product) => p.id !== id)
-            .slice(0, 4);
+          if (this.category) {
+            this.breadcrumbItems.push({
+              label: this.category.name,
+              url: ['/products', this.category.slug]
+            });
+          }
+
+          try {
+            const related = await this.productService.getProductsByCategory(catId);
+            this.relatedProducts = related.items
+              .filter((p: Product) => p.id !== id)
+              .slice(0, 4);
+          } catch (err) {
+            console.warn('Failed to load related products', err);
+          }
         }
 
+        this.breadcrumbItems.push({ label: this.product.name });
+        console.log('Breadcrumbs final array:', this.breadcrumbItems);
+
         if (bId) {
-          this.brand = await this.brandService.getBrandById(bId);
+          try {
+            this.brand = await this.brandService.getBrandById(bId);
+          } catch (err) {
+            console.warn('Failed to load brand', err);
+          }
         }
 
         // Reset scroll
@@ -76,6 +111,8 @@ export class ProductDetailComponent implements OnInit {
     } catch (error) {
       console.error('ProductDetail: Failed to load product', error);
       // Handle error (e.g., redirect to 404 or show error state)
+    } finally {
+      this.isLoading = false;
     }
   }
 
