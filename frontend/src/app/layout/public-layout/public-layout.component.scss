@@ -515,25 +515,36 @@
 
     .social-links {
         display: flex;
-        gap: 1rem;
+        flex-direction: column;
+        gap: 0.75rem;
 
         .social-item {
-            width: 44px;
-            height: 44px;
-            background-color: var(--surface-color-secondary);
-            border-radius: 12px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: 800;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background-color: var(--surface-color-secondary);
+            border-radius: 12px;
+            font-weight: 700;
             font-size: 0.9rem;
+            color: var(--text-color-muted);
             transition: all 0.3s var(--transition-curve);
+            border: 1px solid var(--border-color);
+
+            lucide-icon {
+                opacity: 0.7;
+            }
 
             &:hover {
                 background-color: var(--primary-color);
                 color: white;
-                transform: translateY(-5px);
-                box-shadow: 0 5px 15px rgba(var(--primary-color-rgb), 0.3);
+                transform: translateX(8px);
+                border-color: var(--primary-color);
+                box-shadow: 0 5px 15px rgba(var(--primary-color-rgb), 0.2);
+
+                lucide-icon {
+                    opacity: 1;
+                }
             }
         }
     }

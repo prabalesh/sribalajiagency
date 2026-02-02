@@ -274,17 +274,17 @@
                 <div class="footer-section socials">
                     <h4>Connect</h4>
                     <div class="social-links">
-                        <a href="#" class="social-item">FB</a>
-                        <a href="#" class="social-item">TW</a>
-                        <a href="#" class="social-item">IG</a>
+                        @for (link of cms?.socialLinks; track $index) {
+                        <a [href]="link.url" target="_blank" class="social-item" [title]="link.platform">
+                            <lucide-icon [img]="icons.ExternalLink" [size]="18"></lucide-icon>
+                            <span>{{ link.platform }}</span>
+                        </a>
+                        }
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Sri Balaji Agency. All rights reserved.</p>
-                <div class="admin-link">
-                    <a routerLink="/admin/login">Staff Login</a>
-                </div>
+                <p>&copy; 2026 Sri Balaji Agency. All rights reserved.</p>
             </div>
         </div>
     </footer>

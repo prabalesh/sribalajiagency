@@ -5,13 +5,15 @@ import { FormsModule } from '@angular/forms';
 import { ThemeService } from '../../core/store/theme.service';
 import { CartService } from '../../core/store/cart.service';
 import { AuthService } from '../../core/services/auth/auth.service';
+import { CmsService } from '../../core/services/api/cms.service';
+import { LucideAngularModule, ExternalLink } from 'lucide-angular';
 
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent, LucideAngularModule],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.scss'
 })
@@ -20,15 +22,22 @@ export class PublicLayoutComponent {
   themeService = inject(ThemeService);
   cartService = inject(CartService);
   authService = inject(AuthService);
+  private cmsService = inject(CmsService);
+
+  readonly icons = {
+    ExternalLink
+  };
 
   searchQuery: string = '';
   isSearchOpen = false;
   isUserDropdownOpen = false;
   isMobileMenuOpen = false;
   isLoading = signal(true);
+  cms: any = null;
 
   constructor() {
-    afterNextRender(() => {
+    afterNextRender(async () => {
+      this.cms = await this.cmsService.getHomeCMS();
       this.isLoading.set(false);
     });
   }
