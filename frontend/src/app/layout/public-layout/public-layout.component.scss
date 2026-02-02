@@ -30,7 +30,6 @@
     .brand {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
         cursor: pointer;
         transition: transform 0.3s var(--transition-curve);
 
@@ -38,31 +37,18 @@
             transform: scale(1.02);
         }
 
-        .logo-icon {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.5rem;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 1rem;
-            box-shadow: 0 4px 10px rgba(var(--primary-color-rgb), 0.2);
-        }
+        .logo-img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
 
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: 900;
-            letter-spacing: -0.03em;
-            white-space: nowrap;
-
-            .accent {
-                color: var(--primary-color);
+            @media (max-width: 991px) {
+                height: 38px;
             }
-        }
-    }
 
-    @media (max-width: 600px) {
-        .brand .logo-text {
-            font-size: 1.25rem;
+            @media (max-width: 600px) {
+                height: 32px;
+            }
         }
     }
 
@@ -474,10 +460,11 @@
     }
 
     .footer-section {
-        h3 {
+        .footer-logo {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
             margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-            font-weight: 800;
         }
 
         h4 {

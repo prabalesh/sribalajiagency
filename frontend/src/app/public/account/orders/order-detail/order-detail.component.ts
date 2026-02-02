@@ -44,7 +44,6 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
           <div class="content-grid">
             <!-- Left Column: Items & Info -->
             <div class="main-info">
-             <!-- ... existing items logic ... -->
             <!-- Items List -->
             <section class="glass-card items-section">
               <h2>Items</h2>
@@ -134,19 +133,21 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
       align-items: center;
       gap: 1rem;
       margin-bottom: 0.5rem;
+      flex-wrap: wrap;
       
-      h1 { margin: 0; font-size: 1.75rem; color: var(--text-primary); }
+      h1 { margin: 0; font-size: clamp(1.25rem, 5vw, 1.75rem); color: var(--text-color); word-break: break-all; }
     }
 
-    .date { color: var(--text-secondary); margin: 0 0 2rem; }
+    .date { color: var(--text-color-muted); margin: 0 0 1.5rem; font-size: 0.9rem; }
 
     .content-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 1fr 340px;
       gap: 2rem;
       
-      @media (max-width: 992px) {
+      @media (max-width: 1100px) {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
       }
     }
 
@@ -156,6 +157,10 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
       border-radius: 1rem;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
+
+      @media (max-width: 600px) {
+        padding: 1rem;
+      }
     }
 
     .items-list {
@@ -170,18 +175,24 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
       justify-content: space-between;
       align-items: center;
       padding: 1rem;
-      background: var(--surface-ground);
-      border-radius: 0.5rem;
+      background: var(--surface-color-secondary);
+      border-radius: 0.75rem;
       transition: background-color 0.2s;
+
+      @media (max-width: 480px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
 
       &.clickable {
         cursor: pointer;
-        &:hover { background: var(--surface-hover); }
+        &:hover { background: var(--border-color); }
       }
 
-      h3 { margin: 0 0 0.25rem; font-size: 1rem; color: var(--text-primary); }
-      p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; }
-      .item-price { font-weight: 600; color: var(--text-primary); }
+      h3 { margin: 0 0 0.25rem; font-size: 0.95rem; color: var(--text-color); }
+      p { margin: 0; color: var(--text-color-muted); font-size: 0.85rem; }
+      .item-price { font-weight: 600; color: var(--text-color); }
     }
 
     .order-total {
@@ -192,16 +203,20 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
       border-top: 1px solid var(--border-color);
       font-size: 1.1rem;
       font-weight: 600;
-      color: var(--text-primary);
+      color: var(--text-color);
     }
 
     .info-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
+
+      @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+      }
       
-      h3 { font-size: 0.9rem; color: var(--text-secondary); margin: 0 0 0.5rem; text-transform: uppercase; }
-      p { margin: 0; color: var(--text-primary); }
+      h3 { font-size: 0.9rem; color: var(--text-color-muted); margin: 0 0 0.5rem; text-transform: uppercase; }
+      p { margin: 0; color: var(--text-color); }
     }
 
     /* Progress Bar Styles */
@@ -211,16 +226,36 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
         position: relative;
         margin-bottom: 2rem;
         padding: 0 1rem;
+
+        @media (max-width: 768px) {
+            overflow-x: auto;
+            padding-bottom: 1.5rem;
+            justify-content: flex-start;
+            gap: 2rem;
+            
+            &::-webkit-scrollbar {
+                height: 4px;
+            }
+            &::-webkit-scrollbar-thumb {
+                background: var(--border-color);
+                border-radius: 4px;
+            }
+        }
         
         &::before {
             content: '';
             position: absolute;
-            top: 15px;
+            top: 17px;
             left: 2rem;
             right: 2rem;
             height: 4px;
             background: var(--border-color);
             z-index: 0;
+
+            @media (max-width: 768px) {
+                width: 500px;
+                left: 1rem;
+            }
         }
     }
 
@@ -231,6 +266,7 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
         position: relative;
         z-index: 1;
         width: 100px;
+        flex-shrink: 0;
         text-align: center;
         
         .step-icon {
@@ -245,19 +281,19 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
             margin-bottom: 0.5rem;
             transition: all 0.3s;
             font-weight: bold;
-            color: var(--text-secondary);
+            color: var(--text-color-muted);
         }
         
         .step-label {
             font-size: 0.8rem;
             font-weight: 600;
-            color: var(--text-secondary);
+            color: var(--text-color-muted);
             margin-bottom: 0.25rem;
         }
         
         .step-date {
             font-size: 0.75rem;
-            color: var(--text-secondary);
+            color: var(--text-color-muted);
             font-style: italic;
         }
         
@@ -266,9 +302,9 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
                 border-color: var(--primary-color);
                 background: var(--primary-color);
                 color: white;
-                box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.2);
+                box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.2);
             }
-            .step-label { color: var(--text-primary); }
+            .step-label { color: var(--text-color); }
         }
     }
 
