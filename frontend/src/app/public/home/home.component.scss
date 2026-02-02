@@ -8,17 +8,16 @@
     position: relative;
     background: var(--hero-bg);
     overflow: hidden;
+    min-height: 90vh;
 }
 
 .hero-showcase {
     position: relative;
-    min-height: 600px;
     display: flex;
     align-items: center;
     overflow: hidden;
     z-index: 10;
     border: none;
-    padding: 4rem 0;
 
     .hero-container {
         display: grid;

@@ -1,12 +1,6 @@
 <div class="home-wrapper">
     <!-- Hero Section -->
     <section class="hero-container animate-fade">
-        <!-- <div class="hero-noise"></div> -->
-        <!-- <div class="hero-bg-blobs"> -->
-        <!-- <div class="blob blob-1"></div>
-            <div class="blob blob-2"></div>
-            <div class="blob blob-3"></div> -->
-        <!-- </div> -->
         @if (cms?.heroType === 'carousel' && cms?.heroSlides?.length > 0) {
         <div class="hero-carousel">
             <div class="carousel-container">
@@ -172,7 +166,7 @@
     <section class="trust-markers container">
         <div class="marker glass-card">
             <div class="marker-icon">
-                <lucide-icon [img]="icons.Truck" [size]="32" color="#3b82f6"></lucide-icon>
+                <lucide-icon [img]="icons.Truck" [size]="32" class="icons"></lucide-icon>
             </div>
             <div class="marker-text">
                 <h4>Rapid 24h Delivery</h4>
@@ -181,7 +175,7 @@
         </div>
         <div class="marker glass-card">
             <div class="marker-icon">
-                <lucide-icon [img]="icons.ShieldCheck" [size]="32" color="#3b82f6"></lucide-icon>
+                <lucide-icon [img]="icons.ShieldCheck" [size]="32" class="icons"></lucide-icon>
             </div>
             <div class="marker-text">
                 <h4>Genuine Brand Warranty</h4>
@@ -190,7 +184,7 @@
         </div>
         <div class="marker glass-card">
             <div class="marker-icon">
-                <lucide-icon [img]="icons.MessageCircle" [size]="32" color="#3b82f6"></lucide-icon>
+                <lucide-icon [img]="icons.MessageCircle" [size]="32" class="icons"></lucide-icon>
             </div>
             <div class="marker-text">
                 <h4>Expert Consultation</h4>
