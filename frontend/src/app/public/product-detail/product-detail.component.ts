@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProductService } from '../../core/services/api/product.service';
@@ -30,6 +30,7 @@ export class ProductDetailComponent implements OnInit {
   private brandService = inject(BrandService);
   private cartService = inject(CartService);
 
+  @ViewChild('productGrid') productGrid!: ElementRef<HTMLElement>;
   product?: Product;
   category?: Category;
   brand?: Brand;
@@ -85,7 +86,7 @@ export class ProductDetailComponent implements OnInit {
             const related = await this.productService.getProductsByCategory(catId);
             this.relatedProducts = related.items
               .filter((p: Product) => p.id !== id)
-              .slice(0, 4);
+              .slice(0, 12);
           } catch (err) {
             console.warn('Failed to load related products', err);
           }
@@ -143,5 +144,18 @@ export class ProductDetailComponent implements OnInit {
 
   onCardAddToCart(product: Product) {
     this.cartService.addToCart(product);
+  }
+
+  scrollCarousel(direction: 'left' | 'right') {
+    if (!this.productGrid) return;
+
+    const container = this.productGrid.nativeElement;
+    const scrollAmount = container.clientWidth * 0.8; // Scroll 80% of view width
+
+    if (direction === 'left') {
+      container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
   }
 }

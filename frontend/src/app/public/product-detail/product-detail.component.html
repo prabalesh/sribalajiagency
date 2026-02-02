@@ -117,11 +117,25 @@
     @if (relatedProducts.length > 0) {
     <section class="related-products">
         <h2>You Might Also Like</h2>
-        <div class="product-grid">
-            @for (p of relatedProducts; track p.id) {
-            <app-product-card [product]="p" (addToCart)="onCardAddToCart($event)">
-            </app-product-card>
-            }
+        <div class="carousel-container">
+            <button class="nav-btn prev" (click)="scrollCarousel('left')" aria-label="Previous products">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+
+            <div class="product-grid" #productGrid>
+                @for (p of relatedProducts; track p.id) {
+                <app-product-card [product]="p" (addToCart)="onCardAddToCart($event)" class="carousel-item">
+                </app-product-card>
+                }
+            </div>
+
+            <button class="nav-btn next" (click)="scrollCarousel('right')" aria-label="Next products">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
         </div>
     </section>
     }

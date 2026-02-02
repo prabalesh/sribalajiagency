@@ -327,18 +327,78 @@
         text-align: center;
     }
 
-    .product-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 1.5rem;
+    .carousel-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
 
-        @media (max-width: 768px) {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
+        .product-grid {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: calc((100% - 4.5rem) / 4);
+            gap: 1.5rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            padding-bottom: 1rem;
+            /* Hide scrollbar */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+
+            .carousel-item {
+                scroll-snap-align: start;
+                height: 100%;
+
+                ::ng-deep app-product-card {
+                    height: 100%;
+                }
+            }
+
+            @media (max-width: 1100px) {
+                grid-auto-columns: calc((100% - 3rem) / 3);
+            }
+
+            @media (max-width: 768px) {
+                /* EXACTLY 2 items visible as requested */
+                grid-auto-columns: calc((100% - 1rem) / 2);
+                gap: 1rem;
+            }
         }
 
-        @media (max-width: 480px) {
-            grid-template-columns: 1fr;
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 2;
+            flex-shrink: 0;
+
+            &:hover {
+                background: var(--primary-color);
+                color: white;
+                border-color: var(--primary-color);
+                transform: scale(1.1);
+            }
+
+            /* prev and next are identical in base style, specific positioning can be added here if needed later */
+
+            /* Hide buttons on mobile touch to save space, let them swipe */
+            @media (max-width: 768px) {
+                display: none;
+            }
         }
     }
 
