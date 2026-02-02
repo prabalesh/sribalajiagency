@@ -132,8 +132,14 @@
         position: relative;
 
         .login-btn {
-            padding: 0.75rem 1.5rem;
-            font-size: 0.9rem;
+            &.desktop-login-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            &.mobile-login-btn {
+                display: none;
+            }
         }
 
         .user-dropdown {
@@ -302,8 +308,14 @@
             gap: 0.75rem;
         }
 
-        .user-section .login-btn {
-            display: none;
+        .user-section {
+            .desktop-login-btn {
+                display: none;
+            }
+
+            .mobile-login-btn {
+                display: flex;
+            }
         }
     }
 }
@@ -323,10 +335,7 @@
         .header-actions {
             gap: 0.5rem;
 
-            .theme-btn {
-                display: none;
-                /* Moved to mobile menu */
-            }
+            /* theme-btn is now displayed by default */
         }
 
         .icon-btn {
