@@ -208,3 +208,62 @@
         }
     }
 }
+
+@media (max-width: 480px) {
+    .product-card {
+        .p-image {
+            height: 150px;
+
+            .p-actions .btn-icon-cart {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+            }
+
+            .p-badges .badge {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.6rem;
+            }
+        }
+
+        .p-info {
+            padding: 0.75rem;
+
+            .p-meta {
+                font-size: 0.65rem;
+                margin-bottom: 0.5rem;
+            }
+
+            h3 {
+                font-size: 0.9rem;
+                margin-bottom: 0.75rem;
+                height: 2.8em;
+                /* Adjust line height calculation if needed */
+            }
+
+            .p-footer {
+                align-items: flex-end;
+
+                .p-price-area {
+                    .p-price {
+                        font-size: 1.1rem;
+                    }
+
+                    .p-mrp {
+                        font-size: 0.8rem;
+                    }
+                }
+
+                .p-rating {
+                    .stars {
+                        font-size: 0.75rem;
+                    }
+
+                    .reviews {
+                        font-size: 0.65rem;
+                    }
+                }
+            }
+        }
+    }
+}
