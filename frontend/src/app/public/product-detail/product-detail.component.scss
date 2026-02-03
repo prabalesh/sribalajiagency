@@ -298,6 +298,164 @@
         padding: 0.8rem 1.2rem;
         font-size: 0.85rem;
     }
+
+    .reviews-section {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+        }
+
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+
+            .big-rating {
+                display: flex;
+                align-items: center;
+                background: #f59e0b;
+                color: white;
+                padding: 0.5rem 1rem;
+                font-weight: 900;
+                font-size: 1.5rem;
+                border-radius: 0;
+            }
+
+            .count {
+                color: var(--text-color-muted);
+                font-size: 0.9rem;
+            }
+        }
+
+        .add-review-card {
+            background: var(--surface-color-secondary);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0;
+
+            h4 {
+                margin-bottom: 1rem;
+            }
+
+            .rating-input {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            textarea {
+                width: 100%;
+                padding: 0.75rem;
+                border: 1px solid var(--border-color);
+                border-radius: 0;
+                background: var(--surface-color);
+                margin-bottom: 1rem;
+                resize: vertical;
+                font-family: inherit;
+
+                &:focus {
+                    outline: none;
+                    border-color: var(--primary-color);
+                }
+            }
+        }
+
+        .login-prompt {
+            padding: 1.5rem;
+            background: rgba(var(--primary-color-rgb), 0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+            border-radius: 0;
+
+            a {
+                color: var(--primary-color);
+                font-weight: 700;
+                text-decoration: underline;
+            }
+        }
+
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+
+            .review-item {
+                padding-bottom: 1.5rem;
+                border-bottom: 1px solid var(--border-color);
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                .review-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 0.75rem;
+
+                    .user-info {
+                        display: flex;
+                        gap: 1rem;
+
+                        .avatar {
+                            width: 40px;
+                            height: 40px;
+                            background: var(--surface-color-secondary);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-weight: 700;
+                            color: var(--primary-color);
+                        }
+
+                        .details {
+                            display: flex;
+                            flex-direction: column;
+
+                            .name {
+                                font-weight: 700;
+                                font-size: 0.9rem;
+                            }
+                        }
+                    }
+
+                    .date {
+                        font-size: 0.8rem;
+                        color: var(--text-color-muted);
+                    }
+                }
+
+                .comment {
+                    font-size: 0.95rem;
+                    line-height: 1.5;
+                    color: var(--text-color);
+                }
+
+                .delete-btn {
+                    color: var(--danger-color);
+                    font-size: 0.8rem;
+                    margin-top: 0.5rem;
+                    padding: 0;
+                    text-decoration: underline;
+                }
+            }
+
+            .no-reviews {
+                text-align: center;
+                color: var(--text-color-muted);
+                padding: 2rem;
+                font-style: italic;
+            }
+        }
+    }
 }
 
 .specs-card {

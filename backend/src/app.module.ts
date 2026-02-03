@@ -27,6 +27,8 @@ import { OrderStatusHistory } from './orders/entities/order-status-history.entit
 import { Quotation } from './quotations/entities/quotation.entity';
 import { HomeCMS } from './products/entities/home-cms.entity';
 import { CommonModule } from './common/common.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { Review } from './reviews/entities/review.entity';
 
 @Module({
   imports: [
@@ -47,6 +49,7 @@ import { CommonModule } from './common/common.module';
     CouponsModule,
     LocationsModule,
     QuotationsModule,
+    ReviewsModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -57,7 +60,7 @@ import { CommonModule } from './common/common.module';
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'sribalaji'),
-        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Quotation, Coupon, LocationRestriction, HomeCMS, UserAddress],
+        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Quotation, Coupon, LocationRestriction, HomeCMS, UserAddress, Review],
 
         synchronize: config.get('NODE_ENV') !== 'production',
       }),
