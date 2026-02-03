@@ -23,6 +23,16 @@
         }
     }
 
+    &.out-of-stock-item {
+        opacity: 0.6;
+        filter: grayscale(1);
+
+        &:hover {
+            opacity: 0.8;
+            filter: grayscale(0.5);
+        }
+    }
+
     .p-image {
         height: 300px;
         position: relative;

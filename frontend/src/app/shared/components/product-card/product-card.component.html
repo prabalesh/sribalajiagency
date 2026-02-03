@@ -1,9 +1,9 @@
-<div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]">
+<div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]"
+    [class.out-of-stock-item]="product.stock <= 0">
     <div class="p-image">
         <img [src]="(product.images[0] && product.images[0].url) | imageUrl" [alt]="product.name" loading="lazy">
 
         <div class="p-badges">
-            <span class="badge in-stock" *ngIf="product.stock > 0">In Stock</span>
             <span class="badge out-of-stock" *ngIf="product.stock <= 0">Out of Stock</span>
             <span class="badge featured" *ngIf="product.isFeatured">Featured</span>
         </div>

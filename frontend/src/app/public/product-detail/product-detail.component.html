@@ -33,9 +33,9 @@
                         </span>
                     </div>
                     <span class="stock-status" [class.out]="currentStock <= 0"
-                        [class.low]="currentStock > 0 && currentStock <= 5">
+                        [class.low]="currentStock > 0 && currentStock <= 5" *ngIf="currentStock <= 5">
                         <ng-container *ngIf="currentStock > 0; else outOfStock">
-                            {{ currentStock <= 5 ? 'Only ' + currentStock + ' left!' : 'In Stock' }} </ng-container>
+                            {{ currentStock <= 5 ? 'Only ' + currentStock + ' left!' : '' }} </ng-container>
                                 <ng-template #outOfStock>Out of Stock</ng-template>
                     </span>
                 </div>
