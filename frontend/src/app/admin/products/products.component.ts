@@ -11,11 +11,12 @@ import { DragDropDirective } from '../../shared/directives/drag-drop.directive';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropDirective, PaginationComponent],
+  imports: [CommonModule, FormsModule, DragDropDirective, PaginationComponent, ImageUrlPipe],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
@@ -131,7 +132,15 @@ export class ProductsComponent implements OnInit {
   // Variant Management
   addVariant() {
     if (!this.newProduct.variants) this.newProduct.variants = [];
-    this.newProduct.variants.push({ id: '', name: '', price: this.newProduct.price, comparisonPrice: this.newProduct.comparisonPrice, stock: 0 });
+    this.newProduct.variants.push({
+      id: '',
+      name: '',
+      price: this.newProduct.price,
+      comparisonPrice: this.newProduct.comparisonPrice,
+      stock: 0,
+      image: '',
+      description: ''
+    });
   }
 
   removeVariant(index: number) {

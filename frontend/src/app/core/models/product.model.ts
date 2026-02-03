@@ -15,6 +15,8 @@ export interface ProductVariant {
     sku?: string;
     specifications?: any;
     stock: number;
+    image?: string;
+    description?: string;
 }
 
 export interface Product {

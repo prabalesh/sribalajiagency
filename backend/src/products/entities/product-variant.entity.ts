@@ -24,6 +24,12 @@ export class ProductVariant {
     @Column({ default: 0 })
     stock: number;
 
+    @Column({ nullable: true })
+    image: string;
+
+    @Column({ type: 'text', nullable: true })
+    description: string;
+
     @ManyToOne(() => Product, (product) => product.variants, { onDelete: 'CASCADE' })
     product: Product;
 

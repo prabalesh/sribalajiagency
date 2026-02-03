@@ -135,7 +135,7 @@
                     <div class="image-gallery">
                         @for (img of newProduct.images; track img.id) {
                         <div class="image-item glass-card">
-                            <img [src]="'http://localhost:3000' + img.url" alt="Product Image">
+                            <img [src]="img.url | imageUrl" alt="Product Image">
                             <button type="button" class="delete-btn" (click)="removeImage(img.id)">Remove</button>
                         </div>
                         }
@@ -151,15 +151,23 @@
                     <div class="variants-list">
                         @for (v of newProduct.variants; track $index) {
                         <div class="variant-item glass-card">
-                            <input type="text" [(ngModel)]="v.name" name="vName-{{$index}}" placeholder="Variant Name"
-                                required>
-                            <input type="number" [(ngModel)]="v.price" name="vPrice-{{$index}}" placeholder="Price"
-                                required title="Selling Price">
-                            <input type="number" [(ngModel)]="v.comparisonPrice" name="vCPrice-{{$index}}"
-                                placeholder="MRP" title="Actual Price (Strike)">
-                            <input type="number" [(ngModel)]="v.stock" name="vStock-{{$index}}" placeholder="Stock"
-                                required>
-                            <button type="button" class="remove-btn" (click)="removeVariant($index)">×</button>
+                            <div class="v-row">
+                                <input type="text" [(ngModel)]="v.name" name="vName-{{$index}}"
+                                    placeholder="Variant Name" required>
+                                <input type="number" [(ngModel)]="v.price" name="vPrice-{{$index}}" placeholder="Price"
+                                    required title="Selling Price">
+                                <input type="number" [(ngModel)]="v.comparisonPrice" name="vCPrice-{{$index}}"
+                                    placeholder="MRP" title="Actual Price (Strike)">
+                                <input type="number" [(ngModel)]="v.stock" name="vStock-{{$index}}" placeholder="Stock"
+                                    required>
+                                <button type="button" class="remove-btn" (click)="removeVariant($index)">×</button>
+                            </div>
+                            <div class="v-row secondary">
+                                <input type="text" [(ngModel)]="v.image" name="vImage-{{$index}}"
+                                    placeholder="Specific Image URL (optional)">
+                                <textarea [(ngModel)]="v.description" name="vDesc-{{$index}}"
+                                    placeholder="Variant Specific Description (optional)" rows="1"></textarea>
+                            </div>
                         </div>
                         }
                     </div>

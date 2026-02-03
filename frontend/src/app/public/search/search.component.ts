@@ -4,14 +4,13 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProductService } from '../../core/services/api/product.service';
 import { Product } from '../../core/models/product.model';
 import { Observable } from 'rxjs'; // Import Observable usually not needed for type if using AsyncPipe or manual sub, but useful for type defs
-// Note: delay/of operators were inline imported in service
 
-import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 
 @Component({
   selector: 'app-search',
   standalone: true,
-  imports: [CommonModule, RouterModule, ImageUrlPipe],
+  imports: [CommonModule, RouterModule, ProductCardComponent],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss'
 })

@@ -5,7 +5,7 @@ import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
 import { BrandService } from '../../core/services/api/brand.service';
 import { CartService } from '../../core/store/cart.service';
-import { Product } from '../../core/models/product.model';
+import { Product, ProductVariant } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
 import { Brand } from '../../core/models/brand.model';
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
@@ -45,36 +45,33 @@ export class ProductDetailComponent implements OnInit {
   isLoading = false;
   breadcrumbItems: BreadcrumbItem[] = [];
 
+  // Variant Logic
+  selectedVariant: ProductVariant | undefined;
+
   error: string | null = null;
 
   ngOnInit() {
     this.isBrowser = isPlatformBrowser(this.platformId);
-    console.log('ProductDetailComponent: ngOnInit');
     this.route.paramMap.subscribe(async params => {
-      console.log('ProductDetailComponent: params', params);
       const id = params.get('id');
-      console.log('ProductDetailComponent: id', id);
       if (id) {
         await this.loadProduct(id);
-      } else {
-        console.warn('ProductDetailComponent: No ID found in route');
       }
     });
   }
 
   async loadProduct(id: string) {
-    if (!this.isBrowser) return; // Skip fetching on server to avoid SSR issues
+    if (!this.isBrowser) return; // Skip fetching on server
     this.isLoading = true;
     this.error = null;
     try {
-      this.selectedImageIndex = 0; // Reset to first image
+      this.selectedImageIndex = 0;
+      this.selectedVariant = undefined;
       this.product = await this.productService.getProductById(id);
 
       if (this.product) {
         // NG0900 Fix: Ensure images is an array
         if (this.product.images && !Array.isArray(this.product.images)) {
-          console.warn('ProductDetail: images is not an array, converting...', this.product.images);
-          // If it's an object, try to convert values to array, otherwise empty array
           this.product.images = typeof this.product.images === 'object'
             ? Object.values(this.product.images)
             : [];
@@ -82,7 +79,12 @@ export class ProductDetailComponent implements OnInit {
           this.product.images = [];
         }
 
-        // Build Breadcrumbs immediately
+        // Auto-select first variant if exists
+        if (this.product.variants && this.product.variants.length > 0) {
+          this.selectVariant(this.product.variants[0]);
+        }
+
+        // Build Breadcrumbs
         this.breadcrumbItems = [
           { label: 'Home', url: '/' },
           { label: 'Catalog', url: '/products' }
@@ -94,22 +96,18 @@ export class ProductDetailComponent implements OnInit {
         if (catId) {
           const categories = await this.categoryService.getCategories();
           this.category = categories.find((c: Category) => c.id === catId);
-
           if (this.category) {
             this.breadcrumbItems.push({
               label: this.category.name,
               url: ['/products', this.category.slug]
             });
           }
-
           try {
             const related = await this.productService.getProductsByCategory(catId);
             this.relatedProducts = related.items
               .filter((p: Product) => p.id !== id)
               .slice(0, 12);
-          } catch (err) {
-            console.warn('Failed to load related products', err);
-          }
+          } catch (err) { }
         }
 
         this.breadcrumbItems.push({ label: this.product.name });
@@ -117,9 +115,7 @@ export class ProductDetailComponent implements OnInit {
         if (brandSlug) {
           try {
             this.brand = await this.brandService.getBrandBySlug(brandSlug);
-          } catch (err) {
-            console.warn('Failed to load brand', err);
-          }
+          } catch (err) { }
         }
 
         // Reset scroll
@@ -134,9 +130,43 @@ export class ProductDetailComponent implements OnInit {
     }
   }
 
+  selectVariant(variant: ProductVariant) {
+    this.selectedVariant = variant;
+
+    // Update displayed image if variant has one
+    if (variant.image && this.product) {
+      const variantImageIndex = this.product.images.findIndex(img => img.url === variant.image);
+      if (variantImageIndex !== -1) {
+        this.selectedImageIndex = variantImageIndex;
+      } else {
+        // Optional: If variant image is not in main gallery, we might want to handle it differently
+        // For now, we assume variant images are part of product images or we add logic later
+      }
+    }
+  }
+
+  get currentPrice(): number {
+    return this.selectedVariant ? this.selectedVariant.price : (this.product?.price || 0);
+  }
+
+  get currentStock(): number {
+    // If variants exist, inventory is managed at variant level
+    if (this.product?.variants && this.product.variants.length > 0) {
+      return this.selectedVariant ? this.selectedVariant.stock : 0;
+    }
+    return this.product?.stock || 0;
+  }
+
   addToCart() {
     if (this.product) {
-      this.cartService.addToCart(this.product, this.quantity);
+      // If variants exist but none selected (shouldn't happen with auto-select), disable add
+      if (this.product.variants?.length && !this.selectedVariant) {
+        this.uiService.show('Please select a variation', 'warning');
+        return;
+      }
+
+      // TODO: Update CartService to support variant ID
+      this.cartService.addToCart(this.product, this.quantity); // Note: Passing product for now, backend might need variantId
     }
   }
 

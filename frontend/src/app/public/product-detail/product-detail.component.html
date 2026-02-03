@@ -26,33 +26,50 @@
                 <h1>{{ product.name }}</h1>
                 <div class="price-section">
                     <div class="price-stack">
-                        <span class="price">₹{{ product.price | number }}</span>
-                        <span *ngIf="product.comparisonPrice" class="mrp">₹{{ product.comparisonPrice | number }}</span>
+                        <span class="price">₹{{ currentPrice | number }}</span>
+                        <!-- Show comparison price if available on variant or fallback to product -->
+                        <span *ngIf="selectedVariant?.comparisonPrice || product.comparisonPrice" class="mrp">
+                            ₹{{ (selectedVariant?.comparisonPrice || product.comparisonPrice) | number }}
+                        </span>
                     </div>
-                    <span class="stock-status" [class.out]="!product.isAvailable || product.stock <= 0"
-                        [class.low]="product.stock > 0 && product.stock <= 5">
-                        <ng-container *ngIf="product.stock > 0; else outOfStock">
-                            {{ product.stock <= 5 ? 'Only ' + product.stock + ' left!' : 'In Stock' }} </ng-container>
+                    <span class="stock-status" [class.out]="currentStock <= 0"
+                        [class.low]="currentStock > 0 && currentStock <= 5">
+                        <ng-container *ngIf="currentStock > 0; else outOfStock">
+                            {{ currentStock <= 5 ? 'Only ' + currentStock + ' left!' : 'In Stock' }} </ng-container>
                                 <ng-template #outOfStock>Out of Stock</ng-template>
                     </span>
                 </div>
             </div>
 
-            <p class="description">{{ product.description }}</p>
+            <!-- Variant Selector -->
+            <div class="variants-section" *ngIf="product.variants && product.variants.length > 0">
+                <label>Select Option:</label>
+                <div class="variant-chips">
+                    <button *ngFor="let v of product.variants" class="variant-chip"
+                        [class.active]="selectedVariant?.id === v.id" (click)="selectVariant(v)">
+                        {{ v.name }}
+                    </button>
+                </div>
+            </div>
+
+            <p class="description">{{ selectedVariant?.description || product.description }}</p>
 
             <div class="limit-note"
-                *ngIf="product.maxOrderQuantity && product.maxOrderQuantity < product.stock && !product.isShowcaseOnly">
+                *ngIf="product.maxOrderQuantity && product.maxOrderQuantity < currentStock && !product.isShowcaseOnly">
                 Limit {{ product.maxOrderQuantity }} per order
             </div>
 
             <div class="purchase-actions" *ngIf="product.isAvailable && !product.isShowcaseOnly">
-                <div class="quantity-selector" *ngIf="product.stock > 0">
+                <div class="quantity-selector" *ngIf="currentStock > 0">
                     <button (click)="updateQuantity(-1)" [disabled]="quantity <= 1">-</button>
                     <span>{{ quantity }}</span>
                     <button (click)="updateQuantity(1)"
-                        [disabled]="quantity >= product.stock || (product.maxOrderQuantity && quantity >= product.maxOrderQuantity)">+</button>
+                        [disabled]="quantity >= currentStock || (product.maxOrderQuantity && quantity >= product.maxOrderQuantity)">+</button>
                 </div>
-                <button class="btn-primary" (click)="addToCart()" *ngIf="product.stock > 0">
+                <!-- Disable button if out of stock OR (variants exist AND none selected) -->
+                <button class="btn-primary" (click)="addToCart()"
+                    [disabled]="currentStock <= 0 || (product.variants.length > 0 && !selectedVariant)"
+                    *ngIf="currentStock > 0">
                     Add to Cart
                 </button>
             </div>

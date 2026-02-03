@@ -16,18 +16,7 @@
     @if (!isLoading && products.length > 0) {
     <div class="product-grid">
         @for (product of products; track product.id) {
-        <div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]">
-            <div class="p-image">
-                <img [src]="(product.images[0] && product.images[0].url) | imageUrl" [alt]="product.name">
-            </div>
-            <div class="p-info">
-                <span class="p-brand">{{ product.brand?.name || 'Generic' | uppercase }}</span>
-                <h3>{{ product.name }}</h3>
-                <div class="p-footer">
-                    <span class="p-price">₹{{ product.price | number }}</span>
-                </div>
-            </div>
-        </div>
+        <app-product-card [product]="product"></app-product-card>
         }
     </div>
     }
