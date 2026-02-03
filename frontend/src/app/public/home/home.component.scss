@@ -19,6 +19,10 @@
     z-index: 10;
     border: none;
 
+    @media (max-width: 600px) {
+        display: block;
+    }
+
     .hero-container {
         display: grid;
         border: none;
@@ -36,11 +40,20 @@
             padding: 2rem;
             gap: 3rem;
         }
+
+        @media (max-width: 600px) {
+            margin: 0;
+            padding: 0; // Removed padding completely
+            gap: 0.5rem; // Minimal gap
+            min-height: auto; // Override global min-height
+            display: flex; // Use flex to stack tightly
+            flex-direction: column;
+        }
     }
 
     @media (max-width: 768px) {
         min-height: auto;
-        padding: 3rem 0;
+        padding: 0; // Removing padding completely on container wrapper to let inner container handle it
     }
 }
 
@@ -70,6 +83,13 @@
         font-weight: 900;
         letter-spacing: 0.25em;
         margin-bottom: 2rem;
+
+        @media (max-width: 600px) {
+            margin-bottom: 1rem;
+            padding: 0.4rem 1rem;
+            font-size: 0.65rem;
+        }
+
         box-shadow: 0 15px 25px rgba(255, 62, 0, 0.3);
         animation: fadeInDown 1s var(--transition-curve) backwards;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -82,6 +102,12 @@
         margin-bottom: 1.5rem;
         letter-spacing: -0.04em;
         animation: fadeInUp 1s var(--transition-curve) 0.1s backwards;
+
+        @media (max-width: 600px) {
+            font-size: 2rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
     }
 
     p {
@@ -97,6 +123,7 @@
         @media (max-width: 1024px) {
             margin-left: auto;
             margin-right: auto;
+            margin-bottom: 1.5rem; // Reduced margin on mobile
         }
     }
 
@@ -110,7 +137,9 @@
         }
 
         @media (max-width: 576px) {
-            flex-direction: column;
+            flex-direction: row; // Keep buttons side-by-side if possible, or small stack
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 1rem;
             width: 100%;
         }
@@ -122,7 +151,11 @@
             min-width: 180px;
 
             @media (max-width: 576px) {
-                width: 100%;
+                width: auto; // Allow auto width to fit side by side
+                flex: 1;
+                min-width: 140px;
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
             }
         }
     }
@@ -147,6 +180,16 @@
         @media (max-width: 1024px) {
             max-height: 400px;
             margin-top: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            max-height: none; // Allow full height for the 90% width
+            margin: .5rem auto 0 auto; // Center and minimal top margin
+            margin-top: 10px;
+            display: block;
         }
     }
 }
@@ -179,6 +222,10 @@
             text-align: center;
             gap: 2rem;
         }
+
+        @media (max-width: 600px) {
+            gap: 1rem; // Reduced from 2rem
+        }
     }
 
     &.active {
@@ -193,8 +240,13 @@
     @media (max-width: 1024px) {
         position: relative;
         height: auto;
-        min-height: 500px;
-        padding: 4rem 0;
+        min-height: 300px;
+        padding: 2rem 0;
+    }
+
+    @media (max-width: 600px) {
+        min-height: 250px;
+        padding: 0.5rem 0; // Reduced from 1.5rem
     }
 }
 
@@ -590,6 +642,10 @@
             font-size: 1.5rem;
             font-weight: 800;
             color: var(--text-color-muted);
+
+            &:hover {
+                color: var(--primary-color);
+            }
         }
     }
 }
