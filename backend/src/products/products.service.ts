@@ -161,6 +161,19 @@ export class ProductsService {
         }
     }
 
+    async uploadGenericFile(file: Express.Multer.File) {
+        const url = await this.fileStorageService.saveFile(file, `media/generic/${Date.now()}`);
+        return { url };
+    }
+
+    async uploadGenericFiles(files: Array<Express.Multer.File>) {
+        const uploadPromises = files.map(file =>
+            this.fileStorageService.saveFile(file, `media/generic/${Date.now()}_${Math.random().toString(36).substring(7)}`)
+        );
+        const urls = await Promise.all(uploadPromises);
+        return { urls };
+    }
+
     createCategory(data: any) {
         const category = this.categoryRepo.create(data);
         return this.categoryRepo.save(category);

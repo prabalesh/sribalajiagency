@@ -160,13 +160,26 @@
                                     placeholder="MRP" title="Actual Price (Strike)">
                                 <input type="number" [(ngModel)]="v.stock" name="vStock-{{$index}}" placeholder="Stock"
                                     required>
-                                <button type="button" class="remove-btn" (click)="removeVariant($index)">×</button>
                             </div>
                             <div class="v-row secondary">
+                                <div class="v-images-actions" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                    <button type="button" class="btn-secondary sm" (click)="fileInput.click()">
+                                        <i class="fas fa-upload"></i> Upload Images
+                                    </button>
+                                    <input #fileInput type="file" style="display: none"
+                                        (change)="uploadVariantImage($event, v)" accept="image/*" multiple>
+
+                                    <button type="button" class="btn-secondary sm outline"
+                                        (click)="!v.images ? v.images = [''] : v.images.push('')">
+                                        + Add URL
+                                    </button>
+                                </div>
+
+                                <!-- Fallback/Primary Image (Legacy or Main) -->
                                 <input type="text" [(ngModel)]="v.image" name="vImage-{{$index}}"
-                                    placeholder="Specific Image URL (optional)">
+                                    placeholder="Primary Image URL" class="mt-2">
                                 <textarea [(ngModel)]="v.description" name="vDesc-{{$index}}"
-                                    placeholder="Variant Specific Description (optional)" rows="1"></textarea>
+                                    placeholder="Variant Specific Description (optional)" rows="2"></textarea>
                             </div>
                         </div>
                         }

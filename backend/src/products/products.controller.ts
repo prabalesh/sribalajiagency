@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Post, Put, Delete, Body, UseGuards, UseInterceptors, UploadedFile, ParseBoolPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Put, Delete, Body, UseGuards, UseInterceptors, UploadedFile, UploadedFiles, ParseBoolPipe, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
@@ -97,6 +97,22 @@ export class ProductsController {
     @Permissions('UPDATE_PRODUCT')
     removeImage(@Param('imageId') imageId: string) {
         return this.productsService.removeProductImage(imageId);
+    }
+
+    @Post('media/upload')
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @Permissions('UPDATE_PRODUCT')
+    @UseInterceptors(FileInterceptor('file'))
+    uploadMedia(@UploadedFile() file: Express.Multer.File) {
+        return this.productsService.uploadGenericFile(file);
+    }
+
+    @Post('media/bulk-upload')
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @Permissions('UPDATE_PRODUCT')
+    @UseInterceptors(FilesInterceptor('files'))
+    bulkUploadMedia(@UploadedFiles() files: Array<Express.Multer.File>) {
+        return this.productsService.uploadGenericFiles(files);
     }
 
     @Post('categories')

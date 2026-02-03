@@ -148,6 +148,30 @@ export class ProductsComponent implements OnInit {
     this.newProduct.variants?.splice(index, 1);
   }
 
+  async uploadVariantImage(event: any, variant: any) {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      try {
+        const res = await this.productService.uploadGenericImages(files);
+        if (!variant.images) variant.images = [];
+
+        // Add all returned URLs
+        if (res.urls && res.urls.length > 0) {
+          variant.images.push(...res.urls);
+
+          // Set primary if empty
+          if (!variant.image) variant.image = res.urls[0];
+        }
+
+        this.toastService.success(`${files.length} image(s) uploaded`);
+      } catch (err) {
+        console.error(err);
+        this.toastService.error('Failed to upload images');
+      }
+    }
+    event.target.value = ''; // Reset input
+  }
+
   // Image Management
   async removeImage(imageId: string) {
     if (confirm('Remove this image?')) {

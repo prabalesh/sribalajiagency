@@ -53,6 +53,22 @@ export class ProductService {
     return res.data;
   }
 
+  async uploadGenericImage(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await this.api.post<{ url: string }>(`/products/media/upload`, formData);
+    return res.data;
+  }
+
+  async uploadGenericImages(files: FileList | File[]) {
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+    const res = await this.api.post<{ urls: string[] }>(`/products/media/bulk-upload`, formData);
+    return res.data;
+  }
+
   async deleteImage(imageId: string) {
     await this.api.delete(`/products/images/${imageId}`);
   }
