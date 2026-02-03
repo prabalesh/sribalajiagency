@@ -40,21 +40,6 @@
                     </span>
                 </div>
 
-
-
-                <!-- Progress Bar in List -->
-                <div class="progress-track">
-                    @for (step of getProgressSteps(order); track step.status) {
-                    <div class="progress-step" [class.completed]="step.completed" [class.active]="step.active"
-                        [title]="step.label + (step.date ? ' - ' + (step.date | date:'shortDate') : '')">
-                        <div class="step-icon">
-                            @if (step.completed) { ✓ } @else { {{ step.index }} }
-                        </div>
-                        <div class="step-label">{{ step.label }}</div>
-                    </div>
-                    }
-                </div>
-
                 <div class="order-details">
                     <div class="section">
                         <h4>Items</h4>
