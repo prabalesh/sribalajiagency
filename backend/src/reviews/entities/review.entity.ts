@@ -27,6 +27,12 @@ export class Review {
     @Column()
     productId: string;
 
+    @Column({ type: 'text', nullable: true })
+    reply: string;
+
+    @Column({ type: 'timestamp', nullable: true })
+    repliedAt: Date;
+
     @CreateDateColumn()
     createdAt: Date;
 }

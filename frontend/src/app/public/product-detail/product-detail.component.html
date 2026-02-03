@@ -117,62 +117,8 @@
                 </div>
             </div>
 
-            <div class="reviews-section" id="reviews">
-                <h3>Ratings & Reviews</h3>
-
-                <!-- Product Rating Summary -->
-                <div class="rating-summary">
-                    <div class="big-rating">
-                        <span class="score">{{ product.rating || 0 }}</span>
-                        <span class="star">★</span>
-                    </div>
-                    <div class="count">{{ product.reviewCount || 0 }} Reviews</div>
-                </div>
-
-                <!-- Add Review Form -->
-                <div class="add-review-card" *ngIf="currentUser(); else loginToReview">
-                    <h4>Write a Review</h4>
-                    <div class="rating-input">
-                        <span>Your Rating:</span>
-                        <app-star-rating [(rating)]="userRating"></app-star-rating>
-                    </div>
-                    <textarea [(ngModel)]="reviewComment" placeholder="Share your thoughts about this product..."
-                        rows="3"></textarea>
-                    <button class="btn-primary" [disabled]="userRating === 0 || isReviewSubmitting"
-                        (click)="submitReview()">
-                        {{ isReviewSubmitting ? 'Submitting...' : 'Submit Review' }}
-                    </button>
-                </div>
-                <ng-template #loginToReview>
-                    <div class="login-prompt">
-                        <p>Please <a routerLink="/auth/login"
-                                [queryParams]="{ returnUrl: '/products/' + product.id }">login</a> to write a review.
-                        </p>
-                    </div>
-                </ng-template>
-
-                <!-- Reviews List -->
-                <div class="reviews-list">
-                    <div class="review-item" *ngFor="let review of reviews">
-                        <div class="review-header">
-                            <div class="user-info">
-                                <div class="avatar">{{ review.user?.name?.charAt(0) || 'U' }}</div>
-                                <div class="details">
-                                    <span class="name">{{ review.user?.name || 'Anonymous' }}</span>
-                                    <app-star-rating [rating]="review.rating" [readonly]="true"></app-star-rating>
-                                </div>
-                            </div>
-                            <span class="date">{{ review.createdAt | date }}</span>
-                        </div>
-                        <p class="comment">{{ review.comment }}</p>
-                        <button *ngIf="currentUser() && currentUser()?.id === review.userId" class="delete-btn"
-                            (click)="deleteReview(review.id)">Delete</button>
-                    </div>
-                    <div class="no-reviews" *ngIf="reviews.length === 0">
-                        No reviews yet. Be the first to review!
-                    </div>
-                </div>
-            </div>
+            <app-product-reviews [productId]="product.id" [averageRating]="product.rating || 0">
+            </app-product-reviews>
         </div>
     </div>
 

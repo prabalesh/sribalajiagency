@@ -12,16 +12,15 @@ import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
-import { ReviewService } from '../../core/services/review.service';
-import { StarRatingComponent } from '../../shared/components/star-rating/star-rating.component';
-import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../core/services/auth/auth.service';
+import { ProductReviewsComponent } from './components/product-reviews/product-reviews.component';
 import { ToastService } from '../../core/services/toast.service';
+
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent, ProductCardComponent, BreadcrumbsComponent, StarRatingComponent, FormsModule],
+  imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent, ProductCardComponent, BreadcrumbsComponent, FormsModule, ProductReviewsComponent],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss'
 })
@@ -31,8 +30,6 @@ export class ProductDetailComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
   private cartService = inject(CartService);
-  private reviewService = inject(ReviewService);
-  private authService = inject(AuthService);
   private uiService = inject(ToastService);
   private platformId = inject(PLATFORM_ID);
 
@@ -48,18 +45,10 @@ export class ProductDetailComponent implements OnInit {
   isLoading = false;
   breadcrumbItems: BreadcrumbItem[] = [];
 
-  reviews: any[] = [];
-  userRating: number = 0;
-  reviewComment: string = '';
-  isReviewSubmitting = false;
-
-  // Use signal directly
-  currentUser = this.authService.user;
   error: string | null = null;
 
   ngOnInit() {
     this.isBrowser = isPlatformBrowser(this.platformId);
-    this.authService.isInitialCheckDone(); // Ensure check triggers if needed
     console.log('ProductDetailComponent: ngOnInit');
     this.route.paramMap.subscribe(async params => {
       console.log('ProductDetailComponent: params', params);
@@ -67,7 +56,6 @@ export class ProductDetailComponent implements OnInit {
       console.log('ProductDetailComponent: id', id);
       if (id) {
         await this.loadProduct(id);
-        this.loadReviews(id);
       } else {
         console.warn('ProductDetailComponent: No ID found in route');
       }
@@ -83,6 +71,17 @@ export class ProductDetailComponent implements OnInit {
       this.product = await this.productService.getProductById(id);
 
       if (this.product) {
+        // NG0900 Fix: Ensure images is an array
+        if (this.product.images && !Array.isArray(this.product.images)) {
+          console.warn('ProductDetail: images is not an array, converting...', this.product.images);
+          // If it's an object, try to convert values to array, otherwise empty array
+          this.product.images = typeof this.product.images === 'object'
+            ? Object.values(this.product.images)
+            : [];
+        } else if (!this.product.images) {
+          this.product.images = [];
+        }
+
         // Build Breadcrumbs immediately
         this.breadcrumbItems = [
           { label: 'Home', url: '/' },
@@ -178,58 +177,5 @@ export class ProductDetailComponent implements OnInit {
     } else {
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
-  }
-
-  loadReviews(productId: string) {
-    if (!this.isBrowser) return;
-    this.reviewService.getReviewsByProduct(productId).subscribe({
-      next: (res) => {
-        this.reviews = res;
-      },
-      error: (err) => console.error('Failed to load reviews', err)
-    });
-  }
-
-  submitReview() {
-    if (!this.product || this.userRating === 0) return;
-
-    this.isReviewSubmitting = true;
-    this.reviewService.createReview({
-      productId: this.product.id,
-      rating: this.userRating,
-      comment: this.reviewComment
-    }).subscribe({
-      next: (res) => {
-        this.uiService.show('Review submitted successfully!', 'success');
-        this.reviewComment = '';
-        this.userRating = 0;
-        this.loadReviews(this.product!.id);
-        // Optimistically update product rating if needed, or reload product
-        this.loadProduct(this.product!.id);
-      },
-      error: (err) => {
-        this.uiService.show(err.error?.message || 'Failed to submit review', 'error');
-        this.isReviewSubmitting = false;
-      },
-      complete: () => {
-        this.isReviewSubmitting = false;
-      }
-    });
-  }
-
-  deleteReview(reviewId: string) {
-    if (!this.isBrowser) return;
-    if (!confirm('Are you sure using you want to delete this review?')) return;
-
-    this.reviewService.deleteReview(reviewId).subscribe({
-      next: () => {
-        this.uiService.show('Review deleted', 'success');
-        if (this.product) {
-          this.loadReviews(this.product.id);
-          this.loadProduct(this.product.id);
-        }
-      },
-      error: (err) => this.uiService.show('Failed to delete review', 'error')
-    });
   }
 }

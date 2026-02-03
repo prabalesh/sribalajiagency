@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Review } from './entities/review.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
-import { User } from '../../auth/entities/user.entity';
-import { Product } from '../../products/entities/product.entity';
+import { Product } from 'src/products/entities/product.entity';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class ReviewsService {
@@ -15,7 +15,7 @@ export class ReviewsService {
         private productRepository: Repository<Product>,
     ) { }
 
-    async create(createReviewDto: CreateReviewDto, user: User) {
+    async create(createReviewDto: CreateReviewDto, userId: string) {
         const { productId, rating, comment } = createReviewDto;
 
         const product = await this.productRepository.findOne({ where: { id: productId } });
@@ -25,7 +25,7 @@ export class ReviewsService {
 
         // Check if user already reviewed this product
         const existingReview = await this.reviewsRepository.findOne({
-            where: { userId: user.id, productId },
+            where: { userId: userId, productId },
         });
 
         if (existingReview) {
@@ -35,7 +35,7 @@ export class ReviewsService {
         const review = this.reviewsRepository.create({
             rating,
             comment,
-            userId: user.id,
+            userId: userId,
             productId,
         });
 
@@ -45,15 +45,37 @@ export class ReviewsService {
         return review;
     }
 
-    async findAllByProduct(productId: string) {
-        return this.reviewsRepository.find({
+    async findAllByProduct(productId: string, page: number = 1, limit: number = 5) {
+        const [items, total] = await this.reviewsRepository.findAndCount({
             where: { productId },
             order: { createdAt: 'DESC' },
             relations: ['user'],
+            skip: (page - 1) * limit,
+            take: limit,
         });
+
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit)
+        };
     }
 
-    async remove(id: string, user: User) {
+    async replyToReview(id: string, reply: string) {
+        const review = await this.reviewsRepository.findOne({ where: { id } });
+        if (!review) {
+            throw new NotFoundException('Review not found');
+        }
+
+        review.reply = reply;
+        review.repliedAt = new Date();
+
+        return this.reviewsRepository.save(review);
+    }
+
+    async remove(id: string, userId: string) {
         const review = await this.reviewsRepository.findOne({ where: { id } });
 
         if (!review) {
@@ -62,7 +84,7 @@ export class ReviewsService {
 
         // Only allow user to delete their own review (or admin - handled via roles/guards separately if needed)
         // For now, let's assume this method is called after checking permissions or by the user themselves
-        if (review.userId !== user.id) {
+        if (review.userId !== userId) {
             // If we had an isAdmin flag on user, we could check that too
             // For strictness, let's say only owner can delete here. 
             // Admin deletion might need a separate method or expanded check.

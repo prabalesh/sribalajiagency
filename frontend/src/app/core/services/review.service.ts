@@ -1,25 +1,35 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { ApiService } from '../api/api.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ReviewService {
-    private apiUrl = `${environment.apiUrl}/reviews`;
+    private api = inject(ApiService);
 
-    constructor(private http: HttpClient) { }
-
-    createReview(data: { productId: string, rating: number, comment?: string }): Observable<any> {
-        return this.http.post(this.apiUrl, data);
+    async createReview(data: { productId: string, rating: number, comment?: string }) {
+        const res = await this.api.post<any>('/reviews', data);
+        return res.data;
     }
 
-    getReviewsByProduct(productId: string): Observable<any[]> {
-        return this.http.get<any[]>(`${this.apiUrl}/product/${productId}`);
+    async getReviewsByProduct(productId: string, page: number = 1, limit: number = 5) {
+        const res = await this.api.get<{
+            items: any[],
+            total: number,
+            page: number,
+            limit: number,
+            totalPages: number
+        }>(`/reviews/product/${productId}`, { page, limit });
+        return res.data;
     }
 
-    deleteReview(id: string): Observable<any> {
-        return this.http.delete(`${this.apiUrl}/${id}`);
+    async replyToReview(id: string, reply: string) {
+        const res = await this.api.post<any>(`/reviews/${id}/reply`, { reply });
+        return res.data;
+    }
+
+    async deleteReview(id: string) {
+        const res = await this.api.delete<any>(`/reviews/${id}`);
+        return res.data;
     }
 }
