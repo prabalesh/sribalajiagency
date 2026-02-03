@@ -25,7 +25,10 @@ export class ProductVariant {
     stock: number;
 
     @Column({ nullable: true })
-    image: string;
+    image: string; // Keep for backward compatibility or primary variant image
+
+    @Column('text', { array: true, default: [] })
+    images: string[];
 
     @Column({ type: 'text', nullable: true })
     description: string;

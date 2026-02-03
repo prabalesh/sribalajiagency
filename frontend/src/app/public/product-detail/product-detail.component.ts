@@ -132,17 +132,18 @@ export class ProductDetailComponent implements OnInit {
 
   selectVariant(variant: ProductVariant) {
     this.selectedVariant = variant;
+    this.selectedImageIndex = 0; // Reset to first image of the variant/product
+  }
 
-    // Update displayed image if variant has one
-    if (variant.image && this.product) {
-      const variantImageIndex = this.product.images.findIndex(img => img.url === variant.image);
-      if (variantImageIndex !== -1) {
-        this.selectedImageIndex = variantImageIndex;
-      } else {
-        // Optional: If variant image is not in main gallery, we might want to handle it differently
-        // For now, we assume variant images are part of product images or we add logic later
-      }
+  get displayImages(): any[] {
+    if (this.selectedVariant && this.selectedVariant.images && this.selectedVariant.images.length > 0) {
+      return this.selectedVariant.images.map(url => ({ url, isPrimary: false })); // Map to match structure if needed, or just strings
     }
+    // Fallback to single variant image if multiple not present but single is
+    if (this.selectedVariant && this.selectedVariant.image) {
+      return [{ url: this.selectedVariant.image, isPrimary: true }];
+    }
+    return this.product?.images || [];
   }
 
   get currentPrice(): number {

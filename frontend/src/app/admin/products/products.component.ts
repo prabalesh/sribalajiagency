@@ -139,6 +139,7 @@ export class ProductsComponent implements OnInit {
       comparisonPrice: this.newProduct.comparisonPrice,
       stock: 0,
       image: '',
+      images: [], // Init empty array
       description: ''
     });
   }

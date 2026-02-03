@@ -84,15 +84,15 @@
         letter-spacing: 0.25em;
         margin-bottom: 2rem;
 
+        box-shadow: 0 15px 25px rgba(255, 62, 0, 0.3);
+        animation: fadeInDown 1s var(--transition-curve) backwards;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
         @media (max-width: 600px) {
             margin-bottom: 1rem;
             padding: 0.4rem 1rem;
             font-size: 0.65rem;
         }
-
-        box-shadow: 0 15px 25px rgba(255, 62, 0, 0.3);
-        animation: fadeInDown 1s var(--transition-curve) backwards;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     h1 {

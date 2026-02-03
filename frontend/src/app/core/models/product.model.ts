@@ -16,6 +16,7 @@ export interface ProductVariant {
     specifications?: any;
     stock: number;
     image?: string;
+    images?: string[]; // Added
     description?: string;
 }
 

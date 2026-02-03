@@ -9,11 +9,11 @@
     <div class="product-main-grid">
         <div class="product-gallery">
             <div class="main-image">
-                <img [src]="(product.images.length > 0 ? product.images[selectedImageIndex].url : '') | imageUrl"
+                <img [src]="(displayImages.length > 0 ? displayImages[selectedImageIndex].url : '') | imageUrl"
                     [alt]="product.name">
             </div>
-            <div class="image-thumbnails" *ngIf="product.images.length > 1">
-                <div *ngFor="let image of product.images; let i = index" class="thumbnail"
+            <div class="image-thumbnails" *ngIf="displayImages.length > 1">
+                <div *ngFor="let image of displayImages; let i = index" class="thumbnail"
                     [class.active]="i === selectedImageIndex" (click)="selectImage(i)">
                     <img [src]="image.url | imageUrl" [alt]="product.name">
                 </div>
