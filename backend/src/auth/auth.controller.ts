@@ -1,8 +1,9 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Req, Res, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { AuthSignupDto, AuthLoginDto } from './dto/auth.dto';
 
 
 @Controller('auth')
@@ -32,18 +33,30 @@ export class AuthController {
 
     @Post('local/signup')
     @HttpCode(HttpStatus.CREATED)
-    async signup(@Body() dto: any, @Res({ passthrough: true }) res: Response) {
-        const data = await this.authService.signup(dto);
-        this.setCookies(res, data);
-        return { user: data.user };
+    async signup(@Body() dto: AuthSignupDto, @Res({ passthrough: true }) res: Response) {
+        try {
+            const data = await this.authService.signup(dto);
+            this.setCookies(res, data);
+            return { user: data.user };
+        } catch (error) {
+            if (error.code === '23505') { // Unique constraint violation in Postgres
+                throw new BadRequestException('Email already exists');
+            }
+            throw new InternalServerErrorException('Error during signup');
+        }
     }
 
     @Post('local/signin')
     @HttpCode(HttpStatus.OK)
-    async login(@Body() dto: any, @Res({ passthrough: true }) res: Response) {
-        const data = await this.authService.login(dto);
-        this.setCookies(res, data);
-        return { user: data.user };
+    async login(@Body() dto: AuthLoginDto, @Res({ passthrough: true }) res: Response) {
+        try {
+            const data = await this.authService.login(dto);
+            this.setCookies(res, data);
+            return { user: data.user };
+        } catch (error) {
+            // AuthService already throws ForbiddenException for invalid credentials
+            throw error;
+        }
     }
 
     @Post('logout')
@@ -58,10 +71,14 @@ export class AuthController {
     @UseGuards(AuthGuard('jwt-refresh'))
     @HttpCode(HttpStatus.OK)
     async refreshTokens(@Req() req: any, @Res({ passthrough: true }) res: Response) {
-        const user = req.user;
-        const data = await this.authService.refreshTokens(user.sub, user.refreshToken);
-        this.setCookies(res, data);
-        return { user: data.user };
+        try {
+            const user = req.user;
+            const data = await this.authService.refreshTokens(user.sub, user.refreshToken);
+            this.setCookies(res, data);
+            return { user: data.user };
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

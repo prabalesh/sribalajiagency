@@ -6,6 +6,7 @@ import { Role, Permission } from './entities/role.entity';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { AuthSignupDto, AuthLoginDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +46,7 @@ export class AuthService {
         return { access_token: at, refresh_token: rt };
     }
 
-    async signup(dto: any) {
+    async signup(dto: AuthSignupDto) {
         const password = await this.hashData(dto.password);
         const newUser = this.userRepository.create({
             name: dto.name,
@@ -60,12 +61,12 @@ export class AuthService {
         return { user, ...tokens };
     }
 
-    async login(dto: any) {
+    async login(dto: AuthLoginDto) {
         const user = await this.userRepository.findOne({
             where: { email: dto.email },
             relations: ['roles', 'roles.permissions'],
             select: ['id', 'email', 'password', 'name'],
-        } as any);
+        });
 
         if (!user) throw new ForbiddenException('Access Denied');
 
@@ -75,7 +76,7 @@ export class AuthService {
         const tokens = await this.getTokens(user.id, user.email);
         await this.updateRefreshTokenHash(user.id, tokens.refresh_token);
 
-        const { password: _, ...userWithoutPassword } = user as any;
+        const { password: _, ...userWithoutPassword } = user;
         return { user: userWithoutPassword, ...tokens };
     }
 
