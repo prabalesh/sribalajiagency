@@ -99,13 +99,13 @@ export class CartComponent implements OnInit {
     return methods;
   }
 
-  updateQty(productId: string, delta: number, currentQty: number) {
-    this.cartService.updateQuantity(productId, currentQty + delta);
+  updateQty(productId: string, delta: number, currentQty: number, variantId?: string) {
+    this.cartService.updateQuantity(productId, currentQty + delta, variantId);
     if (this.isCheckoutMode) this.recalculateTax();
   }
 
-  removeItem(productId: string) {
-    this.cartService.removeFromCart(productId);
+  removeItem(productId: string, variantId?: string) {
+    this.cartService.removeFromCart(productId, variantId);
     if (this.isCheckoutMode) this.recalculateTax();
   }
 
@@ -168,6 +168,7 @@ export class CartComponent implements OnInit {
 
     const items = this.cartService.items().map(item => ({
       productId: item.product.id,
+      variantId: item.variant?.id,
       quantity: item.quantity
     }));
 
@@ -211,8 +212,10 @@ export class CartComponent implements OnInit {
     try {
       const items = this.cartService.items().map(item => ({
         productId: item.product.id,
+        variantId: item.variant?.id,
         productName: item.product.name,
-        price: item.product.price || 0,
+        variantName: item.variant?.name,
+        price: item.variant ? item.variant.price : (item.product.price || 0),
         quantity: item.quantity
       }));
 

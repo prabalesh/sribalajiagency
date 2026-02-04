@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Order } from './order.entity';
 import { Product } from '../../products/entities/product.entity';
+import { ProductVariant } from '../../products/entities/product-variant.entity';
 
 @Entity('order_items')
 export class OrderItem {
@@ -13,8 +14,14 @@ export class OrderItem {
     @ManyToOne(() => Product)
     product: Product;
 
+    @ManyToOne(() => ProductVariant, { nullable: true })
+    variant: ProductVariant;
+
     @Column()
     productName: string;
+
+    @Column({ nullable: true })
+    variantName: string;
 
     @Column({ type: 'int' })
     quantity: number;

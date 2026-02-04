@@ -6,7 +6,9 @@ export type OrderStatus = 'Pending' | 'Confirmed' | 'Packaging' | 'Dispatched' |
 export interface OrderItem {
     id?: string;
     productId: string;
+    variantId?: string;
     productName: string;
+    variantName?: string;
     quantity: number;
     price: number;
     product?: Product;
@@ -39,7 +41,9 @@ export interface Order {
 export interface CreateOrderDto {
     items: {
         productId: string;
+        variantId?: string;
         productName: string;
+        variantName?: string;
         price: number;
         quantity: number;
     }[];

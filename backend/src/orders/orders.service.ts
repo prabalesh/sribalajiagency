@@ -7,11 +7,14 @@ import { OrderStatusHistory } from './entities/order-status-history.entity';
 import { User } from '../auth/entities/user.entity';
 import { Product } from '../products/entities/product.entity';
 import { Category } from '../products/entities/category.entity';
+import { ProductVariant } from '../products/entities/product-variant.entity';
 
 export interface CreateOrderDto {
     items: {
         productId: string;
+        variantId?: string;
         productName: string;
+        variantName?: string;
         price: number;
         quantity: number;
     }[];
@@ -35,18 +38,26 @@ export class OrdersService {
         private productRepo: Repository<Product>,
         @InjectRepository(Category)
         private categoryRepo: Repository<Category>,
+        @InjectRepository(ProductVariant)
+        private variantRepo: Repository<ProductVariant>,
     ) { }
 
     async create(userId: string, createOrderDto: CreateOrderDto) {
         const taxResults = await this.calculateTax(
-            createOrderDto.items.map(i => ({ productId: i.productId, quantity: i.quantity })),
+            createOrderDto.items.map(i => ({
+                productId: i.productId,
+                variantId: i.variantId,
+                quantity: i.quantity
+            })),
             createOrderDto.deliveryState
         );
 
         const orderItems = createOrderDto.items.map(item => {
             return this.orderItemRepo.create({
                 product: { id: item.productId },
+                variant: item.variantId ? { id: item.variantId } : undefined,
                 productName: item.productName,
+                variantName: item.variantName,
                 price: item.price,
                 quantity: item.quantity,
             });
@@ -90,7 +101,7 @@ export class OrdersService {
 
         const [items, total] = await this.orderRepo.findAndCount({
             where,
-            relations: ['items', 'items.product', 'statusHistory', 'statusHistory.changedBy'],
+            relations: ['items', 'items.product', 'items.variant', 'statusHistory', 'statusHistory.changedBy'],
             order: { createdAt: 'DESC' },
             take: limit,
             skip: skip
@@ -104,7 +115,7 @@ export class OrdersService {
         const skip = (page - 1) * limit;
 
         const [items, total] = await this.orderRepo.findAndCount({
-            relations: ['user', 'items', 'items.product', 'statusHistory', 'statusHistory.changedBy'],
+            relations: ['user', 'items', 'items.product', 'items.variant', 'statusHistory', 'statusHistory.changedBy'],
             order: { createdAt: 'DESC' },
             take: limit,
             skip: skip
@@ -126,7 +137,7 @@ export class OrdersService {
 
         const [items, total] = await this.orderRepo.findAndCount({
             where: { status: In(statuses) },
-            relations: ['user', 'items', 'items.product', 'statusHistory', 'statusHistory.changedBy'],
+            relations: ['user', 'items', 'items.product', 'items.variant', 'statusHistory', 'statusHistory.changedBy'],
             order: { createdAt: 'DESC' },
             take: limit,
             skip: skip
@@ -138,7 +149,7 @@ export class OrdersService {
     findOne(id: string) {
         return this.orderRepo.findOne({
             where: { id },
-            relations: ['user', 'items', 'items.product', 'statusHistory', 'statusHistory.changedBy'],
+            relations: ['user', 'items', 'items.product', 'items.variant', 'statusHistory', 'statusHistory.changedBy'],
         });
     }
 
@@ -169,26 +180,34 @@ export class OrdersService {
         });
     }
 
-    async calculateTax(items: { productId: string, quantity: number }[], state: string) {
+    async calculateTax(items: { productId: string, variantId?: string, quantity: number }[], state: string) {
         let subtotal = 0;
         let totalTax = 0;
         const STORE_STATE = 'Tamil Nadu';
         const isIntraState = state.toLowerCase().trim() === STORE_STATE.toLowerCase().trim();
 
         const productIds = items.map(i => i.productId);
-        const products = await this.productRepo.find({
-            where: { id: In(productIds) },
-            relations: ['category']
-        });
+        const variantIds = items.map(i => i.variantId).filter(Boolean);
+
+        const [products, variants] = await Promise.all([
+            this.productRepo.find({
+                where: { id: In(productIds) },
+                relations: ['category']
+            }),
+            variantIds.length > 0 ? this.variantRepo.find({ where: { id: In(variantIds) } }) : Promise.resolve([])
+        ]);
 
         const taxBreakdown = items.map(item => {
             const product = products.find(p => p.id === item.productId);
             if (!product) return null;
 
+            const variant = item.variantId ? variants.find(v => v.id === item.variantId) : null;
+            const price = variant ? +variant.price : +product.price;
+
             const rate = +(product.gstRate !== null && product.gstRate !== undefined
                 ? product.gstRate
                 : (product.category?.gstRate ?? 18));
-            const itemSubtotal = +product.price * item.quantity;
+            const itemSubtotal = price * item.quantity;
             const itemTax = (itemSubtotal * rate) / 100;
 
             subtotal += itemSubtotal;
@@ -196,6 +215,7 @@ export class OrdersService {
 
             return {
                 productId: product.id,
+                variantId: item.variantId,
                 productName: product.name,
                 rate,
                 subtotal: itemSubtotal,

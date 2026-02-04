@@ -167,7 +167,7 @@ export class ProductDetailComponent implements OnInit {
       }
 
       // TODO: Update CartService to support variant ID
-      this.cartService.addToCart(this.product, this.quantity); // Note: Passing product for now, backend might need variantId
+      this.cartService.addToCart(this.product, this.quantity, this.selectedVariant); // Note: Passing product for now, backend might need variantId
     }
   }
 

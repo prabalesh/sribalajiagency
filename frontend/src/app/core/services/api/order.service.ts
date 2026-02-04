@@ -45,7 +45,7 @@ export class OrderService {
         return res.data;
     }
 
-    async calculateTax(items: { productId: string, quantity: number }[], state: string) {
+    async calculateTax(items: { productId: string, variantId?: string, quantity: number }[], state: string) {
         const res = await this.api.post<any>('/orders/calculate-tax', { items, state });
         return res.data;
     }

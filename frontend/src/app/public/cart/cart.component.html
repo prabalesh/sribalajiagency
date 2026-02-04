@@ -31,16 +31,21 @@
                     <div class="info-header">
                         <div>
                             <span class="item-tag">In Stock</span>
-                            <h3>{{ item.product.name }}</h3>
+                            <h3>
+                                {{ item.product.name }}
+                                <span *ngIf="item.variant" class="variant-info">({{ item.variant.name }})</span>
+                            </h3>
                         </div>
-                        <button class="remove-btn" (click)="removeItem(item.product.id)" title="Remove item">
+                        <button class="remove-btn" (click)="removeItem(item.product.id, item.variant?.id)"
+                            title="Remove item">
                             <lucide-icon [img]="Trash2" [size]="18"></lucide-icon>
                         </button>
                     </div>
                     <div class="price-section">
                         <div class="price-tag">
                             <span class="label">Unit Price</span>
-                            <span class="amount">₹{{ item.product.price | number }}</span>
+                            <span class="amount">₹{{ (item.variant ? item.variant.price : item.product.price) | number
+                                }}</span>
                         </div>
                     </div>
 
@@ -48,19 +53,20 @@
                         <div class="qty-section">
                             <span class="qty-label">Quantity</span>
                             <div class="qty-control glass-card">
-                                <button (click)="updateQty(item.product.id, -1, item.quantity)"
+                                <button (click)="updateQty(item.product.id, -1, item.quantity, item.variant?.id)"
                                     [disabled]="item.quantity <= 1">
                                     <lucide-icon [img]="Minus" [size]="14"></lucide-icon>
                                 </button>
                                 <span class="qty-value">{{ item.quantity }}</span>
-                                <button (click)="updateQty(item.product.id, 1, item.quantity)">
+                                <button (click)="updateQty(item.product.id, 1, item.quantity, item.variant?.id)">
                                     <lucide-icon [img]="Plus" [size]="14"></lucide-icon>
                                 </button>
                             </div>
                         </div>
                         <div class="subtotal-section">
                             <span class="subtotal-label">Subtotal</span>
-                            <span class="subtotal">₹{{ (item.product.price || 0) * item.quantity | number }}</span>
+                            <span class="subtotal">₹{{ (item.variant ? item.variant.price : (item.product.price || 0)) *
+                                item.quantity | number }}</span>
                         </div>
                     </div>
                 </div>

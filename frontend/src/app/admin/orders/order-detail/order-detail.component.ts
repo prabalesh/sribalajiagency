@@ -66,7 +66,7 @@ import { Order, OrderStatusHistory } from '../../../core/models/order.model';
                  <tbody>
                     @for (item of order.items; track item.productId) {
                        <tr>
-                          <td>{{ item.productName }}</td>
+                           <td>{{ item.productName }}<br><small *ngIf="item.variantName" style="color: var(--text-secondary)">({{ item.variantName }})</small></td>
                           <td>₹{{ item.price | number }}</td>
                           <td>{{ item.quantity }}</td>
                           <td>₹{{ item.price * item.quantity | number }}</td>

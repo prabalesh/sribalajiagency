@@ -51,7 +51,12 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
                 @for (item of order.items; track item.productId) {
                   <div class="item-row clickable" (click)="viewProduct(item.productId)">
                     <div class="item-details">
-                      <h3>{{ item.productName }}</h3>
+                      <h3>
+                        {{ item.productName }}
+                        @if (item.variantName) {
+                          <span class="variant-info">({{ item.variantName }})</span>
+                        }
+                      </h3>
                       <p>Quantity: {{ item.quantity }}</p>
                     </div>
                     <div class="item-price">
