@@ -68,10 +68,12 @@ export class AuthService {
             select: ['id', 'email', 'password', 'name'],
         });
 
-        if (!user) throw new ForbiddenException('Access Denied');
+        const passwordHash = user?.password || '$2b$10$fakehashtopreventtimingattack';
+        const passwordMatches = await bcrypt.compare(dto.password, passwordHash);
 
-        const passwordMatches = await bcrypt.compare(dto.password, user.password);
-        if (!passwordMatches) throw new ForbiddenException('Access Denied');
+        if (!user || !passwordMatches) {
+            throw new ForbiddenException('Access Denied');
+        }
 
         const tokens = await this.getTokens(user.id, user.email);
         await this.updateRefreshTokenHash(user.id, tokens.refresh_token);
