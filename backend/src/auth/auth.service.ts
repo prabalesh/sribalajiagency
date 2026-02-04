@@ -92,7 +92,7 @@ export class AuthService {
             where: { id: userId },
             relations: ['roles', 'roles.permissions'],
             select: ['id', 'email', 'refreshToken'],
-        } as any);
+        });
 
         if (!user || !user.refreshToken) throw new ForbiddenException('Access Denied');
 
