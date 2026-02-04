@@ -34,6 +34,8 @@ export interface Order {
     deliveryPhone?: string;
     deliveryNotes?: string;
     statusHistory?: OrderStatusHistory[];
+    taxAmount?: number;
+    taxDetails?: any;
     createdAt: Date;
     updatedAt?: Date;
 }
