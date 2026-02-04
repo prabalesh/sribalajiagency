@@ -11,6 +11,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api/v1');
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   app.use(cookieParser());
