@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { OrderService } from '../../../../core/services/api/order.service';
 import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
+import { InvoiceComponent } from '../../../../shared/components/invoice/invoice.component';
+import { LucideAngularModule, Printer } from 'lucide-angular';
 
 @Component({
   selector: 'app-user-order-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, InvoiceComponent, LucideAngularModule],
   template: `
     <div class="order-detail-page container">
       @if (isLoading) {
@@ -18,6 +20,10 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
           <div class="header-content">
             <h1>Order #{{ order.id.substring(0, 8) }}</h1>
             <span class="status-badge" [ngClass]="getStatusColor(order.status)">{{ order.status }}</span>
+            <button class="btn-secondary btn-print" (click)="printInvoice()">
+              <lucide-icon [img]="Printer" [size]="18"></lucide-icon>
+              <span>Print Invoice</span>
+            </button>
           </div>
           <p class="date">Placed on {{ order.createdAt | date:'medium' }}</p>
         </header>
@@ -107,6 +113,11 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
               }
             </div>
           </aside>
+        </div>
+
+        <!-- Hidden Invoice for Printing -->
+        <div class="print-only">
+          <app-invoice *ngIf="order" [order]="order"></app-invoice>
         </div>
       } @else {
         <div class="error-state">
@@ -400,12 +411,51 @@ import { Order, OrderStatusHistory } from '../../../../core/models/order.model';
       &.success { background: rgba(76, 175, 80, 0.15); color: #4caf50; }
       &.danger { background: rgba(244, 67, 54, 0.15); color: #f44336; }
     }
+
+    .btn-print {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: auto;
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      color: var(--text-color);
+      transition: all 0.2s;
+
+      &:hover {
+        background: var(--surface-hover);
+        border-color: var(--primary-color);
+      }
+
+      @media (max-width: 600px) {
+        width: 100%;
+        margin-top: 1rem;
+        justify-content: center;
+      }
+    }
+
+    .print-only {
+      display: none;
+    }
+
+    @media print {
+      .order-detail-page {
+        display: none;
+      }
+      .print-only {
+        display: block;
+      }
+    }
   `]
 })
 export class UserOrderDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private orderService = inject(OrderService);
+  readonly Printer = Printer;
 
   order: Order | null = null;
   orderHistory: OrderStatusHistory[] = [];
@@ -435,6 +485,10 @@ export class UserOrderDetailComponent implements OnInit {
 
   viewProduct(productId: string) {
     this.router.navigate(['/products/detail', productId]);
+  }
+
+  printInvoice() {
+    window.print();
   }
 
   getStatusColor(status: string): string {

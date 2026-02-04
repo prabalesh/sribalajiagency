@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { OrderService } from '../../../core/services/api/order.service';
 import { Order, OrderStatusHistory } from '../../../core/models/order.model';
+import { InvoiceComponent } from '../../../shared/components/invoice/invoice.component';
+import { LucideAngularModule, Printer } from 'lucide-angular';
 
 @Component({
    selector: 'app-admin-order-detail',
    standalone: true,
-   imports: [CommonModule, RouterModule],
+   imports: [CommonModule, RouterModule, InvoiceComponent, LucideAngularModule],
    template: `
     <div class="admin-order-detail-page">
       @if (isLoading) {
@@ -19,6 +21,10 @@ import { Order, OrderStatusHistory } from '../../../core/models/order.model';
             <h1>Order #{{ order.id.substring(0, 8) }}</h1>
           </div>
           <div class="header-right">
+             <button class="btn-print" (click)="printInvoice()">
+                <lucide-icon [img]="Printer" [size]="18"></lucide-icon>
+                <span>Generate Invoice</span>
+             </button>
              <span class="status-badge" [ngClass]="getStatusColor(order.status)">{{ order.status }}</span>
           </div>
         </header>
@@ -98,6 +104,11 @@ import { Order, OrderStatusHistory } from '../../../core/models/order.model';
            </section>
         </div>
 
+        <!-- Hidden Invoice for Printing -->
+        <div class="print-only">
+           <app-invoice *ngIf="order" [order]="order"></app-invoice>
+        </div>
+
       } @else {
         <div class="error">Order not found</div>
       }
@@ -131,15 +142,37 @@ import { Order, OrderStatusHistory } from '../../../core/models/order.model';
     .message { flex: 1; color: var(--text-primary); }
     .user { color: var(--text-secondary); font-style: italic; font-size: 0.8rem; }
 
-    .status-badge { padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600; background: var(--surface-hover); }
-    .status-badge.info { color: #2196f3; background: rgba(33, 150, 243, 0.1); }
-    .status-badge.success { color: #4caf50; background: rgba(76, 175, 80, 0.1); }
     .status-badge.warning { color: #ffc107; background: rgba(255, 193, 7, 0.1); }
+
+    .btn-print {
+       display: flex;
+       align-items: center;
+       gap: 0.5rem;
+       background: var(--primary-color);
+       color: white;
+       border: none;
+       padding: 0.5rem 1rem;
+       border-radius: 6px;
+       cursor: pointer;
+       font-weight: 500;
+       transition: opacity 0.2s;
+       margin-right: 1rem;
+    }
+
+    .btn-print:hover { opacity: 0.9; }
+
+    .print-only { display: none; }
+
+    @media print {
+       .admin-order-detail-page { display: none; }
+       .print-only { display: block; }
+    }
   `]
 })
 export class AdminOrderDetailComponent implements OnInit {
    private route = inject(ActivatedRoute);
    private orderService = inject(OrderService);
+   readonly Printer = Printer;
 
    order: Order | null = null;
    orderHistory: OrderStatusHistory[] = [];
@@ -168,5 +201,9 @@ export class AdminOrderDetailComponent implements OnInit {
          'Dispatched': 'primary', 'Delivered': 'success', 'Cancelled': 'danger'
       };
       return colors[status] || 'secondary';
+   }
+
+   printInvoice() {
+      window.print();
    }
 }
