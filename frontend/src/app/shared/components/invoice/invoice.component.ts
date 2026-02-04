@@ -3,17 +3,17 @@ import { CommonModule } from '@angular/common';
 import { Order } from '../../../core/models/order.model';
 
 @Component({
-    selector: 'app-invoice',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-invoice',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="invoice-container" id="printable-invoice">
       <div class="invoice-header">
         <div class="company-info">
           <h1>SRIBALAJI AGENCY</h1>
           <p>Authorized Dealer for Electrical Goods</p>
           <p>123 Agency Street, City - 600001</p>
-          <p>Phone: +91 98765 43210 | Email: sales@sribalaji.com</p>
+          <p>Phone: +91 98765 43210 | Email: sales&#64;sribalaji.com</p>
           <p><strong>GSTIN: 33AAAAA0000A1Z5</strong></p>
         </div>
         <div class="invoice-meta">
@@ -91,7 +91,7 @@ import { Order } from '../../../core/models/order.model';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .invoice-container {
       padding: 40px;
       background: white;
@@ -252,9 +252,9 @@ import { Order } from '../../../core/models/order.model';
   `]
 })
 export class InvoiceComponent {
-    @Input({ required: true }) order!: Order;
+  @Input({ required: true }) order!: Order;
 
-    getSubtotal() {
-        return this.order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    }
+  getSubtotal() {
+    return this.order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  }
 }

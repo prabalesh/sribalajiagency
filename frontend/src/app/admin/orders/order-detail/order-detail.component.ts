@@ -142,7 +142,12 @@ import { LucideAngularModule, Printer } from 'lucide-angular';
     .message { flex: 1; color: var(--text-primary); }
     .user { color: var(--text-secondary); font-style: italic; font-size: 0.8rem; }
 
+    .status-badge { padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600; background: var(--surface-hover); }
+    .status-badge.info { color: #2196f3; background: rgba(33, 150, 243, 0.1); }
+    .status-badge.success { color: #4caf50; background: rgba(76, 175, 80, 0.1); }
     .status-badge.warning { color: #ffc107; background: rgba(255, 193, 7, 0.1); }
+    .status-badge.primary { color: var(--primary-color); background: rgba(var(--primary-rgb), 0.1); }
+    .status-badge.danger { color: #f44336; background: rgba(244, 67, 54, 0.1); }
 
     .btn-print {
        display: flex;
