@@ -28,6 +28,8 @@ async function bootstrap() {
     ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
     : ['http://localhost:4200'];
 
+  console.log(corsOrigins)
+
   app.enableCors({
     origin: corsOrigins,
     credentials: true,
