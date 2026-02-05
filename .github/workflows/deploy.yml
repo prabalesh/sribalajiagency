@@ -44,23 +44,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: "backend/dist/,backend/package*.json"
-          target: "/home/${{ secrets.SSH_USERNAME }}/sribalajiagency/"
+          target: "/home/${{ secrets.SSH_USERNAME }}/sribalajiagency/backend/"
           strip_components: 1
 
-      # Deploy Frontend
-      - name: Deploy frontend to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "frontend/dist/sribalajiagency/browser/"
-          target: "/home/${{ secrets.SSH_USERNAME }}/sribalajiagency/frontend/"
-          strip_components: 3
-
       # Restart Services
-      - name: Restart backend and nginx
+      - name: Restart backend
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -69,7 +57,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/sribalajiagency/backend
-            npm ci --production
-            pm2 restart sribalajiagency-backend || pm2 start dist/main.js --name sribalajiagency-backend
+            npm install --production
+            pm2 delete sribalajiagency-backend || true
+            pm2 start dist/main.js --name sribalajiagency-backend
             pm2 save
-            sudo systemctl reload nginx
