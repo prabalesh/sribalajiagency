@@ -39,9 +39,10 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "backend/dist/,backend/package*.json"
-          target: "/home/${{ secrets.SSH_USERNAME }}/sribalajiagency/backend/"
-          strip_components: 1
+          source: "backend/dist/*,backend/package.json,backend/package-lock.json"
+          target: "/home/${{ secrets.SSH_USERNAME }}/sribalajiagency/"
+          strip_components: 0
+          overwrite: true
 
       # Restart Services
       - name: Restart backend
@@ -53,7 +54,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/sribalajiagency/backend
-            npm install --production
+            rm -rf node_modules
+            npm install --production --force
             pm2 delete sribalajiagency-backend || true
-            NODE_ENV=production pm2 start dist/main.js --name sribalajiagency-backend
+            pm2 start dist/main.js --name sribalajiagency-backend --node-args="--trace-warnings"
             pm2 save
