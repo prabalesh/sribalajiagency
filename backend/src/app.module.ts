@@ -62,7 +62,9 @@ import { Review } from './reviews/entities/review.entity';
         database: config.get<string>('DB_NAME', 'sribalaji'),
         entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Quotation, Coupon, LocationRestriction, HomeCMS, UserAddress, Review],
 
-        synchronize: config.get('NODE_ENV') !== 'production',
+        // synchronize: config.get('NODE_ENV') !== 'production',
+        synchronize: true,
+        migrationsRun: true,
       }),
     }),
   ],
