@@ -15,7 +15,13 @@ async function bootstrap() {
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   app.use(cookieParser());
-  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+  // Security headers
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  }));
+
+  app.use('/api/v1/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Configure CORS with environment-based origins
   const corsOrigins = process.env.CORS_ORIGINS
@@ -26,9 +32,6 @@ async function bootstrap() {
     origin: corsOrigins,
     credentials: true,
   });
-
-  // Security headers
-  app.use(helmet());
 
   // Gzip compression
   app.use(compression());
