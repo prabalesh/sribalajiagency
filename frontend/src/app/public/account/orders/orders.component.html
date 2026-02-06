@@ -40,24 +40,6 @@
                     </span>
                 </div>
 
-                <!-- Progress Bar: Vertical on mobile, Horizontal on desktop -->
-                <div class="progress-track">
-                    @for (step of getProgressSteps(order); track step.status) {
-                    <div class="progress-step" [class.completed]="step.completed" [class.active]="step.active"
-                        [title]="step.label + (step.date ? ' - ' + (step.date | date:'shortDate') : '')">
-                        <div class="step-icon">
-                            @if (step.completed) { ✓ } @else { {{ step.index }} }
-                        </div>
-                        <div class="step-content">
-                            <span class="step-label">{{ step.label }}</span>
-                            @if (step.date) {
-                            <span class="step-date">{{ step.date | date:'shortDate' }}</span>
-                            }
-                        </div>
-                    </div>
-                    }
-                </div>
-
                 <div class="order-details">
                     <div class="section">
                         <h4>Items</h4>
