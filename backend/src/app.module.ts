@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -29,6 +31,7 @@ import { HomeCMS } from './products/entities/home-cms.entity';
 import { CommonModule } from './common/common.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { Review } from './reviews/entities/review.entity';
+import { VigileEyeModule } from '@prabalesh/vigileye-nestjs';
 
 @Module({
   imports: [
@@ -50,6 +53,12 @@ import { Review } from './reviews/entities/review.entity';
     LocationsModule,
     QuotationsModule,
     ReviewsModule,
+    VigileEyeModule.forRoot({
+      apiKey: process.env.VIGILEYE_API_KEY || '',
+      serverUrl: process.env.VIGILEYE_SERVER_URL || '',
+      enabled: process.env.VIGILEYE_ENABLED === 'true' || process.env.NODE_ENV === 'production',
+      ignoreStatusCodes: [404, 401],
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -73,7 +82,9 @@ import { Review } from './reviews/entities/review.entity';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    AppService,
   ],
+  controllers: [AppController],
 })
 export class AppModule { }
 
