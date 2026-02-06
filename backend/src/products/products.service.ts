@@ -8,6 +8,7 @@ import { Brand } from './entities/brand.entity';
 import { ProductImage } from './entities/product-image.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 import { FileStorageService } from '../common/services/file-storage.service';
+import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 
 @Injectable()
 export class ProductsService {
@@ -188,12 +189,12 @@ export class ProductsService {
         return this.categoryRepo.delete(id);
     }
 
-    createBrand(data: any) {
+    createBrand(data: CreateBrandDto) {
         const brand = this.brandRepo.create(data);
         return this.brandRepo.save(brand);
     }
 
-    async updateBrand(id: string, data: any) {
+    async updateBrand(id: string, data: UpdateBrandDto) {
         await this.brandRepo.update(id, data);
         return this.brandRepo.findOneBy({ id });
     }

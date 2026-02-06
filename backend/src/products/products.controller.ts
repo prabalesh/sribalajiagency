@@ -4,6 +4,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
+import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -139,14 +140,14 @@ export class ProductsController {
     @Post('brands')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('CREATE_BRAND')
-    createBrand(@Body() data: any) {
+    createBrand(@Body() data: CreateBrandDto) {
         return this.productsService.createBrand(data);
     }
 
     @Put('brands/:id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('UPDATE_BRAND')
-    updateBrand(@Param('id') id: string, @Body() data: any) {
+    updateBrand(@Param('id') id: string, @Body() data: UpdateBrandDto) {
         return this.productsService.updateBrand(id, data);
     }
 
