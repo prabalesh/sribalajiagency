@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
@@ -189,35 +189,80 @@ export class ProductsService {
         return this.categoryRepo.delete(id);
     }
 
-    createBrand(data: CreateBrandDto) {
-        const brand = this.brandRepo.create(data);
-        return this.brandRepo.save(brand);
+    async createBrand(data: CreateBrandDto) {
+        try {
+            const brand = this.brandRepo.create(data);
+            return await this.brandRepo.save(brand);
+        } catch (error) {
+            if (error.code === '23505') { // Unique constraint violation
+                throw new BadRequestException('A brand with this slug already exists');
+            }
+            throw error;
+        }
     }
 
     async updateBrand(id: string, data: UpdateBrandDto) {
-        await this.brandRepo.update(id, data);
-        return this.brandRepo.findOneBy({ id });
+        const brand = await this.brandRepo.findOneBy({ id });
+        if (!brand) {
+            throw new NotFoundException(`Brand with ID ${id} not found`);
+        }
+
+        try {
+            await this.brandRepo.update(id, data);
+            return await this.brandRepo.findOneBy({ id });
+        } catch (error) {
+            if (error.code === '23505') { // Unique constraint violation
+                throw new BadRequestException('A brand with this slug already exists');
+            }
+            throw error;
+        }
     }
 
     async deleteBrand(id: string) {
         const brand = await this.brandRepo.findOneBy({ id });
-        if (brand && brand.image) {
-            await this.fileStorageService.deleteFile(brand.image.replace('/uploads/', ''));
+        if (!brand) {
+            throw new NotFoundException(`Brand with ID ${id} not found`);
         }
+
+        if (brand.image) {
+            try {
+                await this.fileStorageService.deleteFile(brand.image.replace('/uploads/', ''));
+            } catch (error) {
+                // Log error but don't fail the deletion if image deletion fails
+                console.error('Failed to delete brand image:', error);
+            }
+        }
+
         return this.brandRepo.delete(id);
     }
 
     async uploadBrandImage(brandId: string, file: Express.Multer.File) {
         const brand = await this.brandRepo.findOneBy({ id: brandId });
-        if (!brand) throw new NotFoundException('Brand not found');
-
-        if (brand.image) {
-            await this.fileStorageService.deleteFile(brand.image.replace('/uploads/', ''));
+        if (!brand) {
+            throw new NotFoundException(`Brand with ID ${brandId} not found`);
         }
 
-        const url = await this.fileStorageService.saveFile(file, `brands/${brandId}`);
-        brand.image = url;
-        return this.brandRepo.save(brand);
+        if (!file) {
+            throw new BadRequestException('No file provided');
+        }
+
+        // Delete old image if exists
+        if (brand.image) {
+            try {
+                await this.fileStorageService.deleteFile(brand.image.replace('/uploads/', ''));
+            } catch (error) {
+                // Log error but continue with upload
+                console.error('Failed to delete old brand image:', error);
+            }
+        }
+
+        try {
+            const url = await this.fileStorageService.saveFile(file, `brands/${brandId}`);
+            brand.image = url;
+            return await this.brandRepo.save(brand);
+        } catch (error) {
+            throw new BadRequestException('Failed to upload brand image');
+        }
     }
 
     async getBrandBySlug(slug: string) {

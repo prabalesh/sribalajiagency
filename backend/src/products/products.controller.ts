@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Put, Delete, Body, UseGuards, UseInterceptors, UploadedFile, UploadedFiles, ParseBoolPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Put, Delete, Body, UseGuards, UseInterceptors, UploadedFile, UploadedFiles, ParseBoolPipe, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
@@ -140,6 +140,7 @@ export class ProductsController {
     @Post('brands')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('CREATE_BRAND')
+    @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     createBrand(@Body() data: CreateBrandDto) {
         return this.productsService.createBrand(data);
     }
@@ -147,6 +148,7 @@ export class ProductsController {
     @Put('brands/:id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('UPDATE_BRAND')
+    @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     updateBrand(@Param('id') id: string, @Body() data: UpdateBrandDto) {
         return this.productsService.updateBrand(id, data);
     }
