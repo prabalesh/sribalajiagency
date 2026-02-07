@@ -175,18 +175,78 @@ export class ProductsService {
         return { urls };
     }
 
-    createCategory(data: any) {
-        const category = this.categoryRepo.create(data);
-        return this.categoryRepo.save(category);
+    async createCategory(data: any) {
+        // Simple slug generation if not provided
+        if (!data.slug && data.name) {
+            data.slug = data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+        }
+
+        try {
+            const category = this.categoryRepo.create(data);
+            return await this.categoryRepo.save(category);
+        } catch (error) {
+            if (error.code === '23505') { // Unique constraint violation (postgres code)
+                throw new BadRequestException('A category with this slug already exists');
+            }
+            throw new BadRequestException('Failed to create category');
+        }
     }
 
     async updateCategory(id: string, data: any) {
-        await this.categoryRepo.update(id, data);
-        return this.categoryRepo.findOneBy({ id });
+        const category = await this.categoryRepo.findOneBy({ id });
+        if (!category) {
+            throw new NotFoundException(`Category with ID ${id} not found`);
+        }
+
+        // If updating slug, check if new slug is different and available (though DB unique constraint handles availability)
+        if (data.slug && data.slug !== category.slug) {
+            // Logic to check could go here, or rely on DB catch
+        }
+
+        try {
+            await this.categoryRepo.update(id, data);
+            return await this.categoryRepo.findOneBy({ id });
+        } catch (error) {
+            if (error.code === '23505') {
+                throw new BadRequestException('A category with this slug already exists');
+            }
+            throw new BadRequestException('Failed to update category');
+        }
     }
 
-    deleteCategory(id: string) {
-        return this.categoryRepo.delete(id);
+    async deleteCategory(id: string) {
+        const category = await this.categoryRepo.findOne({
+            where: { id },
+            relations: ['children']
+        });
+
+        if (!category) {
+            throw new NotFoundException(`Category with ID ${id} not found`);
+        }
+
+        // Check for subcategories
+        if (category.children && category.children.length > 0) {
+            throw new BadRequestException(
+                `Cannot delete category "${category.name}" because it has ${category.children.length} sub-category(ies). Please delete or move them first.`
+            );
+        }
+
+        // Check for associated products
+        // Note: If 'products' relation is not eager/loaded, we might need a separate count query if strict check is needed.
+        // Let's do a explicit check to be safe if relations map isn't perfect
+        const productCount = await this.productRepo.count({ where: { category: { id } } });
+
+        if (productCount > 0) {
+            throw new BadRequestException(
+                `Cannot delete category "${category.name}" because it contains ${productCount} product(s). Please remove or reassign these products first.`
+            );
+        }
+
+        try {
+            return await this.categoryRepo.delete(id);
+        } catch (error) {
+            throw new BadRequestException('Failed to delete category');
+        }
     }
 
     async createBrand(data: CreateBrandDto) {

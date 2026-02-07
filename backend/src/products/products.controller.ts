@@ -5,6 +5,7 @@ import { ProductsService } from './products.service';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -119,14 +120,16 @@ export class ProductsController {
     @Post('categories')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('CREATE_CATEGORY')
-    createCategory(@Body() data: any) {
+    @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    createCategory(@Body() data: CreateCategoryDto) {
         return this.productsService.createCategory(data);
     }
 
     @Put('categories/:id')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('UPDATE_CATEGORY')
-    updateCategory(@Param('id') id: string, @Body() data: any) {
+    @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    updateCategory(@Param('id') id: string, @Body() data: UpdateCategoryDto) {
         return this.productsService.updateCategory(id, data);
     }
 
