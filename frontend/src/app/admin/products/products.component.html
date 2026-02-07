@@ -228,8 +228,9 @@
                         </div>
                     </td>
                     <td>
-                        <span class="stock-badge" [class.low]="(p.variants[0].stock || 0) < 10">
-                            {{ p.variants[0].stock || 0 }} units
+                        <span class="stock-badge"
+                            [class.low]="((p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0) < 10">
+                            {{ (p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0 }} units
                         </span>
 
                     </td>

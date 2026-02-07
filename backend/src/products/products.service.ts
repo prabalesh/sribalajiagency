@@ -47,11 +47,11 @@ export class ProductsService {
 
         const { Between, MoreThanOrEqual, LessThanOrEqual, ILike } = require('typeorm');
 
-        let order: any = { isAvailable: 'DESC' }; // Prioritize in-stock/available products
+        let order: any = {};
         if (filters.sortBy) {
             order[filters.sortBy] = filters.sortOrder || 'ASC';
         } else {
-            order.name = 'ASC';
+            order = { isAvailable: 'DESC', name: 'ASC' };
         }
 
         const where: any = {};
@@ -108,29 +108,68 @@ export class ProductsService {
     // CRUD operations
     async createProduct(data: any) {
         const { variants, ...productData } = data;
-        const product = this.productRepo.create(productData);
-        const savedProduct = await this.productRepo.save(product) as any;
 
-        if (variants && variants.length > 0) {
-            const variantEntities = variants.map(v => this.variantRepo.create({ ...v, product: savedProduct }));
-            await this.variantRepo.save(variantEntities);
+        // Verify Category and Brand existence if IDs provided
+        if (productData.categoryId) {
+            const category = await this.categoryRepo.findOneBy({ id: productData.categoryId });
+            if (!category) throw new NotFoundException(`Category with ID ${productData.categoryId} not found`);
+            productData.category = category; // Set relation
         }
 
-        return this.findOne(savedProduct.id);
+        if (productData.brandId) {
+            const brand = await this.brandRepo.findOneBy({ id: productData.brandId });
+            if (!brand) throw new NotFoundException(`Brand with ID ${productData.brandId} not found`);
+            productData.brand = brand; // Set relation
+        }
+
+        try {
+            const product = this.productRepo.create(productData);
+            const savedProduct = await this.productRepo.save(product) as any;
+
+            if (variants && variants.length > 0) {
+                const variantEntities = variants.map(v => this.variantRepo.create({ ...v, product: savedProduct }));
+                await this.variantRepo.save(variantEntities);
+            }
+
+            return this.findOne(savedProduct.id);
+        } catch (error) {
+            console.error('Error creating product:', error);
+            throw new BadRequestException('Failed to create product. Check data fields.');
+        }
     }
 
     async updateProduct(id: string, data: any) {
         const { variants, images, brand, category, ...productData } = data;
-        await this.productRepo.update(id, productData);
 
-        if (variants) {
-            // Simple replacement for now, or more complex diffing logic
-            await this.variantRepo.delete({ product: { id } });
-            const variantEntities = variants.map(v => this.variantRepo.create({ ...v, product: { id } }));
-            await this.variantRepo.save(variantEntities);
+        const existingProduct = await this.productRepo.findOneBy({ id });
+        if (!existingProduct) throw new NotFoundException(`Product with ID ${id} not found`);
+
+        if (productData.categoryId) {
+            const cat = await this.categoryRepo.findOneBy({ id: productData.categoryId });
+            if (!cat) throw new NotFoundException(`Category with ID ${productData.categoryId} not found`);
+            productData.category = cat;
         }
 
-        return this.findOne(id);
+        if (productData.brandId) {
+            const b = await this.brandRepo.findOneBy({ id: productData.brandId });
+            if (!b) throw new NotFoundException(`Brand with ID ${productData.brandId} not found`);
+            productData.brand = b;
+        }
+
+        try {
+            await this.productRepo.update(id, productData);
+
+            if (variants) {
+                // Simple replacement for now
+                await this.variantRepo.delete({ product: { id } });
+                const variantEntities = variants.map(v => this.variantRepo.create({ ...v, product: { id } }));
+                await this.variantRepo.save(variantEntities);
+            }
+
+            return this.findOne(id);
+        } catch (error) {
+            throw new BadRequestException('Failed to update product');
+        }
     }
 
     async deleteProduct(id: string) {

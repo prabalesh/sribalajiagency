@@ -232,7 +232,9 @@ export class ProductsComponent implements OnInit {
   async loadProducts() {
     const data = await this.productService.getProducts({
       page: this.currentPage,
-      limit: this.itemsPerPage
+      limit: this.itemsPerPage,
+      sortBy: 'createdAt',
+      sortOrder: 'DESC'
     });
     this.products = data.items;
     this.totalItems = data.total;
