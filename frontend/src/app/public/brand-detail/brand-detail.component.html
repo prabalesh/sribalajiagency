@@ -1,44 +1,65 @@
 <div class="brand-detail-page container">
-    <header class="brand-header animate-fade" *ngIf="brand">
-        <div class="brand-logo glass-card" *ngIf="brand.image">
-            <img [src]="brand.image | imageUrl" [alt]="brand.name">
+    @if (error()) {
+    <div class="error-state">
+        <p>{{ error() }}</p>
+    </div>
+    } @else {
+    <header class="brand-header animate-fade">
+        @if (isLoading()) {
+        <div class="brand-logo glass-card">
+            <app-skeleton height="100%" width="100%"></app-skeleton>
         </div>
         <div class="brand-info">
-            <h1 class="text-gradient">{{ brand.name }}</h1>
-            <p>{{ brand.description }}</p>
+            <app-skeleton height="48px" width="300px" style="margin-bottom: 1rem;"></app-skeleton>
+            <app-skeleton height="20px" width="500px"></app-skeleton>
         </div>
+        } @else if (brand()) {
+        @if (brand()!.image) {
+        <div class="brand-logo glass-card">
+            <img [src]="brand()!.image | imageUrl" [alt]="brand()!.name">
+        </div>
+        }
+        <div class="brand-info">
+            <h1 class="text-gradient">{{ brand()!.name }}</h1>
+            <p>{{ brand()!.description }}</p>
+        </div>
+        }
     </header>
 
     <section class="categories-section">
-        <h2>Categories available from {{ brand?.name }}</h2>
+        <h2>Categories available from {{ brand()?.name || 'this brand' }}</h2>
 
-        <div class="category-grid" *ngIf="!isLoading; else loadingTemplate">
-            @for (cat of categories; track cat.id) {
-            <div class="category-card glass-card animate-fade" [routerLink]="['/brands', brand?.slug, cat.slug]">
-                <div class="cat-image" *ngIf="cat.imageUrl">
+        @if (isLoading()) {
+        <div class="category-grid">
+            @for (i of skeletonCount; track i) {
+            <div class="category-card skeleton-card glass-card">
+                <app-skeleton height="150px" width="100%"></app-skeleton>
+                <div class="skeleton-info">
+                    <app-skeleton height="20px" width="60%"></app-skeleton>
+                </div>
+            </div>
+            }
+        </div>
+        } @else {
+        <div class="category-grid">
+            @for (cat of categories(); track cat.id) {
+            <div class="category-card glass-card animate-fade" [routerLink]="['/brands', brand()?.slug, cat.slug]">
+                @if (cat.imageUrl) {
+                <div class="cat-image">
                     <img [src]="cat.imageUrl | imageUrl" [alt]="cat.name">
                 </div>
+                }
                 <div class="cat-info">
                     <h3>{{ cat.name }}</h3>
                 </div>
             </div>
-            }
-            @if (categories.length === 0) {
-            <p class="no-results">No categories found for this brand.</p>
+            } @empty {
+            <div class="empty-state">
+                <p>No categories found for this brand.</p>
+            </div>
             }
         </div>
-
-        <ng-template #loadingTemplate>
-            <div class="category-grid">
-                @for (i of [1,2,3,4]; track i) {
-                <div class="category-card skeleton-card glass-card">
-                    <app-skeleton height="150px" width="100%"></app-skeleton>
-                    <div style="padding: 1rem;">
-                        <app-skeleton height="20px" width="60%"></app-skeleton>
-                    </div>
-                </div>
-                }
-            </div>
-        </ng-template>
+        }
     </section>
+    }
 </div>

@@ -15,7 +15,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 1rem;
+        border-radius: var(--border-radius-md, 1rem);
 
         img {
             max-width: 100%;
@@ -25,15 +25,18 @@
     }
 
     .brand-info {
+        flex: 1;
+
         h1 {
-            font-size: 3rem;
+            font-size: clamp(2rem, 5vw, 3rem);
             margin-bottom: 0.5rem;
         }
 
         p {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-color-muted, rgba(255, 255, 255, 0.7));
             max-width: 600px;
             font-size: 1.1rem;
+            line-height: 1.6;
         }
     }
 }
@@ -54,10 +57,10 @@
 .category-card {
     cursor: pointer;
     overflow: hidden;
-    transition: all 0.3s ease;
-    border-radius: 1rem;
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    border-radius: var(--border-radius-md, 1rem);
 
-    &:hover {
+    &:hover:not(.skeleton-card) {
         transform: translateY(-5px);
         background: rgba(255, 255, 255, 0.1);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -65,6 +68,7 @@
 
     .cat-image {
         height: 150px;
+        background: var(--surface-color-secondary, rgba(0, 0, 0, 0.2));
 
         img {
             width: 100%;
@@ -80,7 +84,47 @@
         h3 {
             margin: 0;
             font-size: 1.1rem;
+            font-weight: 500;
         }
+    }
+
+    &.skeleton-card {
+        pointer-events: none;
+
+        .skeleton-info {
+            padding: 1.25rem;
+            display: flex;
+            justify-content: center;
+        }
+    }
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--surface-color);
+    border-radius: var(--border-radius-sm, 0.5rem);
+    border: 2px dashed var(--border-color);
+
+    p {
+        color: var(--text-color-muted);
+        font-size: 1.125rem;
+        margin: 0;
+    }
+}
+
+.error-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--surface-color);
+    border-radius: var(--border-radius-sm, 0.5rem);
+    border: 1px solid rgba(255, 82, 82, 0.3);
+
+    p {
+        color: #ff5252;
+        font-size: 1.125rem;
+        margin: 0;
     }
 }
 
@@ -95,8 +139,15 @@
             height: 120px;
         }
 
-        .brand-info h1 {
-            font-size: 2.25rem;
+        .brand-info {
+            p {
+                font-size: 1rem;
+            }
         }
+    }
+
+    .category-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
     }
 }

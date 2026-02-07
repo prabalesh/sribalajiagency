@@ -44,7 +44,7 @@
                     <div class="section">
                         <h4>Items</h4>
                         @for (item of order.items; track item.productId) {
-                        <div class="product-row clickable" (click)="viewProduct(item.productId)">
+                        <div class="product-row" (click)="viewProduct(item.productId)">
                             <span class="name">
                                 <strong>{{ item.quantity }}x</strong> {{ item.productName }}
                             </span>
@@ -74,12 +74,13 @@
                 <div class="order-footer">
                     <span class="total-label">Order Total</span>
                     <span class="total-amount">₹{{ order.totalAmount | number }}</span>
+                    <div>
+                        <a [routerLink]="['/account/orders', order.id]" class="btn-secondary">View Full Details &
+                            History
+                            →</a>
+                    </div>
                 </div>
 
-                <div class="action-bar">
-                    <a [routerLink]="['/account/orders', order.id]" class="btn-secondary">View Full Details & History
-                        →</a>
-                </div>
             </div>
             } @empty {
             <div class="empty-state glass-card">

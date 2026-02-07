@@ -29,7 +29,7 @@ import { CommonModule } from '@angular/common';
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -37,12 +37,13 @@ import { CommonModule } from '@angular/common';
       backdrop-filter: blur(4px);
     }
     .modal-content {
-      background: var(--surface-card);
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 1.5rem;
       width: 90%;
       max-width: 400px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--shadow-lg);
       animation: slideIn 0.3s ease-out;
     }
     @keyframes slideIn {
@@ -58,18 +59,22 @@ import { CommonModule } from '@angular/common';
     .modal-header h3 {
       margin: 0;
       font-size: 1.25rem;
-      color: var(--text-primary);
+      color: var(--text-color);
     }
     .btn-close {
       background: none;
       border: none;
       font-size: 1.5rem;
       cursor: pointer;
-      color: var(--text-secondary);
+      color: var(--text-color-muted);
+      transition: color 0.2s;
+    }
+    .btn-close:hover {
+      color: var(--text-color);
     }
     .modal-body {
       margin-bottom: 1.5rem;
-      color: var(--text-secondary);
+      color: var(--text-color-muted);
       line-height: 1.5;
     }
     .modal-footer {
@@ -85,17 +90,22 @@ import { CommonModule } from '@angular/common';
       transition: all 0.2s;
     }
     .btn-secondary {
-      background: var(--surface-hover);
+      background: var(--surface-color-secondary);
       border: 1px solid var(--border-color);
-      color: var(--text-primary);
+      color: var(--text-color);
+    }
+    .btn-secondary:hover {
+      background: var(--border-color);
     }
     .btn-danger {
-      background: #ef4444;
+      background: var(--danger-color);
       border: none;
       color: white;
     }
     .btn-danger:hover {
       background: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
   `]
 })

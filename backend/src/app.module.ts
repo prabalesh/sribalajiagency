@@ -32,6 +32,7 @@ import { CommonModule } from './common/common.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { Review } from './reviews/entities/review.entity';
 import { VigileEyeModule } from '@prabalesh/vigileye-nestjs';
+import { SeedAdminRoleAndPermissions1738890000000 } from './database/migrations/1738890000000-SeedAdminRoleAndPermissions';
 
 @Module({
   imports: [
@@ -71,9 +72,9 @@ import { VigileEyeModule } from '@prabalesh/vigileye-nestjs';
         database: config.get<string>('DB_NAME', 'sribalaji'),
         entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Quotation, Coupon, LocationRestriction, HomeCMS, UserAddress, Review],
 
-        // synchronize: config.get('NODE_ENV') !== 'production',
-        synchronize: true,
+        synchronize: config.get('NODE_ENV') !== 'production',
         migrationsRun: true,
+        migrations: [SeedAdminRoleAndPermissions1738890000000],
       }),
     }),
   ],

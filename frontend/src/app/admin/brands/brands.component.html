@@ -32,19 +32,19 @@
     <tbody>
       @for (brand of brands; track brand.id) {
       <tr>
-        <td>
+        <td data-label="Logo">
           <img [src]="brand.image ? 'http://localhost:3000' + brand.image : 'https://placehold.co/50x50?text=Logo'"
             class="brand-logo-sm" [alt]="brand.name">
         </td>
-        <td>{{ brand.name }}</td>
-        <td>{{ brand.description }}</td>
-        <td>
+        <td data-label="Name">{{ brand.name }}</td>
+        <td data-label="Description">{{ brand.description }}</td>
+        <td data-label="Actions">
           <div class="table-actions">
             @if (authService.hasPermission('UPDATE_BRAND')) {
             <button class="btn-sm" (click)="editBrand(brand)">Edit</button>
             }
             @if (authService.hasPermission('DELETE_BRAND')) {
-            <button class="btn-sm delete" (click)="deleteBrand(brand.id)">Delete</button>
+            <button class="btn-sm delete" (click)="openDeleteConfirm(brand.id, brand.name)">Delete</button>
             }
           </div>
         </td>
@@ -52,4 +52,9 @@
       }
     </tbody>
   </table>
+
+  <app-confirm-dialog [isOpen]="showDeleteConfirm" [title]="'Delete Brand'"
+    [message]="'Are you sure you want to delete ' + (brandToDelete?.name || '') + '? This action cannot be undone.'"
+    [confirmText]="'Delete'" [cancelText]="'Cancel'" (confirm)="confirmDelete()" (cancel)="closeDeleteConfirm()">
+  </app-confirm-dialog>
 </div>
