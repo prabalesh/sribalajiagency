@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CategoryService } from '../../core/services/api/category.service';
 import { Category } from '../../core/models/category.model';
+import { ToastService } from '../../core/services/toast.service';
 
 import { AuthService } from '../../core/services/auth/auth.service';
 
@@ -24,7 +25,8 @@ export class CategoriesComponent implements OnInit {
 
   constructor(
     private categoryService: CategoryService,
-    public authService: AuthService
+    public authService: AuthService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit() {
@@ -41,19 +43,26 @@ export class CategoriesComponent implements OnInit {
 
   async addCategory() {
     if (this.newCategory.name && this.newCategory.slug) {
-      if (this.isEditing) {
-        await this.categoryService.updateCategory(this.newCategory as Category);
-      } else {
-        const category: Category = {
-          id: `cat-${Math.random().toString(36).substr(2, 5)}`,
-          name: this.newCategory.name!,
-          slug: this.newCategory.slug!,
-          description: this.newCategory.description
-        };
-        await this.categoryService.addCategory(category);
+      try {
+        if (this.isEditing) {
+          await this.categoryService.updateCategory(this.newCategory as Category);
+          this.toastService.success('Category updated successfully');
+        } else {
+          const category: Category = {
+            id: `cat-${Math.random().toString(36).substr(2, 5)}`,
+            name: this.newCategory.name!,
+            slug: this.newCategory.slug!,
+            description: this.newCategory.description
+          };
+          await this.categoryService.addCategory(category);
+          this.toastService.success('Category added successfully');
+        }
+        this.resetForm();
+        this.loadCategories();
+      } catch (error: any) {
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to save category';
+        this.toastService.error(errorMessage);
       }
-      this.resetForm();
-      this.loadCategories();
     }
   }
 
@@ -64,8 +73,15 @@ export class CategoriesComponent implements OnInit {
 
   async deleteCategory(id: string) {
     if (confirm('Are you sure you want to delete this category?')) {
-      await this.categoryService.deleteCategory(id);
-      this.loadCategories();
+      try {
+        await this.categoryService.deleteCategory(id);
+        this.toastService.success('Category deleted successfully');
+        this.loadCategories();
+      } catch (error: any) {
+        // Extract error message from backend response (Axios structure)
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to delete category';
+        this.toastService.error(errorMessage);
+      }
     }
   }
 
