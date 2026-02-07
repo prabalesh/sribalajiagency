@@ -32,13 +32,13 @@
     <tbody>
       @for (brand of brands; track brand.id) {
       <tr>
-        <td>
+        <td data-label="Logo">
           <img [src]="brand.image ? 'http://localhost:3000' + brand.image : 'https://placehold.co/50x50?text=Logo'"
             class="brand-logo-sm" [alt]="brand.name">
         </td>
-        <td>{{ brand.name }}</td>
-        <td>{{ brand.description }}</td>
-        <td>
+        <td data-label="Name">{{ brand.name }}</td>
+        <td data-label="Description">{{ brand.description }}</td>
+        <td data-label="Actions">
           <div class="table-actions">
             @if (authService.hasPermission('UPDATE_BRAND')) {
             <button class="btn-sm" (click)="editBrand(brand)">Edit</button>
