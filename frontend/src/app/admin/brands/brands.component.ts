@@ -5,11 +5,12 @@ import { Brand } from '../../core/models/brand.model';
 import { BrandService } from '../../core/services/api/brand.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-admin-brands',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmDialogComponent],
   templateUrl: './brands.component.html',
   styleUrl: './brands.component.scss'
 })
@@ -18,6 +19,8 @@ export class BrandsComponent implements OnInit {
   newBrand: Brand = { id: '', name: '', slug: '', description: '' };
   selectedFile: File | null = null;
   isEditing = false;
+  showDeleteConfirm = false;
+  brandToDelete: { id: string; name: string } | null = null;
 
   private brandService = inject(BrandService);
   public authService = inject(AuthService);
@@ -86,17 +89,27 @@ export class BrandsComponent implements OnInit {
     this.isEditing = true;
   }
 
-  async deleteBrand(id: string) {
-    if (!confirm('Are you sure you want to delete this brand?')) {
-      return;
-    }
+  openDeleteConfirm(id: string, name: string) {
+    this.brandToDelete = { id, name };
+    this.showDeleteConfirm = true;
+  }
+
+  closeDeleteConfirm() {
+    this.showDeleteConfirm = false;
+    this.brandToDelete = null;
+  }
+
+  async confirmDelete() {
+    if (!this.brandToDelete) return;
 
     try {
-      await this.brandService.deleteBrand(id);
-      this.brands = this.brands.filter(b => b.id !== id);
+      await this.brandService.deleteBrand(this.brandToDelete.id);
+      this.brands = this.brands.filter(b => b.id !== this.brandToDelete!.id);
       this.toastService.success('Brand deleted successfully');
     } catch (error) {
       this.toastService.error(this.extractErrorMessage(error));
+    } finally {
+      this.closeDeleteConfirm();
     }
   }
 
@@ -119,7 +132,16 @@ export class BrandsComponent implements OnInit {
       return error;
     }
 
-    // Handle validation errors from backend
+    // Handle Axios error responses (error.response.data.message)
+    if (error?.response?.data?.message) {
+      const message = error.response.data.message;
+      if (Array.isArray(message)) {
+        return message.join(', ');
+      }
+      return message;
+    }
+
+    // Handle validation errors from backend (alternative structure)
     if (error?.error?.message) {
       if (Array.isArray(error.error.message)) {
         return error.error.message.join(', ');

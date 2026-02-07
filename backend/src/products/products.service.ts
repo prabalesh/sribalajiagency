@@ -224,6 +224,18 @@ export class ProductsService {
             throw new NotFoundException(`Brand with ID ${id} not found`);
         }
 
+        // Check if brand is being used by any products
+        const productsUsingBrand = await this.productRepo.count({
+            where: { brandId: id }
+        });
+
+        if (productsUsingBrand > 0) {
+            throw new BadRequestException(
+                `Cannot delete brand "${brand.name}" because it is being used by ${productsUsingBrand} product(s). Please remove or reassign these products first.`
+            );
+        }
+
+        // Delete brand image if exists
         if (brand.image) {
             try {
                 await this.fileStorageService.deleteFile(brand.image.replace('/uploads/', ''));
@@ -233,7 +245,17 @@ export class ProductsService {
             }
         }
 
-        return this.brandRepo.delete(id);
+        try {
+            return await this.brandRepo.delete(id);
+        } catch (error) {
+            // Handle any other database errors
+            if (error.code === '23503') { // Foreign key constraint violation
+                throw new BadRequestException(
+                    `Cannot delete this brand because it is referenced by other records in the system.`
+                );
+            }
+            throw new BadRequestException('Failed to delete brand. Please try again.');
+        }
     }
 
     async uploadBrandImage(brandId: string, file: Express.Multer.File) {
