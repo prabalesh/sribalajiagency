@@ -53,10 +53,8 @@
     </tbody>
   </table>
 
-  <!-- Custom Confirm Dialog -->
   <app-confirm-dialog [isOpen]="showDeleteConfirm" [title]="'Delete Brand'"
-    [message]="'Are you sure you want to delete \"' + (brandToDelete?.name || '') + ' \"? This action cannot be
-    undone.'" [confirmText]="'Delete'" [cancelText]="'Cancel'" (confirm)="confirmDelete()"
-    (cancel)="closeDeleteConfirm()">
+    [message]="'Are you sure you want to delete ' + (brandToDelete?.name || '') + '? This action cannot be undone.'"
+    [confirmText]="'Delete'" [cancelText]="'Cancel'" (confirm)="confirmDelete()" (cancel)="closeDeleteConfirm()">
   </app-confirm-dialog>
 </div>
