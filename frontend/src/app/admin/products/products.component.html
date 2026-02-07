@@ -11,13 +11,13 @@
             <!-- ... existing form grid ... -->
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Product Name</label>
+                    <label>Product Name <span class="required">*</span></label>
                     <input type="text" [(ngModel)]="newProduct.name" name="name" required
                         placeholder="e.g. Bosch Power Drill">
                 </div>
                 <!-- ... brands, categories, price, stock, toggle-group, allowed-payment, description, upload area, media gallery, variants-section ... -->
                 <div class="form-group">
-                    <label>Brand</label>
+                    <label>Brand <span class="required">*</span></label>
                     <select [(ngModel)]="newProduct.brandId" name="brandId" required>
                         <option value="" disabled>Select Brand</option>
                         @for (b of brands; track b.id) {
@@ -26,7 +26,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Main Category</label>
+                    <label>Main Category <span class="required">*</span></label>
                     <select [(ngModel)]="selectedMainCategoryId" name="mainCategory" (change)="onMainCategoryChange()"
                         required>
                         <option value="" disabled>Select Category</option>
@@ -36,7 +36,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Sub Category</label>
+                    <label>Sub Category <span class="required">*</span></label>
                     <select [(ngModel)]="newProduct.categoryId" name="categoryId" required
                         [disabled]="!selectedMainCategoryId">
                         <option value="" disabled>Select Sub Category</option>
@@ -49,7 +49,7 @@
                     <label>Base Price (₹)</label>
                     <div class="inline-fields">
                         <div class="field">
-                            <label>Selling Price</label>
+                            <label>Selling Price <span class="required">*</span></label>
                             <input type="number" [(ngModel)]="newProduct.price" name="price" placeholder="0.00">
                         </div>
                         <div class="field">
@@ -63,7 +63,7 @@
                     <label>Inventory & Controls</label>
                     <div class="inline-fields">
                         <div class="field">
-                            <label>Stock</label>
+                            <label>Stock <span class="required">*</span></label>
                             <input type="number" [(ngModel)]="newProduct.stock" name="stock" placeholder="0">
                         </div>
                         <div class="field">
@@ -102,7 +102,7 @@
                     </div>
                 </div>
                 <div class="form-group full-width">
-                    <label>Description</label>
+                    <label>Description <span class="required">*</span></label>
                     <textarea [(ngModel)]="newProduct.description" name="description" rows="3"
                         placeholder="Technical specifications..."></textarea>
                 </div>
@@ -188,7 +188,7 @@
             </div>
 
             <div class="actions">
-                <button type="submit" class="btn-primary" [disabled]="!newProduct.name || !newProduct.categoryId">
+                <button type="submit" class="btn-primary">
                     {{ isEditing ? 'Update Product' : 'Add Product' }}
                 </button>
                 @if (isEditing) {

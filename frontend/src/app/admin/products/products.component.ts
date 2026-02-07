@@ -72,33 +72,61 @@ export class ProductsComponent implements OnInit {
 
   async saveProduct() {
     console.log('AdminProducts: Attempting to save product', this.newProduct);
-    if (this.newProduct.name && this.newProduct.categoryId) {
-      try {
-        let savedProduct: Product;
-        if (this.isEditing) {
-          savedProduct = await this.productService.updateProduct(this.newProduct);
-        } else {
-          savedProduct = await this.productService.addProduct(this.newProduct);
-        }
 
-        // Handle Image Uploads
-        if (this.uploadedFiles.length > 0) {
-          for (let i = 0; i < this.uploadedFiles.length; i++) {
-            await this.productService.uploadImage(savedProduct.id, this.uploadedFiles[i], i === 0 && !savedProduct.images?.some(img => img.isPrimary));
-          }
-        }
+    // Validation
+    if (!this.newProduct.name) {
+      this.toastService.warning('Product Name is required');
+      return;
+    }
+    if (!this.newProduct.brandId) {
+      this.toastService.warning('Please select a Brand');
+      return;
+    }
+    if (!this.selectedMainCategoryId) { // Optional check, but good for UX flow
+      this.toastService.warning('Please select a Main Category');
+      return;
+    }
+    if (!this.newProduct.categoryId) {
+      this.toastService.warning('Please select a Sub Category');
+      return;
+    }
+    if (!this.newProduct.price || this.newProduct.price <= 0) {
+      this.toastService.warning('Price must be greater than 0');
+      return;
+    }
+    if (!this.newProduct.description) {
+      this.toastService.warning('Description is required');
+      return;
+    }
+    if (this.newProduct.stock < 0) {
+      this.toastService.warning('Stock cannot be negative');
+      return;
+    }
 
-        // Refresh list
-        // Refresh list
-        await this.loadProducts();
-        this.resetForm();
-        this.toastService.success(`Product ${this.isEditing ? 'updated' : 'added'} successfully!`);
-      } catch (err) {
-        console.error('AdminProducts: Failed to save product', err);
-        this.toastService.error('Failed to save product. Check backend logs.');
+
+    try {
+      let savedProduct: Product;
+      if (this.isEditing) {
+        savedProduct = await this.productService.updateProduct(this.newProduct);
+      } else {
+        savedProduct = await this.productService.addProduct(this.newProduct);
       }
-    } else {
-      this.toastService.warning('Please fill all required fields including Category');
+
+      // Handle Image Uploads
+      if (this.uploadedFiles.length > 0) {
+        for (let i = 0; i < this.uploadedFiles.length; i++) {
+          await this.productService.uploadImage(savedProduct.id, this.uploadedFiles[i], i === 0 && !savedProduct.images?.some(img => img.isPrimary));
+        }
+      }
+
+      // Refresh list
+      await this.loadProducts();
+      this.resetForm();
+      this.toastService.success(`Product ${this.isEditing ? 'updated' : 'added'} successfully!`);
+    } catch (err: any) {
+      console.error('AdminProducts: Failed to save product', err);
+      const errorMsg = err.response?.data?.message || err.message || 'Failed to save product';
+      this.toastService.error(errorMsg);
     }
   }
 
