@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Category } from './category.entity';
-import { Brand } from './brand.entity';
+import { Category } from '../../categories/entities/category.entity';
+import { Brand } from '../../brands/entities/brand.entity';
 import { ProductImage } from './product-image.entity';
 import { ProductVariant } from './product-variant.entity';
 import { ColumnNumericTransformer } from '../../common/transformers/numeric.transformer';

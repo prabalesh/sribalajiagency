@@ -12,11 +12,14 @@ import { AuthModule } from './auth/auth.module';
 import { UserAddress } from './auth/entities/user-address.entity';
 import { ProductsModule } from './products/products.module';
 import { Product } from './products/entities/product.entity';
-import { Category } from './products/entities/category.entity';
-import { Brand } from './products/entities/brand.entity';
+import { CategoriesModule } from './categories/categories.module';
+import { Category } from './categories/entities/category.entity';
+import { BrandsModule } from './brands/brands.module';
+import { Brand } from './brands/entities/brand.entity';
 import { ProductImage } from './products/entities/product-image.entity';
 import { ProductVariant } from './products/entities/product-variant.entity';
-import { SiteSettings } from './products/entities/settings.entity';
+import { SettingsModule } from './settings/settings.module';
+import { SiteSettings } from './settings/entities/settings.entity';
 import { OrdersModule } from './orders/orders.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { Coupon } from './coupons/entities/coupon.entity';
@@ -27,7 +30,8 @@ import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { OrderStatusHistory } from './orders/entities/order-status-history.entity';
 import { Quotation } from './quotations/entities/quotation.entity';
-import { HomeCMS } from './products/entities/home-cms.entity';
+import { CMSModule } from './cms/cms.module';
+import { HomeCMS } from './cms/entities/home-cms.entity';
 import { CommonModule } from './common/common.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { Review } from './reviews/entities/review.entity';
@@ -52,6 +56,10 @@ import { CartItem } from './carts/entities/cart-item.entity';
     CommonModule,
     AuthModule,
     ProductsModule,
+    CategoriesModule,
+    BrandsModule,
+    CMSModule,
+    SettingsModule,
     OrdersModule,
     CouponsModule,
     LocationsModule,

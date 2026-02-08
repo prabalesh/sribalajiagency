@@ -1,19 +1,15 @@
-import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SiteSettings } from './entities/settings.entity';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { Permissions } from '../auth/decorators/permissions.decorator';
 
-@Controller('settings')
-export class SettingsController {
+@Injectable()
+export class SettingsService {
     constructor(
         @InjectRepository(SiteSettings)
         private settingsRepo: Repository<SiteSettings>,
     ) { }
 
-    @Get()
     async getSettings() {
         let settings = await this.settingsRepo.findOne({ where: { id: 1 } });
         if (!settings) {
@@ -23,10 +19,7 @@ export class SettingsController {
         return settings;
     }
 
-    @Put()
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('UPDATE_SETTINGS') // Using product permission for now
-    async updateSettings(@Body() data: any) {
+    async updateSettings(data: any) {
         let settings = await this.getSettings();
         Object.assign(settings, data);
         return this.settingsRepo.save(settings);

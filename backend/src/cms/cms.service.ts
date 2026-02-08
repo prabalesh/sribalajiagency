@@ -1,22 +1,17 @@
-import { Controller, Get, Post, Put, Body, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HomeCMS } from './entities/home-cms.entity';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { Permissions } from '../auth/decorators/permissions.decorator';
 import { FileStorageService } from '../common/services/file-storage.service';
 
-@Controller('home-cms')
-export class HomeCMSController {
+@Injectable()
+export class CMSService {
     constructor(
         @InjectRepository(HomeCMS)
         private cmsRepo: Repository<HomeCMS>,
         private fileStorageService: FileStorageService,
     ) { }
 
-    @Get()
     async getCMS() {
         let cms = await this.cmsRepo.findOne({ where: {} });
         if (!cms) {
@@ -62,28 +57,18 @@ export class HomeCMSController {
         return cms;
     }
 
-    @Put()
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('UPDATE_CMS')
-    async updateCMS(@Body() data: any) {
+    async updateCMS(data: any) {
         let cms = await this.getCMS();
         Object.assign(cms, data);
         return this.cmsRepo.save(cms);
     }
 
-    @Post('upload')
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('UPLOAD_CMS_ASSETS')
-    @UseInterceptors(FileInterceptor('file'))
-    async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    async uploadImage(file: Express.Multer.File) {
         const url = await this.fileStorageService.saveFile(file, 'cms');
         return { url };
     }
 
-    @Post('delete-file')
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('UPDATE_CMS')
-    async deleteFile(@Body('url') url: string) {
+    async deleteFile(url: string) {
         if (url) {
             await this.fileStorageService.deleteFile(url.replace('/uploads/', ''));
         }

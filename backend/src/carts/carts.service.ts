@@ -49,7 +49,7 @@ export class CartsService {
             const cartItem = this.cartItemRepo.create({
                 cart,
                 productId: item.productId,
-                variantId: item.variantId,
+                variantId: item.variantId ?? undefined,
                 quantity: item.quantity,
             });
             return cartItem;
@@ -78,7 +78,7 @@ export class CartsService {
             const newItem = this.cartItemRepo.create({
                 cart,
                 productId: itemDto.productId,
-                variantId: itemDto.variantId,
+                variantId: itemDto.variantId ?? undefined,
                 quantity: itemDto.quantity,
             });
             await this.cartItemRepo.save(newItem);
@@ -228,7 +228,7 @@ export class CartsService {
                 const newItem = this.cartItemRepo.create({
                     cart: userCart,
                     productId: guestItem.productId,
-                    variantId: guestItem.variantId,
+                    variantId: guestItem.variantId ?? undefined,
                     quantity: guestItem.quantity,
                 });
                 await this.cartItemRepo.save(newItem);

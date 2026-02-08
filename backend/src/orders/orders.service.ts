@@ -6,7 +6,7 @@ import { OrderItem } from './entities/order-item.entity';
 import { OrderStatusHistory } from './entities/order-status-history.entity';
 import { User } from '../auth/entities/user.entity';
 import { Product } from '../products/entities/product.entity';
-import { Category } from '../products/entities/category.entity';
+import { Category } from '../categories/entities/category.entity';
 import { ProductVariant } from '../products/entities/product-variant.entity';
 
 import { CreateOrderDto } from './dto/create-order.dto';
