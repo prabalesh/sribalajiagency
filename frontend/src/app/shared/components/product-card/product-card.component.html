@@ -1,8 +1,8 @@
 <div class="product-card glass-card animate-fade" [routerLink]="['/products/detail', product.id]"
     [class.out-of-stock-item]="product.stock <= 0">
     <div class="p-image">
-        <img [ngSrc]="product.images[0].url || 'https://placehold.co/400x400?text=No+Image'" [alt]="product.name"
-            width="400" height="400">
+        <img [ngSrc]="(product.images && product.images.length > 0) ? product.images[0].url : 'https://placehold.co/400x400?text=No+Image'"
+            [alt]="product.name" width="400" height="400">
 
         <div class="p-badges">
             <span class="badge out-of-stock" *ngIf="product.stock <= 0">Out of Stock</span>
