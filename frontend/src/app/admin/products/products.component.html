@@ -98,11 +98,11 @@
                 <div class="form-group full-width">
                     <label>Allowed Payment Methods</label>
                     <div class="checkbox-row">
-                        <label class="check-item">
+                        <!-- <label class="check-item">
                             <input type="checkbox" [checked]="newProduct.allowedPaymentMethods?.includes('online')"
                                 (change)="togglePaymentMethod('online')" [disabled]="isSaving">
                             Online Payment
-                        </label>
+                        </label> -->
                         <label class="check-item">
                             <input type="checkbox" [checked]="newProduct.allowedPaymentMethods?.includes('cod')"
                                 (change)="togglePaymentMethod('cod')" [disabled]="isSaving">
@@ -124,16 +124,17 @@
                             <input type="file" #fileInput (change)="onFileSelected($event)" multiple hidden
                                 accept="image/*" [disabled]="isSaving || isUploadingImage">
                             <span class="icon">📁</span>
-                            <p>Drag images here or <strong class="browse-link" 
-                                (click)="!isSaving && !isUploadingImage && fileInput.click()">browse files</strong></p>
-                            
+                            <p>Drag images here or <strong class="browse-link"
+                                    (click)="!isSaving && !isUploadingImage && fileInput.click()">browse files</strong>
+                            </p>
+
                             @if (isUploadingImage) {
                             <div class="upload-progress">
                                 <div class="spinner-sm"></div>
                                 <span>Uploading images...</span>
                             </div>
                             }
-                            
+
                             <div class="file-previews">
                                 @for (file of uploadedFiles; track $index) {
                                 <div class="file-item">
@@ -165,8 +166,8 @@
                 <div class="form-group full-width variants-section">
                     <div class="section-header">
                         <h4>Configure Variants</h4>
-                        <button type="button" class="btn-sm" (click)="addVariant()" 
-                            [disabled]="isSaving">+ Add Variant</button>
+                        <button type="button" class="btn-sm" (click)="addVariant()" [disabled]="isSaving">+ Add
+                            Variant</button>
                     </div>
                     <div class="variants-list">
                         @for (v of newProduct.variants; track $index) {
@@ -180,6 +181,15 @@
                                     placeholder="MRP" title="Actual Price (Strike)" [disabled]="isSaving">
                                 <input type="number" [(ngModel)]="v.stock" name="vStock-{{$index}}" placeholder="Stock"
                                     required [disabled]="isSaving">
+                                <button type="button" class="remove-btn" (click)="removeVariant($index)"
+                                    [disabled]="isSaving" title="Remove Variant">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
                             </div>
                             <div class="v-row secondary">
                                 <div class="v-images-actions" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
@@ -191,8 +201,7 @@
                                         (change)="uploadVariantImage($event, v)" accept="image/*" multiple>
 
                                     <button type="button" class="btn-secondary sm outline"
-                                        (click)="!v.images ? v.images = [''] : v.images.push('')"
-                                        [disabled]="isSaving">
+                                        (click)="!v.images ? v.images = [''] : v.images.push('')" [disabled]="isSaving">
                                         + Add URL
                                     </button>
                                 </div>
@@ -219,8 +228,7 @@
                     }
                 </button>
                 @if (isEditing) {
-                <button type="button" (click)="resetForm()" class="btn-secondary" 
-                    [disabled]="isSaving">Cancel</button>
+                <button type="button" (click)="resetForm()" class="btn-secondary" [disabled]="isSaving">Cancel</button>
                 }
             </div>
         </form>
@@ -229,7 +237,7 @@
 
     <div class="list-container animate-fade">
         <h3>Product Catalog</h3>
-        
+
         @if (isLoading && products.length === 0) {
         <div class="table-loading">
             <div class="spinner"></div>
@@ -271,11 +279,11 @@
                     <td>
                         <div class="table-actions">
                             @if (authService.hasPermission('UPDATE_PRODUCT')) {
-                            <button class="btn-sm" (click)="editProduct(p)" 
+                            <button class="btn-sm" (click)="editProduct(p)"
                                 [disabled]="isSaving || isDeleting">Edit</button>
                             }
                             @if (authService.hasPermission('DELETE_PRODUCT')) {
-                            <button class="btn-sm delete" (click)="deleteProduct(p.id)" 
+                            <button class="btn-sm delete" (click)="deleteProduct(p.id)"
                                 [disabled]="isSaving || isDeleting">Delete</button>
                             }
                         </div>
