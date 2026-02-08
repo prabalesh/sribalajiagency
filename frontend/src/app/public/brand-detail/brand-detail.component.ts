@@ -5,13 +5,12 @@ import { Subject, takeUntil } from 'rxjs';
 import { BrandService } from '../../core/services/api/brand.service';
 import { Brand } from '../../core/models/brand.model';
 import { Category } from '../../core/models/category.model';
-import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 
 @Component({
     selector: 'app-brand-detail',
     standalone: true,
-    imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent, NgOptimizedImage],
+    imports: [CommonModule, RouterModule, SkeletonComponent, NgOptimizedImage],
     templateUrl: './brand-detail.component.html',
     styleUrl: './brand-detail.component.scss'
 })

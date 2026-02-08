@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../../api/api.service';
 import { Product } from '../../models/product.model';
 
+import { CreateProductDto, UpdateProductDto } from '../../models/product.dto';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,13 +33,13 @@ export class ProductService {
     return res.data;
   }
 
-  async addProduct(product: any) {
+  async addProduct(product: CreateProductDto) {
     const res = await this.api.post<Product>('/products', product);
     return res.data;
   }
 
-  async updateProduct(product: any) {
-    const res = await this.api.put<Product>(`/products/${product.id}`, product);
+  async updateProduct(id: string, product: UpdateProductDto) {
+    const res = await this.api.put<Product>(`/products/${id}`, product);
     return res.data;
   }
 

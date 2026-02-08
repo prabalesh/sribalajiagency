@@ -57,7 +57,7 @@ describe('ProductService', () => {
         const product = { id: '1', name: 'Updated' } as any;
         apiServiceSpy.put.and.returnValue(Promise.resolve({ data: product } as any));
 
-        const result = await service.updateProduct(product);
+        const result = await service.updateProduct(product.id, product);
         expect(result.name).toBe('Updated');
         expect(apiServiceSpy.put).toHaveBeenCalledWith('/products/1', product);
     });

@@ -34,6 +34,21 @@ export class ToastService {
         this.show(message, 'error', duration);
     }
 
+    apiError(err: any, defaultMsg: string = 'Operation failed') {
+        let errorMsg = defaultMsg;
+        if (err.response?.data) {
+            const data = err.response.data;
+            if (Array.isArray(data.message)) {
+                errorMsg = data.message.join(', ');
+            } else if (data.message) {
+                errorMsg = data.message;
+            }
+        } else if (err.message) {
+            errorMsg = err.message;
+        }
+        this.error(errorMsg);
+    }
+
     warning(message: string, duration?: number) {
         this.show(message, 'warning', duration);
     }

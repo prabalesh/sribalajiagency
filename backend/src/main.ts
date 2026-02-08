@@ -7,6 +7,7 @@ import * as path from 'path';
 import helmet from 'helmet';
 import compression from 'compression';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -43,6 +44,7 @@ async function bootstrap() {
     whitelist: true,
   }));
 
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   const port = process.env.PORT || 3000;

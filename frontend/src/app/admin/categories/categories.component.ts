@@ -34,9 +34,11 @@ export class CategoriesComponent implements OnInit {
   }
 
   async loadCategories() {
-    // Only showing Main Categories for management simplicty first?
-    // Or all? Let's show all for transparency.
-    this.categories = await this.categoryService.getCategories();
+    try {
+      this.categories = await this.categoryService.getCategories();
+    } catch (error) {
+      this.toastService.apiError(error, 'Failed to load categories');
+    }
   }
 
   isEditing = false;
@@ -60,8 +62,7 @@ export class CategoriesComponent implements OnInit {
         this.resetForm();
         this.loadCategories();
       } catch (error: any) {
-        const errorMessage = error.response?.data?.message || error.message || 'Failed to save category';
-        this.toastService.error(errorMessage);
+        this.toastService.apiError(error, 'Failed to save category');
       }
     }
   }
@@ -78,9 +79,7 @@ export class CategoriesComponent implements OnInit {
         this.toastService.success('Category deleted successfully');
         this.loadCategories();
       } catch (error: any) {
-        // Extract error message from backend response (Axios structure)
-        const errorMessage = error.response?.data?.message || error.message || 'Failed to delete category';
-        this.toastService.error(errorMessage);
+        this.toastService.apiError(error, 'Failed to delete category');
       }
     }
   }

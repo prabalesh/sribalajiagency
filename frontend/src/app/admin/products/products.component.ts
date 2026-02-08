@@ -105,11 +105,33 @@ export class ProductsComponent implements OnInit {
 
 
     try {
+      const productData = {
+        name: this.newProduct.name,
+        description: this.newProduct.description,
+        price: this.newProduct.price,
+        comparisonPrice: this.newProduct.comparisonPrice,
+        isAvailable: this.newProduct.isAvailable,
+        stock: this.newProduct.stock,
+        isShowcaseOnly: this.newProduct.isShowcaseOnly,
+        allowedPaymentMethods: this.newProduct.allowedPaymentMethods,
+        categoryId: this.newProduct.categoryId,
+        brandId: this.newProduct.brandId,
+        isFeatured: this.newProduct.isFeatured,
+        variants: this.newProduct.variants?.map(v => {
+          const { sku, specifications, ...variantData } = v;
+          return {
+            ...variantData,
+            id: v.id && v.id !== '' ? v.id : undefined
+          };
+        })
+      };
+
       let savedProduct: Product;
       if (this.isEditing) {
-        savedProduct = await this.productService.updateProduct(this.newProduct);
+        console.log('AdminProducts: Attempting to update product', this.newProduct);
+        savedProduct = await this.productService.updateProduct(this.newProduct.id, productData);
       } else {
-        savedProduct = await this.productService.addProduct(this.newProduct);
+        savedProduct = await this.productService.addProduct(productData);
       }
 
       // Handle Image Uploads
@@ -125,12 +147,12 @@ export class ProductsComponent implements OnInit {
       this.toastService.success(`Product ${this.isEditing ? 'updated' : 'added'} successfully!`);
     } catch (err: any) {
       console.error('AdminProducts: Failed to save product', err);
-      const errorMsg = err.response?.data?.message || err.message || 'Failed to save product';
-      this.toastService.error(errorMsg);
+      this.toastService.apiError(err, 'Failed to save product');
     }
   }
 
   async editProduct(product: Product) {
+    console.log('AdminProducts: Attempting to edit product', product);
     this.newProduct = {
       ...product,
       variants: product.variants ? [...product.variants] : [],
@@ -152,8 +174,14 @@ export class ProductsComponent implements OnInit {
 
   async deleteProduct(id: string) {
     if (confirm('Delete this product?')) {
-      await this.productService.deleteProduct(id);
-      this.products = this.products.filter(p => p.id !== id);
+      try {
+        await this.productService.deleteProduct(id);
+        this.products = this.products.filter(p => p.id !== id);
+        this.toastService.success('Product deleted successfully');
+      } catch (err) {
+        console.error('AdminProducts: Failed to delete product', err);
+        this.toastService.apiError(err, 'Failed to delete product');
+      }
     }
   }
 

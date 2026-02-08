@@ -8,7 +8,6 @@ import { CartService } from '../../core/store/cart.service';
 import { Product, ProductVariant } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
 import { Brand } from '../../core/models/brand.model';
-import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
@@ -20,7 +19,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent, ProductCardComponent, BreadcrumbsComponent, FormsModule, ProductReviewsComponent, NgOptimizedImage],
+  imports: [CommonModule, RouterModule, SkeletonComponent, ProductCardComponent, BreadcrumbsComponent, FormsModule, ProductReviewsComponent, NgOptimizedImage],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss'
 })

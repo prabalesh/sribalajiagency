@@ -9,7 +9,6 @@ import { CartService } from '../../core/store/cart.service';
 import { Category } from '../../core/models/category.model';
 import { Product } from '../../core/models/product.model';
 import { Brand } from '../../core/models/brand.model';
-import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import { LucideAngularModule, ChevronLeft, ChevronRight, Truck, ShieldCheck, MessageCircle, ExternalLink, ArrowRight } from 'lucide-angular';
 
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
@@ -20,7 +19,6 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
   imports: [
     CommonModule,
     RouterModule,
-    ImageUrlPipe,
     LucideAngularModule,
     ProductCardComponent,
     NgOptimizedImage

@@ -34,7 +34,7 @@ export class BrandsComponent implements OnInit {
     try {
       this.brands = await this.brandService.getBrands();
     } catch (error) {
-      this.toastService.error(this.extractErrorMessage(error));
+      this.toastService.apiError(error, 'Failed to load brands');
     }
   }
 
@@ -69,14 +69,13 @@ export class BrandsComponent implements OnInit {
           if (index !== -1) this.brands[index] = withImage;
           this.toastService.success('Brand image uploaded successfully');
         } catch (error) {
-          this.toastService.error('Failed to upload image: ' + this.extractErrorMessage(error));
+          this.toastService.apiError(error, 'Failed to upload image');
         }
       }
 
       this.resetForm();
     } catch (error) {
-      const errorMessage = this.extractErrorMessage(error);
-      this.toastService.error(errorMessage);
+      this.toastService.apiError(error, 'Failed to save brand');
     }
   }
 
@@ -107,7 +106,7 @@ export class BrandsComponent implements OnInit {
       this.brands = this.brands.filter(b => b.id !== this.brandToDelete!.id);
       this.toastService.success('Brand deleted successfully');
     } catch (error) {
-      this.toastService.error(this.extractErrorMessage(error));
+      this.toastService.apiError(error, 'Failed to delete brand');
     } finally {
       this.closeDeleteConfirm();
     }
@@ -125,35 +124,5 @@ export class BrandsComponent implements OnInit {
       .replace(/[^\w\s-]/g, '')
       .replace(/[\s_-]+/g, '-')
       .replace(/^-+|-+$/g, '');
-  }
-
-  private extractErrorMessage(error: any): string {
-    if (typeof error === 'string') {
-      return error;
-    }
-
-    // Handle Axios error responses (error.response.data.message)
-    if (error?.response?.data?.message) {
-      const message = error.response.data.message;
-      if (Array.isArray(message)) {
-        return message.join(', ');
-      }
-      return message;
-    }
-
-    // Handle validation errors from backend (alternative structure)
-    if (error?.error?.message) {
-      if (Array.isArray(error.error.message)) {
-        return error.error.message.join(', ');
-      }
-      return error.error.message;
-    }
-
-    // Handle other error formats
-    if (error?.message) {
-      return error.message;
-    }
-
-    return 'An unexpected error occurred. Please try again.';
   }
 }

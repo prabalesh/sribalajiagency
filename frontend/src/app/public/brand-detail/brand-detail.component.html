@@ -13,16 +13,18 @@
             <app-skeleton height="48px" width="300px" style="margin-bottom: 1rem;"></app-skeleton>
             <app-skeleton height="20px" width="500px"></app-skeleton>
         </div>
-        } @else if (brand()) {
-        @if (brand()!.image) {
+        } @else {
+        @if (brand(); as currentBrand) {
+        @if (currentBrand.image) {
         <div class="brand-logo glass-card">
-            <img [ngSrc]="brand()!.image" [alt]="brand()!.name" width="200" height="100" priority>
+            <img [ngSrc]="currentBrand.image" [alt]="currentBrand.name" width="200" height="100" priority>
         </div>
         }
         <div class="brand-info">
-            <h1 class="text-gradient">{{ brand()!.name }}</h1>
-            <p>{{ brand()!.description }}</p>
+            <h1 class="text-gradient">{{ currentBrand.name }}</h1>
+            <p>{{ currentBrand.description }}</p>
         </div>
+        }
         }
     </header>
 

@@ -1,5 +1,42 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsBoolean, IsArray, ValidateNested, Min, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsBoolean, IsArray, Min, IsUUID, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+
+export class ProductVariantDto {
+    @IsOptional()
+    @IsUUID()
+    id?: string;
+
+    @IsString()
+    @IsNotEmpty()
+    name: string;
+
+    @IsNumber()
+    @Min(0)
+    price: number;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    comparisonPrice?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    stock?: number;
+
+    @IsOptional()
+    @IsString()
+    image?: string;
+
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    images?: string[];
+
+    @IsOptional()
+    @IsString()
+    description?: string;
+}
 
 export class CreateProductDto {
     @IsString()
@@ -57,7 +94,9 @@ export class CreateProductDto {
     // Add other fields as necessary based on entity
     @IsOptional()
     @IsArray()
-    variants?: any[]; // Ideally should be a DTO too, but keeping loose for now or define CreateVariantDto
+    @ValidateNested({ each: true })
+    @Type(() => ProductVariantDto)
+    variants?: ProductVariantDto[];
 }
 
 export class UpdateProductDto {
@@ -117,5 +156,7 @@ export class UpdateProductDto {
 
     @IsOptional()
     @IsArray()
-    variants?: any[];
+    @ValidateNested({ each: true })
+    @Type(() => ProductVariantDto)
+    variants?: ProductVariantDto[];
 }
