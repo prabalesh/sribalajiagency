@@ -1,16 +1,18 @@
 import { Routes } from '@angular/router';
-import { PublicLayoutComponent } from './layout/public-layout/public-layout.component';
-import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
-import { NotFoundComponent } from './shared/components/not-found/not-found.component';
+
+// Lazy load layouts and components that were previously directly imported to reduce initial bundle size
+const PublicLayoutComponent = () => import('./layout/public-layout/public-layout.component').then(m => m.PublicLayoutComponent);
+const AdminLayoutComponent = () => import('./layout/admin-layout/admin-layout.component').then(m => m.AdminLayoutComponent);
+const NotFoundComponent = () => import('./shared/components/not-found/not-found.component').then(m => m.NotFoundComponent);
 
 
 export const routes: Routes = [
     // Public Routes
     {
         path: '',
-        component: PublicLayoutComponent,
+        loadComponent: PublicLayoutComponent,
         children: [
             {
                 path: '',
@@ -124,7 +126,7 @@ export const routes: Routes = [
     // Management Routes (formerly Admin)
     {
         path: 'dashboard',
-        component: AdminLayoutComponent,
+        loadComponent: AdminLayoutComponent,
         canMatch: [adminGuard],
         children: [
             {
@@ -189,6 +191,6 @@ export const routes: Routes = [
 
     {
         path: '**',
-        component: NotFoundComponent
+        loadComponent: NotFoundComponent
     }
 ];

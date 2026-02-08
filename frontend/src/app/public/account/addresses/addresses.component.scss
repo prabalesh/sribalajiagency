@@ -1,4 +1,5 @@
 @use "../../../core/styles/glass" as *;
+@import "leaflet/dist/leaflet.css";
 
 .account-page {
     display: grid;
