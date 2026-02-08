@@ -107,6 +107,11 @@
     }
 }
 
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
 @media (max-width: 900px) {
     .crud-layout {
         grid-template-columns: 1fr;

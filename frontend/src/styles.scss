@@ -32,8 +32,10 @@
 
   /* Status Colors (Light) */
   --success-color: #10b981;
+  --success-color-hover: #059669;
   --success-color-rgb: 16, 185, 129;
   --danger-color: #ef4444;
+  --dagner-color-hover: #dc2626;
   --danger-color-rgb: 239, 68, 68;
   --warning-color: #f59e0b;
   --warning-color-rgb: 245, 158, 11;
@@ -211,6 +213,40 @@ button {
   }
 }
 
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    color: var(--text-color);
+    background: var(--surface-color-secondary);
+    font-weight: 700;
+    white-space: nowrap;
+    position: relative;
+    transition: all 0.2s ease;
+
+    &.delete {
+        color: var(--danger-color);
+
+        &:hover:not(:disabled) {
+            background: var(--danger-color);
+            color: white;
+        }
+    }
+
+    &:hover:not(:disabled) {
+        background: var(--primary-color);
+        color: #fff;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
+
+.btn-lg {
+  padding: 1.25rem 3rem;
+  font-size: 1.125rem;
+  border-radius: var(--border-radius-md);
+}
 
 .glass-card {
   @include glass-card;
@@ -310,4 +346,22 @@ textarea:disabled,
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.bg-success {
+  background-color: var(--success-color);
+  color: white;
+
+  &:hover {
+    background-color: var(--success-color-hover);
+  }
+}
+
+.bg-danger {
+  background-color: var(--danger-color);
+  color: white;
+
+  &:hover {
+    background-color: var(--danger-color-hover);
+  }
 }

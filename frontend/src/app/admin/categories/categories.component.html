@@ -60,10 +60,10 @@
                         <td>
                             <div class="table-actions">
                                 @if (authService.hasPermission('UPDATE_CATEGORY')) {
-                                <button class="btn-icon" (click)="editCategory(cat)">Edit</button>
+                                <button class="btn btn-sm" (click)="editCategory(cat)">Edit</button>
                                 }
                                 @if (authService.hasPermission('DELETE_CATEGORY')) {
-                                <button class="btn-icon delete" (click)="deleteCategory(cat.id)">Delete</button>
+                                <button class="btn btn-sm delete" (click)="deleteCategory(cat.id)">Delete</button>
                                 }
                             </div>
                         </td>

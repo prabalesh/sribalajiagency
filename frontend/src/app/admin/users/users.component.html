@@ -69,10 +69,10 @@
                         <td>
                             <div class="table-actions">
                                 @if (authService.hasPermission('UPDATE_USER')) {
-                                <button class="btn-sm" (click)="editUser(user)">Modify</button>
+                                <button class="btn btn-sm" (click)="editUser(user)">Modify</button>
                                 }
                                 @if (authService.hasPermission('DELETE_USER')) {
-                                <button class="btn-sm delete" (click)="deleteUser(user.id)">Revoke</button>
+                                <button class="btn btn-sm delete" (click)="deleteUser(user.id)">Revoke</button>
                                 }
                             </div>
                         </td>

@@ -22,8 +22,8 @@
                         {{ item.isApproved ? 'Yes' : 'No' }}
                     </span>
                 </td>
-                <td>
-                    <button (click)="toggleApproval(item)">
+                <td class="table-actions">
+                    <button (click)="toggleApproval(item)" class="btn-sm" [ngClass]="item.isApproved ? 'bg-danger' : 'bg-success'">
                         {{ item.isApproved ? 'Reject' : 'Approve' }}
                     </button>
                     <button class="delete" (click)="deleteFeedback(item.id)">Delete</button>

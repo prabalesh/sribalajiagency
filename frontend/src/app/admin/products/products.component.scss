@@ -430,56 +430,6 @@
     }
 }
 
-// ===== BUTTON STYLES =====
-
-.btn-sm {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.75rem;
-    background: var(--surface-color-secondary);
-    border-radius: 8px;
-    font-weight: 700;
-    white-space: nowrap;
-    position: relative;
-    transition: all 0.2s ease;
-
-    &.delete {
-        color: var(--danger-color);
-
-        &:hover:not(:disabled) {
-            background: var(--danger-color);
-            color: white;
-        }
-    }
-
-    &:hover:not(:disabled) {
-        background: var(--border-color);
-    }
-
-    // Loading state for buttons
-    &:disabled {
-        cursor: not-allowed;
-    }
-}
-
-// Primary/Secondary button loading states
-.btn-primary,
-.btn-secondary {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-
-    &:disabled {
-        cursor: not-allowed;
-    }
-
-    .spinner-sm {
-        margin-right: 0;
-    }
-}
-
 // File previews in upload area
 .file-previews {
     margin-top: 1rem;
@@ -519,7 +469,7 @@
             transition: all 0.2s ease;
 
             &:hover:not(:disabled) {
-                background: darken(red, 10%);
+                background: rgba(255, 62, 0, 0.8);
                 transform: scale(1.1);
             }
 
