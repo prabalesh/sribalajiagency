@@ -40,7 +40,10 @@
                     <span class="reviews">({{ product.reviewCount || 0 }})</span>
                 </ng-container>
                 <ng-template #noRating>
-                    <span class="reviews">NA</span>
+                    <span class="stars" [title]="product.rating + ' Stars'">
+                        ★
+                    </span>
+                    <span class="reviews">({{ product.reviewCount || 0 }})</span>
                 </ng-template>
             </div>
         </div>
