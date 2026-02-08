@@ -303,3 +303,11 @@ img {
 .icons {
   color: var(--primary-color);
 }
+
+input:disabled,
+select:disabled,
+textarea:disabled,
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

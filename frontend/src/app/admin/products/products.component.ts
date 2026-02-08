@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Product } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
 import { Brand } from '../../core/models/brand.model';
@@ -26,6 +28,12 @@ export class ProductsComponent implements OnInit {
   isEditing = false;
   uploadedFiles: any[] = [];
 
+  // Loading States
+  isLoading = false;
+  isSaving = false;
+  isDeleting = false;
+  isUploadingImage = false;
+
   // Pagination
   currentPage = 1;
   totalItems = 0;
@@ -39,6 +47,9 @@ export class ProductsComponent implements OnInit {
   // Selection State
   selectedMainCategoryId: string = '';
 
+  // Debouncing for search/filter (if you add search later)
+  private searchSubject = new Subject<string>();
+
   constructor(
     private productService: ProductService,
     private categoryService: CategoryService,
@@ -48,9 +59,59 @@ export class ProductsComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-    await this.loadProducts();
-    this.brands = await this.brandService.getBrands();
-    this.mainCategories = await this.categoryService.getCategoriesByParentId(undefined);
+    this.isLoading = true;
+    try {
+      await Promise.all([
+        this.loadProducts(),
+        this.loadBrands(),
+        this.loadMainCategories()
+      ]);
+    } catch (error) {
+      console.error('Error initializing component:', error);
+      this.toastService.error('Failed to load initial data');
+    } finally {
+      this.isLoading = false;
+    }
+
+    // Setup debounced search (for future search functionality)
+    this.setupSearchDebounce();
+  }
+
+  private setupSearchDebounce() {
+    this.searchSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(searchTerm => {
+      // Implement search logic here when needed
+      this.performSearch(searchTerm);
+    });
+  }
+
+  private async performSearch(searchTerm: string) {
+    // Placeholder for search implementation
+    console.log('Searching for:', searchTerm);
+  }
+
+  onSearchInput(searchTerm: string) {
+    this.searchSubject.next(searchTerm);
+  }
+
+  private async loadBrands() {
+    try {
+      this.brands = await this.brandService.getBrands();
+    } catch (error) {
+      console.error('Error loading brands:', error);
+      throw error;
+    }
+  }
+
+  private async loadMainCategories() {
+    try {
+      this.mainCategories = await this.categoryService.getCategoriesByParentId(undefined);
+    } catch (error) {
+      console.error('Error loading main categories:', error);
+      throw error;
+    }
   }
 
   togglePaymentMethod(method: string) {
@@ -66,8 +127,13 @@ export class ProductsComponent implements OnInit {
   }
 
   async onMainCategoryChange() {
-    this.subCategories = await this.categoryService.getCategoriesByParentId(this.selectedMainCategoryId);
-    this.newProduct.categoryId = '';
+    try {
+      this.subCategories = await this.categoryService.getCategoriesByParentId(this.selectedMainCategoryId);
+      this.newProduct.categoryId = '';
+    } catch (error) {
+      console.error('Error loading subcategories:', error);
+      this.toastService.error('Failed to load subcategories');
+    }
   }
 
   async saveProduct() {
@@ -82,7 +148,7 @@ export class ProductsComponent implements OnInit {
       this.toastService.warning('Please select a Brand');
       return;
     }
-    if (!this.selectedMainCategoryId) { // Optional check, but good for UX flow
+    if (!this.selectedMainCategoryId) {
       this.toastService.warning('Please select a Main Category');
       return;
     }
@@ -103,7 +169,7 @@ export class ProductsComponent implements OnInit {
       return;
     }
 
-
+    this.isSaving = true;
     try {
       const productData = {
         name: this.newProduct.name,
@@ -136,9 +202,15 @@ export class ProductsComponent implements OnInit {
 
       // Handle Image Uploads
       if (this.uploadedFiles.length > 0) {
+        this.isUploadingImage = true;
         for (let i = 0; i < this.uploadedFiles.length; i++) {
-          await this.productService.uploadImage(savedProduct.id, this.uploadedFiles[i], i === 0 && !savedProduct.images?.some(img => img.isPrimary));
+          await this.productService.uploadImage(
+            savedProduct.id, 
+            this.uploadedFiles[i], 
+            i === 0 && !savedProduct.images?.some(img => img.isPrimary)
+          );
         }
+        this.isUploadingImage = false;
       }
 
       // Refresh list
@@ -148,6 +220,8 @@ export class ProductsComponent implements OnInit {
     } catch (err: any) {
       console.error('AdminProducts: Failed to save product', err);
       this.toastService.apiError(err, 'Failed to save product');
+    } finally {
+      this.isSaving = false;
     }
   }
 
@@ -161,19 +235,25 @@ export class ProductsComponent implements OnInit {
     };
     this.isEditing = true;
 
-    const categories = await this.categoryService.getCategories();
-    const currentCategory = categories.find((c: Category) => c.id === product.categoryId);
-    if (currentCategory && currentCategory.parentId) {
-      this.selectedMainCategoryId = currentCategory.parentId;
-      this.subCategories = await this.categoryService.getCategoriesByParentId(this.selectedMainCategoryId);
-    } else if (currentCategory) {
-      this.selectedMainCategoryId = currentCategory.id;
-      this.subCategories = await this.categoryService.getCategoriesByParentId(this.selectedMainCategoryId);
+    try {
+      const categories = await this.categoryService.getCategories();
+      const currentCategory = categories.find((c: Category) => c.id === product.categoryId);
+      if (currentCategory && currentCategory.parentId) {
+        this.selectedMainCategoryId = currentCategory.parentId;
+        this.subCategories = await this.categoryService.getCategoriesByParentId(this.selectedMainCategoryId);
+      } else if (currentCategory) {
+        this.selectedMainCategoryId = currentCategory.id;
+        this.subCategories = await this.categoryService.getCategoriesByParentId(this.selectedMainCategoryId);
+      }
+    } catch (error) {
+      console.error('Error loading categories for edit:', error);
+      this.toastService.error('Failed to load category information');
     }
   }
 
   async deleteProduct(id: string) {
     if (confirm('Delete this product?')) {
+      this.isDeleting = true;
       try {
         await this.productService.deleteProduct(id);
         this.products = this.products.filter(p => p.id !== id);
@@ -181,6 +261,8 @@ export class ProductsComponent implements OnInit {
       } catch (err) {
         console.error('AdminProducts: Failed to delete product', err);
         this.toastService.apiError(err, 'Failed to delete product');
+      } finally {
+        this.isDeleting = false;
       }
     }
   }
@@ -195,7 +277,7 @@ export class ProductsComponent implements OnInit {
       comparisonPrice: this.newProduct.comparisonPrice,
       stock: 0,
       image: '',
-      images: [], // Init empty array
+      images: [],
       description: ''
     });
   }
@@ -207,15 +289,13 @@ export class ProductsComponent implements OnInit {
   async uploadVariantImage(event: any, variant: any) {
     const files = event.target.files;
     if (files && files.length > 0) {
+      this.isUploadingImage = true;
       try {
         const res = await this.productService.uploadGenericImages(files);
         if (!variant.images) variant.images = [];
 
-        // Add all returned URLs
         if (res.urls && res.urls.length > 0) {
           variant.images.push(...res.urls);
-
-          // Set primary if empty
           if (!variant.image) variant.image = res.urls[0];
         }
 
@@ -223,17 +303,28 @@ export class ProductsComponent implements OnInit {
       } catch (err) {
         console.error(err);
         this.toastService.error('Failed to upload images');
+      } finally {
+        this.isUploadingImage = false;
       }
     }
-    event.target.value = ''; // Reset input
+    event.target.value = '';
   }
 
   // Image Management
   async removeImage(imageId: string) {
     if (confirm('Remove this image?')) {
-      await this.productService.deleteImage(imageId);
-      if (this.isEditing) {
-        this.newProduct.images = this.newProduct.images?.filter(img => img.id !== imageId);
+      this.isUploadingImage = true;
+      try {
+        await this.productService.deleteImage(imageId);
+        if (this.isEditing) {
+          this.newProduct.images = this.newProduct.images?.filter(img => img.id !== imageId);
+        }
+        this.toastService.success('Image removed successfully');
+      } catch (error) {
+        console.error('Error removing image:', error);
+        this.toastService.error('Failed to remove image');
+      } finally {
+        this.isUploadingImage = false;
       }
     }
   }
@@ -282,23 +373,34 @@ export class ProductsComponent implements OnInit {
         this.uploadedFiles.push(files[i]);
       }
     }
-    // Reset the input so the same file can be picked again if needed
     event.target.value = '';
   }
+
   async loadProducts() {
-    const data = await this.productService.getProducts({
-      page: this.currentPage,
-      limit: this.itemsPerPage,
-      sortBy: 'createdAt',
-      sortOrder: 'DESC'
-    });
-    this.products = data.items;
-    this.totalItems = data.total;
+    this.isLoading = true;
+    try {
+      const data = await this.productService.getProducts({
+        page: this.currentPage,
+        limit: this.itemsPerPage,
+        sortBy: 'createdAt',
+        sortOrder: 'DESC'
+      });
+      this.products = data.items;
+      this.totalItems = data.total;
+    } catch (error) {
+      console.error('Error loading products:', error);
+      this.toastService.error('Failed to load products');
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   onPageChange(page: number) {
     this.currentPage = page;
     this.loadProducts();
   }
-}
 
+  ngOnDestroy() {
+    this.searchSubject.complete();
+  }
+}

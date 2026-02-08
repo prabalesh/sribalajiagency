@@ -349,7 +349,89 @@
         display: flex;
         gap: 0.5rem;
     }
+
+    // Table Loading State
+    .table-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        min-height: 300px;
+
+        p {
+            margin-top: 1rem;
+            color: var(--text-color-muted);
+            font-size: 0.95rem;
+        }
+    }
+
+    // Upload Progress Indicator
+    .upload-progress {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        color: var(--success-color);
+        font-size: 0.9rem;
+        font-weight: 500;
+
+        .spinner-sm {
+            border-top-color: var(--success-color);
+        }
+    }
+
+    // Table Row Deleting State
+    table tbody tr.deleting {
+        opacity: 0.5;
+        pointer-events: none;
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--surface-color);
+            opacity: 0.3;
+        }
+    }
 }
+
+// ===== SPINNER ANIMATIONS =====
+
+// Large Spinner
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+// Small Spinner (for buttons and inline use)
+.spinner-sm {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ===== BUTTON STYLES =====
 
 .btn-sm {
     padding: 0.4rem 0.8rem;
@@ -358,17 +440,94 @@
     border-radius: 8px;
     font-weight: 700;
     white-space: nowrap;
+    position: relative;
+    transition: all 0.2s ease;
 
     &.delete {
         color: var(--danger-color);
 
-        &:hover {
+        &:hover:not(:disabled) {
             background: var(--danger-color);
             color: white;
         }
     }
 
-    &:hover {
+    &:hover:not(:disabled) {
         background: var(--border-color);
+    }
+
+    // Loading state for buttons
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
+
+// Primary/Secondary button loading states
+.btn-primary,
+.btn-secondary {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+
+    .spinner-sm {
+        margin-right: 0;
+    }
+}
+
+// File previews in upload area
+.file-previews {
+    margin-top: 1rem;
+
+    .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 1rem;
+        background: var(--surface-color-secondary);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+
+        span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 1rem;
+        }
+
+        .remove-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+
+            &:hover:not(:disabled) {
+                background: darken(red, 10%);
+                transform: scale(1.1);
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
     }
 }
