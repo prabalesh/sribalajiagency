@@ -17,30 +17,40 @@
 
     .brand-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        // Fixed: Better responsive breakpoints
+        grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
         gap: 2rem;
+        // Center cards when fewer than grid columns
+        justify-items: center;
 
         @media (max-width: 768px) {
-            grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
         }
 
+        // Better mobile control
+        @media (max-width: 500px) {
+            grid-template-columns: 1fr;
+        }
+
         .brand-card {
+            // Fixed: Remove max-width to fill grid cell properly
+            width: 100%;
             max-width: 290px;
             background: var(--surface-color);
             padding: 2rem;
             border-radius: var(--border-radius-sm);
             box-shadow: var(--shadow-sm);
             text-align: center;
-            transition: transform 0.3s;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 1px solid var(--border-color);
+            // Prevent layout shift on hover
+            will-change: transform;
 
             @media (max-width: 768px) {
-                max-width: 100%;
                 padding: 1rem;
             }
 
-            &:hover {
+            &:hover:not(.skeleton-card) {
                 transform: translateY(-5px);
                 box-shadow: var(--shadow-md);
 
@@ -67,6 +77,8 @@
                     max-width: 100%;
                     max-height: 100%;
                     object-fit: contain;
+                    // Prevent image flickering
+                    image-rendering: -webkit-optimize-contrast;
                 }
 
                 .brand-placeholder {
@@ -85,6 +97,10 @@
                     color: var(--primary-color);
                     margin-bottom: 0.5rem;
                     font-size: 1.25rem;
+                    // Prevent text overflow
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
 
                     @media (max-width: 768px) {
                         font-size: 1rem;
@@ -97,10 +113,14 @@
                     font-size: 0.9rem;
                     line-height: 1.5;
                     margin: 0;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
 
                     @media (max-width: 768px) {
                         font-size: 0.75rem;
                         line-height: 1.4;
+                        -webkit-line-clamp: 2;
                     }
                 }
             }
@@ -109,21 +129,32 @@
         // Skeleton Loading Styles
         .skeleton-card {
             pointer-events: none;
-
-            &:hover {
-                transform: none;
-            }
+            cursor: default;
 
             .skeleton-logo,
             .skeleton-title,
             .skeleton-text {
-                background: linear-gradient(90deg,
-                        var(--surface-color-secondary) 25%,
-                        rgba(255, 255, 255, 0.1) 50%,
-                        var(--surface-color-secondary) 75%);
-                background-size: 200% 100%;
-                animation: skeleton-loading 1.5s ease-in-out infinite;
+                // Fixed: More performant animation using pseudo-element
+                position: relative;
+                background: var(--surface-color-secondary);
                 border-radius: 4px;
+                overflow: hidden;
+
+                &::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(
+                        90deg,
+                        transparent,
+                        rgba(255, 255, 255, 0.1),
+                        transparent
+                    );
+                    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+                }
             }
 
             .skeleton-logo {
@@ -211,13 +242,12 @@
     }
 }
 
-// Skeleton Loading Animation
-@keyframes skeleton-loading {
+// Fixed: More performant skeleton animation
+@keyframes skeleton-shimmer {
     0% {
-        background-position: 200% 0;
+        transform: translateX(-100%);
     }
-
     100% {
-        background-position: -200% 0;
+        transform: translateX(100%);
     }
 }
