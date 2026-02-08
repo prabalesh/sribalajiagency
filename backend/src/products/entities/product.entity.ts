@@ -3,6 +3,7 @@ import { Category } from './category.entity';
 import { Brand } from './brand.entity';
 import { ProductImage } from './product-image.entity';
 import { ProductVariant } from './product-variant.entity';
+import { ColumnNumericTransformer } from '../../common/transformers/numeric.transformer';
 
 @Entity('products')
 export class Product {
@@ -15,10 +16,10 @@ export class Product {
     @Column({ type: 'text' })
     description: string;
 
-    @Column({ type: 'decimal', precision: 12, scale: 2 })
+    @Column({ type: 'decimal', precision: 12, scale: 2, transformer: new ColumnNumericTransformer() })
     price: number;
 
-    @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
+    @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true, transformer: new ColumnNumericTransformer() })
     comparisonPrice: number; // MRP or Original Price (Strike-through)
 
     @OneToMany(() => ProductImage, (image) => image.product, { cascade: true })
@@ -42,10 +43,10 @@ export class Product {
     @Column({ type: 'jsonb', nullable: true })
     allowedPaymentMethods: string[]; // e.g., ['online', 'cod']
 
-    @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+    @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, transformer: new ColumnNumericTransformer() })
     gstRate: number;
 
-    @Column({ type: 'decimal', precision: 3, scale: 1, nullable: true, default: 0 })
+    @Column({ type: 'decimal', precision: 3, scale: 1, nullable: true, default: 0, transformer: new ColumnNumericTransformer() })
     rating: number;
 
     @Column({ default: 0 })

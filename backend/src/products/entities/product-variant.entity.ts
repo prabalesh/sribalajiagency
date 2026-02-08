@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Product } from './product.entity';
+import { ColumnNumericTransformer } from '../../common/transformers/numeric.transformer';
 
 @Entity('product_variants')
 export class ProductVariant {
@@ -9,10 +10,10 @@ export class ProductVariant {
     @Column()
     name: string; // e.g., 'Large', 'Blue'
 
-    @Column({ type: 'decimal', precision: 12, scale: 2 })
+    @Column({ type: 'decimal', precision: 12, scale: 2, transformer: new ColumnNumericTransformer() })
     price: number;
 
-    @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
+    @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true, transformer: new ColumnNumericTransformer() })
     comparisonPrice: number;
 
     @Column({ nullable: true })
