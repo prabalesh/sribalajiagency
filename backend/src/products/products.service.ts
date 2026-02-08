@@ -87,8 +87,6 @@ export class ProductsService {
             where: whereClause
         });
 
-        console.log('AdminProducts: Attempting to find products', items);
-
         return { items, total, page, limit };
     }
 
