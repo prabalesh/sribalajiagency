@@ -69,6 +69,11 @@
             font-size: 0.95rem;
             cursor: pointer;
             box-shadow: var(--shadow-sm);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            color-scheme: light;
+            background-color: var(--bg-color);
 
             @media (max-width: 600px) {
                 width: 100%;
@@ -79,6 +84,18 @@
                 outline: none;
             }
         }
+    }
+}
+
+select option {
+    background-color: var(--surface-card) !important;
+    color: var(--text-color) !important;
+}
+
+[data-theme='dark'] {
+    select option {
+        background-color: var(--surface-color) !important;
+        color: var(--text-color) !important;
     }
 }
 
@@ -307,17 +324,14 @@
     }
 }
 
-/* Progress Bar Styles */
 .progress-track {
     display: flex;
     flex-direction: column;
-    /* Vertical by default (Mobile) */
     position: relative;
     margin: 1.5rem 0;
     padding: 0 1rem;
     gap: 1.5rem;
 
-    /* Desktop: Horizontal */
     @media (min-width: 768px) {
         flex-direction: row;
         justify-content: space-between;
@@ -326,22 +340,17 @@
         padding: 0 2rem;
     }
 
-    /* Connecting Line */
     &::before {
         content: '';
         position: absolute;
         background: var(--border-color);
         z-index: 0;
-
-        /* Mobile: Vertical Line */
         top: 0;
         bottom: 0;
         left: calc(1rem + 16px);
-        /* padding-left + half icon width */
         width: 2px;
         height: auto;
 
-        /* Desktop: Horizontal Line */
         @media (min-width: 768px) {
             top: 15px;
             left: 2rem;
@@ -356,14 +365,12 @@
 .progress-step {
     display: flex;
     align-items: center;
-    /* Side-by-side on mobile */
     gap: 1rem;
     position: relative;
     z-index: 1;
     text-align: left;
     background: transparent;
 
-    /* Desktop: Stacked vertically */
     @media (min-width: 768px) {
         flex-direction: column;
         align-items: center;
@@ -427,14 +434,6 @@
     }
 }
 
-.action-bar {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
-    text-align: right;
-}
-
-/* Pagination Styles */
 .pagination {
     display: flex;
     justify-content: center;
