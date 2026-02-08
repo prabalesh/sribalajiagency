@@ -9,7 +9,7 @@ export class CartItemDto {
 
     @IsOptional()
     @IsUUID()
-    variantId?: string;
+    variantId?: string | null;
 
     @IsNotEmpty()
     @IsNumber()
