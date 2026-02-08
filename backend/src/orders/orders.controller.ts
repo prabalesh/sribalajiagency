@@ -1,7 +1,8 @@
 import { Controller, Post, Body, Get, Param, UseGuards, Req, Patch, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { OrdersService } from './orders.service';
-import type { CreateOrderDto } from './orders.service';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 import type { OrderStatus } from './entities/order.entity';
@@ -70,10 +71,9 @@ export class OrdersController {
     @Permissions('UPDATE_ORDER')
     updateStatus(
         @Param('id') id: string,
-        @Body('status') status: OrderStatus,
-        @Body('message') message: string,
+        @Body() updateOrderDto: UpdateOrderDto,
         @Req() req: any
     ) {
-        return this.ordersService.updateStatus(id, status, message, req.user.id);
+        return this.ordersService.updateStatus(id, updateOrderDto, req.user.id);
     }
 }

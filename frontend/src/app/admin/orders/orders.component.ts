@@ -109,6 +109,10 @@ export class OrdersComponent implements OnInit {
         this.currentPage = 1;
     }
 
+    applyFilters() {
+        this.currentPage = 1;
+    }
+
     onPageChange(page: number) {
         this.currentPage = page;
         this.loadOrders();

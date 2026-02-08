@@ -9,21 +9,8 @@ import { Product } from '../products/entities/product.entity';
 import { Category } from '../products/entities/category.entity';
 import { ProductVariant } from '../products/entities/product-variant.entity';
 
-export interface CreateOrderDto {
-    items: {
-        productId: string;
-        variantId?: string;
-        productName: string;
-        variantName?: string;
-        price: number;
-        quantity: number;
-    }[];
-    paymentMethod: string;
-    deliveryAddress: string;
-    deliveryPhone: string;
-    deliveryState: string;
-    deliveryNotes?: string;
-}
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -153,14 +140,22 @@ export class OrdersService {
         });
     }
 
-    async updateStatus(id: string, status: OrderStatus, message?: string, userId?: string) {
-        await this.orderRepo.update(id, { status });
+    async updateStatus(id: string, updateOrderDto: UpdateOrderDto, userId?: string) {
+        let currentStatus: OrderStatus | undefined;
+
+        if (updateOrderDto.status) {
+            await this.orderRepo.update(id, { status: updateOrderDto.status });
+            currentStatus = updateOrderDto.status;
+        } else {
+            const order = await this.orderRepo.findOne({ where: { id }, select: ['status'] });
+            currentStatus = order?.status;
+        }
 
         // Create status history entry
         const statusHistory = this.statusHistoryRepo.create({
             order: { id },
-            status,
-            message: message || `Status updated to ${status}`,
+            status: currentStatus || 'Pending',
+            message: updateOrderDto.message || (updateOrderDto.status ? `Status updated to ${updateOrderDto.status}` : 'Order updated'),
         });
 
         if (userId) {
@@ -181,8 +176,8 @@ export class OrdersService {
     }
 
     async calculateTax(items: { productId: string, variantId?: string, quantity: number }[], state: string) {
-        let subtotal = 0;
-        let totalTax = 0;
+        let subtotal: number = 0;
+        let totalTax: number = 0;
         const STORE_STATE = 'Tamil Nadu';
         const isIntraState = state.toLowerCase().trim() === STORE_STATE.toLowerCase().trim();
 
@@ -204,9 +199,10 @@ export class OrdersService {
             const variant = item.variantId ? variants.find(v => v.id === item.variantId) : null;
             const price = variant ? +variant.price : +product.price;
 
-            const rate = +(product.gstRate !== null && product.gstRate !== undefined
+            const rate = +(product.gstRate !== null && product.gstRate !== undefined && product.gstRate >= 0 && product.gstRate <= 100 && !isNaN(product.gstRate)
                 ? product.gstRate
                 : (product.category?.gstRate ?? 18));
+
             const itemSubtotal = price * item.quantity;
             const itemTax = (itemSubtotal * rate) / 100;
 

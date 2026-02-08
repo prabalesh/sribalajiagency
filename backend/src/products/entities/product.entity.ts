@@ -43,7 +43,7 @@ export class Product {
     @Column({ type: 'jsonb', nullable: true })
     allowedPaymentMethods: string[]; // e.g., ['online', 'cod']
 
-    @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, transformer: new ColumnNumericTransformer() })
+    @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, default: 18, transformer: new ColumnNumericTransformer() })
     gstRate: number;
 
     @Column({ type: 'decimal', precision: 3, scale: 1, nullable: true, default: 0, transformer: new ColumnNumericTransformer() })
