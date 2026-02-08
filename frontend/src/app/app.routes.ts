@@ -66,14 +66,6 @@ export const routes: Routes = [
                 pathMatch: 'full',
             },
             {
-                path: 'request-quote',
-                loadComponent: () => import('./public/quotations/quotations.component').then(m => m.QuotationsComponent)
-            },
-            {
-                path: 'my-quotes',
-                loadComponent: () => import('./public/my-quotes/my-quotes.component').then(m => m.MyQuotesComponent)
-            },
-            {
                 path: 'contact',
                 loadComponent: () => import('./public/contact/contact.component').then(m => m.ContactComponent)
             },
@@ -159,10 +151,6 @@ export const routes: Routes = [
             {
                 path: 'models',
                 loadComponent: () => import('./admin/models/models.component').then(m => m.ModelsComponent)
-            },
-            {
-                path: 'quotations',
-                loadComponent: () => import('./admin/quotations/quotations.component').then(m => m.QuotationsComponent)
             },
             {
                 path: 'feedback',
