@@ -106,8 +106,6 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
-  /* Prevent horizontal scroll from overflowing elements */
 }
 
 body {
@@ -125,7 +123,6 @@ body {
   margin: 0 auto;
   padding: 0 1.5rem;
   width: 100%;
-  /* Ensure it takes full width up to max-width */
   box-sizing: border-box;
 }
 
@@ -133,7 +130,6 @@ body {
   .container {
     padding: 0 1.25rem;
     max-width: 100%;
-    /* Ensure full width on smaller screens */
   }
 }
 
@@ -143,7 +139,6 @@ body {
   }
 }
 
-/* Base Responsive Utilities */
 .w-full {
   width: 100%;
 }

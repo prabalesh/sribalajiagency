@@ -1,5 +1,8 @@
 .brands-container {
     padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
     @media (max-width: 768px) {
         padding: 1rem;
@@ -16,26 +19,51 @@
     }
 
     .brand-grid {
-        display: grid;
-        // Fixed: Better responsive breakpoints
-        grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
-        gap: 2rem;
-        // Center cards when fewer than grid columns
+            display: grid;
+        // Extra large screens: 6 columns
+        grid-template-columns: repeat(6, 1fr);
+        gap: 1.5rem;
         justify-items: center;
+        // Center the entire grid container
+        max-width: 1800px;
+        margin: 0 auto;
 
-        @media (max-width: 768px) {
-            gap: 1rem;
+        // Large screens: 5 columns
+        @media (max-width: 1600px) {
+            grid-template-columns: repeat(5, 1fr);
+            max-width: 1500px;
         }
 
-        // Better mobile control
-        @media (max-width: 500px) {
-            grid-template-columns: 1fr;
+        // Medium-large screens: 4 columns
+        @media (max-width: 1280px) {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            max-width: 1200px;
+        }
+
+        // Medium screens: 3 columns
+        @media (max-width: 1024px) {
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 900px;
+        }
+
+        // Small-medium screens: 2 columns
+        @media (max-width: 768px) {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            max-width: 600px;
+        }
+
+        // Extra small screens: 2 columns
+        @media (max-width: 480px) {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            max-width: 100%;
         }
 
         .brand-card {
-            // Fixed: Remove max-width to fill grid cell properly
             width: 100%;
-            max-width: 290px;
+            max-width: 250px;
             background: var(--surface-color);
             padding: 2rem;
             border-radius: var(--border-radius-sm);
@@ -43,10 +71,14 @@
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 1px solid var(--border-color);
-            // Prevent layout shift on hover
             will-change: transform;
 
             @media (max-width: 768px) {
+                padding: 1.5rem;
+                max-width: 100%;
+            }
+
+            @media (max-width: 480px) {
                 padding: 1rem;
             }
 
@@ -69,15 +101,18 @@
                 margin-bottom: 1rem;
 
                 @media (max-width: 768px) {
-                    height: 70px;
+                    height: 80px;
                     margin-bottom: 0.75rem;
+                }
+
+                @media (max-width: 480px) {
+                    height: 70px;
                 }
 
                 img {
                     max-width: 100%;
                     max-height: 100%;
                     object-fit: contain;
-                    // Prevent image flickering
                     image-rendering: -webkit-optimize-contrast;
                 }
 
@@ -87,6 +122,10 @@
                     color: var(--primary-color);
 
                     @media (max-width: 768px) {
+                        font-size: 2rem;
+                    }
+
+                    @media (max-width: 480px) {
                         font-size: 1.5rem;
                     }
                 }
@@ -97,12 +136,16 @@
                     color: var(--primary-color);
                     margin-bottom: 0.5rem;
                     font-size: 1.25rem;
-                    // Prevent text overflow
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
 
                     @media (max-width: 768px) {
+                        font-size: 1.1rem;
+                        margin-bottom: 0.4rem;
+                    }
+
+                    @media (max-width: 480px) {
                         font-size: 1rem;
                         margin-bottom: 0.25rem;
                     }
@@ -118,9 +161,13 @@
                     overflow: hidden;
 
                     @media (max-width: 768px) {
-                        font-size: 0.75rem;
+                        font-size: 0.85rem;
                         line-height: 1.4;
                         -webkit-line-clamp: 2;
+                    }
+
+                    @media (max-width: 480px) {
+                        font-size: 0.75rem;
                     }
                 }
             }
@@ -134,7 +181,6 @@
             .skeleton-logo,
             .skeleton-title,
             .skeleton-text {
-                // Fixed: More performant animation using pseudo-element
                 position: relative;
                 background: var(--surface-color-secondary);
                 border-radius: 4px;
@@ -162,8 +208,12 @@
                 margin-bottom: 1rem;
 
                 @media (max-width: 768px) {
-                    height: 70px;
+                    height: 80px;
                     margin-bottom: 0.75rem;
+                }
+
+                @media (max-width: 480px) {
+                    height: 70px;
                 }
             }
 
@@ -173,6 +223,11 @@
                 margin: 0 auto 1rem;
 
                 @media (max-width: 768px) {
+                    height: 20px;
+                    margin-bottom: 0.75rem;
+                }
+
+                @media (max-width: 480px) {
                     height: 18px;
                     margin-bottom: 0.5rem;
                 }
@@ -184,6 +239,11 @@
                 margin-bottom: 0.5rem;
 
                 @media (max-width: 768px) {
+                    height: 13px;
+                    margin-bottom: 0.4rem;
+                }
+
+                @media (max-width: 480px) {
                     height: 12px;
                     margin-bottom: 0.25rem;
                 }
@@ -204,6 +264,10 @@
             border: 2px dashed var(--border-color);
 
             @media (max-width: 768px) {
+                padding: 3rem 1.5rem;
+            }
+
+            @media (max-width: 480px) {
                 padding: 2rem 1rem;
             }
 
@@ -213,6 +277,10 @@
                 margin: 0;
 
                 @media (max-width: 768px) {
+                    font-size: 1rem;
+                }
+
+                @media (max-width: 480px) {
                     font-size: 0.9rem;
                 }
             }
@@ -227,6 +295,10 @@
         border: 1px solid rgba(255, 82, 82, 0.3);
 
         @media (max-width: 768px) {
+            padding: 3rem 1.5rem;
+        }
+
+        @media (max-width: 480px) {
             padding: 2rem 1rem;
         }
 
@@ -236,13 +308,16 @@
             margin: 0;
 
             @media (max-width: 768px) {
+                font-size: 1rem;
+            }
+
+            @media (max-width: 480px) {
                 font-size: 0.9rem;
             }
         }
     }
 }
 
-// Fixed: More performant skeleton animation
 @keyframes skeleton-shimmer {
     0% {
         transform: translateX(-100%);
