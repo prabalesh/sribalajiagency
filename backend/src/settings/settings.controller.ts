@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { SettingsService } from './settings.service';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
+import { UpdateSettingsDto } from './dto/settings.dto';
 
 @Controller('settings')
 export class SettingsController {
@@ -16,7 +17,7 @@ export class SettingsController {
     @Put()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('UPDATE_SETTINGS')
-    async updateSettings(@Body() data: any) {
+    async updateSettings(@Body() data: UpdateSettingsDto) {
         return this.settingsService.updateSettings(data);
     }
 }
