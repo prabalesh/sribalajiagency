@@ -22,7 +22,8 @@ export const routes: Routes = [
             },
             {
                 path: 'brands',
-                loadComponent: () => import('./public/brand/brand.component').then(m => m.BrandComponent)
+                loadComponent: () => import('./public/brand/brand.component').then(m => m.BrandComponent),
+                data: { preload: true }
             },
             {
                 path: 'brands/:brand',
@@ -30,11 +31,13 @@ export const routes: Routes = [
             },
             {
                 path: 'brands/:brand/:category',
-                loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent)
+                loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent),
+                data: { preload: true }
             },
             {
                 path: 'products',
-                loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent)
+                loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent),
+                data: { preload: true }
             },
             {
                 path: 'products/detail/:id',
@@ -42,11 +45,13 @@ export const routes: Routes = [
             },
             {
                 path: 'products/:category',
-                loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent)
+                loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent),
+                data: { preload: true }
             },
             {
                 path: 'products/:category/:subcategory',
-                loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent)
+                loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent),
+                data: { preload: true }
             },
             {
                 path: 'cart',
