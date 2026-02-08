@@ -25,11 +25,9 @@ import { CouponsModule } from './coupons/coupons.module';
 import { Coupon } from './coupons/entities/coupon.entity';
 import { LocationsModule } from './locations/locations.module';
 import { LocationRestriction } from './locations/entities/location-restriction.entity';
-import { QuotationsModule } from './quotations/quotations.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { OrderStatusHistory } from './orders/entities/order-status-history.entity';
-import { Quotation } from './quotations/entities/quotation.entity';
 import { CMSModule } from './cms/cms.module';
 import { HomeCMS } from './cms/entities/home-cms.entity';
 import { CommonModule } from './common/common.module';
@@ -63,7 +61,6 @@ import { CartItem } from './carts/entities/cart-item.entity';
     OrdersModule,
     CouponsModule,
     LocationsModule,
-    QuotationsModule,
     ReviewsModule,
     CartsModule,
     VigileEyeModule.forRoot({
@@ -82,7 +79,7 @@ import { CartItem } from './carts/entities/cart-item.entity';
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'sribalaji'),
-        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Quotation, Coupon, LocationRestriction, HomeCMS, UserAddress, Review, Cart, CartItem],
+        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Coupon, LocationRestriction, HomeCMS, UserAddress, Review, Cart, CartItem],
 
         synchronize: config.get('NODE_ENV') !== 'production',
         migrationsRun: true,

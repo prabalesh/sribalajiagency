@@ -14,7 +14,6 @@ import { Coupon } from '../coupons/entities/coupon.entity';
 import { Order } from '../orders/entities/order.entity';
 import { OrderItem } from '../orders/entities/order-item.entity';
 import { OrderStatusHistory } from '../orders/entities/order-status-history.entity';
-import { Quotation } from '../quotations/entities/quotation.entity';
 import * as bcrypt from 'bcrypt';
 import * as inquirer from 'inquirer';
 
@@ -50,7 +49,6 @@ async function bootstrap() {
     const orderRepo = app.get<Repository<Order>>(getRepositoryToken(Order));
     const orderItemRepo = app.get<Repository<OrderItem>>(getRepositoryToken(OrderItem));
     const orderHistoryRepo = app.get<Repository<OrderStatusHistory>>(getRepositoryToken(OrderStatusHistory));
-    const quotationRepo = app.get<Repository<Quotation>>(getRepositoryToken(Quotation));
 
     logger.log('🚀 Advanced Interactive Database Seeder Started');
     console.log('\n');
@@ -559,25 +557,6 @@ async function bootstrap() {
             }
             logger.log(`✅ Created ${config.orders} orders`);
         }
-    }
-
-    // 9. Create Quotations
-    if (config.quotations > 0) {
-        logger.log(`💬 Creating ${config.quotations} quotations...`);
-        const users = await userRepo.find();
-
-        for (let i = 0; i < config.quotations; i++) {
-            const user = users[Math.floor(Math.random() * users.length)];
-            await quotationRepo.save(quotationRepo.create({
-                user: user as any,
-                productName: faker.commerce.productName(),
-                quantity: faker.number.int({ min: 1, max: 100 }),
-                message: faker.lorem.paragraph(),
-                status: faker.helpers.arrayElement(['pending', 'quoted', 'accepted', 'rejected']),
-                createdAt: faker.date.past({ years: 1 })
-            } as any));
-        }
-        logger.log(`✅ Created ${config.quotations} quotations`);
     }
 
     // 10. Create Coupons
