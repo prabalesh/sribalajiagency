@@ -16,7 +16,7 @@
         } @else if (brand()) {
         @if (brand()!.image) {
         <div class="brand-logo glass-card">
-            <img [src]="brand()!.image | imageUrl" [alt]="brand()!.name">
+            <img [ngSrc]="brand()!.image" [alt]="brand()!.name" width="200" height="100" priority>
         </div>
         }
         <div class="brand-info">
@@ -46,7 +46,7 @@
             <div class="category-card glass-card animate-fade" [routerLink]="['/brands', brand()?.slug, cat.slug]">
                 @if (cat.imageUrl) {
                 <div class="cat-image">
-                    <img [src]="cat.imageUrl | imageUrl" [alt]="cat.name">
+                    <img [ngSrc]="cat.imageUrl" [alt]="cat.name" width="300" height="200">
                 </div>
                 }
                 <div class="cat-info">

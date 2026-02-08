@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { BrandService } from '../../core/services/api/brand.service';
@@ -11,7 +11,7 @@ import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.com
 @Component({
     selector: 'app-brand-detail',
     standalone: true,
-    imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent],
+    imports: [CommonModule, RouterModule, ImageUrlPipe, SkeletonComponent, NgOptimizedImage],
     templateUrl: './brand-detail.component.html',
     styleUrl: './brand-detail.component.scss'
 })

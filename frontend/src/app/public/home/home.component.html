@@ -19,7 +19,8 @@
                         </div>
                     </div>
                     <div class="hero-image">
-                        <img [src]="slide.image | imageUrl" [alt]="slide.title">
+                        <img [ngSrc]="slide.image" [alt]="slide.title" fill [priority]="$index === 0"
+                            class="hero-img-fill">
                     </div>
                 </div>
                 }
@@ -68,9 +69,8 @@
                     </div>
                 </div>
                 <div class="hero-image-wrapper">
-                    <img [src]="cms?.heroImage | imageUrl:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=2000'"
-                        [alt]="cms?.heroTitle || 'Premium Home Tech'" loading="eager" fetchpriority="high" width="800"
-                        height="600">
+                    <img [ngSrc]="cms?.heroImage || 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=2000'"
+                        [alt]="cms?.heroTitle || 'Premium Home Tech'" priority width="800" height="600">
                 </div>
             </div>
         </section>
@@ -137,7 +137,7 @@
             </div>
             @if (cms.aboutImage) {
             <div class="about-visual">
-                <img [src]="cms.aboutImage | imageUrl" alt="About Sri Balaji">
+                <img [ngSrc]="cms.aboutImage" alt="About Sri Balaji" width="600" height="400">
             </div>
             }
         </div>
@@ -151,7 +151,7 @@
             @for (brand of brands; track brand.id) {
             <div class="brand-item">
                 @if (brand.image) {
-                <img [src]="brand.image | imageUrl" [alt]="brand.name" class="brand-logo-img">
+                <img [ngSrc]="brand.image" [alt]="brand.name" class="brand-logo-img" width="120" height="60">
                 } @else {
                 <span class="brand-name">{{ brand.name }}</span>
                 }

@@ -9,13 +9,14 @@
     <div class="product-main-grid">
         <div class="product-gallery">
             <div class="main-image">
-                <img [src]="(displayImages.length > 0 ? displayImages[selectedImageIndex].url : '') | imageUrl"
-                    [alt]="product.name">
+                @if (displayImages.length > 0) {
+                <img [ngSrc]="displayImages[selectedImageIndex].url" [alt]="product.name" fill priority>
+                }
             </div>
             <div class="image-thumbnails" *ngIf="displayImages.length > 1">
                 <div *ngFor="let image of displayImages; let i = index" class="thumbnail"
                     [class.active]="i === selectedImageIndex" (click)="selectImage(i)">
-                    <img [src]="image.url | imageUrl" [alt]="product.name">
+                    <img [ngSrc]="image.url" [alt]="product.name" width="100" height="100">
                 </div>
             </div>
         </div>

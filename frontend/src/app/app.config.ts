@@ -5,12 +5,18 @@ import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { CustomPreloadingStrategy } from './core/strategies/custom-preloading.strategy';
+import { IMAGE_LOADER } from '@angular/common';
+import { sbaImageLoader } from './core/loaders/image-loader';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withPreloading(CustomPreloadingStrategy)),
-    provideClientHydration(withEventReplay())
+    provideClientHydration(withEventReplay()),
+    {
+      provide: IMAGE_LOADER,
+      useValue: sbaImageLoader
+    }
   ]
 };

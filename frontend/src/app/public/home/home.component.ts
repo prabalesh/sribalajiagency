@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
@@ -22,7 +22,8 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
     RouterModule,
     ImageUrlPipe,
     LucideAngularModule,
-    ProductCardComponent
+    ProductCardComponent,
+    NgOptimizedImage
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
