@@ -1,4 +1,9 @@
 <div class="public-layout" [attr.data-theme]="themeService.currentTheme()">
+    <!-- Route Loading Screen -->
+    @if (routeLoadingService.isLoading()) {
+    <app-route-loading></app-route-loading>
+    }
+
     <header class="main-header glass-card">
         <div class="container header-content">
             <div class="brand" routerLink="/">
