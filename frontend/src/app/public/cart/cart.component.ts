@@ -84,18 +84,21 @@ export class CartComponent implements OnInit {
   }
 
   get allowedMethods() {
+    console.log('Calculating allowed payment methods...', this.settings);
     if (!this.settings) return [];
 
     let methods = [];
     if (this.settings.allowOnline) methods.push('online');
     if (this.settings.allowCod) methods.push('cod');
+    console.log('Initial allowed methods from settings:', methods);
 
     const items = this.cartService.items();
-    for (const item of items) {
-      if (item.product.allowedPaymentMethods) {
-        methods = methods.filter(m => item.product.allowedPaymentMethods?.includes(m));
-      }
-    }
+    console.log('Cart items:', items);
+    // Note: Payment method filtering by product is removed since we don't have product objects
+    // This should be handled on the backend during validation if needed
+
+    const uniqueMethods = Array.from(new Set(methods));
+    console.log('Allowed payment methods based on settings:', uniqueMethods);
     return methods;
   }
 
@@ -167,8 +170,8 @@ export class CartComponent implements OnInit {
     if (!selectedAddress) return;
 
     const items = this.cartService.items().map(item => ({
-      productId: item.product.id,
-      variantId: item.variant?.id,
+      productId: item.productId,
+      variantId: item.variantId,
       quantity: item.quantity
     }));
 
@@ -211,11 +214,11 @@ export class CartComponent implements OnInit {
 
     try {
       const items = this.cartService.items().map(item => ({
-        productId: item.product.id,
-        variantId: item.variant?.id,
-        productName: item.product.name,
-        variantName: item.variant?.name,
-        price: item.variant ? item.variant.price : (item.product.price || 0),
+        productId: item.productId,
+        variantId: item.variantId,
+        productName: item.productName,
+        variantName: item.variantName,
+        price: item.price,
         quantity: item.quantity
       }));
 

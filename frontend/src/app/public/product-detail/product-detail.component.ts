@@ -166,7 +166,7 @@ export class ProductDetailComponent implements OnInit {
       }
 
       // TODO: Update CartService to support variant ID
-      this.cartService.addToCart(this.product, this.quantity, this.selectedVariant); // Note: Passing product for now, backend might need variantId
+      this.cartService.addToCart(this.product.id, this.quantity, this.selectedVariant?.id); // Note: Passing product for now, backend might need variantId
     }
   }
 
@@ -193,7 +193,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   onCardAddToCart(product: Product) {
-    this.cartService.addToCart(product);
+    this.cartService.addToCart(product.id);
   }
 
   scrollCarousel(direction: 'left' | 'right') {

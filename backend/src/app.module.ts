@@ -33,6 +33,9 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { Review } from './reviews/entities/review.entity';
 import { VigileEyeModule } from '@prabalesh/vigileye-nestjs';
 import { SeedAdminRoleAndPermissions1738890000000 } from './database/migrations/1738890000000-SeedAdminRoleAndPermissions';
+import { CartsModule } from './carts/carts.module';
+import { Cart } from './carts/entities/cart.entity';
+import { CartItem } from './carts/entities/cart-item.entity';
 
 @Module({
   imports: [
@@ -54,6 +57,7 @@ import { SeedAdminRoleAndPermissions1738890000000 } from './database/migrations/
     LocationsModule,
     QuotationsModule,
     ReviewsModule,
+    CartsModule,
     VigileEyeModule.forRoot({
       apiKey: process.env.VIGILEYE_API_KEY || '',
       serverUrl: process.env.VIGILEYE_SERVER_URL || '',
@@ -70,7 +74,7 @@ import { SeedAdminRoleAndPermissions1738890000000 } from './database/migrations/
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'sribalaji'),
-        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Quotation, Coupon, LocationRestriction, HomeCMS, UserAddress, Review],
+        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Quotation, Coupon, LocationRestriction, HomeCMS, UserAddress, Review, Cart, CartItem],
 
         synchronize: config.get('NODE_ENV') !== 'production',
         migrationsRun: true,

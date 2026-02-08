@@ -43,7 +43,7 @@ export class QuotationsComponent implements OnInit {
         }
       } else if (this.cartService.count() > 0) {
         this.quoteForm.productName = `${this.cartService.count()} Items in Shopping Bag`;
-        const itemDetails = this.cartService.items().map(i => `- ${i.product.name} (Qty: ${i.quantity})`).join('\n');
+        const itemDetails = this.cartService.items().map(i => `- ${i.productName} (Qty: ${i.quantity})`).join('\n');
         this.quoteForm.message = `I would like to request a quotation for the following items:\n${itemDetails}\n\nTotal Estimated Amount: ₹${this.cartService.total() * 1.18}`;
       }
     });

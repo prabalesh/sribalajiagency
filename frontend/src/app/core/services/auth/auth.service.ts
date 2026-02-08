@@ -10,6 +10,7 @@ export class AuthService {
   private api = inject(ApiService);
   private currentUser = signal<User | null>(null);
   public isInitialCheckDone = signal<boolean>(false);
+  private cartService: any; // Will be set after construction to avoid circular dependency
 
   private isBrowser: boolean;
 
@@ -53,6 +54,10 @@ export class AuthService {
       }
 
       this.currentUser.set(user);
+
+      // Merge cart after successful login
+      await this.cartService?.mergeOnLogin();
+
       return true;
     } catch (e) {
       return false;
@@ -69,6 +74,9 @@ export class AuthService {
   }
 
   async logout() {
+    // Clear cart before logout
+    this.cartService?.onLogout();
+
     try {
       await this.api.post('/auth/logout', {});
     } catch (e) {
@@ -151,5 +159,10 @@ export class AuthService {
   async getPermissions() {
     const res = await this.api.get<any[]>('/roles/permissions');
     return res.data;
+  }
+
+  // Set cart service (called from CartService to avoid circular dependency)
+  setCartService(cartService: any) {
+    this.cartService = cartService;
   }
 }
