@@ -20,7 +20,6 @@ export class CategoriesComponent implements OnInit {
   newCategory: Partial<Category> = {
     name: '',
     slug: '',
-    description: '',
   };
 
   constructor(
@@ -54,7 +53,6 @@ export class CategoriesComponent implements OnInit {
             id: `cat-${Math.random().toString(36).substr(2, 5)}`,
             name: this.newCategory.name!,
             slug: this.newCategory.slug!,
-            description: this.newCategory.description
           };
           await this.categoryService.addCategory(category);
           this.toastService.success('Category added successfully');
@@ -85,7 +83,8 @@ export class CategoriesComponent implements OnInit {
   }
 
   resetForm() {
-    this.newCategory = { name: '', slug: '', description: '' };
+    this.newCategory = { name: '', slug: '' };
+    this.isEditing = false;
   }
 
   // Helper to auto-generate slug from name

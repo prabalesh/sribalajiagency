@@ -17,12 +17,6 @@
                     <label>Slug</label>
                     <input type="text" [(ngModel)]="newCategory.slug" name="slug" required placeholder="e.g. furniture">
                 </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <div class="textarea-wrapper">
-                        <textarea [(ngModel)]="newCategory.description" name="description" rows="3"></textarea>
-                    </div>
-                </div>
                 <div class="actions">
                     <button type="submit" class="btn-primary" [disabled]="!newCategory.name || !newCategory.slug">
                         {{ isEditing ? 'Update' : 'Add' }} Category
