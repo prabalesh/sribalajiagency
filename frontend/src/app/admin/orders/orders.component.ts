@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, computed, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -44,40 +44,6 @@ export class OrdersComponent implements OnInit {
 
     statusOptions: OrderStatus[] = ['Pending', 'Confirmed', 'Packaging', 'Dispatched', 'Delivered', 'Cancelled'];
 
-    // Computed filtered orders
-    get filteredOrders(): Order[] {
-        return this.orders.filter(order => {
-            // Search
-            const searchLower = this.searchTerm.toLowerCase();
-            const matchesSearch = !this.searchTerm ||
-                order.id.toLowerCase().includes(searchLower) ||
-                order.user?.name.toLowerCase().includes(searchLower) ||
-                order.user?.email.toLowerCase().includes(searchLower) ||
-                order.deliveryPhone?.includes(searchLower);
-
-            // Status
-            const matchesStatus = this.statusFilter === 'All' || order.status === this.statusFilter;
-
-            // Date Range
-            let matchesDate = true;
-            if (this.startDate) {
-                matchesDate = matchesDate && new Date(order.createdAt) >= new Date(this.startDate);
-            }
-            if (this.endDate) {
-                const end = new Date(this.endDate);
-                end.setHours(23, 59, 59, 999);
-                matchesDate = matchesDate && new Date(order.createdAt) <= end;
-            }
-
-            return matchesSearch && matchesStatus && matchesDate;
-        });
-    }
-
-    // Pagination is now server-side, so paginatedOrders is just orders
-    get paginatedOrders(): Order[] {
-        return this.orders;
-    }
-
     async ngOnInit() {
         await this.loadOrders();
     }
@@ -107,6 +73,12 @@ export class OrdersComponent implements OnInit {
         this.startDate = '';
         this.endDate = '';
         this.currentPage = 1;
+    }
+
+    // Apply filters and reload
+    async applyFilters() {
+        this.currentPage = 1;
+        await this.loadOrders();
     }
 
     onPageChange(page: number) {

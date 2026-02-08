@@ -19,25 +19,26 @@
         <div class="search-group">
             <span class="search-icon">🔍</span>
             <input type="text" [(ngModel)]="searchTerm" placeholder="Search orders, customers, phone..."
-                class="search-input">
+                class="search-input" (keyup.enter)="applyFilters()">
         </div>
 
         <div class="filter-group">
-            <select [(ngModel)]="statusFilter" class="filter-select">
+            <select [(ngModel)]="statusFilter" class="filter-select" (change)="applyFilters()">
                 <option value="All">All Statuses</option>
                 @for (status of statusOptions; track status) {
                 <option [value]="status">{{ status }}</option>
                 }
             </select>
 
-            <input type="date" [(ngModel)]="startDate" class="filter-date" placeholder="Start Date">
-            <input type="date" [(ngModel)]="endDate" class="filter-date" placeholder="End Date">
+            <input type="date" [(ngModel)]="startDate" class="filter-date" placeholder="Start Date" (change)="applyFilters()">
+            <input type="date" [(ngModel)]="endDate" class="filter-date" placeholder="End Date" (change)="applyFilters()">
 
-            <button class="btn-secondary btn-sm" (click)="resetFilters()">
+            <button class="btn-secondary btn-sm" (click)="resetFilters(); applyFilters()">
                 Reset Filters
             </button>
         </div>
     </div>
+
 
     <!-- Orders Table -->
     @if (isLoading) {
@@ -57,7 +58,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (order of paginatedOrders; track order.id) {
+                @for (order of orders; track order.id) {
                 <tr>
                     <td class="id-col" title="{{ order.id }}">
                         <a [routerLink]="['/dashboard/orders', order.id]" class="id-link">#{{ order.id.substring(0, 8)
