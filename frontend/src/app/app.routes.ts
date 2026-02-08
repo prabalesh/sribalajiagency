@@ -46,12 +46,10 @@ export const routes: Routes = [
             {
                 path: 'products/:category',
                 loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent),
-                data: { preload: true }
             },
             {
                 path: 'products/:category/:subcategory',
                 loadComponent: () => import('./public/products/products.component').then(m => m.ProductsComponent),
-                data: { preload: true }
             },
             {
                 path: 'cart',
@@ -65,7 +63,7 @@ export const routes: Routes = [
             {
                 path: 'history',
                 redirectTo: 'account/orders',
-                pathMatch: 'full'
+                pathMatch: 'full',
             },
             {
                 path: 'request-quote',
@@ -105,7 +103,8 @@ export const routes: Routes = [
                     },
                     {
                         path: 'orders',
-                        loadComponent: () => import('./public/account/orders/orders.component').then(m => m.OrdersComponent)
+                        loadComponent: () => import('./public/account/orders/orders.component').then(m => m.OrdersComponent),
+                        data: { preload: true }
                     },
                     {
                         path: 'orders/:id',
@@ -150,7 +149,8 @@ export const routes: Routes = [
             },
             {
                 path: 'brands',
-                loadComponent: () => import('./admin/brands/brands.component').then(m => m.BrandsComponent)
+                loadComponent: () => import('./admin/brands/brands.component').then(m => m.BrandsComponent),
+                data: { preload: true }
             },
             {
                 path: 'products',
