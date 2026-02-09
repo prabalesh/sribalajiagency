@@ -1,85 +1,331 @@
-<div class="crud-container">
-    <header class="page-header">
-        <h1>Roles & Access Control</h1>
-        <p>Define user roles and assign granular system permissions</p>
-    </header>
+<div class="permissions-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <lucide-icon [img]="Shield" [size]="32"></lucide-icon>
+                <span>Roles & Access Control</span>
+            </h1>
+            <p class="page-subtitle">Define user roles and assign granular system permissions</p>
+        </div>
+    </div>
 
+    <!-- Stats Cards (Mobile Only) -->
+    <div class="stats-cards mobile-only">
+        <div class="stat-card glass-card">
+            <lucide-icon [img]="Shield" [size]="24"></lucide-icon>
+            <div class="stat-content">
+                <span class="stat-value">{{ roles.length }}</span>
+                <span class="stat-label">Total Roles</span>
+            </div>
+        </div>
+        <div class="stat-card glass-card">
+            <lucide-icon [img]="Key" [size]="24"></lucide-icon>
+            <div class="stat-content">
+                <span class="stat-value">{{ permissions.length }}</span>
+                <span class="stat-label">Permissions</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Form -->
     @if (authService.hasPermission('MANAGE_ROLES')) {
-    <div class="form-card animate-fade">
-        <h3>{{ isEditing ? 'Modify Role' : 'Create New Security Role' }}</h3>
-        <form (ngSubmit)="saveRole()">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Role Identifier</label>
-                    <input type="text" [(ngModel)]="newRole.name" name="name" required
-                        placeholder="e.g. Content Manager">
-                </div>
-                <div class="form-group">
-                    <label>Short Description</label>
-                    <input type="text" [(ngModel)]="newRole.description" name="description"
-                        placeholder="Describe access level...">
-                </div>
-                <div class="form-group full-width">
-                    <label>Assigned Permissions</label>
-                    <div class="permissions-grid-wrapper">
-                        @for (p of permissions; track p.id) {
-                        <label class="permission-checkbox">
-                            <input type="checkbox" [checked]="newRole.permissionIds.includes(p.id)"
-                                (change)="togglePermission(p.id)">
-                            <div class="p-card">
-                                <strong>{{ p.name }}</strong>
-                                <span>{{ p.description }}</span>
-                            </div>
+        <div class="form-card glass-card animate-fade">
+            <div class="form-header">
+                <h3>
+                    <lucide-icon [img]="isEditing ? Edit : Plus" [size]="22"></lucide-icon>
+                    <span>{{ isEditing ? 'Modify Role' : 'Create New Security Role' }}</span>
+                </h3>
+                @if (isEditing) {
+                    <button type="button" class="btn-icon-sm" (click)="resetForm()" title="Cancel">
+                        <lucide-icon [img]="X" [size]="18"></lucide-icon>
+                    </button>
+                }
+            </div>
+
+            <form (ngSubmit)="saveRole()">
+                <div class="form-grid">
+                    <!-- Role Name -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="ShieldCheck" [size]="16"></lucide-icon>
+                            <span>Role Identifier <span class="required">*</span></span>
                         </label>
-                        }
+                        <input 
+                            type="text" 
+                            class="form-input"
+                            [(ngModel)]="newRole.name" 
+                            name="name" 
+                            required
+                            placeholder="e.g. Content Manager"
+                            [disabled]="isSaving">
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Users" [size]="16"></lucide-icon>
+                            <span>Short Description</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-input"
+                            [(ngModel)]="newRole.description" 
+                            name="description"
+                            placeholder="Describe access level..."
+                            [disabled]="isSaving">
+                    </div>
+
+                    <!-- Permissions Section -->
+                    <div class="form-group full-width permissions-section">
+                        <div class="permissions-header">
+                            <div class="header-left">
+                                <label class="form-label">
+                                    <lucide-icon [img]="Key" [size]="16"></lucide-icon>
+                                    <span>Assigned Permissions</span>
+                                </label>
+                                <span class="selection-count">
+                                    {{ getSelectedCount() }} of {{ getTotalCount() }} selected
+                                </span>
+                            </div>
+                            <div class="header-actions">
+                                <button 
+                                    type="button" 
+                                    class="btn-link" 
+                                    (click)="selectAllPermissions()"
+                                    [disabled]="isSaving">
+                                    Select All
+                                </button>
+                                <button 
+                                    type="button" 
+                                    class="btn-link" 
+                                    (click)="deselectAllPermissions()"
+                                    [disabled]="isSaving">
+                                    Clear All
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Search & Filter -->
+                        <div class="permissions-controls">
+                            <div class="search-box">
+                                <lucide-icon [img]="Search" [size]="18"></lucide-icon>
+                                <input 
+                                    type="text" 
+                                    class="search-input"
+                                    [(ngModel)]="searchTerm"
+                                    [ngModelOptions]="{standalone: true}"
+                                    placeholder="Search permissions..."
+                                    [disabled]="isSaving">
+                            </div>
+
+                            <div class="filter-box">
+                                <lucide-icon [img]="Filter" [size]="18"></lucide-icon>
+                                <select 
+                                    class="filter-select"
+                                    [(ngModel)]="selectedCategory"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [disabled]="isSaving">
+                                    @for (cat of permissionCategories; track cat) {
+                                        <option [value]="cat">{{ cat | uppercase }}</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Permissions Grid -->
+                        <div class="permissions-grid">
+                            @for (p of filteredPermissions; track p.id) {
+                                <label class="permission-card" [class.selected]="newRole.permissionIds.includes(p.id)">
+                                    <input 
+                                        type="checkbox" 
+                                        class="permission-checkbox"
+                                        [checked]="newRole.permissionIds.includes(p.id)"
+                                        (change)="togglePermission(p.id)"
+                                        [disabled]="isSaving">
+                                    <div class="permission-content">
+                                        <div class="permission-icon">
+                                            <lucide-icon 
+                                                [img]="newRole.permissionIds.includes(p.id) ? ShieldCheck : Shield" 
+                                                [size]="20">
+                                            </lucide-icon>
+                                        </div>
+                                        <div class="permission-info">
+                                            <strong class="permission-name">{{ p.name }}</strong>
+                                            <span class="permission-desc">{{ p.description }}</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            } @empty {
+                                <div class="empty-permissions">
+                                    <lucide-icon [img]="AlertCircle" [size]="48"></lucide-icon>
+                                    <p>No permissions found matching your criteria</p>
+                                </div>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="actions">
-                <button type="submit" class="btn-primary" [disabled]="!newRole.name">{{ isEditing ? 'Save Changes' :
-                    'Create Role' }}</button>
-                @if (isEditing) {
-                <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
-                }
-            </div>
-        </form>
-    </div>
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button 
+                        type="submit" 
+                        class="btn-primary"
+                        [disabled]="!newRole.name || isSaving">
+                        @if (isSaving) {
+                            <span class="spinner-sm"></span>
+                            <span>{{ isEditing ? 'Saving...' : 'Creating...' }}</span>
+                        } @else {
+                            <lucide-icon [img]="isEditing ? Check : Plus" [size]="18"></lucide-icon>
+                            <span>{{ isEditing ? 'Save Changes' : 'Create Role' }}</span>
+                        }
+                    </button>
+                    @if (isEditing) {
+                        <button 
+                            type="button" 
+                            (click)="resetForm()" 
+                            class="btn-secondary"
+                            [disabled]="isSaving">
+                            Cancel
+                        </button>
+                    }
+                </div>
+            </form>
+        </div>
     }
 
-    <div class="list-container animate-fade">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Role</th>
-                    <th>Security Level</th>
-                    <th>Permissions</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
+    <!-- Roles List -->
+    <div class="list-card glass-card animate-fade">
+        <div class="list-header">
+            <h3>
+                <lucide-icon [img]="Shield" [size]="22"></lucide-icon>
+                <span>Security Roles ({{ roles.length }})</span>
+            </h3>
+        </div>
+
+        @if (isLoading) {
+            <div class="loading-state">
+                <div class="spinner-large"></div>
+                <p>Loading roles...</p>
+            </div>
+        } @else if (roles.length === 0) {
+            <div class="empty-state">
+                <lucide-icon [img]="Shield" [size]="64"></lucide-icon>
+                <p>No roles created yet. Create your first role to get started!</p>
+            </div>
+        } @else {
+            <!-- Desktop Table -->
+            <div class="table-wrapper desktop-only">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Description</th>
+                            <th>Permissions</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (r of roles; track r.id) {
+                            <tr [class.deleting]="isDeleting">
+                                <td>
+                                    <div class="role-cell">
+                                        <lucide-icon [img]="Shield" [size]="20"></lucide-icon>
+                                        <strong>{{ r.name | uppercase }}</strong>
+                                    </div>
+                                </td>
+                                <td>{{ r.description || 'No description' }}</td>
+                                <td>
+                                    <div class="perm-chips">
+                                        @for (p of r.permissions; track p.id; let i = $index) {
+                                            @if (i < 3) {
+                                                <span class="chip">{{ p.name }}</span>
+                                            }
+                                        }
+                                        @if (r.permissions.length > 3) {
+                                            <span class="chip more">+{{ r.permissions.length - 3 }} more</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        @if (authService.hasPermission('MANAGE_ROLES')) {
+                                            <button 
+                                                class="btn-icon" 
+                                                (click)="editRole(r)"
+                                                [disabled]="isSaving || isDeleting"
+                                                title="Edit role">
+                                                <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                            </button>
+                                            <button 
+                                                class="btn-icon btn-delete" 
+                                                (click)="deleteRole(r.id)"
+                                                [disabled]="isSaving || isDeleting"
+                                                title="Delete role">
+                                                <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Cards -->
+            <div class="mobile-cards mobile-only">
                 @for (r of roles; track r.id) {
-                <tr>
-                    <td><strong>{{ r.name | uppercase }}</strong></td>
-                    <td>{{ r.description }}</td>
-                    <td>
-                        <div class="perm-chips">
-                            @for (p of r.permissions; track p.id) {
-                            <span class="chip">{{ p.name }}</span>
-                            }
+                    <div class="role-card">
+                        <div class="role-card-header">
+                            <div class="role-name">
+                                <lucide-icon [img]="Shield" [size]="24"></lucide-icon>
+                                <h4>{{ r.name | uppercase }}</h4>
+                            </div>
+                            <span class="permission-count">{{ r.permissions.length }} perms</span>
                         </div>
-                    </td>
-                    <td>
-                        <div class="table-actions">
+
+                        <div class="role-card-body">
+                            @if (r.description) {
+                                <p class="role-description">{{ r.description }}</p>
+                            }
+
+                            <div class="permissions-preview">
+                                <label>Permissions:</label>
+                                <div class="perm-chips">
+                                    @for (p of r.permissions; track p.id; let i = $index) {
+                                        @if (i < 5) {
+                                            <span class="chip">{{ p.name }}</span>
+                                        }
+                                    }
+                                    @if (r.permissions.length > 5) {
+                                        <span class="chip more">+{{ r.permissions.length - 5 }}</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="role-card-actions">
                             @if (authService.hasPermission('MANAGE_ROLES')) {
-                            <button class="btn-sm" (click)="editRole(r)">Edit</button>
-                            <button class="btn-sm delete" (click)="deleteRole(r.id)">Delete</button>
+                                <button 
+                                    class="btn-secondary btn-sm" 
+                                    (click)="editRole(r)"
+                                    [disabled]="isSaving || isDeleting">
+                                    <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                    <span>Edit</span>
+                                </button>
+                                <button 
+                                    class="btn-danger btn-sm" 
+                                    (click)="deleteRole(r.id)"
+                                    [disabled]="isSaving || isDeleting">
+                                    <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                                    <span>Delete</span>
+                                </button>
                             }
                         </div>
-                    </td>
-                </tr>
+                    </div>
                 }
-            </tbody>
-        </table>
+            </div>
+        }
     </div>
 </div>
