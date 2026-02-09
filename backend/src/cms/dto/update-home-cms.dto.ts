@@ -15,6 +15,7 @@ class HomeSlideDto {
     image: string;
 
     @IsString()
+    @IsUrl()
     link: string;
 
     @IsString()

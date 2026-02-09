@@ -14,7 +14,8 @@ import { UpdateSettingsDto } from './dto/settings.dto';
  * @remarks
  * - Uses transactions for atomic updates
  * - Automatically creates default settings if none exist
- * - Thread-safe through database transactions
+ * - Thread-safe through database transactions and upsert operations
+ * - Handles concurrent initialization requests safely
  * 
  * @example
  * ```typescript
@@ -26,7 +27,7 @@ import { UpdateSettingsDto } from './dto/settings.dto';
 export class SettingsService {
     /** The fixed ID for the singleton settings record */
     private readonly SETTING_ID = 1;
-
+    
     /** Logger instance with service context for tracing */
     private readonly logger = new Logger(SettingsService.name);
 
@@ -46,7 +47,8 @@ export class SettingsService {
      * Retrieves the current site settings.
      * 
      * If settings don't exist in the database, creates a new record with
-     * default values defined in the SiteSettings entity.
+     * default values defined in the SiteSettings entity. Uses upsert to
+     * prevent duplicate key violations during concurrent initialization.
      * 
      * @returns Promise resolving to the SiteSettings entity
      * @throws {InternalServerErrorException} If database operation fails
@@ -60,23 +62,26 @@ export class SettingsService {
      * TODO: Add caching layer (Redis) to reduce database hits
      * TODO: Consider adding settings validation on retrieval
      */
-    async getSettings() {
+    async getSettings(): Promise<SiteSettings> {
         try {
             this.logger.log(`Fetching settings with ID: ${this.SETTING_ID}`);
-
-            let settings = await this.settingsRepo.findOne({
-                where: { id: this.SETTING_ID }
+            
+            let settings = await this.settingsRepo.findOne({ 
+                where: { id: this.SETTING_ID } 
             });
-
+            
             if (!settings) {
                 this.logger.warn(`Settings not found, creating default settings with ID: ${this.SETTING_ID}`);
-                settings = this.settingsRepo.create({ id: this.SETTING_ID });
-                settings = await this.settingsRepo.save(settings);
-                this.logger.log(`Default settings created successfully`);
+                
+                // Use upsert to handle race conditions during concurrent initialization
+                // If another request creates the record first, this will just retrieve it
+                settings = await this.ensureSettingsExist();
+                
+                this.logger.log(`Default settings initialized successfully`);
             } else {
                 this.logger.log(`Settings retrieved successfully`);
             }
-
+            
             return settings;
         } catch (error) {
             this.logger.error(
@@ -84,6 +89,58 @@ export class SettingsService {
                 error.stack
             );
             throw new InternalServerErrorException("Failed to retrieve settings");
+        }
+    }
+
+    /**
+     * Ensures settings record exists using upsert operation.
+     * 
+     * This method is race-condition safe and can be called concurrently.
+     * Uses INSERT ... ON CONFLICT DO NOTHING pattern to prevent duplicate
+     * key constraint violations when multiple requests try to create the
+     * initial settings record simultaneously.
+     * 
+     * @returns Promise resolving to the SiteSettings entity
+     * @private
+     * 
+     * @remarks
+     * This uses TypeORM's upsert functionality which translates to:
+     * - PostgreSQL: INSERT ... ON CONFLICT DO NOTHING
+     * - MySQL: INSERT IGNORE
+     * - SQLite: INSERT OR IGNORE
+     */
+    private async ensureSettingsExist(): Promise<SiteSettings> {
+        try {
+            // Create default settings object
+            const defaultSettings = this.settingsRepo.create({ 
+                id: this.SETTING_ID 
+            });
+
+            // Upsert: Insert if not exists, ignore if exists (handles race condition)
+            await this.settingsRepo
+                .createQueryBuilder()
+                .insert()
+                .into(SiteSettings)
+                .values(defaultSettings)
+                .orIgnore() // On conflict, do nothing
+                .execute();
+
+            // Fetch the record (either newly created or existing from concurrent request)
+            const settings = await this.settingsRepo.findOne({
+                where: { id: this.SETTING_ID }
+            });
+
+            if (!settings) {
+                throw new Error('Failed to create or retrieve settings after upsert');
+            }
+
+            return settings;
+        } catch (error) {
+            this.logger.error(
+                `Failed to ensure settings exist: ${error.message}`,
+                error.stack
+            );
+            throw error;
         }
     }
 
@@ -111,43 +168,77 @@ export class SettingsService {
      * TODO: Consider adding optimistic locking to prevent concurrent update conflicts
      * TODO: Add webhook/event emission for settings changes (notify other services)
      */
-    async updateSettings(data: UpdateSettingsDto) {
+    async updateSettings(data: UpdateSettingsDto): Promise<SiteSettings> {
         const queryRunner = this.dataSource.createQueryRunner();
-
-        // Establish database connection for transaction
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
+        
+        // Track transaction state to avoid rolling back non-existent transactions
+        let isTransactionActive = false;
 
         try {
-            this.logger.log(`Updating settings with data: ${JSON.stringify(data)}`);
+            // Establish database connection for transaction
+            await queryRunner.connect();
+            this.logger.debug('Query runner connected');
+            
+            // Start transaction - only after successful connection
+            await queryRunner.startTransaction();
+            isTransactionActive = true;
+            this.logger.debug('Transaction started');
 
-            // Find existing settings within transaction scope
-            let settings = await queryRunner.manager.findOne(SiteSettings, {
+            this.logger.log(`Updating settings with data: ${JSON.stringify(data)}`);
+            
+            // Use upsert within transaction to handle race condition
+            // If settings don't exist during update, create them atomically
+            const defaultSettings = queryRunner.manager.create(SiteSettings, {
+                id: this.SETTING_ID,
+                ...data, // Apply updates to defaults
+            });
+
+            // Upsert with conflict resolution - update if exists, insert if not
+            await queryRunner.manager
+                .createQueryBuilder()
+                .insert()
+                .into(SiteSettings)
+                .values(defaultSettings)
+                .orUpdate(
+                    // Columns to update on conflict
+                    Object.keys(data),
+                    // Conflict target (primary key)
+                    ['id']
+                )
+                .execute();
+
+            // Fetch the updated record
+            const updatedSettings = await queryRunner.manager.findOne(SiteSettings, {
                 where: { id: this.SETTING_ID }
             });
 
-            // Create default settings if not found
-            if (!settings) {
-                this.logger.warn(`Settings not found during update, creating new settings`);
-                settings = queryRunner.manager.create(SiteSettings, {
-                    id: this.SETTING_ID
-                });
+            if (!updatedSettings) {
+                throw new Error('Failed to retrieve settings after upsert');
             }
-
-            // Merge incoming data with existing settings
-            Object.assign(settings, data);
-            const updatedSettings = await queryRunner.manager.save(settings);
-
+            
             // Commit transaction on success
             await queryRunner.commitTransaction();
+            isTransactionActive = false;
             this.logger.log(`Settings updated successfully: ${JSON.stringify(updatedSettings)}`);
-
+            
             // TODO: Emit SettingsUpdatedEvent here for event-driven architecture
-
+            
             return updatedSettings;
         } catch (error) {
-            // Rollback transaction on any error
-            await queryRunner.rollbackTransaction();
+            // Only rollback if transaction was actually started
+            if (isTransactionActive) {
+                try {
+                    await queryRunner.rollbackTransaction();
+                    this.logger.warn('Transaction rolled back due to error');
+                } catch (rollbackError) {
+                    // Log rollback failure but don't throw - original error is more important
+                    this.logger.error(
+                        `Failed to rollback transaction: ${rollbackError.message}`,
+                        rollbackError.stack
+                    );
+                }
+            }
+            
             this.logger.error(
                 `Failed to update settings: ${error.message}`,
                 error.stack
@@ -155,8 +246,11 @@ export class SettingsService {
             throw new InternalServerErrorException("Failed to update settings");
         } finally {
             // Always release query runner to prevent connection leaks
-            await queryRunner.release();
-            this.logger.debug(`Query runner released`);
+            // Check if queryRunner is still connected before releasing
+            if (queryRunner.isReleased === false) {
+                await queryRunner.release();
+                this.logger.debug('Query runner released');
+            }
         }
     }
 }
