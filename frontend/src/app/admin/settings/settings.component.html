@@ -1,63 +1,247 @@
 <div class="settings-container">
     <header class="page-header">
-        <h1>Settings</h1>
-        <p>Manage your store configuration</p>
+        <div class="header-content">
+            <div class="header-text">
+                <h1>Settings</h1>
+                <p>Manage your store configuration and payment options</p>
+            </div>
+            <div class="header-status">
+                @if (!isLoading) {
+                    @if (isStoreClosed()) {
+                        <div class="status-badge status-closed">
+                            <span class="icon">🔒</span>
+                            <span>Store Closed</span>
+                        </div>
+                    } @else {
+                        <div class="status-badge status-open">
+                            <span class="icon">✓</span>
+                            <span>Store Open</span>
+                        </div>
+                    }
+                }
+                @if (!isLoading && settings.updatedAt) {
+                    <div class="last-updated">
+                        <span class="icon">🕒</span>
+                        <span>Last updated {{ settings.updatedAt | date:'MMM d, y, h:mm a' }}</span>
+                    </div>
+                }
+            </div>
+        </div>
     </header>
 
     @if (isLoading) {
         <div class="loading-state">
+            <div class="spinner"></div>
             <p>Loading settings...</p>
         </div>
+    } @else if (errorMessage) {
+        <div class="error-state">
+            <span class="error-icon">⚠️</span>
+            <div class="error-content">
+                <h3>Failed to Load Settings</h3>
+                <p>{{ errorMessage }}</p>
+                <button class="btn-retry" (click)="loadSettings()">
+                    <span class="icon">🔄</span>
+                    Retry
+                </button>
+            </div>
+        </div>
     } @else {
-        <div class="card">
-            <div class="card-content">
-                <div class="section-title">
-                    <h3>Global Payment Settings</h3>
-                    <p>Enable/Disable payment methods site-wide</p>
+        <div class="settings-content">
+            <!-- Store Status Alert -->
+            @if (isStoreClosed()) {
+                <div class="alert alert-error">
+                    <span class="alert-icon">🔒</span>
+                    <div class="alert-content">
+                        <strong>Store Currently Closed</strong>
+                        <p>All payment methods are disabled. Customers cannot place new orders until you enable at least one payment method.</p>
+                        @if (canUpdateSettings()) {
+                            <button class="btn-quick-action" (click)="openStore()" [disabled]="isSaving">
+                                <span class="icon">🔓</span>
+                                Open Store (Enable All Payments)
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Main Settings Card -->
+            <div class="card main-card">
+                <div class="card-header">
+                    <div class="header-icon">💳</div>
+                    <div>
+                        <h2>Payment Methods</h2>
+                        <p>Configure global payment options for your store</p>
+                    </div>
                 </div>
 
-                <div class="toggle-grid">
-                    <label class="toggle-item">
-                        <input 
-                            type="checkbox" 
-                            [(ngModel)]="settings.allowOnline" 
-                            name="allowOnline"
-                            [disabled]="!authService.hasPermission('UPDATE_SETTINGS')">
-                        <div class="toggle-text">
-                            <strong>Accept Online Payments</strong>
-                            <p>Allow customers to pay via Razorpay/Cards</p>
+                <div class="card-body">
+                    <div class="toggle-grid">
+                        <label class="toggle-item" 
+                               [class.disabled]="!canUpdateSettings()"
+                               [class.active]="settings.allowOnline">
+                            <div class="toggle-indicator">
+                                <input 
+                                    type="checkbox" 
+                                    [(ngModel)]="settings.allowOnline" 
+                                    name="allowOnline"
+                                    [disabled]="!canUpdateSettings()">
+                                <span class="checkmark"></span>
+                            </div>
+                            <div class="toggle-content">
+                                <div class="toggle-header">
+                                    <strong>Online Payments</strong>
+                                    <span class="badge" 
+                                          [class.badge-success]="settings.allowOnline"
+                                          [class.badge-inactive]="!settings.allowOnline">
+                                        {{ settings.allowOnline ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </div>
+                                <p>Accept payments via Razorpay, Credit/Debit Cards, UPI, and Wallets</p>
+                                <div class="toggle-meta">
+                                    <span class="meta-item">
+                                        <span class="icon">✓</span> Instant confirmation
+                                    </span>
+                                    <span class="meta-item">
+                                        <span class="icon">✓</span> Secure transactions
+                                    </span>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <label class="toggle-item" 
+                               [class.disabled]="!canUpdateSettings()"
+                               [class.active]="settings.allowCod">
+                            <div class="toggle-indicator">
+                                <input 
+                                    type="checkbox" 
+                                    [(ngModel)]="settings.allowCod" 
+                                    name="allowCod"
+                                    [disabled]="!canUpdateSettings()">
+                                <span class="checkmark"></span>
+                            </div>
+                            <div class="toggle-content">
+                                <div class="toggle-header">
+                                    <strong>Cash on Delivery (COD)</strong>
+                                    <span class="badge" 
+                                          [class.badge-success]="settings.allowCod"
+                                          [class.badge-inactive]="!settings.allowCod">
+                                        {{ settings.allowCod ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </div>
+                                <p>Allow customers to pay in cash upon delivery at their doorstep</p>
+                                <div class="toggle-meta">
+                                    <span class="meta-item">
+                                        <span class="icon">✓</span> No payment gateway fees
+                                    </span>
+                                    <span class="meta-item">
+                                        <span class="icon">✓</span> Increased trust
+                                    </span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Info Alert -->
+                    <div class="alert alert-info">
+                        <span class="alert-icon">ℹ️</span>
+                        <div class="alert-content">
+                            <strong>Note:</strong>
+                            <p>These are global settings. You can override payment options for individual products if needed.</p>
                         </div>
-                    </label>
-                    
-                    <label class="toggle-item">
-                        <input 
-                            type="checkbox" 
-                            [(ngModel)]="settings.allowCod" 
-                            name="allowCod"
-                            [disabled]="!authService.hasPermission('UPDATE_SETTINGS')">
-                        <div class="toggle-text">
-                            <strong>Accept Cash on Delivery (COD)</strong>
-                            <p>Allow orders without immediate payment</p>
+                    </div>
+
+                    <!-- Warning if no payment methods enabled -->
+                    @if (!settings.allowOnline && !settings.allowCod && !isStoreClosed()) {
+                        <div class="alert alert-warning">
+                            <span class="alert-icon">⚠️</span>
+                            <div class="alert-content">
+                                <strong>Warning:</strong>
+                                <p>Disabling all payment methods will close your store and prevent customers from placing orders.</p>
+                            </div>
                         </div>
-                    </label>
-                </div>
-
-                <div class="settings-info-card">
-                    <span class="icon">ℹ️</span>
-                    <p>Note: Per-product payment settings can still override these global defaults for specific items if needed.</p>
-                </div>
-
-                <div class="actions">
-                    @if (authService.hasPermission('UPDATE_SETTINGS')) {
-                        <button 
-                            type="button" 
-                            class="btn-primary" 
-                            (click)="saveSettings()"
-                            [disabled]="isSaving">
-                            {{ isSaving ? 'Saving...' : 'Save Changes' }}
-                        </button>
                     }
                 </div>
+
+                <div class="card-footer">
+                    <div class="footer-info">
+                        @if (hasUnsavedChanges()) {
+                            <span class="unsaved-indicator">
+                                <span class="dot"></span>
+                                Unsaved changes
+                            </span>
+                        }
+                    </div>
+                    <div class="footer-actions">
+                        @if (canUpdateSettings()) {
+                            <!-- Quick Actions -->
+                            @if (!hasUnsavedChanges() && !isStoreClosed()) {
+                                <button 
+                                    type="button" 
+                                    class="btn-secondary btn-danger" 
+                                    (click)="closeStore()"
+                                    [disabled]="isSaving">
+                                    <span class="icon">🔒</span>
+                                    <span>Close Store</span>
+                                </button>
+                            }
+
+                            @if (hasUnsavedChanges()) {
+                                <button 
+                                    type="button" 
+                                    class="btn-secondary" 
+                                    (click)="resetSettings()"
+                                    [disabled]="isSaving">
+                                    Cancel
+                                </button>
+                            }
+                            <button 
+                                type="button" 
+                                class="btn-primary" 
+                                (click)="saveSettings()"
+                                [disabled]="isSaving || !hasUnsavedChanges()">
+                                @if (isSaving) {
+                                    <span class="spinner-small"></span>
+                                    <span>Saving...</span>
+                                } @else {
+                                    <span class="icon">💾</span>
+                                    <span>Save Changes</span>
+                                }
+                            </button>
+                        } @else {
+                            <div class="no-permission">
+                                <span class="icon">🔒</span>
+                                You don't have permission to modify settings
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Info Card -->
+            <div class="card info-card">
+                <div class="info-header">
+                    <span class="icon">💡</span>
+                    <h3>Quick Tips</h3>
+                </div>
+                <ul class="tips-list">
+                    <li>
+                        <span class="tip-icon">✓</span>
+                        <span>Enable both methods to maximize customer convenience</span>
+                    </li>
+                    <li>
+                        <span class="tip-icon">✓</span>
+                        <span>Disable all payment methods during maintenance or inventory updates</span>
+                    </li>
+                    <li>
+                        <span class="tip-icon">✓</span>
+                        <span>COD orders may have higher return rates but increase customer trust</span>
+                    </li>
+                    <li>
+                        <span class="tip-icon">✓</span>
+                        <span>Online payments provide instant order confirmation and faster processing</span>
+                    </li>
+                </ul>
             </div>
         </div>
     }
