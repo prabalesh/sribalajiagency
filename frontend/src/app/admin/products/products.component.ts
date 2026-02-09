@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -14,15 +14,65 @@ import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
+import { 
+  LucideAngularModule, 
+  Package, 
+  Edit, 
+  Trash2, 
+  Plus, 
+  X, 
+  Upload, 
+  Image as ImageIcon, 
+  Tag, 
+  DollarSign, 
+  Layers, 
+  ShoppingCart,
+  AlertCircle,
+  Check,
+  Search,
+  FolderTree,
+  ChevronDown
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropDirective, PaginationComponent, ImageUrlPipe],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    DragDropDirective, 
+    PaginationComponent, 
+    ImageUrlPipe,
+    LucideAngularModule
+  ],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
-export class ProductsComponent implements OnInit {
+export class ProductsComponent implements OnInit, OnDestroy {
+  private productService = inject(ProductService);
+  private categoryService = inject(CategoryService);
+  private brandService = inject(BrandService);
+  private toastService = inject(ToastService);
+  public authService = inject(AuthService);
+
+  // Icon references
+  readonly Package = Package;
+  readonly Edit = Edit;
+  readonly Trash2 = Trash2;
+  readonly Plus = Plus;
+  readonly X = X;
+  readonly Upload = Upload;
+  readonly ImageIcon = ImageIcon;
+  readonly Tag = Tag;
+  readonly DollarSign = DollarSign;
+  readonly Layers = Layers;
+  readonly ShoppingCart = ShoppingCart;
+  readonly AlertCircle = AlertCircle;
+  readonly Check = Check;
+  readonly Search = Search;
+  readonly FolderTree = FolderTree;
+  readonly ChevronDown = ChevronDown;
+
   products: Product[] = [];
   newProduct: Product = this.getEmptyProduct();
   isEditing = false;
@@ -47,16 +97,9 @@ export class ProductsComponent implements OnInit {
   // Selection State
   selectedMainCategoryId: string = '';
 
-  // Debouncing for search/filter (if you add search later)
+  // Search
+  searchQuery = '';
   private searchSubject = new Subject<string>();
-
-  constructor(
-    private productService: ProductService,
-    private categoryService: CategoryService,
-    private brandService: BrandService,
-    private toastService: ToastService,
-    public authService: AuthService
-  ) { }
 
   async ngOnInit() {
     this.isLoading = true;
@@ -73,7 +116,6 @@ export class ProductsComponent implements OnInit {
       this.isLoading = false;
     }
 
-    // Setup debounced search (for future search functionality)
     this.setupSearchDebounce();
   }
 
@@ -82,14 +124,13 @@ export class ProductsComponent implements OnInit {
       debounceTime(500),
       distinctUntilChanged()
     ).subscribe(searchTerm => {
-      // Implement search logic here when needed
       this.performSearch(searchTerm);
     });
   }
 
   private async performSearch(searchTerm: string) {
-    // Placeholder for search implementation
     console.log('Searching for:', searchTerm);
+    // Implement search logic here when needed
   }
 
   onSearchInput(searchTerm: string) {
@@ -249,21 +290,33 @@ export class ProductsComponent implements OnInit {
       console.error('Error loading categories for edit:', error);
       this.toastService.error('Failed to load category information');
     }
+
+    // Scroll to form
+    if (window.innerWidth < 1024) {
+      setTimeout(() => {
+        document.querySelector('.form-card')?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 100);
+    }
   }
 
   async deleteProduct(id: string) {
-    if (confirm('Delete this product?')) {
-      this.isDeleting = true;
-      try {
-        await this.productService.deleteProduct(id);
-        this.products = this.products.filter(p => p.id !== id);
-        this.toastService.success('Product deleted successfully');
-      } catch (err) {
-        console.error('AdminProducts: Failed to delete product', err);
-        this.toastService.apiError(err, 'Failed to delete product');
-      } finally {
-        this.isDeleting = false;
-      }
+    if (!confirm('Delete this product? This action cannot be undone.')) {
+      return;
+    }
+
+    this.isDeleting = true;
+    try {
+      await this.productService.deleteProduct(id);
+      this.products = this.products.filter(p => p.id !== id);
+      this.toastService.success('Product deleted successfully');
+    } catch (err) {
+      console.error('AdminProducts: Failed to delete product', err);
+      this.toastService.apiError(err, 'Failed to delete product');
+    } finally {
+      this.isDeleting = false;
     }
   }
 
@@ -312,20 +365,22 @@ export class ProductsComponent implements OnInit {
 
   // Image Management
   async removeImage(imageId: string) {
-    if (confirm('Remove this image?')) {
-      this.isUploadingImage = true;
-      try {
-        await this.productService.deleteImage(imageId);
-        if (this.isEditing) {
-          this.newProduct.images = this.newProduct.images?.filter(img => img.id !== imageId);
-        }
-        this.toastService.success('Image removed successfully');
-      } catch (error) {
-        console.error('Error removing image:', error);
-        this.toastService.error('Failed to remove image');
-      } finally {
-        this.isUploadingImage = false;
+    if (!confirm('Remove this image?')) {
+      return;
+    }
+
+    this.isUploadingImage = true;
+    try {
+      await this.productService.deleteImage(imageId);
+      if (this.isEditing) {
+        this.newProduct.images = this.newProduct.images?.filter(img => img.id !== imageId);
       }
+      this.toastService.success('Image removed successfully');
+    } catch (error) {
+      console.error('Error removing image:', error);
+      this.toastService.error('Failed to remove image');
+    } finally {
+      this.isUploadingImage = false;
     }
   }
 
@@ -398,6 +453,17 @@ export class ProductsComponent implements OnInit {
   onPageChange(page: number) {
     this.currentPage = page;
     this.loadProducts();
+  }
+
+  get filteredProducts(): Product[] {
+    if (!this.searchQuery.trim()) {
+      return this.products;
+    }
+    const query = this.searchQuery.toLowerCase();
+    return this.products.filter(p => 
+      p.name.toLowerCase().includes(query) ||
+      p.description?.toLowerCase().includes(query)
+    );
   }
 
   ngOnDestroy() {
