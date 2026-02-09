@@ -1,6 +1,6 @@
 import { Component, inject, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule, NavigationStart, NavigationEnd, NavigationCancel, NavigationError, RouteConfigLoadStart, RouteConfigLoadEnd } from '@angular/router';
+import { Router, RouterModule, NavigationEnd, NavigationCancel, NavigationError, RouteConfigLoadStart, RouteConfigLoadEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ThemeService } from '../../core/store/theme.service';
 import { CartService } from '../../core/store/cart.service';
@@ -8,7 +8,7 @@ import { AuthService } from '../../core/services/auth/auth.service';
 import { CmsService } from '../../core/services/api/cms.service';
 import { RouteLoadingService } from '../../core/services/route-loading.service';
 import { LucideAngularModule, ExternalLink } from 'lucide-angular';
-import { Subscription } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
 
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { RouteLoadingComponent } from '../../shared/components/route-loading/route-loading.component';
@@ -42,25 +42,41 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
 
   constructor() {
     afterNextRender(async () => {
-      this.cms = await this.cmsService.getHomeCMS();
-      this.isLoading.set(false);
+      try {
+        this.cms = await this.cmsService.getHomeCMS();
+      } catch (error) {
+        console.error('Failed to load CMS data:', error);
+      } finally {
+        this.isLoading.set(false);
+      }
     });
   }
 
   ngOnInit() {
-    // Listen to router events to show/hide loading screen
-    this.routerSubscription = this.router.events.subscribe(event => {
-      if (event instanceof RouteConfigLoadStart) {
-        // Lazy-loaded module/component is being loaded
-        this.routeLoadingService.show();
-      } else if (event instanceof RouteConfigLoadEnd ||
-        event instanceof NavigationEnd ||
-        event instanceof NavigationCancel ||
-        event instanceof NavigationError) {
-        // Loading complete or navigation finished/cancelled/errored
-        this.routeLoadingService.hide();
-      }
-    });
+    // Optimized router event handling
+    this.routerSubscription = this.router.events
+      .pipe(
+        filter(event => 
+          event instanceof RouteConfigLoadStart ||
+          event instanceof RouteConfigLoadEnd ||
+          event instanceof NavigationEnd ||
+          event instanceof NavigationCancel ||
+          event instanceof NavigationError
+        )
+      )
+      .subscribe(event => {
+        if (event instanceof RouteConfigLoadStart) {
+          this.routeLoadingService.show();
+        } else {
+          this.routeLoadingService.hide();
+        }
+        
+        // Close mobile menu and dropdowns on navigation
+        if (event instanceof NavigationEnd) {
+          this.isMobileMenuOpen = false;
+          this.isUserDropdownOpen = false;
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -84,5 +100,13 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
 
   toggleTheme() {
     this.themeService.toggleTheme();
+  }
+
+  closeUserDropdown() {
+    this.isUserDropdownOpen = false;
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen = false;
   }
 }
