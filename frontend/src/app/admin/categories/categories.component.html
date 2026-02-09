@@ -1,70 +1,213 @@
 <div class="crud-container">
-    <h1>Manage Categories</h1>
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <lucide-icon [img]="FolderTree" [size]="32"></lucide-icon>
+                <span>Manage Categories</span>
+            </h1>
+            <p class="page-subtitle">Organize your product categories and subcategories</p>
+        </div>
+    </div>
 
     <div class="crud-layout">
-        <!-- Add Category Form -->
-        @if (authService.hasPermission('CREATE_CATEGORY') || (isEditing &&
-        authService.hasPermission('UPDATE_CATEGORY'))) {
-        <div class="form-card">
-            <h3>{{ isEditing ? 'Edit Category' : 'Add New Category' }}</h3>
-            <form (ngSubmit)="addCategory()">
-                <div class="form-group">
-                    <label>Category Name</label>
-                    <input type="text" [(ngModel)]="newCategory.name" name="name" (input)="generateSlug()" required
-                        placeholder="e.g. Furniture">
-                </div>
-                <div class="form-group">
-                    <label>Slug</label>
-                    <input type="text" [(ngModel)]="newCategory.slug" name="slug" required placeholder="e.g. furniture">
-                </div>
-                <div class="actions">
-                    <button type="submit" class="btn-primary" [disabled]="!newCategory.name || !newCategory.slug">
-                        {{ isEditing ? 'Update' : 'Add' }} Category
-                    </button>
+        <!-- Add/Edit Category Form -->
+        @if (authService.hasPermission('CREATE_CATEGORY') || (isEditing && authService.hasPermission('UPDATE_CATEGORY'))) {
+            <div class="form-card glass-card">
+                <div class="form-header">
+                    <h3>
+                        <lucide-icon [img]="isEditing ? Edit : Plus" [size]="20"></lucide-icon>
+                        <span>{{ isEditing ? 'Edit Category' : 'Add New Category' }}</span>
+                    </h3>
                     @if (isEditing) {
-                    <button type="button" (click)="resetForm(); isEditing = false" class="btn-secondary">Cancel</button>
+                        <button type="button" class="btn-icon-sm" (click)="resetForm()" title="Cancel">
+                            <lucide-icon [img]="X" [size]="18"></lucide-icon>
+                        </button>
                     }
                 </div>
-            </form>
-        </div>
+
+                <form (ngSubmit)="addCategory()">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="FolderTree" [size]="16"></lucide-icon>
+                            <span>Category Name</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-input"
+                            [(ngModel)]="newCategory.name" 
+                            name="name" 
+                            (input)="generateSlug()" 
+                            required 
+                            placeholder="e.g. Electronics"
+                            [disabled]="isSaving">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
+                            <span>Slug (URL-friendly)</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-input"
+                            [(ngModel)]="newCategory.slug" 
+                            name="slug" 
+                            required 
+                            placeholder="e.g. electronics"
+                            [disabled]="isSaving">
+                        <small class="form-hint">Auto-generated from name, or enter custom slug</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button 
+                            type="submit" 
+                            class="btn-primary"
+                            [disabled]="!validateCategory() || isSaving">
+                            @if (isSaving) {
+                                <span class="spinner-small"></span>
+                                <span>{{ isEditing ? 'Updating...' : 'Adding...' }}</span>
+                            } @else {
+                                <lucide-icon [img]="isEditing ? Edit : Plus" [size]="18"></lucide-icon>
+                                <span>{{ isEditing ? 'Update' : 'Add' }} Category</span>
+                            }
+                        </button>
+                        @if (isEditing) {
+                            <button type="button" (click)="resetForm()" class="btn-secondary" [disabled]="isSaving">
+                                Cancel
+                            </button>
+                        }
+                    </div>
+                </form>
+            </div>
         }
 
         <!-- Categories List -->
-        <div class="list-card">
-            <h3>Existing Categories</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Slug</th>
-                        <th>Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (cat of categories; track cat.id) {
-                    <tr>
-                        <td>{{ cat.name }}</td>
-                        <td>{{ cat.slug }}</td>
-                        <td>
-                            <span class="badge" [ngClass]="{'main': !cat.parentId, 'sub': cat.parentId}">
-                                {{ cat.parentId ? 'Sub Category' : 'Main Category' }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="table-actions">
+        <div class="list-card glass-card">
+            <div class="list-header">
+                <h3>
+                    <lucide-icon [img]="Layers" [size]="20"></lucide-icon>
+                    <span>Existing Categories</span>
+                </h3>
+                
+                <!-- Search Bar -->
+                <div class="search-box">
+                    <lucide-icon [img]="Search" [size]="18"></lucide-icon>
+                    <input 
+                        type="text" 
+                        class="search-input"
+                        [(ngModel)]="searchQuery"
+                        placeholder="Search categories..."
+                        [disabled]="isLoading">
+                </div>
+            </div>
+
+            @if (isLoading) {
+                <div class="loading-state">
+                    <div class="spinner-large"></div>
+                    <p>Loading categories...</p>
+                </div>
+            } @else if (filteredCategories.length === 0) {
+                <div class="empty-state">
+                    <lucide-icon [img]="FolderTree" [size]="48"></lucide-icon>
+                    <p>{{ searchQuery ? 'No categories found matching your search' : 'No categories yet. Create your first category!' }}</p>
+                </div>
+            } @else {
+                <!-- Desktop Table -->
+                <div class="table-wrapper desktop-only">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Slug</th>
+                                <th>Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (cat of filteredCategories; track cat.id) {
+                                <tr>
+                                    <td>
+                                        <div class="category-cell">
+                                            <div class="category-icon">
+                                                <lucide-icon [img]="getCategoryIcon(cat)" [size]="20"></lucide-icon>
+                                            </div>
+                                            <strong>{{ cat.name }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <code class="slug-code">{{ cat.slug }}</code>
+                                    </td>
+                                    <td>
+                                        <span class="badge" [ngClass]="getCategoryBadgeClass(cat)">
+                                            {{ cat.parentId ? 'Sub Category' : 'Main Category' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="table-actions">
+                                            @if (authService.hasPermission('UPDATE_CATEGORY')) {
+                                                <button 
+                                                    class="btn-icon" 
+                                                    (click)="editCategory(cat)"
+                                                    title="Edit category">
+                                                    <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                                </button>
+                                            }
+                                            @if (authService.hasPermission('DELETE_CATEGORY')) {
+                                                <button 
+                                                    class="btn-icon btn-delete" 
+                                                    (click)="deleteCategory(cat.id)"
+                                                    title="Delete category">
+                                                    <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="mobile-cards mobile-only">
+                    @for (cat of filteredCategories; track cat.id) {
+                        <div class="category-card">
+                            <div class="category-card-header">
+                                <div class="category-icon-large">
+                                    <lucide-icon [img]="getCategoryIcon(cat)" [size]="24"></lucide-icon>
+                                </div>
+                                <div class="category-card-info">
+                                    <h4>{{ cat.name }}</h4>
+                                    <code class="slug-code">{{ cat.slug }}</code>
+                                </div>
+                                <span class="badge" [ngClass]="getCategoryBadgeClass(cat)">
+                                    {{ cat.parentId ? 'Sub' : 'Main' }}
+                                </span>
+                            </div>
+
+                            <div class="category-card-actions">
                                 @if (authService.hasPermission('UPDATE_CATEGORY')) {
-                                <button class="btn btn-sm" (click)="editCategory(cat)">Edit</button>
+                                    <button 
+                                        class="btn-secondary btn-sm" 
+                                        (click)="editCategory(cat)">
+                                        <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                        <span>Edit</span>
+                                    </button>
                                 }
                                 @if (authService.hasPermission('DELETE_CATEGORY')) {
-                                <button class="btn btn-sm delete" (click)="deleteCategory(cat.id)">Delete</button>
+                                    <button 
+                                        class="btn-danger btn-sm" 
+                                        (click)="deleteCategory(cat.id)">
+                                        <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                                        <span>Delete</span>
+                                    </button>
                                 }
                             </div>
-                        </td>
-                    </tr>
+                        </div>
                     }
-                </tbody>
-            </table>
+                </div>
+            }
         </div>
     </div>
 </div>
