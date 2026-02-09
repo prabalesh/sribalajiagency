@@ -1,272 +1,642 @@
-<div class="crud-container">
-    <header class="page-header">
-        <h1>Advanced Home CMS</h1>
-        <p>Take full control of your storefront's landing experience</p>
+<div class="cms-container">
+    <!-- Header -->
+    <header class="cms-header">
+        <div class="header-content">
+            <div class="header-title">
+                <h1>Home CMS Manager</h1>
+                <p class="header-subtitle">Manage your storefront landing experience</p>
+            </div>
+            <div class="header-actions">
+                @if (authService.hasPermission('UPDATE_CMS')) {
+                    <button 
+                        type="button" 
+                        class="btn-save" 
+                        (click)="saveCMS()"
+                        [disabled]="isSaving || isUploading()"
+                        [class.saving]="isSaving">
+                        @if (isSaving) {
+                            <span class="spinner"></span>
+                            <span>Saving...</span>
+                        } @else {
+                            <svg class="icon-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            <span>Save Changes</span>
+                        }
+                    </button>
+                }
+            </div>
+        </div>
     </header>
 
-    <div class="cms-tabs">
-        <button [class.active]="activeTab === 'hero'" (click)="activeTab = 'hero'">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" class="tab-icon">
-                <path
-                    d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.71-2.13.71-2.13l-1.58-1.58s-1.29 0-2.13.71zm9.41-9.41l5.66 5.66-1.41 1.41-5.66-5.66 1.41-1.41z">
-                </path>
-                <path d="M11.5 5.5l.5-.5c.8-.8 2.04-.8 2.84 0l1.42 1.42c.8.8.8 2.04 0 2.84l-.5.5L11.5 5.5z"></path>
-            </svg>
-            Hero Slides
-        </button>
-        <button [class.active]="activeTab === 'sections'" (click)="activeTab = 'sections'">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" class="tab-icon">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="3" y1="9" x2="21" y2="9"></line>
-                <line x1="3" y1="15" x2="21" y2="15"></line>
-                <line x1="9" y1="3" x2="9" y2="21"></line>
-                <line x1="15" y1="3" x2="15" y2="21"></line>
-            </svg>
-            Sections
-        </button>
-        <button [class.active]="activeTab === 'about'" (click)="activeTab = 'about'">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" class="tab-icon">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-            About Us
-        </button>
-        <button [class.active]="activeTab === 'social'" (click)="activeTab = 'social'">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" class="tab-icon">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
-                </path>
-            </svg>
-            Social
-        </button>
-    </div>
+    <!-- Loading State -->
+    @if (isLoading) {
+        <div class="loading-container">
+            <div class="spinner-large"></div>
+            <p>Loading CMS data...</p>
+        </div>
+    } @else {
+        <!-- Tab Navigation -->
+        <nav class="cms-tabs">
+            <button 
+                class="tab-button"
+                [class.active]="activeTab === 'hero'" 
+                (click)="setActiveTab('hero')"
+                type="button">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <path d="m21 15-5-5L5 21"></path>
+                </svg>
+                <span>Hero Section</span>
+            </button>
+            <button 
+                class="tab-button"
+                [class.active]="activeTab === 'sections'" 
+                (click)="setActiveTab('sections')"
+                type="button">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Sections</span>
+            </button>
+            <button 
+                class="tab-button"
+                [class.active]="activeTab === 'about'" 
+                (click)="setActiveTab('about')"
+                type="button">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                <span>About</span>
+            </button>
+            <button 
+                class="tab-button"
+                [class.active]="activeTab === 'social'" 
+                (click)="setActiveTab('social')"
+                type="button">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                </svg>
+                <span>Social</span>
+            </button>
+        </nav>
 
-    <div class="form-card animate-fade">
-        <form (ngSubmit)="saveCMS()">
-
-
-            <!-- Hero Slides Tab -->
+        <!-- Tab Content -->
+        <div class="cms-content">
+            <!-- Hero Tab -->
             @if (activeTab === 'hero') {
-            <div class="tab-content">
-                <div class="section-title">
-                    <h3>Hero Section Layout</h3>
-                    <select [(ngModel)]="cms.heroType" name="heroType" class="layout-select"
-                        [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        <option value="standard">Classic Showcase</option>
-                        <option value="carousel">Modern Carousel</option>
-                    </select>
-                </div>
+                <div class="tab-panel animate-fade">
+                    <div class="panel-header">
+                        <div>
+                            <h2 class="panel-title">Hero Section</h2>
+                            <p class="panel-description">Configure your homepage hero banner</p>
+                        </div>
+                        <select 
+                            [(ngModel)]="cms.heroType" 
+                            (ngModelChange)="onCmsChange()"
+                            name="heroType" 
+                            class="hero-type-select"
+                            [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                            <option value="standard">Standard Hero</option>
+                            <option value="carousel">Carousel Slides</option>
+                        </select>
+                    </div>
 
-                @if (cms.heroType === 'standard') {
-                <div class="item-card">
-                    <h4>Standard Hero Content</h4>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Badge</label>
-                            <input type="text" [(ngModel)]="cms.heroBadge" name="heroBadge"
-                                placeholder="AUTHORIZED DEALER" [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        </div>
-                        <div class="form-group">
-                            <label>Main Title</label>
-                            <input type="text" [(ngModel)]="cms.heroTitle" name="heroTitle" placeholder="Title"
-                                [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Subtitle / Description</label>
-                            <textarea [(ngModel)]="cms.heroSubtitle" name="heroSubtitle" rows="3"
-                                [disabled]="!authService.hasPermission('UPDATE_CMS')"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Action Text</label>
-                            <input type="text" [(ngModel)]="cms.heroLinkText" name="heroLinkText"
-                                placeholder="Explore Now" [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        </div>
-                        <div class="form-group">
-                            <label>Action Link</label>
-                            <input type="text" [(ngModel)]="cms.heroLink" name="heroLink" placeholder="/products"
-                                [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Showcase Image</label>
-                            <div class="image-upload-row">
-                                @if (cms.heroImage) {
-                                <img [src]="cms.heroImage.startsWith('http') ? cms.heroImage : 'http://localhost:3000' + cms.heroImage"
-                                    class="preview-img">
-                                }
-                                @if (authService.hasPermission('UPLOAD_CMS_ASSETS')) {
-                                <input type="file" (change)="onFileSelected($event, cms, 'heroImage')" accept="image/*">
-                                }
+                    @if (cms.heroType === 'standard') {
+                        <div class="content-card">
+                            <h3 class="card-title">Standard Hero Configuration</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Badge Text</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-input"
+                                        [(ngModel)]="cms.heroBadge"
+                                        (ngModelChange)="onCmsChange()"
+                                        name="heroBadge"
+                                        placeholder="e.g., AUTHORIZED DEALER"
+                                        [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Hero Title</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-input"
+                                        [(ngModel)]="cms.heroTitle"
+                                        (ngModelChange)="onCmsChange()"
+                                        name="heroTitle"
+                                        placeholder="Main headline"
+                                        [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label class="form-label">Hero Subtitle</label>
+                                    <textarea 
+                                        class="form-textarea"
+                                        [(ngModel)]="cms.heroSubtitle"
+                                        (ngModelChange)="onCmsChange()"
+                                        name="heroSubtitle"
+                                        rows="3"
+                                        placeholder="Supporting description text"
+                                        [disabled]="!authService.hasPermission('UPDATE_CMS')"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Button Text</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-input"
+                                        [(ngModel)]="cms.heroLinkText"
+                                        (ngModelChange)="onCmsChange()"
+                                        name="heroLinkText"
+                                        placeholder="e.g., Explore Collection"
+                                        [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Button Link</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-input"
+                                        [(ngModel)]="cms.heroLink"
+                                        (ngModelChange)="onCmsChange()"
+                                        name="heroLink"
+                                        placeholder="/products"
+                                        [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label class="form-label">Hero Image</label>
+                                    <div class="image-upload-container">
+                                        @if (cms.heroImage) {
+                                            <div class="image-preview-wrapper">
+                                                <img [src]="getImageUrl(cms.heroImage)" alt="Hero" class="image-preview">
+                                                @if (authService.hasPermission('UPDATE_CMS')) {
+                                                    <button 
+                                                        type="button" 
+                                                        class="btn-remove-image"
+                                                        (click)="removeImage(cms, 'heroImage')">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                        </svg>
+                                                    </button>
+                                                }
+                                            </div>
+                                        }
+                                        @if (authService.hasPermission('UPLOAD_CMS_ASSETS')) {
+                                            <label class="file-upload-label">
+                                                <input 
+                                                    type="file" 
+                                                    class="file-upload-input"
+                                                    (change)="onFileSelected($event, cms, 'heroImage')" 
+                                                    accept="image/*">
+                                                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                                </svg>
+                                                <span>{{ cms.heroImage ? 'Change Image' : 'Upload Image' }}</span>
+                                            </label>
+                                        }
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                }
+                    }
 
-                @if (cms.heroType === 'carousel') {
-                <div class="carousel-management">
-                    <div class="section-title">
-                        <h4>Hero Slides</h4>
-                        @if (authService.hasPermission('UPDATE_CMS')) {
-                        <button type="button" class="btn-sm" (click)='addSlide()'>+ Add Slide</button>
-                        }
-                    </div>
+                    @if (cms.heroType === 'carousel') {
+                        <div class="carousel-section">
+                            <div class="section-header">
+                                <h3 class="card-title">Carousel Slides</h3>
+                                @if (authService.hasPermission('UPDATE_CMS')) {
+                                    <button type="button" class="btn-add" (click)="addSlide()">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        Add Slide
+                                    </button>
+                                }
+                            </div>
 
-                    @for (slide of cms.heroSlides; track $index) {
-                    <div class="item-card slide-item">
-                        <div class="item-header">
-                            <h5>Slide #{{ $index + 1 }}</h5>
-                            @if (authService.hasPermission('UPDATE_CMS')) {
-                            <button type="button" class="btn-sm delete" (click)="removeSlide($index)">Remove</button>
+                            @if (cms.heroSlides.length === 0) {
+                                <div class="empty-state">
+                                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <path d="m21 15-5-5L5 21"></path>
+                                    </svg>
+                                    <p>No slides yet. Add your first slide to get started!</p>
+                                </div>
+                            }
+
+                            @for (slide of cms.heroSlides; track trackByIndex($index)) {
+                                <div class="content-card slide-card">
+                                    <div class="slide-header">
+                                        <div class="slide-number">Slide {{ $index + 1 }}</div>
+                                        <div class="slide-actions">
+                                            @if (authService.hasPermission('UPDATE_CMS')) {
+                                                @if ($index > 0) {
+                                                    <button 
+                                                        type="button" 
+                                                        class="btn-icon"
+                                                        (click)="moveSlide($index, 'up')"
+                                                        title="Move up">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                                        </svg>
+                                                    </button>
+                                                }
+                                                @if ($index < cms.heroSlides.length - 1) {
+                                                    <button 
+                                                        type="button" 
+                                                        class="btn-icon"
+                                                        (click)="moveSlide($index, 'down')"
+                                                        title="Move down">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                                        </svg>
+                                                    </button>
+                                                }
+                                                <button 
+                                                    type="button" 
+                                                    class="btn-icon btn-delete"
+                                                    (click)="removeSlide($index)"
+                                                    title="Remove slide">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                    </svg>
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">Badge</label>
+                                            <input 
+                                                type="text" 
+                                                class="form-input"
+                                                [(ngModel)]="slide.badge"
+                                                (ngModelChange)="onCmsChange()"
+                                                [name]="'badge-' + $index"
+                                                placeholder="NEW ARRIVAL"
+                                                [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Title</label>
+                                            <input 
+                                                type="text" 
+                                                class="form-input"
+                                                [(ngModel)]="slide.title"
+                                                (ngModelChange)="onCmsChange()"
+                                                [name]="'title-' + $index"
+                                                placeholder="Slide title"
+                                                [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                        </div>
+                                        <div class="form-group full-width">
+                                            <label class="form-label">Subtitle</label>
+                                            <textarea 
+                                                class="form-textarea"
+                                                [(ngModel)]="slide.subtitle"
+                                                (ngModelChange)="onCmsChange()"
+                                                [name]="'subtitle-' + $index"
+                                                rows="2"
+                                                placeholder="Supporting text"
+                                                [disabled]="!authService.hasPermission('UPDATE_CMS')"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Button Text</label>
+                                            <input 
+                                                type="text" 
+                                                class="form-input"
+                                                [(ngModel)]="slide.linkText"
+                                                (ngModelChange)="onCmsChange()"
+                                                [name]="'linkText-' + $index"
+                                                placeholder="Shop Now"
+                                                [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Button Link</label>
+                                            <input 
+                                                type="text" 
+                                                class="form-input"
+                                                [(ngModel)]="slide.link"
+                                                (ngModelChange)="onCmsChange()"
+                                                [name]="'link-' + $index"
+                                                placeholder="/products"
+                                                [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                        </div>
+                                        <div class="form-group full-width">
+                                            <label class="form-label">Slide Image</label>
+                                            <div class="image-upload-container">
+                                                @if (slide.image) {
+                                                    <div class="image-preview-wrapper">
+                                                        <img [src]="getImageUrl(slide.image)" alt="Slide" class="image-preview">
+                                                        @if (authService.hasPermission('UPDATE_CMS')) {
+                                                            <button 
+                                                                type="button" 
+                                                                class="btn-remove-image"
+                                                                (click)="removeImage(slide, 'image')">
+                                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                                </svg>
+                                                            </button>
+                                                        }
+                                                    </div>
+                                                }
+                                                @if (authService.hasPermission('UPLOAD_CMS_ASSETS')) {
+                                                    <label class="file-upload-label">
+                                                        <input 
+                                                            type="file" 
+                                                            class="file-upload-input"
+                                                            (change)="onFileSelected($event, slide, 'image')" 
+                                                            accept="image/*">
+                                                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                                        </svg>
+                                                        <span>{{ slide.image ? 'Change' : 'Upload' }}</span>
+                                                    </label>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             }
                         </div>
+                    }
+                </div>
+            }
+
+            <!-- Sections Tab -->
+            @if (activeTab === 'sections') {
+                <div class="tab-panel animate-fade">
+                    <div class="panel-header">
+                        <div>
+                            <h2 class="panel-title">Section Visibility</h2>
+                            <p class="panel-description">Control which sections appear on the homepage</p>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="toggle-grid">
+                            <label class="toggle-card">
+                                <input 
+                                    type="checkbox" 
+                                    class="toggle-checkbox"
+                                    [(ngModel)]="cms.showCategories"
+                                    (ngModelChange)="onCmsChange()"
+                                    name="showCategories"
+                                    [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                <div class="toggle-content">
+                                    <div class="toggle-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="14" width="7" height="7"></rect>
+                                            <rect x="3" y="14" width="7" height="7"></rect>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="toggle-title">Categories Grid</div>
+                                        <div class="toggle-description">Display product categories section</div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="toggle-card">
+                                <input 
+                                    type="checkbox" 
+                                    class="toggle-checkbox"
+                                    [(ngModel)]="cms.showFeatured"
+                                    (ngModelChange)="onCmsChange()"
+                                    name="showFeatured"
+                                    [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                <div class="toggle-content">
+                                    <div class="toggle-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="toggle-title">Featured Products</div>
+                                        <div class="toggle-description">Show featured products showcase</div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="toggle-card">
+                                <input 
+                                    type="checkbox" 
+                                    class="toggle-checkbox"
+                                    [(ngModel)]="cms.showBrands"
+                                    (ngModelChange)="onCmsChange()"
+                                    name="showBrands"
+                                    [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                <div class="toggle-content">
+                                    <div class="toggle-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="toggle-title">Brand Showcase</div>
+                                        <div class="toggle-description">Display partner brands section</div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="toggle-card">
+                                <input 
+                                    type="checkbox" 
+                                    class="toggle-checkbox"
+                                    [(ngModel)]="cms.showTrustMarkers"
+                                    (ngModelChange)="onCmsChange()"
+                                    name="showTrustMarkers"
+                                    [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                <div class="toggle-content">
+                                    <div class="toggle-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="toggle-title">Trust Markers</div>
+                                        <div class="toggle-description">Show trust badges and guarantees</div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- About Tab -->
+            @if (activeTab === 'about') {
+                <div class="tab-panel animate-fade">
+                    <div class="panel-header">
+                        <div>
+                            <h2 class="panel-title">About Section</h2>
+                            <p class="panel-description">Tell your brand story</p>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
                         <div class="form-grid">
-                            <div class="form-group">
-                                <label>Badge</label>
-                                <input type="text" [(ngModel)]="slide.badge" name="badge-{{$index}}"
-                                    placeholder="NEW ARRIVAL" [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                            </div>
-                            <div class="form-group">
-                                <label>Title</label>
-                                <input type="text" [(ngModel)]="slide.title" name="title-{{$index}}"
-                                    placeholder="Slide Title" [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                            </div>
                             <div class="form-group full-width">
-                                <label>Subtitle</label>
-                                <textarea [(ngModel)]="slide.subtitle" name="sub-{{$index}}" rows="2"
-                                    [disabled]="!authService.hasPermission('UPDATE_CMS')"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>Button Text</label>
-                                <input type="text" [(ngModel)]="slide.linkText" name="bt-{{$index}}"
-                                    placeholder="Shop Now" [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                            </div>
-                            <div class="form-group">
-                                <label>Button Link</label>
-                                <input type="text" [(ngModel)]="slide.link" name="bl-{{$index}}" placeholder="/products"
+                                <label class="form-label">Section Title</label>
+                                <input 
+                                    type="text" 
+                                    class="form-input"
+                                    [(ngModel)]="cms.aboutTitle"
+                                    (ngModelChange)="onCmsChange()"
+                                    name="aboutTitle"
+                                    placeholder="About Our Company"
                                     [disabled]="!authService.hasPermission('UPDATE_CMS')">
                             </div>
                             <div class="form-group full-width">
-                                <label>Slide Image</label>
-                                <div class="image-upload-row">
-                                    @if (slide.image) {
-                                    <img [src]="slide.image.startsWith('http') ? slide.image : 'http://localhost:3000' + slide.image"
-                                        class="preview-img">
+                                <label class="form-label">About Content</label>
+                                <textarea 
+                                    class="form-textarea"
+                                    [(ngModel)]="cms.aboutContent"
+                                    (ngModelChange)="onCmsChange()"
+                                    name="aboutContent"
+                                    rows="6"
+                                    placeholder="Share your company's story, values, and mission..."
+                                    [disabled]="!authService.hasPermission('UPDATE_CMS')"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Section Image</label>
+                                <div class="image-upload-container">
+                                    @if (cms.aboutImage) {
+                                        <div class="image-preview-wrapper">
+                                            <img [src]="getImageUrl(cms.aboutImage)" alt="About" class="image-preview">
+                                            @if (authService.hasPermission('UPDATE_CMS')) {
+                                                <button 
+                                                    type="button" 
+                                                    class="btn-remove-image"
+                                                    (click)="removeImage(cms, 'aboutImage')">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </button>
+                                            }
+                                        </div>
                                     }
                                     @if (authService.hasPermission('UPLOAD_CMS_ASSETS')) {
-                                    <input type="file" (change)="onFileSelected($event, slide)" accept="image/*">
+                                        <label class="file-upload-label">
+                                            <input 
+                                                type="file" 
+                                                class="file-upload-input"
+                                                (change)="onFileSelected($event, cms, 'aboutImage')" 
+                                                accept="image/*">
+                                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="17 8 12 3 7 8"></polyline>
+                                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                                            </svg>
+                                            <span>{{ cms.aboutImage ? 'Change Image' : 'Upload Image' }}</span>
+                                        </label>
                                     }
                                 </div>
                             </div>
                         </div>
                     </div>
-                    }
                 </div>
-                }
-            </div>
-            }
-
-            <!-- Sections Tab -->
-            @if (activeTab === 'sections') {
-            <div class="tab-content">
-                <h3>Visibility Flags</h3>
-                <div class="toggle-grid">
-                    <label class="toggle-item">
-                        <input type="checkbox" [(ngModel)]="cms.showCategories" name="showCategories"
-                            [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        <span>Show Categories Grid</span>
-                    </label>
-                    <label class="toggle-item">
-                        <input type="checkbox" [(ngModel)]="cms.showFeatured" name="showFeatured"
-                            [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        <span>Show Featured Products</span>
-                    </label>
-                    <label class="toggle-item">
-                        <input type="checkbox" [(ngModel)]="cms.showBrands" name="showBrands"
-                            [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        <span>Show Brand Shelf</span>
-                    </label>
-                    <label class="toggle-item">
-                        <input type="checkbox" [(ngModel)]="cms.showTrustMarkers" name="showTrustMarkers"
-                            [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        <span>Show Trust Features</span>
-                    </label>
-                </div>
-            </div>
-            }
-
-            <!-- About Tab -->
-            @if (activeTab === 'about') {
-            <div class="tab-content">
-                <h3>About Section</h3>
-                <div class="form-grid">
-                    <div class="form-group full-width">
-                        <label>Main Title</label>
-                        <input type="text" [(ngModel)]="cms.aboutTitle" name="aboutTitle"
-                            [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Story Content</label>
-                        <textarea [(ngModel)]="cms.aboutContent" name="aboutContent" rows="6"
-                            [disabled]="!authService.hasPermission('UPDATE_CMS')"></textarea>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Section Image</label>
-                        <div class="image-upload-row">
-                            @if (cms.aboutImage) {
-                            <img [src]="'http://localhost:3000' + cms.aboutImage" class="preview-img">
-                            }
-                            @if (authService.hasPermission('UPLOAD_CMS_ASSETS')) {
-                            <input type="file" (change)="onFileSelected($event, cms, 'aboutImage')" accept="image/*">
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
             }
 
             <!-- Social Tab -->
             @if (activeTab === 'social') {
-            <div class="tab-content">
-                <div class="section-title">
-                    <h3>Social Media Links</h3>
-                    @if (authService.hasPermission('UPDATE_CMS')) {
-                    <button type="button" class="btn-sm" (click)="addSocialLink()">+ Add Link</button>
-                    }
-                </div>
-                @for (link of cms.socialLinks; track $index) {
-                <div class="item-card social-item">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Platform</label>
-                            <input type="text" [(ngModel)]="link.platform" name="plat-{{$index}}"
-                                placeholder="Instagram" [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                <div class="tab-panel animate-fade">
+                    <div class="panel-header">
+                        <div>
+                            <h2 class="panel-title">Social Media</h2>
+                            <p class="panel-description">Connect your social media accounts</p>
                         </div>
-                        <div class="form-group">
-                            <label>URL</label>
-                            <input type="text" [(ngModel)]="link.url" name="surl-{{$index}}" placeholder="https://..."
-                                [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        </div>
+                        @if (authService.hasPermission('UPDATE_CMS')) {
+                            <button type="button" class="btn-add" (click)="addSocialLink()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Add Link
+                            </button>
+                        }
                     </div>
-                    @if (authService.hasPermission('UPDATE_CMS')) {
-                    <button type="button" class="btn-sm delete" (click)="removeSocialLink($index)">Remove</button>
+
+                    @if (cms.socialLinks.length === 0) {
+                        <div class="empty-state">
+                            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                            </svg>
+                            <p>No social links yet. Add your first social media link!</p>
+                        </div>
+                    }
+
+                    @for (link of cms.socialLinks; track trackByIndex($index)) {
+                        <div class="content-card social-card">
+                            <div class="social-header">
+                                <span class="social-number">Link {{ $index + 1 }}</span>
+                                @if (authService.hasPermission('UPDATE_CMS')) {
+                                    <button 
+                                        type="button" 
+                                        class="btn-icon btn-delete"
+                                        (click)="removeSocialLink($index)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                    </button>
+                                }
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Platform</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-input"
+                                        [(ngModel)]="link.platform"
+                                        (ngModelChange)="onCmsChange()"
+                                        [name]="'platform-' + $index"
+                                        placeholder="e.g., Facebook, Instagram"
+                                        [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Icon Name</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-input"
+                                        [(ngModel)]="link.icon"
+                                        (ngModelChange)="onCmsChange()"
+                                        [name]="'icon-' + $index"
+                                        placeholder="e.g., facebook, instagram"
+                                        [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label class="form-label">URL</label>
+                                    <input 
+                                        type="url" 
+                                        class="form-input"
+                                        [(ngModel)]="link.url"
+                                        (ngModelChange)="onCmsChange()"
+                                        [name]="'url-' + $index"
+                                        placeholder="https://..."
+                                        [disabled]="!authService.hasPermission('UPDATE_CMS')">
+                                </div>
+                            </div>
+                        </div>
                     }
                 </div>
-                }
-            </div>
             }
-
-            <div class="actions main-actions">
-                @if ((authService.hasPermission('UPDATE_CMS'))) {
-                <button type="submit" class="btn-primary" [disabled]="isSaving">
-                    {{ isSaving ? 'Publishing...' : 'Save All Changes' }}
-                </button>
-                }
-            </div>
-        </form>
-    </div>
+        </div>
+    }
 </div>

@@ -1,9 +1,12 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CmsService } from '../../core/services/api/cms.service';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { CmsService, HomeCMS, HeroSlide, SocialLink } from '../../core/services/api/cms.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+
+type TabType = 'hero' | 'sections' | 'about' | 'social';
 
 @Component({
     selector: 'app-admin-home-cms',
@@ -12,75 +15,278 @@ import { ToastService } from '../../core/services/toast.service';
     templateUrl: './home-cms.component.html',
     styleUrl: './home-cms.component.scss'
 })
-export class HomeCMSComponent implements OnInit {
+export class HomeCMSComponent implements OnInit, OnDestroy {
     private cmsService = inject(CmsService);
     public authService = inject(AuthService);
-    public toastService = inject(ToastService);
+    private toastService = inject(ToastService);
 
-    cms: any = {
+    cms: HomeCMS = {
+        id: '',
+        heroType: 'standard',
+        heroBadge: '',
+        heroTitle: '',
+        heroSubtitle: '',
+        heroImage: '',
+        heroLink: '',
+        heroLinkText: '',
         heroSlides: [],
-        socialLinks: [],
         showCategories: true,
         showFeatured: true,
         showBrands: true,
-        showTrustMarkers: true
+        showTrustMarkers: true,
+        aboutTitle: '',
+        aboutContent: '',
+        aboutImage: '',
+        socialLinks: [],
+        updatedAt: new Date()
     };
-    activeTab: 'hero' | 'sections' | 'about' | 'social' | 'settings' = 'hero';
+
+    activeTab: TabType = 'hero';
     isSaving = false;
+    isLoading = true;
+    uploadingFiles: Set<string> = new Set();
+
+    // Auto-save with debouncing
+    private autoSaveSubject = new Subject<Partial<HomeCMS>>();
+    private destroy$ = new Subject<void>();
 
     async ngOnInit() {
-        this.loadCMS();
+        await this.loadCMS();
+        this.setupAutoSave();
+    }
+
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    private setupAutoSave() {
+        // Debounce auto-save by 2 seconds
+        this.autoSaveSubject.pipe(
+            debounceTime(2000),
+            distinctUntilChanged()
+        ).subscribe(async (data) => {
+            if (this.authService.hasPermission('UPDATE_CMS')) {
+                await this.saveCMSInternal(false);
+            }
+        });
     }
 
     async loadCMS() {
-        const data = await this.cmsService.getHomeCMS();
-        this.cms = {
-            ...this.cms,
-            ...data
-        };
-        if (!this.cms.socialLinks) this.cms.socialLinks = [];
+        try {
+            this.isLoading = true;
+            const data = await this.cmsService.getHomeCMS();
+            this.cms = {
+                ...this.cms,
+                ...data,
+                heroSlides: data.heroSlides || [],
+                socialLinks: data.socialLinks || []
+            };
+        } catch (error) {
+            const errorMessage = this.extractErrorMessage(error);
+            this.toastService.error(errorMessage || 'Failed to load CMS data');
+            console.error('Error loading CMS:', error);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    onCmsChange() {
+        // Trigger auto-save on any change
+        this.autoSaveSubject.next(this.cms);
     }
 
     async saveCMS() {
+        await this.saveCMSInternal(true);
+    }
+
+    private async saveCMSInternal(showToast: boolean = true) {
+        if (this.isSaving) return;
+        
         this.isSaving = true;
         try {
             await this.cmsService.updateHomeCMS(this.cms);
-            this.toastService.success('CMS updated successfully!');
+            if (showToast) {
+                this.toastService.success('CMS updated successfully!');
+            }
         } catch (error) {
-            this.toastService.error('Failed to update CMS. Please try again.');
+            if (showToast) {
+                const errorMessage = this.extractErrorMessage(error);
+                this.toastService.error(errorMessage || 'Failed to update CMS');
+            }
+            console.error('Error updating CMS:', error);
         } finally {
             this.isSaving = false;
         }
     }
 
+    setActiveTab(tab: TabType) {
+        this.activeTab = tab;
+    }
+
     addSlide() {
-        this.cms.heroSlides.push({
+        const newSlide: HeroSlide = {
             title: '',
             subtitle: '',
             badge: '',
             image: '',
-            link: '',
-            linkText: ''
-        });
+            link: '/products',
+            linkText: 'Shop Now'
+        };
+        this.cms.heroSlides.push(newSlide);
+        this.onCmsChange();
     }
 
     removeSlide(index: number) {
-        this.cms.heroSlides.splice(index, 1);
+        if (confirm('Are you sure you want to remove this slide?')) {
+            const slide = this.cms.heroSlides[index];
+            // Delete image if exists
+            if (slide.image) {
+                this.cmsService.deleteCmsFile(slide.image).catch(err => {
+                    console.error('Error deleting slide image:', err);
+                });
+            }
+            this.cms.heroSlides.splice(index, 1);
+            this.onCmsChange();
+        }
     }
 
-    async onFileSelected(event: any, target: any, field: string = 'image') {
-        const file = event.target.files[0];
-        if (file) {
+    moveSlide(index: number, direction: 'up' | 'down') {
+        const newIndex = direction === 'up' ? index - 1 : index + 1;
+        if (newIndex < 0 || newIndex >= this.cms.heroSlides.length) return;
+        
+        const temp = this.cms.heroSlides[index];
+        this.cms.heroSlides[index] = this.cms.heroSlides[newIndex];
+        this.cms.heroSlides[newIndex] = temp;
+        this.onCmsChange();
+    }
+
+    async onFileSelected(event: Event, target: HeroSlide | HomeCMS, field: keyof HeroSlide | keyof HomeCMS = 'image') {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        
+        if (!file) return;
+
+        // Validate file
+        if (!file.type.startsWith('image/')) {
+            this.toastService.error('Please select an image file');
+            return;
+        }
+
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            this.toastService.error('Image size must be less than 5MB');
+            return;
+        }
+
+        const uploadKey = `${field}-${Date.now()}`;
+        this.uploadingFiles.add(uploadKey);
+
+        try {
             const res = await this.cmsService.uploadCmsFile(file);
-            target[field] = res.url;
+            (target as any)[field] = res.url;
+            this.onCmsChange();
+            this.toastService.success('Image uploaded successfully');
+        } catch (error) {
+            const errorMessage = this.extractErrorMessage(error);
+            this.toastService.error(errorMessage || 'Failed to upload image');
+            console.error('Upload error:', error);
+        } finally {
+            this.uploadingFiles.delete(uploadKey);
+            input.value = ''; // Reset input
+        }
+    }
+
+    async removeImage(target: HeroSlide | HomeCMS, field: keyof HeroSlide | keyof HomeCMS) {
+        if (!confirm('Are you sure you want to remove this image?')) return;
+
+        const imageUrl = (target as any)[field];
+        if (imageUrl) {
+            try {
+                await this.cmsService.deleteCmsFile(imageUrl);
+                (target as any)[field] = '';
+                this.onCmsChange();
+                this.toastService.success('Image removed successfully');
+            } catch (error) {
+                const errorMessage = this.extractErrorMessage(error);
+                this.toastService.error(errorMessage || 'Failed to remove image');
+                console.error('Delete error:', error);
+            }
         }
     }
 
     addSocialLink() {
-        this.cms.socialLinks.push({ platform: '', url: '', icon: '' });
+        const newLink: SocialLink = {
+            platform: '',
+            url: '',
+            icon: ''
+        };
+        this.cms.socialLinks.push(newLink);
+        this.onCmsChange();
     }
 
     removeSocialLink(index: number) {
-        this.cms.socialLinks.splice(index, 1);
+        if (confirm('Are you sure you want to remove this social link?')) {
+            this.cms.socialLinks.splice(index, 1);
+            this.onCmsChange();
+        }
+    }
+
+    getImageUrl(url: string): string {
+        if (!url) return '';
+        return url.startsWith('http') ? url : `http://localhost:3000${url}`;
+    }
+
+    isUploading(): boolean {
+        return this.uploadingFiles.size > 0;
+    }
+
+    trackByIndex(index: number): number {
+        return index;
+    }
+
+    /**
+     * Extract error message from Axios error responses
+     */
+    private extractErrorMessage(error: any): string {
+        // Axios error structure: error.response.data
+        
+        // Axios response with error
+        if (error?.response?.data) {
+            const data = error.response.data;
+            
+            // NestJS validation errors (array of messages)
+            if (data.message && Array.isArray(data.message)) {
+                return data.message.join(', ');
+            }
+            
+            // NestJS single error message
+            if (data.message && typeof data.message === 'string') {
+                return data.message;
+            }
+            
+            // Generic error property
+            if (data.error && typeof data.error === 'string') {
+                return data.error;
+            }
+            
+            // If data itself is a string
+            if (typeof data === 'string') {
+                return data;
+            }
+        }
+        
+        // Axios error message (network errors, etc.)
+        if (error?.message && typeof error.message === 'string') {
+            return error.message;
+        }
+        
+        // Axios request failed (no response)
+        if (error?.request && !error?.response) {
+            return 'Network error. Please check your connection.';
+        }
+
+        // Fallback
+        return '';
     }
 }
