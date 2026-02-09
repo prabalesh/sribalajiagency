@@ -115,10 +115,10 @@ export const routes: Routes = [
                     }
                 ]
             },
-            {
-                path: 'feedback',
-                loadComponent: () => import('./public/feedback/feedback.component').then(m => m.FeedbackComponent)
-            }
+            // {
+            //     path: 'feedback',
+            //     loadComponent: () => import('./public/feedback/feedback.component').then(m => m.FeedbackComponent)
+            // }
         ]
     },
 
