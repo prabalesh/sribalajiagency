@@ -1,0 +1,56 @@
+.trust-markers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    padding: clamp(3rem, 8vw, 5rem) 0;
+
+    @media (max-width: 991px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.marker {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    transition: all 0.3s;
+
+    &:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
+
+        .marker-icon {
+            color: white;
+            transform: scale(1.1);
+        }
+    }
+}
+
+.marker-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--surface-color-secondary);
+    padding: 16px;
+    border-radius: 50%;
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+    color: var(--primary-color);
+    transition: all 0.3s;
+}
+
+.marker-text {
+    h4 {
+        font-size: 1.1rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    p {
+        font-size: 0.9rem;
+        color: var(--text-color-muted);
+        margin: 0;
+        line-height: 1.5;
+    }
+}

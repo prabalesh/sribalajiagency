@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Put, Body, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Body, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CMSService } from './cms.service';
-import { UpdateHomeCmsDto } from './dto/update-home-cms.dto';
+import { UpdateHomeCmsDto, UpdateHeroDto, UpdateAboutDto, UpdateSocialLinksDto, UpdateVisibilityDto } from './dto/update-home-cms.dto';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 
@@ -20,6 +20,34 @@ export class CMSController {
     @Permissions('UPDATE_CMS')
     async updateCMS(@Body() data: UpdateHomeCmsDto) {
         return this.cmsService.updateCMS(data);
+    }
+
+    @Patch('hero')
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @Permissions('UPDATE_CMS')
+    async updateHero(@Body() data: UpdateHeroDto) {
+        return this.cmsService.updateHero(data);
+    }
+
+    @Patch('about')
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @Permissions('UPDATE_CMS')
+    async updateAbout(@Body() data: UpdateAboutDto) {
+        return this.cmsService.updateAbout(data);
+    }
+
+    @Patch('social-links')
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @Permissions('UPDATE_CMS')
+    async updateSocialLinks(@Body() data: UpdateSocialLinksDto) {
+        return this.cmsService.updateSocialLinks(data);
+    }
+
+    @Patch('visibility')
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @Permissions('UPDATE_CMS')
+    async updateVisibility(@Body() data: UpdateVisibilityDto) {
+        return this.cmsService.updateVisibility(data);
     }
 
     @Post('upload')

@@ -1,0 +1,21 @@
+@if (showCategories !== false) {
+<section class="category-section container">
+    <div class="section-header">
+        <div>
+            <span class="sub-header">COLLECTIONS</span>
+            <h2>Shop by Category</h2>
+        </div>
+        <a routerLink="/products" class="view-all">Browse All</a>
+    </div>
+    <div class="category-grid">
+        @for (cat of categories; track cat.id) {
+        <div class="category-card glass-card" [routerLink]="['/products', cat.slug]">
+            <div class="cat-content">
+                <h3>{{ cat.name }}</h3>
+            </div>
+            <div class="cat-icon">{{ cat.name.charAt(0) }}</div>
+        </div>
+        }
+    </div>
+</section>
+}

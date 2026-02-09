@@ -5,8 +5,8 @@ export class HomeCMS {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ default: 'standard' })
-    heroType: 'standard' | 'carousel';
+    @Column({ default: 'classic' })
+    heroType: 'classic' | 'carousel' | 'split' | 'overlay' | 'classic-carousel';
 
     @Column({ default: 'BESTSELLER 2026' })
     heroBadge: string;
@@ -26,6 +26,9 @@ export class HomeCMS {
     @Column({ default: 'Explore All' })
     heroLinkText: string;
 
+    @Column({ default: 'center' })
+    heroContentAlignment: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+
     @Column({ type: 'json', nullable: true })
     heroSlides: {
         title: string;
@@ -34,6 +37,7 @@ export class HomeCMS {
         image: string;
         link: string;
         linkText: string;
+        alignment?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
     }[];
 
     @Column({ default: true })

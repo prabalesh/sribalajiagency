@@ -8,10 +8,12 @@ import { ToastService } from '../../core/services/toast.service';
 
 type TabType = 'hero' | 'sections' | 'about' | 'social';
 
+import { CmsPreviewComponent } from './components/cms-preview/cms-preview.component';
+
 @Component({
     selector: 'app-admin-home-cms',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, CmsPreviewComponent],
     templateUrl: './home-cms.component.html',
     styleUrl: './home-cms.component.scss'
 })
@@ -22,7 +24,8 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
 
     cms: HomeCMS = {
         id: '',
-        heroType: 'standard',
+        heroType: 'classic',
+        heroContentAlignment: 'center',
         heroBadge: '',
         heroTitle: '',
         heroSubtitle: '',
@@ -45,6 +48,18 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
     isSaving = false;
     isLoading = true;
     uploadingFiles: Set<string> = new Set();
+
+    // Track if using upload or link for images
+    imageSource: { [key: string]: 'upload' | 'link' } = {
+        heroImage: 'upload',
+        aboutImage: 'upload'
+    };
+
+    alignmentOptions: ('top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right')[] = [
+        'top-left', 'top-center', 'top-right',
+        'center-left', 'center', 'center-right',
+        'bottom-left', 'bottom-center', 'bottom-right'
+    ];
 
     // Auto-save with debouncing
     private autoSaveSubject = new Subject<Partial<HomeCMS>>();
@@ -82,6 +97,28 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
                 heroSlides: data.heroSlides || [],
                 socialLinks: data.socialLinks || []
             };
+
+            // Detect image source
+            if (this.cms.heroImage && this.cms.heroImage.startsWith('http') && !this.cms.heroImage.includes('localhost:3000')) {
+                this.imageSource['heroImage'] = 'link';
+            }
+            if (this.cms.aboutImage && this.cms.aboutImage.startsWith('http') && !this.cms.aboutImage.includes('localhost:3000')) {
+                this.imageSource['aboutImage'] = 'link';
+            }
+
+            // For slides, we'll assume upload for now if it's local, or link if it's external
+            this.cms.heroSlides.forEach((slide, idx) => {
+                const key = `slideImage-${idx}`;
+                if (slide.image && slide.image.startsWith('http') && !slide.image.includes('localhost:3000')) {
+                    this.imageSource[key] = 'link';
+                } else {
+                    this.imageSource[key] = 'upload';
+                }
+                // Initialize slide alignment if missing
+                if (!slide.alignment) {
+                    slide.alignment = 'center';
+                }
+            });
         } catch (error) {
             const errorMessage = this.extractErrorMessage(error);
             this.toastService.error(errorMessage || 'Failed to load CMS data');
@@ -102,12 +139,28 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
 
     private async saveCMSInternal(showToast: boolean = true) {
         if (this.isSaving) return;
-        
+
         this.isSaving = true;
         try {
-            await this.cmsService.updateHomeCMS(this.cms);
+            switch (this.activeTab) {
+                case 'hero':
+                    await this.cmsService.updateHero(this.cms);
+                    break;
+                case 'about':
+                    await this.cmsService.updateAbout(this.cms);
+                    break;
+                case 'social':
+                    await this.cmsService.updateSocialLinks(this.cms.socialLinks);
+                    break;
+                case 'sections':
+                    await this.cmsService.updateVisibility(this.cms);
+                    break;
+                default:
+                    await this.cmsService.updateHomeCMS(this.cms);
+            }
+
             if (showToast) {
-                this.toastService.success('CMS updated successfully!');
+                this.toastService.success(`${this.activeTab.charAt(0).toUpperCase() + this.activeTab.slice(1)} updated successfully!`);
             }
         } catch (error) {
             if (showToast) {
@@ -131,7 +184,8 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
             badge: '',
             image: '',
             link: '/products',
-            linkText: 'Shop Now'
+            linkText: 'Shop Now',
+            alignment: 'center'
         };
         this.cms.heroSlides.push(newSlide);
         this.onCmsChange();
@@ -154,7 +208,7 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
     moveSlide(index: number, direction: 'up' | 'down') {
         const newIndex = direction === 'up' ? index - 1 : index + 1;
         if (newIndex < 0 || newIndex >= this.cms.heroSlides.length) return;
-        
+
         const temp = this.cms.heroSlides[index];
         this.cms.heroSlides[index] = this.cms.heroSlides[newIndex];
         this.cms.heroSlides[newIndex] = temp;
@@ -164,7 +218,7 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
     async onFileSelected(event: Event, target: HeroSlide | HomeCMS, field: keyof HeroSlide | keyof HomeCMS = 'image') {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
-        
+
         if (!file) return;
 
         // Validate file
@@ -245,42 +299,55 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
         return index;
     }
 
+    onSlideImageChange(index: number) {
+        const slide = this.cms.heroSlides[index];
+        const key = `slideImage-${index}`;
+
+        if (slide.image && (slide.image.startsWith('http://') || slide.image.startsWith('https://'))) {
+            if (this.imageSource[key] !== 'link') {
+                this.imageSource[key] = 'link';
+                this.toastService.info('Switched to Link mode for external image');
+            }
+        }
+        this.onCmsChange();
+    }
+
     /**
      * Extract error message from Axios error responses
      */
     private extractErrorMessage(error: any): string {
         // Axios error structure: error.response.data
-        
+
         // Axios response with error
         if (error?.response?.data) {
             const data = error.response.data;
-            
+
             // NestJS validation errors (array of messages)
             if (data.message && Array.isArray(data.message)) {
                 return data.message.join(', ');
             }
-            
+
             // NestJS single error message
             if (data.message && typeof data.message === 'string') {
                 return data.message;
             }
-            
+
             // Generic error property
             if (data.error && typeof data.error === 'string') {
                 return data.error;
             }
-            
+
             // If data itself is a string
             if (typeof data === 'string') {
                 return data;
             }
         }
-        
+
         // Axios error message (network errors, etc.)
         if (error?.message && typeof error.message === 'string') {
             return error.message;
         }
-        
+
         // Axios request failed (no response)
         if (error?.request && !error?.response) {
             return 'Network error. Please check your connection.';

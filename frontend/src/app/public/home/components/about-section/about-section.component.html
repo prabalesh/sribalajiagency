@@ -1,0 +1,17 @@
+@if (cms?.aboutContent) {
+<section class="about-section container">
+    <div class="about-grid">
+        <div class="about-text">
+            <div class="hero-badge">OUR STORY</div>
+            <h2 class="text-gradient">{{ cms.aboutTitle }}</h2>
+            <div class="content" [innerHTML]="cms.aboutContent"></div>
+            <button class="btn-secondary mt-4" routerLink="/contact">Get in Touch</button>
+        </div>
+        @if (cms.aboutImage) {
+        <div class="about-visual">
+            <img [src]="cms.aboutImage" alt="About Sri Balaji">
+        </div>
+        }
+    </div>
+</section>
+}

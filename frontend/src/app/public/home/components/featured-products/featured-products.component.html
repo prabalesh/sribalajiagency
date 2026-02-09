@@ -1,0 +1,19 @@
+@if (showFeatured !== false) {
+<section class="featured-section bg-surface">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <span class="sub-header">TRENDING</span>
+                <h2>Most Popular This Month</h2>
+            </div>
+        </div>
+
+        <div class="product-grid">
+            @for (product of products; track product.id) {
+            <app-product-card [product]="product" (addToCart)="onAddToCart($event)">
+            </app-product-card>
+            }
+        </div>
+    </div>
+</section>
+}

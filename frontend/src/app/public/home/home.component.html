@@ -1,217 +1,24 @@
 <div class="home-wrapper">
     <!-- Hero Section -->
-    <section class="hero-container animate-fade">
-        @if (cms?.heroType === 'carousel' && cms?.heroSlides?.length > 0) {
-        <div class="hero-carousel">
-            <div class="carousel-container">
-                @for (slide of cms.heroSlides; track $index) {
-                <div class="carousel-slide" [class.active]="$index === currentSlideIndex">
-                    <div class="container hero-content-wrapper">
-                        <div class="hero-content">
-                            <div class="hero-badge">{{ slide.badge }}</div>
-                            <h1 class="text-gradient">{{ slide.title }}</h1>
-                            <p>{{ slide.subtitle }}</p>
-                            <div class="hero-actions">
-                                <button class="btn-primary" [routerLink]="slide.link">
-                                    {{ slide.linkText || 'Shop Now' }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="hero-image">
-                        <img [ngSrc]="slide.image" [alt]="slide.title" fill [priority]="$index === 0"
-                            class="hero-img-fill">
-                    </div>
-                </div>
-                }
-
-                @if (cms.heroSlides.length > 1) {
-                <div class="carousel-controls container">
-                    <div class="controls-wrapper">
-                        <button type="button" class="ctrl-btn" (click)="prevSlide()">
-                            <lucide-icon [img]="icons.ChevronLeft" [size]="24" strokeWidth="2.5"></lucide-icon>
-                        </button>
-                        <div class="indicators">
-                            @for (s of cms.heroSlides; track $index) {
-                            <span [class.active]="$index === currentSlideIndex"
-                                (click)="currentSlideIndex = $index"></span>
-                            }
-                        </div>
-                        <button type="button" class="ctrl-btn" (click)="nextSlide()">
-                            <lucide-icon [img]="icons.ChevronRight" [size]="24" strokeWidth="2.5"></lucide-icon>
-                        </button>
-                    </div>
-                </div>
-                }
-            </div>
-        </div>
-        } @else {
-        <section class="hero-showcase" aria-label="Hero section">
-            <div class="hero-container">
-                <div class="hero-content">
-                    <span class="hero-badge" role="text">
-                        {{ cms?.heroBadge || 'AUTHORIZED DEALER' }}
-                    </span>
-                    <h1 class="hero-title text-gradient">
-                        {{ cms?.heroTitle || 'Experience the Future of Home Technology' }}
-                    </h1>
-                    <p class="hero-subtitle">
-                        {{ cms?.heroSubtitle || 'Curated selection of global brands for your modern home.' }}
-                    </p>
-                    <div class="hero-actions">
-                        <a class="btn btn-primary" [routerLink]="cms?.heroLink || '/products'"
-                            aria-label="Explore our collection">
-                            {{ cms?.heroLinkText || 'Explore Collection' }}
-                        </a>
-                        <!-- <a class="btn btn-secondary" routerLink="/products" aria-label="View all available products">
-                            See All Products
-                        </a> -->
-                    </div>
-                </div>
-                <div class="hero-image-wrapper">
-                    <img [ngSrc]="cms?.heroImage || 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=2000'"
-                        [alt]="cms?.heroTitle || 'Premium Home Tech'" priority width="800" height="600">
-                </div>
-            </div>
-        </section>
-        }
-    </section>
+    <app-hero [cms]="cms"></app-hero>
 
     <!-- Category Grid -->
-    @if (cms?.showCategories !== false) {
-    <section class="category-section container">
-        <div class="section-header">
-            <div>
-                <span class="sub-header">COLLECTIONS</span>
-                <h2>Shop by Category</h2>
-            </div>
-            <a routerLink="/products" class="view-all">Browse All</a>
-        </div>
-        <div class="category-grid">
-            @for (cat of categories; track cat.id) {
-            <div class="category-card glass-card" [routerLink]="['/products', cat.slug]">
-                <div class="cat-content">
-                    <h3>{{ cat.name }}</h3>
-                    <!-- <span class="explore-btn">
-                        Explore <lucide-icon [img]="icons.ArrowRight" [size]="16" class="ml-1"></lucide-icon>
-                    </span> -->
-                </div>
-                <div class="cat-icon">{{ cat.name.charAt(0) }}</div>
-            </div>
-            }
-        </div>
-    </section>
-    }
+    <app-category-grid [categories]="categories" [showCategories]="cms?.showCategories"></app-category-grid>
 
     <!-- Featured Products -->
-    @if (cms?.showFeatured !== false) {
-    <section class="featured-section bg-surface">
-        <div class="container">
-            <div class="section-header">
-                <div>
-                    <span class="sub-header">TRENDING</span>
-                    <h2>Most Popular This Month</h2>
-                </div>
-            </div>
-
-            <div class="product-grid">
-                @for (product of featuredProducts; track product.id) {
-                <app-product-card [product]="product" (addToCart)="addToCart($event)">
-                </app-product-card>
-                }
-            </div>
-        </div>
-    </section>
-    }
+    <app-featured-products [products]="featuredProducts" [showFeatured]="cms?.showFeatured"
+        (addToCart)="addToCart($event)">
+    </app-featured-products>
 
     <!-- About Section -->
-    @if (cms?.aboutContent) {
-    <section class="about-section container">
-        <div class="about-grid">
-            <div class="about-text">
-                <div class="hero-badge">OUR STORY</div>
-                <h2 class="text-gradient">{{ cms.aboutTitle }}</h2>
-                <div class="content" [innerHTML]="cms.aboutContent"></div>
-                <button class="btn-secondary mt-4" routerLink="/contact">Get in Touch</button>
-            </div>
-            @if (cms.aboutImage) {
-            <div class="about-visual">
-                <img [ngSrc]="cms.aboutImage" alt="About Sri Balaji" width="600" height="400">
-            </div>
-            }
-        </div>
-    </section>
-    }
+    <app-about-section [cms]="cms"></app-about-section>
 
     <!-- Brand Shelf -->
-    @if (cms?.showBrands !== false) {
-    <section class="brand-shelf container">
-        <div class="brand-row">
-            @for (brand of brands; track brand.id) {
-            <div class="brand-item">
-                @if (brand.image) {
-                <img [ngSrc]="brand.image" [alt]="brand.name" class="brand-logo-img" width="120" height="60">
-                } @else {
-                <span class="brand-name">{{ brand.name }}</span>
-                }
-            </div>
-            }
-        </div>
-    </section>
-    }
+    <app-brand-shelf [brands]="brands" [showBrands]="cms?.showBrands"></app-brand-shelf>
 
     <!-- Trust Markers -->
-    @if (cms?.showTrustMarkers !== false) {
-    <section class="trust-markers container">
-        <div class="marker glass-card">
-            <div class="marker-icon">
-                <lucide-icon [img]="icons.Truck" [size]="32" class="icons"></lucide-icon>
-            </div>
-            <div class="marker-text">
-                <h4>Rapid 24h Delivery</h4>
-                <p>Available on select items in major hubs.</p>
-            </div>
-        </div>
-        <div class="marker glass-card">
-            <div class="marker-icon">
-                <lucide-icon [img]="icons.ShieldCheck" [size]="32" class="icons"></lucide-icon>
-            </div>
-            <div class="marker-text">
-                <h4>Genuine Brand Warranty</h4>
-                <p>Direct manufacturer support for all products.</p>
-            </div>
-        </div>
-        <div class="marker glass-card">
-            <div class="marker-icon">
-                <lucide-icon [img]="icons.MessageCircle" [size]="32" class="icons"></lucide-icon>
-            </div>
-            <div class="marker-text">
-                <h4>Expert Consultation</h4>
-                <p>Talk to our product specialists anytime.</p>
-            </div>
-        </div>
-    </section>
-    }
+    <app-trust-markers [showTrustMarkers]="cms?.showTrustMarkers"></app-trust-markers>
 
     <!-- Social Section -->
-    @if (cms?.socialLinks?.length > 0) {
-    <section class="social-section container">
-        <div class="section-header">
-            <div>
-                <span class="sub-header">COMMUNITY</span>
-                <h2>Follow Our Journey</h2>
-            </div>
-        </div>
-        <div class="social-grid">
-            @for (link of cms.socialLinks; track $index) {
-            <a [href]="link.url" target="_blank" class="social-card glass-card">
-                <span class="social-index">{{ link.platform }}</span>
-                <span class="social-arrow">
-                    <lucide-icon [img]="icons.ExternalLink" [size]="20"></lucide-icon>
-                </span>
-            </a>
-            }
-        </div>
-    </section>
-    }
+    <app-social-section [socialLinks]="cms?.socialLinks"></app-social-section>
 </div>

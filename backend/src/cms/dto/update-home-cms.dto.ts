@@ -1,42 +1,57 @@
-import { IsString, IsOptional, IsEnum, IsBoolean, IsArray, ValidateNested, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsBoolean, IsArray, ValidateNested, IsUrl, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 
-class HomeSlideDto {
+export class HomeSlideDto {
     @IsString()
+    @IsNotEmpty()
     title: string;
 
     @IsString()
-    subtitle: string;
+    @IsOptional()
+    subtitle?: string;
 
     @IsString()
-    badge: string;
+    @IsOptional()
+    badge?: string;
 
     @IsString()
+    @IsNotEmpty()
     image: string;
 
     @IsString()
-    @IsUrl()
-    link: string;
+    @IsOptional()
+    link?: string;
 
     @IsString()
-    linkText: string;
+    @IsOptional()
+    linkText?: string;
+
+    @IsOptional()
+    @IsEnum(['top-left', 'top-center', 'top-right', 'center-left', 'center', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'])
+    alignment?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 }
 
-class SocialLinkDto {
+export class SocialLinkDto {
     @IsString()
+    @IsNotEmpty()
     platform: string;
 
     @IsUrl()
+    @IsNotEmpty()
     url: string;
 
     @IsString()
+    @IsNotEmpty()
     icon: string;
 }
 
-export class UpdateHomeCmsDto {
+export class UpdateHeroDto {
+    @IsEnum(['classic', 'carousel', 'split', 'overlay', 'classic-carousel'])
+    heroType: 'classic' | 'carousel' | 'split' | 'overlay' | 'classic-carousel';
+
     @IsOptional()
-    @IsEnum(['standard', 'carousel'])
-    heroType?: 'standard' | 'carousel';
+    @IsEnum(['top-left', 'top-center', 'top-right', 'center-left', 'center', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'])
+    heroContentAlignment?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
     @IsOptional()
     @IsString()
@@ -61,6 +76,85 @@ export class UpdateHomeCmsDto {
     @IsOptional()
     @IsString()
     heroLinkText?: string;
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => HomeSlideDto)
+    heroSlides?: HomeSlideDto[];
+}
+
+export class UpdateAboutDto {
+    @IsOptional()
+    @IsString()
+    aboutTitle?: string;
+
+    @IsOptional()
+    @IsString()
+    aboutContent?: string;
+
+    @IsOptional()
+    @IsString()
+    aboutImage?: string;
+}
+
+export class UpdateSocialLinksDto {
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => SocialLinkDto)
+    socialLinks: SocialLinkDto[];
+}
+
+export class UpdateVisibilityDto {
+    @IsOptional()
+    @IsBoolean()
+    showCategories?: boolean;
+
+    @IsOptional()
+    @IsBoolean()
+    showFeatured?: boolean;
+
+    @IsOptional()
+    @IsBoolean()
+    showBrands?: boolean;
+
+    @IsOptional()
+    @IsBoolean()
+    showTrustMarkers?: boolean;
+}
+
+export class UpdateHomeCmsDto {
+    @IsOptional()
+    @IsEnum(['classic', 'carousel', 'split', 'overlay', 'classic-carousel'])
+    heroType?: 'classic' | 'carousel' | 'split' | 'overlay' | 'classic-carousel';
+
+    @IsOptional()
+    @IsString()
+    heroBadge?: string;
+
+    @IsOptional()
+    @IsString()
+    heroTitle?: string;
+
+    @IsOptional()
+    @IsString()
+    heroSubtitle?: string;
+
+    @IsOptional()
+    @IsString()
+    heroImage?: string;
+
+    @IsOptional()
+    @IsString()
+    heroLink?: string;
+
+    @IsOptional()
+    @IsString()
+    heroLinkText?: string;
+
+    @IsOptional()
+    @IsEnum(['top-left', 'top-center', 'top-right', 'center-left', 'center', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'])
+    heroContentAlignment?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
     @IsOptional()
     @IsArray()

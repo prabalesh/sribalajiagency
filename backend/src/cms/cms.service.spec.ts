@@ -74,6 +74,39 @@ describe('CMSService', () => {
         });
     });
 
+    describe('modular updates', () => {
+        beforeEach(() => {
+            mockCMSRepo.findOne.mockResolvedValue({ id: '1' });
+            mockCMSRepo.save.mockImplementation(c => c);
+        });
+
+        it('should update hero section', async () => {
+            const data = { heroType: 'split' as any, heroTitle: 'New Hero' };
+            const result = await service.updateHero(data);
+            expect(result.heroTitle).toBe('New Hero');
+            expect(result.heroType).toBe('split');
+        });
+
+        it('should update about section', async () => {
+            const data = { aboutTitle: 'New About' };
+            const result = await service.updateAbout(data);
+            expect(result.aboutTitle).toBe('New About');
+        });
+
+        it('should update social links', async () => {
+            const data = { socialLinks: [{ platform: 'Twitter', url: 'https://twitter.com', icon: 'tw' }] };
+            const result = await service.updateSocialLinks(data);
+            expect(result.socialLinks).toHaveLength(1);
+            expect(result.socialLinks[0].platform).toBe('Twitter');
+        });
+
+        it('should update visibility', async () => {
+            const data = { showFeatured: false };
+            const result = await service.updateVisibility(data);
+            expect(result.showFeatured).toBe(false);
+        });
+    });
+
     describe('uploadImage', () => {
         it('should upload a file and return url', async () => {
             const file = {

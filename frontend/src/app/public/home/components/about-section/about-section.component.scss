@@ -1,0 +1,50 @@
+.about-section {
+    padding: clamp(3rem, 10vw, 6rem) 0;
+
+    .about-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 3rem;
+        align-items: center;
+
+        @media (max-width: 991px) {
+            grid-template-columns: 1fr;
+            gap: 4rem;
+        }
+    }
+
+    h2 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        margin-bottom: 2.5rem;
+        line-height: 1.1;
+    }
+
+    .content {
+        font-size: 1.1rem;
+        color: var(--text-color-muted);
+        line-height: 1.7;
+        margin-bottom: 2rem;
+    }
+
+    .about-visual img {
+        width: 100%;
+        height: auto;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-lg);
+        transform: perspective(1000px) rotateY(-5deg);
+    }
+}
+
+.hero-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary-color), #ff8c00);
+    color: white;
+    padding: 0.6rem 1.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.25em;
+    margin-bottom: 2rem;
+    box-shadow: 0 15px 25px rgba(255, 62, 0, 0.3);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

@@ -9,6 +9,7 @@ export interface HeroSlide {
     image: string;
     link: string;
     linkText: string;
+    alignment?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 }
 
 export interface SocialLink {
@@ -17,9 +18,12 @@ export interface SocialLink {
     icon: string;
 }
 
+export type HeroType = 'classic' | 'carousel' | 'split' | 'overlay' | 'classic-carousel';
+
 export interface HomeCMS {
     id: string;
-    heroType: 'standard' | 'carousel';
+    heroType: HeroType;
+    heroContentAlignment: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
     heroBadge: string;
     heroTitle: string;
     heroSubtitle: string;
@@ -55,6 +59,26 @@ export class CmsService {
 
     async updateHomeCMS(data: Partial<HomeCMS>): Promise<HomeCMS> {
         const res = await this.api.put<HomeCMS>('/home-cms', data);
+        return res.data;
+    }
+
+    async updateHero(data: Partial<HomeCMS>): Promise<HomeCMS> {
+        const res = await this.api.patch<HomeCMS>('/home-cms/hero', data);
+        return res.data;
+    }
+
+    async updateAbout(data: Partial<HomeCMS>): Promise<HomeCMS> {
+        const res = await this.api.patch<HomeCMS>('/home-cms/about', data);
+        return res.data;
+    }
+
+    async updateSocialLinks(socialLinks: SocialLink[]): Promise<HomeCMS> {
+        const res = await this.api.patch<HomeCMS>('/home-cms/social-links', { socialLinks });
+        return res.data;
+    }
+
+    async updateVisibility(data: Partial<HomeCMS>): Promise<HomeCMS> {
+        const res = await this.api.patch<HomeCMS>('/home-cms/visibility', data);
         return res.data;
     }
 

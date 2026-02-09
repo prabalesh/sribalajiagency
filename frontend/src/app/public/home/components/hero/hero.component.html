@@ -1,0 +1,193 @@
+<section class="hero-container animate-fade"
+    [ngClass]="[cms?.heroType || 'classic', 'align-' + (cms?.heroContentAlignment || 'center')]">
+
+    @if (cms?.heroType === 'carousel' && cms?.heroSlides?.length > 0) {
+    <div class="hero-carousel" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
+        <div class="carousel-container">
+            @for (slide of cms.heroSlides; track $index) {
+            <div class="carousel-slide" [class.active]="$index === currentSlideIndex"
+                [attr.aria-hidden]="$index !== currentSlideIndex">
+                <div class="hero-image">
+                    @if (slide.image) {
+                    <img [ngSrc]="slide.image" [alt]="slide.title || 'Hero slide'" fill [priority]="$index === 0"
+                        class="hero-img-fill">
+                    }
+                </div>
+                <div class="container hero-content-wrapper">
+                    <div class="hero-content" [style.align-items]="getAlignment(slide.alignment || 'center')">
+                        @if (slide.badge) {
+                        <span class="hero-badge">{{ slide.badge }}</span>
+                        }
+                        @if (slide.title) {
+                        <h1 class="text-gradient">{{ slide.title }}</h1>
+                        }
+                        @if (slide.subtitle) {
+                        <p>{{ slide.subtitle }}</p>
+                        }
+                        @if (slide.linkText && slide.link) {
+                        <div class="hero-actions">
+                            <a class="btn-primary" [routerLink]="slide.link">
+                                {{ slide.linkText }}
+                            </a>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            }
+
+            @if (cms.heroSlides.length > 1) {
+            <div class="carousel-controls">
+                <div class="controls-wrapper container">
+                    <button type="button" class="ctrl-btn" (click)="prevSlide()" aria-label="Previous slide">
+                        <lucide-icon [img]="ChevronLeft" [size]="24" [strokeWidth]="2.5"></lucide-icon>
+                    </button>
+                    <div class="indicators" role="tablist" aria-label="Slide indicators">
+                        @for (s of cms.heroSlides; track $index) {
+                        <button type="button" role="tab" [class.active]="$index === currentSlideIndex"
+                            (click)="goToSlide($index)" [attr.aria-selected]="$index === currentSlideIndex"
+                            [attr.aria-label]="'Go to slide ' + ($index + 1)">
+                        </button>
+                        }
+                    </div>
+                    <button type="button" class="ctrl-btn" (click)="nextSlide()" aria-label="Next slide">
+                        <lucide-icon [img]="ChevronRight" [size]="24" [strokeWidth]="2.5"></lucide-icon>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+    } @else if (cms?.heroType === 'classic-carousel' && cms?.heroSlides?.length > 0) {
+    <div class="hero-classic-carousel container" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
+        <div class="carousel-track">
+            @for (slide of cms.heroSlides; track $index) {
+            <div class="classic-carousel-slide" [class.active]="$index === currentSlideIndex"
+                [attr.aria-hidden]="$index !== currentSlideIndex">
+
+                <div class="hero-content">
+                    @if (slide.badge) {
+                    <span class="hero-badge animate-in-up" [style.--delay]="'0.1s'">{{ slide.badge }}</span>
+                    }
+                    @if (slide.title) {
+                    <h1 class="hero-title text-gradient animate-in-up" [style.--delay]="'0.2s'">{{ slide.title }}</h1>
+                    }
+                    @if (slide.subtitle) {
+                    <p class="hero-subtitle animate-in-up" [style.--delay]="'0.3s'">{{ slide.subtitle }}</p>
+                    }
+                    @if (slide.linkText && slide.link) {
+                    <div class="hero-actions animate-in-up" [style.--delay]="'0.4s'">
+                        <a class="btn-primary" [routerLink]="slide.link">
+                            {{ slide.linkText }}
+                        </a>
+                    </div>
+                    }
+                </div>
+
+                <div class="hero-image-wrapper animate-in-scale">
+                    <img [ngSrc]="slide.image" [alt]="slide.title || 'Hero slide'" priority width="800" height="600">
+                </div>
+            </div>
+            }
+
+            @if (cms.heroSlides.length > 1) {
+            <div class="carousel-nav-buttons">
+                <button type="button" class="nav-btn prev" (click)="prevSlide()" aria-label="Previous slide">
+                    <lucide-icon [img]="ChevronLeft" [size]="24"></lucide-icon>
+                </button>
+                <button type="button" class="nav-btn next" (click)="nextSlide()" aria-label="Next slide">
+                    <lucide-icon [img]="ChevronRight" [size]="24"></lucide-icon>
+                </button>
+            </div>
+            }
+        </div>
+
+        @if (cms.heroSlides.length > 1) {
+        <div class="carousel-indicators-wrapper container">
+            <div class="indicators" role="tablist" aria-label="Slide indicators">
+                @for (s of cms.heroSlides; track $index) {
+                <button type="button" role="tab" [class.active]="$index === currentSlideIndex"
+                    (click)="goToSlide($index)" [attr.aria-selected]="$index === currentSlideIndex"
+                    [attr.aria-label]="'Go to slide ' + ($index + 1)">
+                </button>
+                }
+            </div>
+        </div>
+        }
+    </div>
+    } @else if (cms?.heroType === 'split') {
+    <div class="hero-split container">
+        <div class="split-content">
+            @if (cms?.heroBadge) {
+            <span class="hero-badge">{{ cms.heroBadge }}</span>
+            }
+            @if (cms?.heroTitle) {
+            <h1 class="hero-title text-gradient">{{ cms.heroTitle }}</h1>
+            }
+            @if (cms?.heroSubtitle) {
+            <p class="hero-subtitle">{{ cms.heroSubtitle }}</p>
+            }
+            @if (cms?.heroLinkText && cms?.heroLink) {
+            <div class="hero-actions">
+                <a class="btn-primary" [routerLink]="cms.heroLink">{{ cms.heroLinkText }}</a>
+            </div>
+            }
+        </div>
+        @if (cms?.heroImage) {
+        <div class="split-image">
+            <img [ngSrc]="cms.heroImage" [alt]="cms?.heroTitle || 'Hero image'" priority width="800" height="800">
+        </div>
+        }
+    </div>
+    } @else if (cms?.heroType === 'overlay') {
+    <div class="hero-overlay">
+        @if (cms?.heroImage) {
+        <div class="overlay-bg">
+            <img [ngSrc]="cms.heroImage" [alt]="cms?.heroTitle || 'Hero background'" fill priority>
+        </div>
+        }
+        <div class="overlay-content container">
+            @if (cms?.heroBadge) {
+            <span class="hero-badge">{{ cms.heroBadge }}</span>
+            }
+            @if (cms?.heroTitle) {
+            <h1 class="hero-title white">{{ cms.heroTitle }}</h1>
+            }
+            @if (cms?.heroSubtitle) {
+            <p class="hero-subtitle white">{{ cms.heroSubtitle }}</p>
+            }
+            @if (cms?.heroLinkText && cms?.heroLink) {
+            <div class="hero-actions">
+                <a class="btn-primary" [routerLink]="cms.heroLink">{{ cms.heroLinkText }}</a>
+            </div>
+            }
+        </div>
+    </div>
+    } @else {
+    <section class="hero-showcase" aria-label="Hero section">
+        <div class="hero-container-inner container">
+            <div class="hero-content">
+                <span class="hero-badge" role="text">
+                    {{ cms?.heroBadge || 'AUTHORIZED DEALER' }}
+                </span>
+                <h1 class="hero-title text-gradient">
+                    {{ cms?.heroTitle || 'Experience the Future of Home Technology' }}
+                </h1>
+                <p class="hero-subtitle">
+                    {{ cms?.heroSubtitle || 'Curated selection of global brands for your modern home.' }}
+                </p>
+                <div class="hero-actions">
+                    <a class="btn-primary" [routerLink]="cms?.heroLink || '/products'"
+                        aria-label="Explore our collection">
+                        {{ cms?.heroLinkText || 'Explore Collection' }}
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image-wrapper">
+                <img [ngSrc]="cms?.heroImage || 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=2000'"
+                    [alt]="cms?.heroTitle || 'Premium Home Tech'" priority width="800" height="600">
+            </div>
+        </div>
+    </section>
+    }
+</section>

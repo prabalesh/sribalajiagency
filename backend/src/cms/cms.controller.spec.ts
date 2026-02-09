@@ -9,6 +9,10 @@ describe('CMSController', () => {
     const mockService = {
         getCMS: jest.fn(),
         updateCMS: jest.fn(),
+        updateHero: jest.fn(),
+        updateAbout: jest.fn(),
+        updateSocialLinks: jest.fn(),
+        updateVisibility: jest.fn(),
         uploadImage: jest.fn(),
         deleteFile: jest.fn(),
     };
@@ -40,9 +44,33 @@ describe('CMSController', () => {
     });
 
     it('should update CMS', async () => {
-        const data = { title: 'New' };
+        const data = { heroTitle: 'New' };
         await controller.updateCMS(data);
         expect(service.updateCMS).toHaveBeenCalledWith(data);
+    });
+
+    it('should update hero', async () => {
+        const data = { heroType: 'split' as any };
+        await controller.updateHero(data);
+        expect(service.updateHero).toHaveBeenCalledWith(data);
+    });
+
+    it('should update about', async () => {
+        const data = { aboutTitle: 'New' };
+        await controller.updateAbout(data);
+        expect(service.updateAbout).toHaveBeenCalledWith(data);
+    });
+
+    it('should update social links', async () => {
+        const data = { socialLinks: [] };
+        await controller.updateSocialLinks(data);
+        expect(service.updateSocialLinks).toHaveBeenCalledWith(data);
+    });
+
+    it('should update visibility', async () => {
+        const data = { showFeatured: false };
+        await controller.updateVisibility(data);
+        expect(service.updateVisibility).toHaveBeenCalledWith(data);
     });
 
     it('should upload image', async () => {

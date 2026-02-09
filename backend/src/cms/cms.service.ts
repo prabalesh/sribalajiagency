@@ -2,7 +2,7 @@ import { Injectable, Logger, BadRequestException, InternalServerErrorException }
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HomeCMS } from './entities/home-cms.entity';
-import { UpdateHomeCmsDto } from './dto/update-home-cms.dto';
+import { UpdateHomeCmsDto, UpdateHeroDto, UpdateAboutDto, UpdateSocialLinksDto, UpdateVisibilityDto } from './dto/update-home-cms.dto';
 import { FileStorageService } from '../common/services/file-storage.service';
 
 /**
@@ -100,7 +100,7 @@ export class CMSService {
         // FIXME: Empty where clause is inefficient - should use specific ID
         // TODO: Use where: { id: this.CMS_ID }
         let cms = await this.cmsRepo.findOne({ where: {} });
-        
+
         // Create default CMS content if none exists
         if (!cms) {
             this.logger.warn('CMS content not found, creating default content');
@@ -111,7 +111,7 @@ export class CMSService {
             // FIXME: Huge hardcoded default content - should be in separate file
             // TODO: Move to seed data or configuration file
             cms = this.cmsRepo.create({
-                heroType: 'standard',
+                heroType: 'classic',
                 heroBadge: 'AUTHORIZED DEALER',
                 heroTitle: 'Experience the Future of Home Technology',
                 heroSubtitle: 'Premium selection of global brands including Sony, Samsung, and Bosch. Engineered for excellence, delivered with care.',
@@ -206,40 +206,37 @@ export class CMSService {
     async updateCMS(data: UpdateHomeCmsDto) {
         this.logger.log('Updating CMS content');
 
-        // TODO: Add authorization check
-        // TODO: Validate input data
-
-        // FIXME: Doesn't validate heroType and heroSlides consistency
-        if (data.heroType === 'carousel' && (!data.heroSlides || data.heroSlides.length === 0)) {
-            throw new BadRequestException('Carousel hero type requires at least one slide');
-        }
-
-        // Get existing CMS content
         const cms = await this.getCMS();
-
-        // TODO: Create backup/version before update
-        // TODO: Log the changes being made
-
-        // Merge update data with existing content
-        // FIXME: Object.assign doesn't handle nested objects properly
         Object.assign(cms, data);
-
-        // TODO: Sanitize HTML content
-        // TODO: Validate URLs
 
         try {
             const updated = await this.cmsRepo.save(cms);
             this.logger.log('CMS content updated successfully');
-
-            // TODO: Clear cache
-            // TODO: Emit CMSUpdatedEvent
-            // TODO: Invalidate frontend cache
-
             return updated;
         } catch (error) {
             this.logger.error(`Failed to update CMS content: ${error.message}`, error.stack);
             throw new InternalServerErrorException('Failed to update CMS content');
         }
+    }
+
+    async updateHero(data: UpdateHeroDto) {
+        this.logger.log('Updating Hero section');
+        return this.updateCMS(data);
+    }
+
+    async updateAbout(data: UpdateAboutDto) {
+        this.logger.log('Updating About section');
+        return this.updateCMS(data);
+    }
+
+    async updateSocialLinks(data: UpdateSocialLinksDto) {
+        this.logger.log('Updating Social Links');
+        return this.updateCMS(data);
+    }
+
+    async updateVisibility(data: UpdateVisibilityDto) {
+        this.logger.log('Updating Section Visibility');
+        return this.updateCMS(data);
     }
 
     /**
@@ -302,7 +299,7 @@ export class CMSService {
         try {
             // FIXME: Generic 'cms' folder - should be more specific
             const url = await this.fileStorageService.saveFile(file, 'cms');
-            
+
             this.logger.log(`CMS image uploaded successfully: ${url}`);
 
             // TODO: Generate thumbnails

@@ -1,0 +1,15 @@
+@if (showBrands !== false) {
+<section class="brand-shelf container">
+    <div class="brand-row">
+        @for (brand of brands; track brand.id) {
+        <div class="brand-item">
+            @if (brand.image) {
+            <img [ngSrc]="brand.image" [alt]="brand.name" class="brand-logo-img" width="120" height="60">
+            } @else {
+            <span class="brand-name">{{ brand.name }}</span>
+            }
+        </div>
+        }
+    </div>
+</section>
+}

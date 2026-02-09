@@ -1,0 +1,107 @@
+.category-section {
+    padding: clamp(3rem, 8vw, 5rem) 0;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+
+    @media (max-width: 640px) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+}
+
+.category-card {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+
+    @media (max-width: 640px) {
+        padding: 1rem;
+        min-height: 120px;
+    }
+
+    &:hover {
+        transform: translateY(-10px);
+        border-color: var(--primary-color);
+
+        .cat-icon {
+            transform: scale(1.5) rotate(-10deg);
+            opacity: 0.15;
+        }
+    }
+
+    h3 {
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+        font-weight: 800;
+
+        @media (max-width: 640px) {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    .cat-icon {
+        position: absolute;
+        top: 20%;
+        right: -5%;
+        font-size: 8rem;
+        font-weight: 900;
+        line-height: 1;
+        opacity: 0.05;
+        transition: all 0.6s var(--transition-curve);
+        pointer-events: none;
+
+        @media (max-width: 640px) {
+            font-size: 5rem;
+            top: 25%;
+        }
+    }
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+
+    .sub-header {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        letter-spacing: 0.15em;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    h2 {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        font-weight: 900;
+        letter-spacing: -0.02em;
+    }
+
+    .view-all {
+        font-weight: 700;
+        color: var(--primary-color);
+        padding-bottom: 5px;
+        border-bottom: 2px solid transparent;
+
+        &:hover {
+            border-bottom-color: var(--primary-color);
+        }
+    }
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+}

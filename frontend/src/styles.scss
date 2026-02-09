@@ -63,6 +63,9 @@
   --hero-subtitle: #475569;
   --hero-img-filter: brightness(1);
   --hero-glass: rgba(255, 255, 255, 0.6);
+
+  /* Typography */
+  --font-family: 'Montserrat', sans-serif;
 }
 
 /* Dark Theme */
@@ -121,14 +124,28 @@ body {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-family);
   background-color: var(--bg-color);
   color: var(--text-color);
   line-height: 1.6;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color var(--transition-speed) var(--transition-curve),
-              color var(--transition-speed) var(--transition-curve);
+    color var(--transition-speed) var(--transition-curve);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  font-family: var(--font-family);
 }
 
 a {
@@ -178,13 +195,13 @@ button {
 
 @media (max-width: 1024px) {
   .container {
-    padding: 0 1.25rem;
+    padding: 0 2rem;
   }
 }
 
 @media (max-width: 600px) {
   .container {
-    padding: 0 1rem;
+    padding: 0 2rem;
   }
 }
 
@@ -302,32 +319,74 @@ button {
    ============================================ */
 
 /* Display */
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.flex-wrap { flex-wrap: wrap; }
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
 
 /* Alignment */
-.items-center { align-items: center; }
-.justify-between { justify-content: space-between; }
-.text-center { text-align: center; }
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.text-center {
+  text-align: center;
+}
 
 /* Spacing */
-.gap-2 { gap: 1rem; }
-.gap-4 { gap: 2rem; }
-.mb-1 { margin-bottom: 0.5rem; }
-.mb-2 { margin-bottom: 1rem; }
-.mb-4 { margin-bottom: 2rem; }
-.mt-4 { margin-top: 2rem; }
+.gap-2 {
+  gap: 1rem;
+}
+
+.gap-4 {
+  gap: 2rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 2rem;
+}
+
+.mt-4 {
+  margin-top: 2rem;
+}
 
 /* Sizing */
-.w-full { width: 100%; }
+.w-full {
+  width: 100%;
+}
 
 /* Overflow */
-.overflow-hidden { overflow: hidden; }
+.overflow-hidden {
+  overflow: hidden;
+}
 
 /* Typography */
-.fw-bold { font-weight: 700; }
-.fw-black { font-weight: 900; }
+.fw-bold {
+  font-weight: 700;
+}
+
+.fw-black {
+  font-weight: 900;
+}
 
 /* ============================================
    ANIMATIONS
@@ -338,6 +397,7 @@ button {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -349,6 +409,7 @@ button {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -362,42 +423,61 @@ button {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
 }
 
 @keyframes shimmer {
-  0%, 100% {
+
+  0%,
+  100% {
     filter: hue-rotate(0deg);
   }
+
   50% {
     filter: hue-rotate(20deg);
   }
 }
 
 @keyframes shake {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0);
   }
-  20%, 60% {
+
+  20%,
+  60% {
     transform: translateX(-6px);
   }
-  40%, 80% {
+
+  40%,
+  80% {
     transform: translateX(6px);
   }
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
+
   40% {
     transform: translateY(-5px);
   }
+
   60% {
     transform: translateY(-3px);
   }
@@ -407,6 +487,7 @@ button {
   0% {
     left: -100%;
   }
+
   100% {
     left: 200%;
   }

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
@@ -8,11 +8,16 @@ import { CmsService } from '../../core/services/api/cms.service';
 import { CartService } from '../../core/store/cart.service';
 import { Category } from '../../core/models/category.model';
 import { Product } from '../../core/models/product.model';
+import { LucideAngularModule } from 'lucide-angular';
+
+import { HeroComponent } from './components/hero/hero.component';
+import { CategoryGridComponent } from './components/category-grid/category-grid.component';
+import { FeaturedProductsComponent } from './components/featured-products/featured-products.component';
+import { AboutSectionComponent } from './components/about-section/about-section.component';
+import { BrandShelfComponent } from './components/brand-shelf/brand-shelf.component';
+import { TrustMarkersComponent } from './components/trust-markers/trust-markers.component';
+import { SocialSectionComponent } from './components/social-section/social-section.component';
 import { Brand } from '../../core/models/brand.model';
-import { LucideAngularModule, ChevronLeft, ChevronRight, Truck, ShieldCheck, MessageCircle, ExternalLink, ArrowRight } from 'lucide-angular';
-
-import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
-
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -20,23 +25,18 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
     CommonModule,
     RouterModule,
     LucideAngularModule,
-    ProductCardComponent,
-    NgOptimizedImage
+    HeroComponent,
+    CategoryGridComponent,
+    FeaturedProductsComponent,
+    AboutSectionComponent,
+    BrandShelfComponent,
+    TrustMarkersComponent,
+    SocialSectionComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements OnInit, OnDestroy {
-  readonly icons = {
-    ChevronLeft,
-    ChevronRight,
-    Truck,
-    ShieldCheck,
-    MessageCircle,
-    ExternalLink,
-    ArrowRight
-  };
-
+export class HomeComponent implements OnInit {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
@@ -47,8 +47,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   featuredProducts: Product[] = [];
   brands: Brand[] = [];
   cms: any = null;
-  currentSlideIndex = 0;
-  private slideInterval: any;
 
   async ngOnInit() {
     [this.categories, this.brands, this.cms] = await Promise.all([
@@ -59,34 +57,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     const result = await this.productService.getProducts({ page: 1, limit: 8 });
     this.featuredProducts = result.items;
-
-    if (this.cms?.heroSlides?.length > 1) {
-      this.startSlideShow();
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.slideInterval) {
-      clearInterval(this.slideInterval);
-    }
-  }
-
-  startSlideShow() {
-    this.slideInterval = setInterval(() => {
-      this.nextSlide();
-    }, 5000);
-  }
-
-  nextSlide() {
-    if (this.cms?.heroSlides) {
-      this.currentSlideIndex = (this.currentSlideIndex + 1) % this.cms.heroSlides.length;
-    }
-  }
-
-  prevSlide() {
-    if (this.cms?.heroSlides) {
-      this.currentSlideIndex = (this.currentSlideIndex - 1 + this.cms.heroSlides.length) % this.cms.heroSlides.length;
-    }
   }
 
   addToCart(product: Product) {
