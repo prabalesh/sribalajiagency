@@ -1,90 +1,253 @@
 <div class="crud-container">
-    <h1>Manage Users</h1>
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <lucide-icon [img]="Users" [size]="32"></lucide-icon>
+                <span>Manage Users</span>
+            </h1>
+            <p class="page-subtitle">Create, edit, and manage user accounts</p>
+        </div>
+    </div>
 
     <div class="crud-layout">
         <!-- Add/Edit User Form -->
         @if (authService.hasPermission('CREATE_USER') || (isEditing && authService.hasPermission('UPDATE_USER'))) {
-        <div class="form-card">
-            <h3>{{ isEditing ? 'Edit User' : 'Add New User' }}</h3>
-            <form (ngSubmit)="saveUser()">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" [(ngModel)]="newUser.name" name="name" required placeholder="John Doe">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" [(ngModel)]="newUser.email" name="email" required
-                        placeholder="john@example.com">
-                </div>
-                <div class="form-group">
-                    <label>Assigned Roles</label>
-                    <select [(ngModel)]="newUser.roleIds" name="roleIds" required multiple class="multi-select">
-                        @for (role of roles; track role.id) {
-                        <option [value]="role.id">{{ role.name | uppercase }}</option>
-                        }
-                    </select>
-                    <small>Hold Ctrl (Cmd) to select multiple</small>
-                </div>
-
-                <div class="actions">
-                    <button type="submit" class="btn-primary"
-                        [disabled]="!newUser.name || !newUser.email || newUser.roleIds.length === 0">
-                        {{ isEditing ? 'Update User' : 'Add User' }}
-                    </button>
+            <div class="form-card glass-card">
+                <div class="form-header">
+                    <h3>
+                        <lucide-icon [img]="isEditing ? Edit : UserPlus" [size]="20"></lucide-icon>
+                        <span>{{ isEditing ? 'Edit User' : 'Add New User' }}</span>
+                    </h3>
                     @if (isEditing) {
-                    <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
+                        <button type="button" class="btn-icon-sm" (click)="resetForm()" title="Cancel">
+                            <lucide-icon [img]="X" [size]="18"></lucide-icon>
+                        </button>
                     }
                 </div>
-            </form>
-        </div>
+
+                <form (ngSubmit)="saveUser()">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Users" [size]="16"></lucide-icon>
+                            <span>Full Name</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-input"
+                            [(ngModel)]="newUser.name" 
+                            name="name" 
+                            required 
+                            placeholder="John Doe"
+                            [disabled]="isSaving">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Mail" [size]="16"></lucide-icon>
+                            <span>Email Address</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            class="form-input"
+                            [(ngModel)]="newUser.email" 
+                            name="email" 
+                            required
+                            placeholder="john@example.com"
+                            [disabled]="isSaving">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Shield" [size]="16"></lucide-icon>
+                            <span>Assigned Roles</span>
+                        </label>
+                        <select 
+                            [(ngModel)]="newUser.roleIds" 
+                            name="roleIds" 
+                            required 
+                            multiple 
+                            class="form-select multi-select"
+                            [disabled]="isSaving">
+                            @for (role of roles; track role.id) {
+                                <option [value]="role.id">{{ role.name | uppercase }}</option>
+                            }
+                        </select>
+                        <small class="form-hint">Hold Ctrl (Cmd on Mac) to select multiple roles</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button 
+                            type="submit" 
+                            class="btn-primary"
+                            [disabled]="!validateUser() || isSaving">
+                            @if (isSaving) {
+                                <span class="spinner-small"></span>
+                                <span>{{ isEditing ? 'Updating...' : 'Creating...' }}</span>
+                            } @else {
+                                <lucide-icon [img]="isEditing ? Edit : Plus" [size]="18"></lucide-icon>
+                                <span>{{ isEditing ? 'Update User' : 'Add User' }}</span>
+                            }
+                        </button>
+                        @if (isEditing) {
+                            <button type="button" (click)="resetForm()" class="btn-secondary" [disabled]="isSaving">
+                                Cancel
+                            </button>
+                        }
+                    </div>
+                </form>
+            </div>
         }
 
         <!-- Users List -->
-        <div class="list-card">
-            <h3>Security Directory</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Identitiy</th>
-                        <th>Email Contact</th>
-                        <th>Assigned Roles</th>
-                        <th>Management</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (user of users; track user.id) {
-                    <tr>
-                        <td><strong>{{ user.name }}</strong></td>
-                        <td>{{ user.email }}</td>
-                        <td>
-                            <div class="role-badges">
+        <div class="list-card glass-card">
+            <div class="list-header">
+                <h3>
+                    <lucide-icon [img]="Shield" [size]="20"></lucide-icon>
+                    <span>Security Directory</span>
+                </h3>
+                
+                <!-- Search Bar -->
+                <div class="search-box">
+                    <lucide-icon [img]="Search" [size]="18"></lucide-icon>
+                    <input 
+                        type="text" 
+                        class="search-input"
+                        [(ngModel)]="searchQuery"
+                        placeholder="Search users..."
+                        [disabled]="isLoading">
+                </div>
+            </div>
+
+            @if (isLoading) {
+                <div class="loading-state">
+                    <div class="spinner-large"></div>
+                    <p>Loading users...</p>
+                </div>
+            } @else if (filteredUsers.length === 0) {
+                <div class="empty-state">
+                    <lucide-icon [img]="Users" [size]="48"></lucide-icon>
+                    <p>{{ searchQuery ? 'No users found matching your search' : 'No users yet. Create your first user!' }}</p>
+                </div>
+            } @else {
+                <!-- Desktop Table -->
+                <div class="table-wrapper desktop-only">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Identity</th>
+                                <th>Email Contact</th>
+                                <th>Assigned Roles</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (user of filteredUsers; track user.id) {
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <div class="user-avatar">
+                                                {{ user.name.charAt(0).toUpperCase() }}
+                                            </div>
+                                            <strong>{{ user.name }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <div class="role-badges">
+                                            @for (role of user.roles; track role.id) {
+                                                <span class="badge" [ngClass]="getRoleBadgeClass(role.name)">
+                                                    {{ role.name }}
+                                                </span>
+                                            }
+                                            @if (!user.roles || user.roles.length === 0) {
+                                                <span class="badge badge-user">User</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="table-actions">
+                                            @if (authService.hasPermission('UPDATE_USER')) {
+                                                <button 
+                                                    class="btn-icon" 
+                                                    (click)="editUser(user)"
+                                                    title="Edit user">
+                                                    <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                                </button>
+                                            }
+                                            @if (authService.hasPermission('DELETE_USER')) {
+                                                <button 
+                                                    class="btn-icon btn-delete" 
+                                                    (click)="deleteUser(user.id)"
+                                                    title="Delete user">
+                                                    <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="mobile-cards mobile-only">
+                    @for (user of filteredUsers; track user.id) {
+                        <div class="user-card">
+                            <div class="user-card-header">
+                                <div class="user-avatar-large">
+                                    {{ user.name.charAt(0).toUpperCase() }}
+                                </div>
+                                <div class="user-card-info">
+                                    <h4>{{ user.name }}</h4>
+                                    <p>{{ user.email }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="user-card-roles">
                                 @for (role of user.roles; track role.id) {
-                                <span class="badge" [ngClass]="role.name">{{ role.name }}</span>
+                                    <span class="badge" [ngClass]="getRoleBadgeClass(role.name)">
+                                        {{ role.name }}
+                                    </span>
                                 }
                                 @if (!user.roles || user.roles.length === 0) {
-                                <span class="badge user">user</span>
+                                    <span class="badge badge-user">User</span>
                                 }
                             </div>
-                        </td>
-                        <td>
-                            <div class="table-actions">
+
+                            <div class="user-card-actions">
                                 @if (authService.hasPermission('UPDATE_USER')) {
-                                <button class="btn btn-sm" (click)="editUser(user)">Modify</button>
+                                    <button 
+                                        class="btn-secondary btn-sm" 
+                                        (click)="editUser(user)">
+                                        <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                        <span>Edit</span>
+                                    </button>
                                 }
                                 @if (authService.hasPermission('DELETE_USER')) {
-                                <button class="btn btn-sm delete" (click)="deleteUser(user.id)">Revoke</button>
+                                    <button 
+                                        class="btn-danger btn-sm" 
+                                        (click)="deleteUser(user.id)">
+                                        <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                                        <span>Delete</span>
+                                    </button>
                                 }
                             </div>
-                        </td>
-                    </tr>
+                        </div>
                     }
-                </tbody>
-            </table>
+                </div>
+            }
         </div>
+    </div>
 
-        <!-- Pagination -->
-        <app-pagination [currentPage]="currentPage" [totalItems]="totalItems" [itemsPerPage]="itemsPerPage"
+    <!-- Pagination -->
+    @if (!isLoading && totalItems > itemsPerPage) {
+        <app-pagination 
+            [currentPage]="currentPage" 
+            [totalItems]="totalItems" 
+            [itemsPerPage]="itemsPerPage"
             (pageChange)="onPageChange($event)">
         </app-pagination>
-    </div>
+    }
 </div>
