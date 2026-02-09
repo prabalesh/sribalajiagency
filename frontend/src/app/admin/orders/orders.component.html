@@ -1,148 +1,352 @@
 <div class="admin-orders-page">
-    <header class="page-header">
-        <h1>Order Management</h1>
-        <p>Manage and track all orders</p>
-    </header>
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <lucide-icon [img]="ShoppingCart" [size]="32"></lucide-icon>
+                <span>Order Management</span>
+            </h1>
+            <p class="page-subtitle">Manage and track all orders</p>
+        </div>
+    </div>
 
     <!-- Queue Tabs -->
-    <div class="queue-tabs">
-        <button class="tab-btn" [class.active]="activeTab === 'orders'" (click)="switchTab('orders')">
-            Orders Queue
+    <div class="queue-tabs glass-card">
+        <button 
+            class="tab-btn" 
+            [class.active]="activeTab === 'orders'" 
+            (click)="switchTab('orders')">
+            <lucide-icon [img]="ShoppingCart" [size]="20"></lucide-icon>
+            <span>Orders Queue</span>
         </button>
-        <button class="tab-btn" [class.active]="activeTab === 'delivery'" (click)="switchTab('delivery')">
-            Delivery Queue
+        <button 
+            class="tab-btn" 
+            [class.active]="activeTab === 'delivery'" 
+            (click)="switchTab('delivery')">
+            <lucide-icon [img]="Truck" [size]="20"></lucide-icon>
+            <span>Delivery Queue</span>
         </button>
     </div>
 
     <!-- Filters Bar -->
     <div class="filters-bar glass-card">
         <div class="search-group">
-            <span class="search-icon">🔍</span>
-            <input type="text" [(ngModel)]="searchTerm" placeholder="Search orders, customers, phone..."
-                class="search-input" (keyup.enter)="applyFilters()">
+            <lucide-icon [img]="Search" [size]="18"></lucide-icon>
+            <input 
+                type="text" 
+                [(ngModel)]="searchTerm" 
+                placeholder="Search orders, customers, phone..."
+                class="search-input" 
+                (keyup.enter)="applyFilters()">
         </div>
 
         <div class="filter-group">
-            <select [(ngModel)]="statusFilter" class="filter-select" (change)="applyFilters()">
-                <option value="All">All Statuses</option>
-                @for (status of statusOptions; track status) {
-                <option [value]="status">{{ status }}</option>
-                }
-            </select>
+            <div class="filter-item">
+                <lucide-icon [img]="Filter" [size]="16"></lucide-icon>
+                <select 
+                    [(ngModel)]="statusFilter" 
+                    class="filter-select" 
+                    (change)="applyFilters()">
+                    <option value="All">All Statuses</option>
+                    @for (status of statusOptions; track status) {
+                        <option [value]="status">{{ status }}</option>
+                    }
+                </select>
+            </div>
 
-            <input type="date" [(ngModel)]="startDate" class="filter-date" placeholder="Start Date" (change)="applyFilters()">
-            <input type="date" [(ngModel)]="endDate" class="filter-date" placeholder="End Date" (change)="applyFilters()">
+            <div class="filter-item">
+                <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+                <input 
+                    type="date" 
+                    [(ngModel)]="startDate" 
+                    class="filter-date" 
+                    placeholder="Start Date" 
+                    (change)="applyFilters()">
+            </div>
 
-            <button class="btn-secondary btn-sm" (click)="resetFilters(); applyFilters()">
-                Reset Filters
+            <div class="filter-item">
+                <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+                <input 
+                    type="date" 
+                    [(ngModel)]="endDate" 
+                    class="filter-date" 
+                    placeholder="End Date" 
+                    (change)="applyFilters()">
+            </div>
+
+            <button 
+                class="btn-secondary btn-sm" 
+                (click)="resetFilters(); applyFilters()">
+                <lucide-icon [img]="X" [size]="16"></lucide-icon>
+                <span>Reset</span>
             </button>
         </div>
     </div>
 
-
-    <!-- Orders Table -->
+    <!-- Orders Table/Cards -->
     @if (isLoading) {
-    <div class="loading">Loading orders...</div>
+        <div class="loading-state glass-card">
+            <div class="spinner-large"></div>
+            <p>Loading orders...</p>
+        </div>
+    } @else if (filteredOrders.length === 0) {
+        <div class="empty-state glass-card">
+            <lucide-icon [img]="ShoppingCart" [size]="64"></lucide-icon>
+            <p>No orders found matching your filters.</p>
+            <button class="btn-secondary" (click)="resetFilters(); applyFilters()">
+                Clear Filters
+            </button>
+        </div>
     } @else {
-    <div class="table-container glass-card">
-        <table class="orders-table">
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Date</th>
-                    <th>Customer</th>
-                    <th>Total</th>
-                    <th>Payment</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (order of filteredOrders; track order.id) {
-                <tr>
-                    <td class="id-col" title="{{ order.id }}">
-                        <a [routerLink]="['/dashboard/orders', order.id]" class="id-link">#{{ order.id.substring(0, 8)
-                            }}</a>
-                    </td>
-                    <td>{{ order.createdAt | date:'mediumDate' }}</td>
-                    <td>
-                        <div class="customer-info">
-                            <span class="name">{{ order.user?.name || 'Guest' }}</span>
-                            <span class="email">{{ order.user?.email }}</span>
+        <!-- Desktop Table -->
+        <div class="table-container glass-card desktop-only">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (order of filteredOrders; track order.id) {
+                        <tr>
+                            <td class="id-col">
+                                <a [routerLink]="['/dashboard/orders', order.id]" class="id-link">
+                                    #{{ getTruncatedId(order.id) }}
+                                </a>
+                            </td>
+                            <td>{{ order.createdAt | date:'mediumDate' }}</td>
+                            <td>
+                                <div class="customer-info">
+                                    <span class="name">{{ order.user?.name || 'Guest' }}</span>
+                                    <span class="email">{{ order.user?.email }}</span>
+                                </div>
+                            </td>
+                            <td class="amount">₹{{ order.totalAmount | number:'1.2-2' }}</td>
+                            <td>
+                                <span 
+                                    class="payment-badge" 
+                                    [class.cod]="order.paymentMethod === 'cod'">
+                                    <lucide-icon 
+                                        [img]="order.paymentMethod === 'online' ? CreditCard : IndianRupee" 
+                                        [size]="14">
+                                    </lucide-icon>
+                                    {{ order.paymentMethod === 'online' ? 'Online' : 'COD' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span 
+                                    class="status-badge" 
+                                    [ngClass]="getStatusColor(order.status)">
+                                    <lucide-icon [img]="getStatusIcon(order.status)" [size]="14"></lucide-icon>
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <button 
+                                        class="btn-icon" 
+                                        [routerLink]="['/dashboard/orders', order.id]"
+                                        title="View details">
+                                        <lucide-icon [img]="Eye" [size]="16"></lucide-icon>
+                                    </button>
+                                    @if (authService.hasPermission(PERMISSIONS.UPDATE_ORDER)) {
+                                        <button 
+                                            class="btn-icon" 
+                                            (click)="openStatusModal(order)" 
+                                            title="Update status">
+                                            <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            @if (totalItems > itemsPerPage) {
+                <app-pagination 
+                    [currentPage]="currentPage" 
+                    [totalItems]="totalItems" 
+                    [itemsPerPage]="itemsPerPage"
+                    (pageChange)="onPageChange($event)">
+                </app-pagination>
+            }
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="mobile-cards mobile-only">
+            @for (order of filteredOrders; track order.id) {
+                <div class="order-card glass-card">
+                    <div class="order-card-header">
+                        <div class="order-id">
+                            <a [routerLink]="['/dashboard/orders', order.id]">
+                                #{{ getTruncatedId(order.id) }}
+                            </a>
                         </div>
-                    </td>
-                    <td class="amount">₹{{ order.totalAmount | number }}</td>
-                    <td>
-                        <span class="payment-badge" [class.cod]="order.paymentMethod === 'cod'">
-                            {{ order.paymentMethod === 'online' ? 'Online' : 'COD' }}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="status-badge" [ngClass]="getStatusColor(order.status)">
+                        <span 
+                            class="status-badge" 
+                            [ngClass]="getStatusColor(order.status)">
+                            <lucide-icon [img]="getStatusIcon(order.status)" [size]="12"></lucide-icon>
                             {{ order.status }}
                         </span>
-                    </td>
-                    <td class="table-actions">
-                        <button class="btn-sm" (click)="openStatusModal(order)" title="Update Status">
-                            Edit
-                        </button>
-                    </td>
-                </tr>
-                } @empty {
-                <tr>
-                    <td colspan="7" class="empty-state">No orders found matching your filters.</td>
-                </tr>
-                }
-            </tbody>
-        </table>
+                    </div>
 
-        <!-- Pagination -->
-        <app-pagination [currentPage]="currentPage" [totalItems]="totalItems" [itemsPerPage]="itemsPerPage"
-            (pageChange)="onPageChange($event)">
-        </app-pagination>
-    </div>
+                    <div class="order-card-body">
+                        <div class="order-detail">
+                            <lucide-icon [img]="User" [size]="16"></lucide-icon>
+                            <div class="detail-content">
+                                <span class="label">Customer</span>
+                                <span class="value">{{ order.user?.name || 'Guest' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="order-detail">
+                            <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+                            <div class="detail-content">
+                                <span class="label">Date</span>
+                                <span class="value">{{ order.createdAt | date:'mediumDate' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="order-detail">
+                            <lucide-icon [img]="IndianRupee" [size]="16"></lucide-icon>
+                            <div class="detail-content">
+                                <span class="label">Total</span>
+                                <span class="value amount">₹{{ order.totalAmount | number:'1.2-2' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="order-detail">
+                            <lucide-icon 
+                                [img]="order.paymentMethod === 'online' ? CreditCard : IndianRupee" 
+                                [size]="16">
+                            </lucide-icon>
+                            <div class="detail-content">
+                                <span class="label">Payment</span>
+                                <span class="value">{{ order.paymentMethod === 'online' ? 'Online' : 'COD' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-card-actions">
+                        <button 
+                            class="btn-secondary btn-sm" 
+                            [routerLink]="['/dashboard/orders', order.id]">
+                            <lucide-icon [img]="Eye" [size]="16"></lucide-icon>
+                            <span>View</span>
+                        </button>
+                        @if (authService.hasPermission(PERMISSIONS.UPDATE_ORDER)) {
+                            <button 
+                                class="btn-primary btn-sm" 
+                                (click)="openStatusModal(order)">
+                                <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                <span>Update</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Mobile Pagination -->
+            @if (totalItems > itemsPerPage) {
+                <app-pagination 
+                    [currentPage]="currentPage" 
+                    [totalItems]="totalItems" 
+                    [itemsPerPage]="itemsPerPage"
+                    (pageChange)="onPageChange($event)">
+                </app-pagination>
+            }
+        </div>
     }
 
     <!-- Status Update Modal -->
     @if (showStatusModal && selectedOrder) {
-    <div class="modal-overlay" (click)="closeStatusModal()">
-        <div class="modal-content" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <h2>Update Status</h2>
-                <button class="close-btn" (click)="closeStatusModal()">×</button>
-            </div>
-
-            <div class="modal-body">
-                <div class="order-summary">
-                    <p><strong>Order #{{ selectedOrder.id.substring(0, 8) }}</strong></p>
-                    <p class="customer">Customer: {{ selectedOrder.user?.name }}</p>
+        <div class="modal-overlay" (click)="closeStatusModal()">
+            <div class="modal-content glass-card" (click)="$event.stopPropagation()">
+                <div class="modal-header">
+                    <h2>
+                        <lucide-icon [img]="Edit" [size]="24"></lucide-icon>
+                        <span>Update Status</span>
+                    </h2>
+                    <button class="btn-icon-close" (click)="closeStatusModal()">
+                        <lucide-icon [img]="X" [size]="20"></lucide-icon>
+                    </button>
                 </div>
 
-                <div class="form-group">
-                    <label for="status">New Status</label>
-                    <select id="status" [(ngModel)]="newStatus" class="form-control">
-                        <option value="">Select Status</option>
-                        @for (status of statusOptions; track status) {
-                        <option [value]="status">{{ status }}</option>
+                <div class="modal-body">
+                    <div class="order-summary">
+                        <p class="order-id"><strong>Order #{{ getTruncatedId(selectedOrder.id) }}</strong></p>
+                        <p class="customer">
+                            <lucide-icon [img]="User" [size]="16"></lucide-icon>
+                            {{ selectedOrder.user?.name }}
+                        </p>
+                        <p class="amount">
+                            <lucide-icon [img]="IndianRupee" [size]="16"></lucide-icon>
+                            ₹{{ selectedOrder.totalAmount | number:'1.2-2' }}
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status" class="form-label">
+                            <lucide-icon [img]="Package" [size]="16"></lucide-icon>
+                            <span>New Status</span>
+                        </label>
+                        <select 
+                            id="status" 
+                            [(ngModel)]="newStatus" 
+                            class="form-control"
+                            [disabled]="isUpdating">
+                            <option value="">Select Status</option>
+                            @for (status of statusOptions; track status) {
+                                <option [value]="status">{{ status }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message" class="form-label">
+                            <lucide-icon [img]="Mail" [size]="16"></lucide-icon>
+                            <span>Status Message (Optional)</span>
+                        </label>
+                        <textarea 
+                            id="message" 
+                            [(ngModel)]="statusMessage"
+                            placeholder="Add a message regarding this status update..." 
+                            rows="3"
+                            class="form-control"
+                            [disabled]="isUpdating"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button 
+                        class="btn-secondary" 
+                        (click)="closeStatusModal()"
+                        [disabled]="isUpdating">
+                        Cancel
+                    </button>
+                    <button 
+                        class="btn-primary" 
+                        (click)="updateStatus()" 
+                        [disabled]="!newStatus || isUpdating">
+                        @if (isUpdating) {
+                            <span class="spinner-sm"></span>
+                            <span>Updating...</span>
+                        } @else {
+                            <lucide-icon [img]="Check" [size]="18"></lucide-icon>
+                            <span>Update Status</span>
                         }
-                    </select>
+                    </button>
                 </div>
-
-                <div class="form-group">
-                    <label for="message">Status Message (Optional)</label>
-                    <textarea id="message" [(ngModel)]="statusMessage"
-                        placeholder="Add a message regarding this status update..." rows="3"
-                        class="form-control"></textarea>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-secondary" (click)="closeStatusModal()">Cancel</button>
-                <button class="btn-primary" (click)="updateStatus()" [disabled]="!newStatus">
-                    Update Status
-                </button>
             </div>
         </div>
-    </div>
     }
 </div>
