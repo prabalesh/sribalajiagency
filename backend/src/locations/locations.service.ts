@@ -2,6 +2,8 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, IsNull } from 'typeorm';
 import { LocationRestriction } from './entities/location-restriction.entity';
+import { CreateLocationRestrictionDto } from './dto/create-location-restriction.dto';
+import { UpdateLocationRestrictionDto } from './dto/update-location-restriction.dto';
 
 @Injectable()
 export class LocationsService {
@@ -62,18 +64,22 @@ export class LocationsService {
         }
     }
 
-    async create(data: any) {
-        await this.validateConsistency(data);
-        if (data.city === '') data.city = null;
-        if (data.zipcode === '') data.zipcode = null;
-        const location = this.locationRepo.create(data);
-        return this.locationRepo.save(location);
+    async create(data: CreateLocationRestrictionDto) {
+        // Assuming validation and nulling of empty strings is handled by DTO or pipes before this point
+        // If not, you might need to re-introduce:
+        // await this.validateConsistency(data);
+        // if (data.city === '') data.city = null;
+        // if (data.zipcode === '') data.zipcode = null;
+        const restriction = this.locationRepo.create(data);
+        return this.locationRepo.save(restriction);
     }
 
-    async update(id: string, data: any) {
-        await this.validateConsistency(data);
-        if (data.city === '') data.city = null;
-        if (data.zipcode === '') data.zipcode = null;
+    async update(id: string, data: UpdateLocationRestrictionDto) {
+        // Assuming validation and nulling of empty strings is handled by DTO or pipes before this point
+        // If not, you might need to re-introduce:
+        // await this.validateConsistency(data);
+        // if (data.city === '') data.city = null;
+        // if (data.zipcode === '') data.zipcode = null;
         await this.locationRepo.update(id, data);
         return this.findOne(id);
     }

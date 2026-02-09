@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HomeCMS } from './entities/home-cms.entity';
+import { UpdateHomeCmsDto } from './dto/update-home-cms.dto';
 import { FileStorageService } from '../common/services/file-storage.service';
 
 @Injectable()
@@ -57,8 +58,8 @@ export class CMSService {
         return cms;
     }
 
-    async updateCMS(data: any) {
-        let cms = await this.getCMS();
+    async updateCMS(data: UpdateHomeCmsDto) {
+        const cms = await this.getCMS();
         Object.assign(cms, data);
         return this.cmsRepo.save(cms);
     }

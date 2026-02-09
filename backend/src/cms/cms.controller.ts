@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Body, UseGuards, UseInterceptors, UploadedF
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CMSService } from './cms.service';
+import { UpdateHomeCmsDto } from './dto/update-home-cms.dto';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 
@@ -17,7 +18,7 @@ export class CMSController {
     @Put()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('UPDATE_CMS')
-    async updateCMS(@Body() data: any) {
+    async updateCMS(@Body() data: UpdateHomeCmsDto) {
         return this.cmsService.updateCMS(data);
     }
 

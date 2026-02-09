@@ -2,6 +2,8 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Coupon } from './entities/coupon.entity';
+import { CreateCouponDto } from './dto/create-coupon.dto';
+import { UpdateCouponDto } from './dto/update-coupon.dto';
 
 @Injectable()
 export class CouponsService {
@@ -32,12 +34,12 @@ export class CouponsService {
         return coupon;
     }
 
-    create(data: any) {
+    async create(data: CreateCouponDto) {
         const coupon = this.couponRepo.create(data);
         return this.couponRepo.save(coupon);
     }
 
-    async update(id: string, data: any) {
+    async update(id: string, data: UpdateCouponDto) {
         await this.couponRepo.update(id, data);
         return this.findOne(id);
     }
