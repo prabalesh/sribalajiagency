@@ -1,0 +1,255 @@
+<div class="admin-order-detail-page">
+    @if (isLoading) {
+        <div class="loading-state glass-card">
+            <div class="spinner-large"></div>
+            <p>Loading order details...</p>
+        </div>
+    } @else if (order) {
+        <!-- Page Header -->
+        <header class="page-header">
+            <div class="header-left">
+                <a routerLink="/dashboard/orders" class="back-link">
+                    <lucide-icon [img]="ArrowLeft" [size]="20"></lucide-icon>
+                    <span>Back to Orders</span>
+                </a>
+                <h1 class="page-title">
+                    <lucide-icon [img]="ShoppingCart" [size]="28"></lucide-icon>
+                    <span>Order #{{ getTruncatedId(order.id) }}</span>
+                </h1>
+            </div>
+            <div class="header-right">
+                <button class="btn-print" (click)="printInvoice()">
+                    <lucide-icon [img]="Printer" [size]="18"></lucide-icon>
+                    <span>Print Invoice</span>
+                </button>
+                <span class="status-badge" [ngClass]="getStatusColor(order.status)">
+                    <lucide-icon [img]="getStatusIcon(order.status)" [size]="14"></lucide-icon>
+                    {{ order.status }}
+                </span>
+            </div>
+        </header>
+
+        <!-- Order Summary Cards (Mobile Only) -->
+        <div class="summary-cards mobile-only">
+            <div class="summary-card glass-card">
+                <lucide-icon [img]="IndianRupee" [size]="24"></lucide-icon>
+                <div class="summary-content">
+                    <span class="summary-label">Total Amount</span>
+                    <span class="summary-value">₹{{ order.totalAmount | number:'1.2-2' }}</span>
+                </div>
+            </div>
+            <div class="summary-card glass-card">
+                <lucide-icon [img]="ShoppingCart" [size]="24"></lucide-icon>
+                <div class="summary-content">
+                    <span class="summary-label">Total Items</span>
+                    <span class="summary-value">{{ getTotalItems() }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Customer Information -->
+            <section class="glass-card info-card">
+                <h2 class="card-title">
+                    <lucide-icon [img]="User" [size]="20"></lucide-icon>
+                    <span>Customer Information</span>
+                </h2>
+                <div class="info-list">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <lucide-icon [img]="User" [size]="18"></lucide-icon>
+                        </div>
+                        <div class="info-content">
+                            <label>Customer Name</label>
+                            <p>{{ order.user?.name || 'Guest' }}</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <lucide-icon [img]="Mail" [size]="18"></lucide-icon>
+                        </div>
+                        <div class="info-content">
+                            <label>Email Address</label>
+                            <p>{{ order.user?.email || 'N/A' }}</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <lucide-icon [img]="Phone" [size]="18"></lucide-icon>
+                        </div>
+                        <div class="info-content">
+                            <label>Phone Number</label>
+                            <p>{{ order.deliveryPhone }}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Delivery Details -->
+            <section class="glass-card info-card">
+                <h2 class="card-title">
+                    <lucide-icon [img]="MapPin" [size]="20"></lucide-icon>
+                    <span>Delivery Details</span>
+                </h2>
+                <div class="info-list">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <lucide-icon [img]="MapPin" [size]="18"></lucide-icon>
+                        </div>
+                        <div class="info-content">
+                            <label>Delivery Address</label>
+                            <p class="address">{{ order.deliveryAddress }}</p>
+                        </div>
+                    </div>
+                    @if (order.deliveryNotes) {
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <lucide-icon [img]="FileText" [size]="18"></lucide-icon>
+                            </div>
+                            <div class="info-content">
+                                <label>Delivery Notes</label>
+                                <p>{{ order.deliveryNotes }}</p>
+                            </div>
+                        </div>
+                    }
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <lucide-icon [img]="Calendar" [size]="18"></lucide-icon>
+                        </div>
+                        <div class="info-content">
+                            <label>Order Date</label>
+                            <p>{{ order.createdAt | date:'medium' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Order Items -->
+            <section class="glass-card items-card">
+                <h2 class="card-title">
+                    <lucide-icon [img]="Package" [size]="20"></lucide-icon>
+                    <span>Order Items ({{ getTotalItems() }})</span>
+                </h2>
+
+                <!-- Desktop Table -->
+                <div class="items-table-wrapper desktop-only">
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of order.items; track item.productId) {
+                                <tr>
+                                    <td>
+                                        <div class="product-info">
+                                            <span class="product-name">{{ item.productName }}</span>
+                                            @if (item.variantName) {
+                                                <span class="variant-name">{{ item.variantName }}</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="price">₹{{ item.price | number:'1.2-2' }}</td>
+                                    <td class="quantity">{{ item.quantity }}</td>
+                                    <td class="total">₹{{ (item.price * item.quantity) | number:'1.2-2' }}</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="total-label">Total Amount</td>
+                                <td class="total-amount">₹{{ order.totalAmount | number:'1.2-2' }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Mobile Cards -->
+                <div class="items-mobile mobile-only">
+                    @for (item of order.items; track item.productId) {
+                        <div class="item-card">
+                            <div class="item-header">
+                                <div class="item-name">
+                                    <span class="product-name">{{ item.productName }}</span>
+                                    @if (item.variantName) {
+                                        <span class="variant-name">{{ item.variantName }}</span>
+                                    }
+                                </div>
+                                <span class="item-qty">×{{ item.quantity }}</span>
+                            </div>
+                            <div class="item-footer">
+                                <span class="item-price">₹{{ item.price | number:'1.2-2' }} each</span>
+                                <span class="item-total">₹{{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+                            </div>
+                        </div>
+                    }
+                    <div class="mobile-total">
+                        <span>Total Amount</span>
+                        <span class="amount">₹{{ order.totalAmount | number:'1.2-2' }}</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Status Timeline -->
+            <section class="glass-card timeline-card">
+                <h2 class="card-title">
+                    <lucide-icon [img]="Clock" [size]="20"></lucide-icon>
+                    <span>Order Timeline</span>
+                </h2>
+                <div class="timeline">
+                    @for (event of orderHistory; track event.id; let isFirst = $first) {
+                        <div class="timeline-item" [class.active]="isFirst">
+                            <div class="timeline-marker">
+                                <div class="timeline-dot"></div>
+                                @if (!$last) {
+                                    <div class="timeline-line"></div>
+                                }
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <span class="timeline-status" [ngClass]="getStatusColor(event.status)">
+                                        <lucide-icon [img]="getStatusIcon(event.status)" [size]="14"></lucide-icon>
+                                        {{ event.status }}
+                                    </span>
+                                    <span class="timeline-time">
+                                        <lucide-icon [img]="Clock" [size]="14"></lucide-icon>
+                                        {{ event.createdAt | date:'short' }}
+                                    </span>
+                                </div>
+                                @if (event.message) {
+                                    <p class="timeline-message">{{ event.message }}</p>
+                                }
+                                @if (event.changedBy) {
+                                    <span class="timeline-user">
+                                        <lucide-icon [img]="User" [size]="12"></lucide-icon>
+                                        by {{ event.changedBy.name }}
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <!-- Hidden Invoice for Printing -->
+        <div class="print-only">
+            <app-invoice [order]="order"></app-invoice>
+        </div>
+
+    } @else {
+        <div class="error-state glass-card">
+            <lucide-icon [img]="AlertCircle" [size]="64"></lucide-icon>
+            <h2>Order Not Found</h2>
+            <p>The order you're looking for doesn't exist or has been removed.</p>
+            <a routerLink="/dashboard/orders" class="btn-secondary">
+                <lucide-icon [img]="ArrowLeft" [size]="18"></lucide-icon>
+                <span>Back to Orders</span>
+            </a>
+        </div>
+    }
+</div>
