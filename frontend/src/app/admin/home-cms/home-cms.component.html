@@ -59,6 +59,7 @@
     <div class="form-card animate-fade">
         <form (ngSubmit)="saveCMS()">
 
+
             <!-- Hero Slides Tab -->
             @if (activeTab === 'hero') {
             <div class="tab-content">
@@ -266,41 +267,6 @@
                     }
                 </div>
                 }
-            </div>
-            }
-
-            <!-- Settings Tab -->
-            @if (activeTab === 'settings') {
-            <div class="tab-content">
-                <div class="section-title">
-                    <h3>Global Payment Settings</h3>
-                    <p>Enable/Disable payment methods site-wide</p>
-                </div>
-
-                <div class="toggle-grid">
-                    <label class="toggle-item">
-                        <input type="checkbox" [(ngModel)]="settings.allowOnline" name="allowOnline"
-                            [disabled]="!authService.hasPermission('UPDATE_SETTINGS')">
-                        <div class="toggle-text">
-                            <strong>Accept Online Payments</strong>
-                            <p>Allow customers to pay via Razorpay/Cards</p>
-                        </div>
-                    </label>
-                    <label class="toggle-item">
-                        <input type="checkbox" [(ngModel)]="settings.allowCod" name="allowCod"
-                            [disabled]="!authService.hasPermission('UPDATE_SETTINGS')">
-                        <div class="toggle-text">
-                            <strong>Accept Cash on Delivery (COD)</strong>
-                            <p>Allow orders without immediate payment</p>
-                        </div>
-                    </label>
-                </div>
-
-                <div class="settings-info-card glass-card">
-                    <span class="icon">ℹ️</span>
-                    <p>Note: Per-product payment settings can still override these global defaults for specific items if
-                        needed.</p>
-                </div>
             </div>
             }
 

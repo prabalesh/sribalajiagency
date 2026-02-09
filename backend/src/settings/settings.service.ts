@@ -170,42 +170,38 @@ export class SettingsService {
      */
     async updateSettings(data: UpdateSettingsDto): Promise<SiteSettings> {
         const queryRunner = this.dataSource.createQueryRunner();
-        
-        // Track transaction state to avoid rolling back non-existent transactions
         let isTransactionActive = false;
 
         try {
-            // Establish database connection for transaction
             await queryRunner.connect();
             this.logger.debug('Query runner connected');
             
-            // Start transaction - only after successful connection
             await queryRunner.startTransaction();
             isTransactionActive = true;
             this.logger.debug('Transaction started');
 
             this.logger.log(`Updating settings with data: ${JSON.stringify(data)}`);
             
-            // Use upsert within transaction to handle race condition
-            // If settings don't exist during update, create them atomically
-            const defaultSettings = queryRunner.manager.create(SiteSettings, {
-                id: this.SETTING_ID,
-                ...data, // Apply updates to defaults
+            // Ensure settings exist first
+            let settings = await queryRunner.manager.findOne(SiteSettings, {
+                where: { id: this.SETTING_ID }
             });
 
-            // Upsert with conflict resolution - update if exists, insert if not
-            await queryRunner.manager
-                .createQueryBuilder()
-                .insert()
-                .into(SiteSettings)
-                .values(defaultSettings)
-                .orUpdate(
-                    // Columns to update on conflict
-                    Object.keys(data),
-                    // Conflict target (primary key)
-                    ['id']
-                )
-                .execute();
+            if (!settings) {
+                // Create default if doesn't exist
+                settings = queryRunner.manager.create(SiteSettings, {
+                    id: this.SETTING_ID
+                });
+                await queryRunner.manager.save(SiteSettings, settings);
+                this.logger.log('Created default settings');
+            }
+
+            // Now update with the provided data
+            await queryRunner.manager.update(
+                SiteSettings,
+                { id: this.SETTING_ID },
+                data  // This will only update the fields in data
+            );
 
             // Fetch the updated record
             const updatedSettings = await queryRunner.manager.findOne(SiteSettings, {
@@ -213,41 +209,24 @@ export class SettingsService {
             });
 
             if (!updatedSettings) {
-                throw new Error('Failed to retrieve settings after upsert');
+                throw new Error('Failed to retrieve settings after update');
             }
             
-            // Commit transaction on success
             await queryRunner.commitTransaction();
             isTransactionActive = false;
             this.logger.log(`Settings updated successfully: ${JSON.stringify(updatedSettings)}`);
             
-            // TODO: Emit SettingsUpdatedEvent here for event-driven architecture
-            
             return updatedSettings;
         } catch (error) {
-            // Only rollback if transaction was actually started
             if (isTransactionActive) {
-                try {
-                    await queryRunner.rollbackTransaction();
-                    this.logger.warn('Transaction rolled back due to error');
-                } catch (rollbackError) {
-                    // Log rollback failure but don't throw - original error is more important
-                    this.logger.error(
-                        `Failed to rollback transaction: ${rollbackError.message}`,
-                        rollbackError.stack
-                    );
-                }
+                await queryRunner.rollbackTransaction();
+                this.logger.warn('Transaction rolled back due to error');
             }
             
-            this.logger.error(
-                `Failed to update settings: ${error.message}`,
-                error.stack
-            );
+            this.logger.error(`Failed to update settings: ${error.message}`, error.stack);
             throw new InternalServerErrorException("Failed to update settings");
         } finally {
-            // Always release query runner to prevent connection leaks
-            // Check if queryRunner is still connected before releasing
-            if (queryRunner.isReleased === false) {
+            if (!queryRunner.isReleased) {
                 await queryRunner.release();
                 this.logger.debug('Query runner released');
             }

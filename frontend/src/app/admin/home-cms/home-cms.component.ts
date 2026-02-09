@@ -2,8 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CmsService } from '../../core/services/api/cms.service';
-import { SettingsService } from '../../core/services/api/settings.service';
 import { AuthService } from '../../core/services/auth/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
     selector: 'app-admin-home-cms',
@@ -14,8 +14,8 @@ import { AuthService } from '../../core/services/auth/auth.service';
 })
 export class HomeCMSComponent implements OnInit {
     private cmsService = inject(CmsService);
-    private settingsService = inject(SettingsService);
     public authService = inject(AuthService);
+    public toastService = inject(ToastService);
 
     cms: any = {
         heroSlides: [],
@@ -24,11 +24,6 @@ export class HomeCMSComponent implements OnInit {
         showFeatured: true,
         showBrands: true,
         showTrustMarkers: true
-    };
-    settings: any = {
-        enabledPaymentMethods: ['online', 'cod'],
-        allowCod: true,
-        allowOnline: true
     };
     activeTab: 'hero' | 'sections' | 'about' | 'social' | 'settings' = 'hero';
     isSaving = false;
@@ -43,21 +38,16 @@ export class HomeCMSComponent implements OnInit {
             ...this.cms,
             ...data
         };
-        if (!this.cms.heroSlides) this.cms.heroSlides = [];
         if (!this.cms.socialLinks) this.cms.socialLinks = [];
-
-        const settingsData = await this.settingsService.getStoreSettings();
-        if (settingsData) {
-            this.settings = { ...this.settings, ...settingsData };
-        }
     }
 
     async saveCMS() {
         this.isSaving = true;
         try {
             await this.cmsService.updateHomeCMS(this.cms);
-            await this.settingsService.updateStoreSettings(this.settings);
-            alert('Settings updated successfully!');
+            this.toastService.success('CMS updated successfully!');
+        } catch (error) {
+            this.toastService.error('Failed to update CMS. Please try again.');
         } finally {
             this.isSaving = false;
         }
