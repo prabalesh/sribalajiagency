@@ -1,106 +1,392 @@
-<div class="crud-container">
-    <header class="page-header">
-        <h1>Coupons & Offers</h1>
-        <p>Create and manage discount codes for your customers</p>
-    </header>
+<div class="coupons-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <lucide-icon [img]="Ticket" [size]="32"></lucide-icon>
+                <span>Coupons & Offers</span>
+            </h1>
+            <p class="page-subtitle">Create and manage discount codes for your customers</p>
+        </div>
+    </div>
 
+    <!-- Stats Cards (Mobile Only) -->
+    <div class="stats-cards mobile-only">
+        <div class="stat-card glass-card">
+            <lucide-icon [img]="Ticket" [size]="24"></lucide-icon>
+            <div class="stat-content">
+                <span class="stat-value">{{ getActiveCouponsCount() }}</span>
+                <span class="stat-label">Active Coupons</span>
+            </div>
+        </div>
+        <div class="stat-card glass-card">
+            <lucide-icon [img]="TrendingUp" [size]="24"></lucide-icon>
+            <div class="stat-content">
+                <span class="stat-value">{{ coupons.length }}</span>
+                <span class="stat-label">Total Coupons</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Form -->
     @if (authService.hasPermission('CREATE_COUPON') || (isEditing && authService.hasPermission('UPDATE_COUPON'))) {
-    <div class="form-card animate-fade">
-        <h3>{{ isEditing ? 'Edit Coupon' : 'Create New Offer' }}</h3>
-        <form (ngSubmit)="saveCoupon()">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Internal Name</label>
-                    <input type="text" [(ngModel)]="newCoupon.name" name="name" required
-                        placeholder="e.g. Summer Sale 2026">
-                </div>
-                <!-- ... other form groups ... -->
-                <div class="form-group">
-                    <label>Discount Code</label>
-                    <input type="text" [(ngModel)]="newCoupon.code" name="code" required placeholder="SUMMER20">
-                </div>
-                <div class="form-group">
-                    <label>Discount Type</label>
-                    <select [(ngModel)]="newCoupon.discountType" name="discountType">
-                        <option value="percentage">Percentage (%)</option>
-                        <option value="flat">Flat Amount (₹)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Discount Value</label>
-                    <input type="number" [(ngModel)]="newCoupon.discountValue" name="discountValue" required>
-                </div>
-                <div class="form-group">
-                    <label>Start Date</label>
-                    <input type="date" [(ngModel)]="newCoupon.startDate" name="startDate" required>
-                </div>
-                <div class="form-group">
-                    <label>Expiration Date</label>
-                    <input type="date" [(ngModel)]="newCoupon.endDate" name="endDate" required>
-                </div>
-                <div class="form-group">
-                    <label>Min. Order Amount (₹)</label>
-                    <input type="number" [(ngModel)]="newCoupon.minOrderAmount" name="minOrderAmount">
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <div class="toggle-group">
-                        <input type="checkbox" [(ngModel)]="newCoupon.isActive" name="isActive">
-                        <span>Active</span>
+        <div class="form-card glass-card animate-fade">
+            <div class="form-header">
+                <h3>
+                    <lucide-icon [img]="isEditing ? Edit : Plus" [size]="22"></lucide-icon>
+                    <span>{{ isEditing ? 'Edit Coupon' : 'Create New Offer' }}</span>
+                </h3>
+                @if (isEditing) {
+                    <button type="button" class="btn-icon-sm" (click)="resetForm()" title="Cancel">
+                        <lucide-icon [img]="X" [size]="18"></lucide-icon>
+                    </button>
+                }
+            </div>
+
+            <form (ngSubmit)="saveCoupon()">
+                <div class="form-grid">
+                    <!-- Internal Name -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
+                            <span>Internal Name <span class="required">*</span></span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-input"
+                            [(ngModel)]="newCoupon.name" 
+                            name="name" 
+                            required
+                            placeholder="e.g. Summer Sale 2026"
+                            [disabled]="isSaving">
+                    </div>
+
+                    <!-- Discount Code -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Ticket" [size]="16"></lucide-icon>
+                            <span>Discount Code <span class="required">*</span></span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-input code-input"
+                            [(ngModel)]="newCoupon.code" 
+                            name="code" 
+                            required 
+                            placeholder="SUMMER20"
+                            [disabled]="isSaving"
+                            style="text-transform: uppercase;">
+                    </div>
+
+                    <!-- Discount Type -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Percent" [size]="16"></lucide-icon>
+                            <span>Discount Type</span>
+                        </label>
+                        <div class="select-wrapper">
+                            <select 
+                                class="form-select"
+                                [(ngModel)]="newCoupon.discountType" 
+                                name="discountType"
+                                [disabled]="isSaving">
+                                <option value="percentage">Percentage (%)</option>
+                                <option value="flat">Flat Amount (₹)</option>
+                            </select>
+                            <lucide-icon [img]="TrendingUp" [size]="18" class="select-icon"></lucide-icon>
+                        </div>
+                    </div>
+
+                    <!-- Discount Value -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon 
+                                [img]="newCoupon.discountType === 'percentage' ? Percent : IndianRupee" 
+                                [size]="16">
+                            </lucide-icon>
+                            <span>Discount Value <span class="required">*</span></span>
+                        </label>
+                        <input 
+                            type="number" 
+                            class="form-input"
+                            [(ngModel)]="newCoupon.discountValue" 
+                            name="discountValue" 
+                            required
+                            min="0"
+                            [max]="newCoupon.discountType === 'percentage' ? 100 : null"
+                            placeholder="0"
+                            [disabled]="isSaving">
+                    </div>
+
+                    <!-- Start Date -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+                            <span>Start Date <span class="required">*</span></span>
+                        </label>
+                        <input 
+                            type="date" 
+                            class="form-input"
+                            [(ngModel)]="newCoupon.startDate" 
+                            name="startDate" 
+                            required
+                            [disabled]="isSaving">
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Clock" [size]="16"></lucide-icon>
+                            <span>Expiration Date <span class="required">*</span></span>
+                        </label>
+                        <input 
+                            type="date" 
+                            class="form-input"
+                            [(ngModel)]="newCoupon.endDate" 
+                            name="endDate" 
+                            required
+                            [disabled]="isSaving">
+                    </div>
+
+                    <!-- Min Order Amount -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="IndianRupee" [size]="16"></lucide-icon>
+                            <span>Min. Order Amount (₹)</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            class="form-input"
+                            [(ngModel)]="newCoupon.minOrderAmount" 
+                            name="minOrderAmount"
+                            min="0"
+                            placeholder="0"
+                            [disabled]="isSaving">
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <label class="toggle-group">
+                            <input 
+                                type="checkbox" 
+                                class="toggle-checkbox"
+                                [(ngModel)]="newCoupon.isActive" 
+                                name="isActive"
+                                [disabled]="isSaving">
+                            <span class="toggle-label">
+                                <lucide-icon [img]="Check" [size]="16"></lucide-icon>
+                                Active
+                            </span>
+                        </label>
                     </div>
                 </div>
-            </div>
 
-            <div class="actions">
-                <button type="submit" class="btn-primary" [disabled]="!newCoupon.name || !newCoupon.code">
-                    {{ isEditing ? 'Update Coupon' : 'Create Coupon' }}
-                </button>
-                @if (isEditing) {
-                <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
-                }
-            </div>
-        </form>
-    </div>
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button 
+                        type="submit" 
+                        class="btn-primary"
+                        [disabled]="!newCoupon.name || !newCoupon.code || isSaving">
+                        @if (isSaving) {
+                            <span class="spinner-sm"></span>
+                            <span>{{ isEditing ? 'Updating...' : 'Creating...' }}</span>
+                        } @else {
+                            <lucide-icon [img]="isEditing ? Edit : Plus" [size]="18"></lucide-icon>
+                            <span>{{ isEditing ? 'Update Coupon' : 'Create Coupon' }}</span>
+                        }
+                    </button>
+                    @if (isEditing) {
+                        <button 
+                            type="button" 
+                            (click)="resetForm()" 
+                            class="btn-secondary"
+                            [disabled]="isSaving">
+                            Cancel
+                        </button>
+                    }
+                </div>
+            </form>
+        </div>
     }
 
-    <div class="list-container animate-fade">
-        <table class="data-table">
-            <!-- ... table head ... -->
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Value</th>
-                    <th>Valid Until</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
+    <!-- Coupons List -->
+    <div class="list-card glass-card animate-fade">
+        <div class="list-header">
+            <h3>
+                <lucide-icon [img]="Ticket" [size]="22"></lucide-icon>
+                <span>Active Coupons ({{ getActiveCouponsCount() }})</span>
+            </h3>
+        </div>
+
+        @if (isLoading) {
+            <div class="loading-state">
+                <div class="spinner-large"></div>
+                <p>Loading coupons...</p>
+            </div>
+        } @else if (coupons.length === 0) {
+            <div class="empty-state">
+                <lucide-icon [img]="Ticket" [size]="64"></lucide-icon>
+                <p>No coupons created yet. Create your first coupon to get started!</p>
+            </div>
+        } @else {
+            <!-- Desktop Table -->
+            <div class="table-wrapper desktop-only">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Discount</th>
+                            <th>Valid Period</th>
+                            <th>Min Order</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (c of coupons; track c.id) {
+                            <tr [class.deleting]="isDeleting">
+                                <td>
+                                    <div class="code-cell">
+                                        <span class="code">{{ c.code }}</span>
+                                        <button 
+                                            class="btn-copy"
+                                            (click)="copyCouponCode(c.code)"
+                                            title="Copy code">
+                                            <lucide-icon [img]="Copy" [size]="14"></lucide-icon>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>{{ c.name }}</td>
+                                <td class="discount-cell">
+                                    <lucide-icon 
+                                        [img]="c.discountType === 'percentage' ? Percent : IndianRupee" 
+                                        [size]="14">
+                                    </lucide-icon>
+                                    {{ c.discountType === 'percentage' ? c.discountValue + '%' : '₹' + (c.discountValue | number:'1.2-2') }}
+                                </td>
+                                <td>
+                                    <div class="date-range">
+                                        <span>{{ c.startDate | date:'mediumDate' }}</span>
+                                        <span class="separator">→</span>
+                                        <span>{{ c.endDate | date:'mediumDate' }}</span>
+                                    </div>
+                                </td>
+                                <td>₹{{ c.minOrderAmount | number:'1.0-0' }}</td>
+                                <td>
+                                    <span 
+                                        class="status-badge"
+                                        [class.active]="c.isActive && !isExpired(c.endDate)"
+                                        [class.expired]="isExpired(c.endDate)">
+                                        <lucide-icon 
+                                            [img]="c.isActive && !isExpired(c.endDate) ? Check : X" 
+                                            [size]="12">
+                                        </lucide-icon>
+                                        {{ isExpired(c.endDate) ? 'Expired' : (c.isActive ? 'Active' : 'Inactive') }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        @if (authService.hasPermission('UPDATE_COUPON')) {
+                                            <button 
+                                                class="btn-icon" 
+                                                (click)="editCoupon(c)"
+                                                [disabled]="isSaving || isDeleting"
+                                                title="Edit coupon">
+                                                <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                            </button>
+                                        }
+                                        @if (authService.hasPermission('DELETE_COUPON')) {
+                                            <button 
+                                                class="btn-icon btn-delete" 
+                                                (click)="deleteCoupon(c.id)"
+                                                [disabled]="isSaving || isDeleting"
+                                                title="Delete coupon">
+                                                <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Cards -->
+            <div class="mobile-cards mobile-only">
                 @for (c of coupons; track c.id) {
-                <tr>
-                    <td><strong>{{ c.code }}</strong></td>
-                    <td>{{ c.name }}</td>
-                    <td class="amount">{{ c.discountType === 'percentage' ? c.discountValue + '%' : '₹' +
-                        (c.discountValue | number) }}</td>
-                    <td>{{ c.endDate | date:'mediumDate' }}</td>
-                    <td>
-                        <span class="status-badge" [class.active]="c.isActive">{{ c.isActive ? 'Active' : 'Expired'
-                            }}</span>
-                    </td>
-                    <td>
-                        <div class="table-actions">
+                    <div class="coupon-card">
+                        <div class="coupon-card-header">
+                            <div class="code-section">
+                                <span class="code">{{ c.code }}</span>
+                                <button 
+                                    class="btn-copy"
+                                    (click)="copyCouponCode(c.code)"
+                                    title="Copy code">
+                                    <lucide-icon [img]="Copy" [size]="16"></lucide-icon>
+                                </button>
+                            </div>
+                            <span 
+                                class="status-badge"
+                                [class.active]="c.isActive && !isExpired(c.endDate)"
+                                [class.expired]="isExpired(c.endDate)">
+                                <lucide-icon 
+                                    [img]="c.isActive && !isExpired(c.endDate) ? Check : X" 
+                                    [size]="12">
+                                </lucide-icon>
+                                {{ isExpired(c.endDate) ? 'Expired' : (c.isActive ? 'Active' : 'Inactive') }}
+                            </span>
+                        </div>
+
+                        <div class="coupon-card-body">
+                            <h4>{{ c.name }}</h4>
+
+                            <div class="coupon-details">
+                                <div class="detail-item">
+                                    <lucide-icon 
+                                        [img]="c.discountType === 'percentage' ? Percent : IndianRupee" 
+                                        [size]="16">
+                                    </lucide-icon>
+                                    <span>{{ c.discountType === 'percentage' ? c.discountValue + '% OFF' : '₹' + (c.discountValue | number:'1.2-2') + ' OFF' }}</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <lucide-icon [img]="IndianRupee" [size]="16"></lucide-icon>
+                                    <span>Min. Order: ₹{{ c.minOrderAmount | number:'1.0-0' }}</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+                                    <span>{{ c.startDate | date:'mediumDate' }} - {{ c.endDate | date:'mediumDate' }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="coupon-card-actions">
                             @if (authService.hasPermission('UPDATE_COUPON')) {
-                            <button class="btn-sm" (click)="editCoupon(c)">Edit</button>
+                                <button 
+                                    class="btn-secondary btn-sm" 
+                                    (click)="editCoupon(c)"
+                                    [disabled]="isSaving || isDeleting">
+                                    <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                    <span>Edit</span>
+                                </button>
                             }
                             @if (authService.hasPermission('DELETE_COUPON')) {
-                            <button class="btn-sm delete" (click)="deleteCoupon(c.id)">Delete</button>
+                                <button 
+                                    class="btn-danger btn-sm" 
+                                    (click)="deleteCoupon(c.id)"
+                                    [disabled]="isSaving || isDeleting">
+                                    <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                                    <span>Delete</span>
+                                </button>
                             }
                         </div>
-                    </td>
-                </tr>
+                    </div>
                 }
-            </tbody>
-        </table>
+            </div>
+        }
     </div>
 </div>
