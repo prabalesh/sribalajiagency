@@ -1,0 +1,115 @@
+<div class="payment-settings">
+  @if (isLoading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading settings...</p>
+    </div>
+  } @else {
+    @if (isStoreClosed()) {
+      <div class="alert alert-error">
+        <lucide-icon [img]="Lock" [size]="20"></lucide-icon>
+        <div class="alert-content">
+          <strong>Store Currently Closed</strong>
+          <p>All payment methods are disabled. Customers cannot place orders.</p>
+          @if (canUpdateSettings()) {
+            <button class="btn-text" (click)="openStore()" [disabled]="isSaving">
+              <lucide-icon [img]="Unlock" [size]="16"></lucide-icon>
+              Open Store
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="card">
+      <div class="card-body">
+        <div class="payment-options">
+          <label class="payment-option" [class.active]="settings.allowOnline">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="settings.allowOnline" 
+              [disabled]="!canUpdateSettings()">
+            <div class="option-content">
+              <div class="option-header">
+                <strong>Online Payments</strong>
+                <span class="badge" [class.active]="settings.allowOnline">
+                  {{ settings.allowOnline ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+              <p>Razorpay, Cards, UPI, Wallets</p>
+              <div class="features">
+                <span><lucide-icon [img]="Check" [size]="14"></lucide-icon> Instant confirmation</span>
+                <span><lucide-icon [img]="Check" [size]="14"></lucide-icon> Secure</span>
+              </div>
+            </div>
+          </label>
+
+          <label class="payment-option" [class.active]="settings.allowCod">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="settings.allowCod" 
+              [disabled]="!canUpdateSettings()">
+            <div class="option-content">
+              <div class="option-header">
+                <strong>Cash on Delivery</strong>
+                <span class="badge" [class.active]="settings.allowCod">
+                  {{ settings.allowCod ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+              <p>Pay in cash upon delivery</p>
+              <div class="features">
+                <span><lucide-icon [img]="Check" [size]="14"></lucide-icon> No gateway fees</span>
+                <span><lucide-icon [img]="Check" [size]="14"></lucide-icon> Increased trust</span>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <div class="alert alert-info">
+          <lucide-icon [img]="Info" [size]="18"></lucide-icon>
+          <p>Global settings. Can be overridden per product.</p>
+        </div>
+
+        @if (!settings.allowOnline && !settings.allowCod) {
+          <div class="alert alert-warning">
+            <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+            <p>No payment methods enabled. Store will be closed.</p>
+          </div>
+        }
+      </div>
+
+      <div class="card-footer">
+        <div class="footer-left">
+          @if (hasUnsavedChanges()) {
+            <span class="unsaved"><span class="dot"></span> Unsaved changes</span>
+          }
+          @if (settings.updatedAt) {
+            <span class="timestamp">
+              <lucide-icon [img]="Clock" [size]="14"></lucide-icon>
+              {{ settings.updatedAt | date:'MMM d, h:mm a' }}
+            </span>
+          }
+        </div>
+        <div class="footer-actions">
+          @if (canUpdateSettings()) {
+            @if (hasUnsavedChanges()) {
+              <button class="btn-secondary" (click)="resetSettings()" [disabled]="isSaving">
+                <lucide-icon [img]="RotateCcw" [size]="16"></lucide-icon>
+                Cancel
+              </button>
+            }
+            <button class="btn-primary" (click)="saveSettings()" [disabled]="isSaving || !hasUnsavedChanges()">
+              <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+              {{ isSaving ? 'Saving...' : 'Save Changes' }}
+            </button>
+          } @else {
+            <span class="no-permission">
+              <lucide-icon [img]="Lock" [size]="16"></lucide-icon>
+              No permission
+            </span>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

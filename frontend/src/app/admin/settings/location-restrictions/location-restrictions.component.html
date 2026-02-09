@@ -1,92 +1,105 @@
-<div class="crud-container">
-    <header class="page-header">
-        <h1>Service Areas</h1>
-        <p>Manage allowed States and Cities for agency operations</p>
-    </header>
-
-    @if (authService.hasPermission('CREATE_LOCATION') || (isEditing && authService.hasPermission('UPDATE_LOCATION'))) {
-    <div class="form-card animate-fade">
-        <h3>{{ isEditing ? 'Edit Service Area' : 'Add New Location' }}</h3>
-        <form (ngSubmit)="saveLocation()">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>State Name</label>
-                    <select [(ngModel)]="newLocation.state" name="state" required class="form-control">
-                        <option value="">Select State</option>
-                        @for (state of states; track state) {
-                        <option [value]="state">{{ state }}</option>
-                        }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Specific City (Optional)</label>
-                    <select [(ngModel)]="newLocation.city" name="city" class="form-control"
-                        [disabled]="!newLocation.state">
-                        <option value="">All Cities</option>
-                        @for (city of availableCities; track city) {
-                        <option [value]="city">{{ city }}</option>
-                        }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Zipcode (Optional)</label>
-                    <input type="text" [(ngModel)]="newLocation.zipcode" (blur)="onZipChange()" name="zipcode"
-                        placeholder="e.g. 641001" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Service Status</label>
-                    <div class="toggle-group">
-                        <input type="checkbox" [(ngModel)]="newLocation.isAllowed" name="isAllowed">
-                        <span>Operational</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="actions">
-                <button type="submit" class="btn-primary" [disabled]="!newLocation.state">{{ isEditing ? 'Update Area' :
-                    'Add Location' }}</button>
-                @if (isEditing) {
-                <button type="button" (click)="resetForm()" class="btn-secondary">Cancel</button>
+<div class="location-restrictions">
+  @if (authService.hasPermission('CREATE_LOCATION') || (isEditing && authService.hasPermission('UPDATE_LOCATION'))) {
+    <div class="card form-card">
+      <div class="card-header">
+        <h3>{{ isEditing ? 'Edit Service Area' : 'Add Service Area' }}</h3>
+      </div>
+      <form (ngSubmit)="saveLocation()">
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>State *</label>
+              <select [(ngModel)]="newLocation.state" name="state" required>
+                <option value="">Select State</option>
+                @for (state of states; track state) {
+                  <option [value]="state">{{ state }}</option>
                 }
+              </select>
             </div>
-        </form>
-    </div>
-    }
-
-    <div class="list-container animate-fade">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>State</th>
-                    <th>City / Region</th>
-                    <th>Zipcode</th>
-                    <th>Operational Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (loc of locations; track loc.id) {
-                <tr>
-                    <td><strong>{{ loc.state }}</strong></td>
-                    <td>{{ loc.city || 'All Cities Enabled' }}</td>
-                    <td>{{ loc.zipcode || 'Any' }}</td>
-                    <td>
-                        <span class="status-badge" [class.active]="loc.isAllowed">{{ loc.isAllowed ? 'Allowed' :
-                            'Restricted' }}</span>
-                    </td>
-                    <td>
-                        <div class="table-actions">
-                            @if (authService.hasPermission('UPDATE_LOCATION')) {
-                            <button class="btn-sm" (click)="editLocation(loc)">Edit</button>
-                            }
-                            @if (authService.hasPermission('DELETE_LOCATION')) {
-                            <button class="btn-sm delete" (click)="deleteLocation(loc.id)">Remove</button>
-                            }
-                        </div>
-                    </td>
-                </tr>
+            <div class="form-group">
+              <label>City</label>
+              <select [(ngModel)]="newLocation.city" name="city" [disabled]="!newLocation.state">
+                <option value="">All Cities</option>
+                @for (city of availableCities; track city) {
+                  <option [value]="city">{{ city }}</option>
                 }
-            </tbody>
-        </table>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>PIN Code</label>
+              <input type="text" [(ngModel)]="newLocation.zipcode" (blur)="onZipChange()" 
+                     name="zipcode" placeholder="e.g. 641001" maxlength="6">
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" [(ngModel)]="newLocation.isAllowed" name="isAllowed">
+                <span>Operational</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn-primary" [disabled]="!newLocation.state">
+            <lucide-icon [img]="isEditing ? Check : Plus" [size]="16"></lucide-icon>
+            {{ isEditing ? 'Update' : 'Add Location' }}
+          </button>
+          @if (isEditing) {
+            <button type="button" (click)="resetForm()" class="btn-secondary">
+              <lucide-icon [img]="X" [size]="16"></lucide-icon>
+              Cancel
+            </button>
+          }
+        </div>
+      </form>
     </div>
+  }
+
+  <div class="card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>State</th>
+            <th>City</th>
+            <th>PIN Code</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (loc of locations; track loc.id) {
+            <tr>
+              <td><strong>{{ loc.state }}</strong></td>
+              <td>{{ loc.city || 'All Cities' }}</td>
+              <td>{{ loc.zipcode || 'Any' }}</td>
+              <td>
+                <span class="badge" [class.active]="loc.isAllowed">
+                  {{ loc.isAllowed ? 'Allowed' : 'Restricted' }}
+                </span>
+              </td>
+              <td>
+                <div class="actions">
+                  @if (authService.hasPermission('UPDATE_LOCATION')) {
+                    <button class="btn-icon" (click)="editLocation(loc)" title="Edit">
+                      <lucide-icon [img]="Edit2" [size]="16"></lucide-icon>
+                    </button>
+                  }
+                  @if (authService.hasPermission('DELETE_LOCATION')) {
+                    <button class="btn-icon btn-danger" (click)="deleteLocation(loc.id)" title="Delete">
+                      <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+          @empty {
+            <tr>
+              <td colspan="5" class="empty-state">No service areas configured</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

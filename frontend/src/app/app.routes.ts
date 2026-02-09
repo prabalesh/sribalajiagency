@@ -181,10 +181,6 @@ export const routes: Routes = [
             {
                 path: 'home-cms',
                 loadComponent: () => import('./admin/home-cms/home-cms.component').then(m => m.HomeCMSComponent)
-            },
-            {
-                path: 'settings/locations',
-                loadComponent: () => import('./admin/settings/location-restrictions/location-restrictions.component').then(m => m.LocationRestrictionsComponent)
             }
         ]
     },
