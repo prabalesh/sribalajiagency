@@ -1,51 +1,63 @@
 @use "app/core/styles/glass" as *;
 
+/* ============================================
+   CSS CUSTOM PROPERTIES (VARIABLES)
+   ============================================ */
+
 :root {
-  /* Common variables */
-  --transition-speed: 0.4s;
-  --transition-curve: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Layout */
   --container-max-width: 1280px;
   --header-height: 80px;
-  --border-radius-sm: 0;
-  --border-radius-md: 0;
-  --border-radius-lg: 0;
 
-  /* Theme: Light (Default) */
+  /* Border Radius */
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+
+  /* Transitions */
+  --transition-speed: 0.4s;
+  --transition-curve: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Light Theme - Base Colors */
   --bg-color: #fcfcfd;
   --surface-color: #ffffff;
   --surface-color-secondary: #f4f6f8;
   --text-color: #0f172a;
-  /* Slate 900 */
-  --text-color-muted: #64748b;
-  /* Slate 500 */
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+
+  /* Primary Colors */
   --primary-color: #ff3e00;
   --primary-color-rgb: 255, 62, 0;
-  --primary-color-hover: #e63700;
+  --primary-hover: #e63700;
   --accent-color: #ccff00;
-  --border-color: #e2e8f0;
-  --nav-bg: rgba(255, 255, 255, 0.85);
-  --glass-effect: blur(16px);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
-  /* Status Colors (Light) */
+  /* Status Colors */
   --success-color: #10b981;
-  --success-color-hover: #059669;
   --success-color-rgb: 16, 185, 129;
+  --success-hover: #059669;
   --danger-color: #ef4444;
-  --dagner-color-hover: #dc2626;
   --danger-color-rgb: 239, 68, 68;
+  --danger-hover: #dc2626;
   --warning-color: #f59e0b;
   --warning-color-rgb: 245, 158, 11;
   --info-color: #3b82f6;
   --info-color-rgb: 59, 130, 246;
 
-  /* Skeleton Colors (Light) */
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Effects */
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --glass-effect: blur(16px);
+
+  /* Skeleton Loader */
   --skeleton-bg: #e2e8f0;
   --skeleton-shimmer: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
 
-  /* Hero Section Adaptive Vars */
+  /* Hero Section */
   --hero-bg: radial-gradient(circle at 70% 30%, #ffffff 0%, #f1f5f9 100%);
   --hero-text: #0f172a;
   --hero-subtitle: #475569;
@@ -53,25 +65,19 @@
   --hero-glass: rgba(255, 255, 255, 0.6);
 }
 
+/* Dark Theme */
 [data-theme='dark'] {
   --bg-color: #020617;
-  /* Slate 950 */
   --surface-color: #0f172a;
-  /* Slate 900 */
   --surface-color-secondary: #1e293b;
-  /* Slate 800 */
   --text-color: #f8fafc;
-  --text-color-muted: #94a3b8;
+  --text-secondary: #94a3b8;
+  --border-color: #1e293b;
+
   --primary-color: #ff5722;
   --primary-color-rgb: 255, 87, 34;
-  --primary-color-hover: #ff7043;
-  --border-color: #1e293b;
-  --nav-bg: rgba(2, 6, 23, 0.85);
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.8);
+  --primary-hover: #ff7043;
 
-  /* Status Colors (Dark) */
   --success-color: #34d399;
   --success-color-rgb: 52, 211, 153;
   --danger-color: #f87171;
@@ -81,11 +87,14 @@
   --info-color: #60a5fa;
   --info-color-rgb: 96, 165, 250;
 
-  /* Skeleton Colors (Dark) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.8);
+
+  --nav-bg: rgba(2, 6, 23, 0.85);
   --skeleton-bg: #1e293b;
   --skeleton-shimmer: linear-gradient(90deg, #1e293b 25%, #334155 37%, #1e293b 63%);
 
-  /* Hero Section Adaptive Vars (Dark) */
   --hero-bg: radial-gradient(circle at 70% 30%, #0f172a 0%, #020617 100%);
   --hero-text: #ffffff;
   --hero-subtitle: rgba(255, 255, 255, 0.8);
@@ -93,7 +102,13 @@
   --hero-glass: rgba(15, 23, 42, 0.6);
 }
 
-* {
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -103,57 +118,22 @@ html,
 body {
   width: 100%;
   height: 100%;
-  margin: 0;
-  padding: 0;
 }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
-  transition: background-color var(--transition-speed) var(--transition-curve), color var(--transition-speed) var(--transition-curve);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-speed) var(--transition-curve),
+              color var(--transition-speed) var(--transition-curve);
 }
-
-.container {
-  max-width: var(--container-max-width);
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-@media (max-width: 1024px) {
-  .container {
-    padding: 0 1.25rem;
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 600px) {
-  .container {
-    padding: 0 1rem;
-  }
-}
-
-.w-full {
-  width: 100%;
-}
-
-.overflow-hidden {
-  overflow: hidden;
-}
-
-.flex-wrap {
-  flex-wrap: wrap;
-}
-
 
 a {
-  text-decoration: none;
   color: inherit;
+  text-decoration: none;
   transition: all var(--transition-speed) var(--transition-curve);
 }
 
@@ -169,7 +149,49 @@ button {
   transition: all var(--transition-speed) var(--transition-curve);
 }
 
-/* Common UI Elements */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+input,
+select,
+textarea,
+button {
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 1.25rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
 .btn-primary {
   background-color: var(--primary-color);
   color: white;
@@ -182,8 +204,8 @@ button {
   gap: 0.75rem;
   box-shadow: 0 4px 14px 0 rgba(255, 62, 0, 0.39);
 
-  &:hover {
-    background-color: var(--primary-color-hover);
+  &:hover:not(:disabled) {
+    background-color: var(--primary-hover);
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(255, 62, 0, 0.23);
   }
@@ -201,7 +223,7 @@ button {
   font-weight: 700;
   border: 1px solid var(--border-color);
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: var(--border-color);
     transform: translateY(-2px);
   }
@@ -214,8 +236,12 @@ button {
   background: var(--surface-color-secondary);
   font-weight: 700;
   white-space: nowrap;
-  position: relative;
   transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+  }
 
   &.delete {
     color: var(--danger-color);
@@ -225,15 +251,6 @@ button {
       color: white;
     }
   }
-
-  &:hover:not(:disabled) {
-    background: var(--primary-color);
-    color: #fff;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-  }
 }
 
 .btn-lg {
@@ -241,6 +258,28 @@ button {
   font-size: 1.125rem;
   border-radius: var(--border-radius-md);
 }
+
+.bg-success {
+  background-color: var(--success-color);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: var(--success-hover);
+  }
+}
+
+.bg-danger {
+  background-color: var(--danger-color);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: var(--danger-hover);
+  }
+}
+
+/* ============================================
+   COMPONENTS
+   ============================================ */
 
 .glass-card {
   @include glass-card;
@@ -254,144 +293,65 @@ button {
   display: inline-block;
 }
 
-/* Animations */
+.icons {
+  color: var(--primary-color);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Display */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+
+/* Alignment */
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.text-center { text-align: center; }
+
+/* Spacing */
+.gap-2 { gap: 1rem; }
+.gap-4 { gap: 2rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-4 { margin-bottom: 2rem; }
+.mt-4 { margin-top: 2rem; }
+
+/* Sizing */
+.w-full { width: 100%; }
+
+/* Overflow */
+.overflow-hidden { overflow: hidden; }
+
+/* Typography */
+.fw-bold { font-weight: 700; }
+.fw-black { font-weight: 900; }
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.animate-fade {
-  animation: fadeIn 0.8s var(--transition-curve) forwards;
-}
-
-/* Utilities */
-.mb-1 {
-  margin-bottom: 0.5rem;
-}
-
-.mb-2 {
-  margin-bottom: 1rem;
-}
-
-.mb-4 {
-  margin-bottom: 2rem;
-}
-
-.mt-4 {
-  margin-top: 2rem;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.fw-bold {
-  font-weight: 700;
-}
-
-.fw-black {
-  font-weight: 900;
-}
-
-.flex {
-  display: flex;
-}
-
-.flex-col {
-  flex-direction: column;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.gap-2 {
-  gap: 1rem;
-}
-
-.gap-4 {
-  gap: 2rem;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-.icons {
-  color: var(--primary-color);
-}
-
-input:disabled,
-select:disabled,
-textarea:disabled,
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.bg-success {
-  background-color: var(--success-color);
-  color: white;
-
-  &:hover {
-    background-color: var(--success-color-hover);
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-}
-
-.bg-danger {
-  background-color: var(--danger-color);
-  color: white;
-
-  &:hover {
-    background-color: var(--danger-color-hover);
-  }
-}
-
-/* Shared Animations */
-@keyframes shimmer {
-
-  0%,
-  100% {
-    filter: hue-rotate(0deg);
-  }
-
-  50% {
-    filter: hue-rotate(20deg);
-  }
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-@keyframes shine {
-  0% {
-    left: -100%;
-  }
-
-  100% {
-    left: 200%;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -401,51 +361,58 @@ button:disabled {
   }
 }
 
-@keyframes shake {
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
 
-  0%,
-  100% {
+@keyframes shimmer {
+  0%, 100% {
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    filter: hue-rotate(20deg);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
     transform: translateX(0);
   }
-
-  20%,
-  60% {
+  20%, 60% {
     transform: translateX(-6px);
   }
-
-  40%,
-  80% {
+  40%, 80% {
     transform: translateX(6px);
   }
 }
 
 @keyframes bounce {
-
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
+  0%, 20%, 50%, 80%, 100% {
     transform: translateY(0);
   }
-
   40% {
     transform: translateY(-5px);
   }
-
   60% {
     transform: translateY(-3px);
   }
 }
 
-@keyframes slideInUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
+@keyframes shine {
+  0% {
+    left: -100%;
   }
+  100% {
+    left: 200%;
+  }
+}
 
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+/* Animation Classes */
+.animate-fade {
+  animation: fadeIn 0.8s var(--transition-curve) forwards;
 }
