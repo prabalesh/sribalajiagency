@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { BrandsService } from './brands.service';
 import { Brand } from './entities/brand.entity';
 import { Product } from '../products/entities/product.entity';
 import { FileStorageService } from '../common/services/file-storage.service';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 
 describe('BrandsService', () => {
     let service: BrandsService;
@@ -15,6 +15,7 @@ describe('BrandsService', () => {
 
     const mockBrandRepo = {
         find: jest.fn(),
+        findOne: jest.fn(),
         findOneBy: jest.fn(),
         create: jest.fn(),
         save: jest.fn(),
@@ -39,6 +40,7 @@ describe('BrandsService', () => {
                 { provide: getRepositoryToken(Brand), useValue: mockBrandRepo },
                 { provide: getRepositoryToken(Product), useValue: mockProductRepo },
                 { provide: FileStorageService, useValue: mockFileStorage },
+                { provide: DataSource, useValue: {} },
             ],
         }).compile();
 
@@ -88,9 +90,9 @@ describe('BrandsService', () => {
             expect(result.id).toBe('1');
         });
 
-        it('should throw BadRequestException on duplicate slug', async () => {
+        it('should throw ConflictException on duplicate slug', async () => {
             mockBrandRepo.save.mockRejectedValue({ code: '23505' });
-            await expect(service.create({} as any)).rejects.toThrow(BadRequestException);
+            await expect(service.create({} as any)).rejects.toThrow(ConflictException);
         });
     });
 

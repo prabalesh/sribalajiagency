@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, DataSource } from 'typeorm';
 import { AuthService } from './auth.service';
 import { User } from './entities/user.entity';
 import { Role, Permission } from './entities/role.entity';
@@ -23,6 +23,7 @@ describe('AuthService', () => {
         create: jest.fn(),
         save: jest.fn(),
         findOne: jest.fn(),
+        findOneBy: jest.fn(),
         findAndCount: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
@@ -49,6 +50,18 @@ describe('AuthService', () => {
     const mockConfigService = {
         get: jest.fn(),
     };
+    const mockDataSource = {
+        createQueryRunner: jest.fn().mockReturnValue({
+            connect: jest.fn(),
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn(),
+            rollbackTransaction: jest.fn(),
+            release: jest.fn(),
+            manager: {
+                save: jest.fn(),
+            },
+        }),
+    };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -59,6 +72,7 @@ describe('AuthService', () => {
                 { provide: getRepositoryToken(Permission), useValue: mockPermissionRepo },
                 { provide: JwtService, useValue: mockJwtService },
                 { provide: ConfigService, useValue: mockConfigService },
+                { provide: DataSource, useValue: mockDataSource },
             ],
         }).compile();
 

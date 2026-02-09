@@ -74,6 +74,7 @@ describe('CouponsService', () => {
 
     describe('create', () => {
         it('should create a coupon', async () => {
+            mockRepo.findOneBy.mockResolvedValueOnce(null); // No duplicate check fail
             const dto: any = { name: 'New', code: 'NEW10', discountType: 'flat', discountValue: 10 };
             const result = await service.create(dto);
             expect(result).toEqual(mockCoupon);

@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { CategoriesService } from './categories.service';
 import { Category } from './entities/category.entity';
 import { Product } from '../products/entities/product.entity';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 
 describe('CategoriesService', () => {
     let service: CategoriesService;
@@ -24,6 +24,7 @@ describe('CategoriesService', () => {
     const mockProductRepo = {
         count: jest.fn(),
     };
+    const mockDataSource = {};
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -31,6 +32,7 @@ describe('CategoriesService', () => {
                 CategoriesService,
                 { provide: getRepositoryToken(Category), useValue: mockCategoryRepo },
                 { provide: getRepositoryToken(Product), useValue: mockProductRepo },
+                { provide: DataSource, useValue: mockDataSource },
             ],
         }).compile();
 
@@ -81,9 +83,9 @@ describe('CategoriesService', () => {
             expect(result.slug).toBe('test-category');
         });
 
-        it('should throw BadRequestException on duplicate slug', async () => {
+        it('should throw ConflictException on duplicate slug', async () => {
             mockCategoryRepo.save.mockRejectedValue({ code: '23505' });
-            await expect(service.create({ name: 'Dup', slug: 'dup' } as any)).rejects.toThrow(BadRequestException);
+            await expect(service.create({ name: 'Dup', slug: 'dup' } as any)).rejects.toThrow(ConflictException);
         });
     });
 

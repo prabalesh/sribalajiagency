@@ -1,3 +1,4 @@
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -75,7 +76,12 @@ describe('CMSService', () => {
 
     describe('uploadImage', () => {
         it('should upload a file and return url', async () => {
-            const file = {} as any;
+            const file = {
+                originalname: '1.jpg',
+                mimetype: 'image/jpeg',
+                size: 1024,
+                buffer: Buffer.from([]),
+            } as any;
             mockFileStorage.saveFile.mockResolvedValue('/uploads/cms/1.jpg');
             const result = await service.uploadImage(file);
             expect(result.url).toBe('/uploads/cms/1.jpg');
@@ -88,9 +94,8 @@ describe('CMSService', () => {
             expect(mockFileStorage.deleteFile).toHaveBeenCalledWith('test.jpg');
         });
 
-        it('should resolve even if no url', async () => {
-            const result = await service.deleteFile('');
-            expect(result.success).toBe(true);
+        it('should throw BadRequestException if no url', async () => {
+            await expect(service.deleteFile('')).rejects.toThrow(BadRequestException);
             expect(mockFileStorage.deleteFile).not.toHaveBeenCalled();
         });
     });

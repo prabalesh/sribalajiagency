@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { CartsService } from './carts.service';
 import { Cart } from './entities/cart.entity';
 import { CartItem } from './entities/cart-item.entity';
@@ -34,6 +34,11 @@ describe('CartsService', () => {
     const mockVariantRepo = {
         findOne: jest.fn(),
     };
+    const mockDataSource = {
+        manager: {
+            transaction: jest.fn(),
+        },
+    };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -55,6 +60,7 @@ describe('CartsService', () => {
                     provide: getRepositoryToken(ProductVariant),
                     useValue: mockVariantRepo,
                 },
+                { provide: DataSource, useValue: mockDataSource },
             ],
         }).compile();
 

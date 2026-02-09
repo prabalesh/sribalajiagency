@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { UserAddressesService } from './user-addresses.service';
 import { UserAddress } from './entities/user-address.entity';
 import { User } from './entities/user.entity';
@@ -20,12 +20,22 @@ describe('UserAddressesService', () => {
     };
 
     const mockUser = { id: 'u1' } as User;
+    const mockDataSource = {
+        createQueryRunner: jest.fn().mockReturnValue({
+            connect: jest.fn(),
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn(),
+            rollbackTransaction: jest.fn(),
+            release: jest.fn(),
+        }),
+    };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 UserAddressesService,
                 { provide: getRepositoryToken(UserAddress), useValue: mockAddressRepo },
+                { provide: DataSource, useValue: mockDataSource },
             ],
         }).compile();
 

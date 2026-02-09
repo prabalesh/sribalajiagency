@@ -87,12 +87,9 @@ export class BrandsService {
      * TODO: Cache brand list
      * TODO: Add sorting options
      */
-    findAll() {
+    async findAll() {
         this.logger.log('Finding all brands');
-        // FIXME: Missing await - this returns a Promise, not the data
-        let brands = this.brandRepo.find({ order: { name: 'ASC' } });
-        // FIXME: console.log should be removed or use logger
-        console.log(brands);
+        let brands = await this.brandRepo.find({ order: { name: 'ASC' } });
         return brands;
     }
 
