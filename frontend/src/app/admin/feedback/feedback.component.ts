@@ -10,10 +10,7 @@ import { Feedback } from '../../core/models/feedback.model';
   styleUrl: './feedback.component.scss'
 })
 export class FeedbackComponent {
-  feedbacks: Feedback[] = [
-    { id: '1', userName: 'John', rating: 5, comment: 'Great!', isApproved: true, createdAt: new Date() },
-    { id: '2', userName: 'Spam Bot', rating: 1, comment: 'Buy crypto...', isApproved: false, createdAt: new Date() }
-  ];
+  feedbacks: Feedback[] = [];
 
   toggleApproval(feedback: Feedback) {
     feedback.isApproved = !feedback.isApproved;
