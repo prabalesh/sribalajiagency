@@ -13,6 +13,11 @@ export class CategoryService {
         return res.data;
     }
 
+    async getCategoryTree() {
+        const res = await this.api.get<Category[]>('/categories/tree');
+        return res.data;
+    }
+
     async addCategory(category: Category) {
         const res = await this.api.post<Category>('/categories', category);
         return res.data;

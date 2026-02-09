@@ -14,18 +14,18 @@ import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
-import { 
-  LucideAngularModule, 
-  Package, 
-  Edit, 
-  Trash2, 
-  Plus, 
-  X, 
-  Upload, 
-  Image as ImageIcon, 
-  Tag, 
-  DollarSign, 
-  Layers, 
+import {
+  LucideAngularModule,
+  Package,
+  Edit,
+  Trash2,
+  Plus,
+  X,
+  Upload,
+  Image as ImageIcon,
+  Tag,
+  DollarSign,
+  Layers,
   ShoppingCart,
   AlertCircle,
   Check,
@@ -38,10 +38,10 @@ import {
   selector: 'app-admin-products',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    DragDropDirective, 
-    PaginationComponent, 
+    CommonModule,
+    FormsModule,
+    DragDropDirective,
+    PaginationComponent,
     ImageUrlPipe,
     LucideAngularModule
   ],
@@ -91,11 +91,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   // Dropdown Data
   brands: Brand[] = [];
-  mainCategories: Category[] = [];
-  subCategories: Category[] = [];
+  categories: (Category & { level: number })[] = [];
 
   // Selection State
-  selectedMainCategoryId: string = '';
+  selectedCategoryId: string = '';
 
   // Search
   searchQuery = '';
@@ -107,7 +106,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
       await Promise.all([
         this.loadProducts(),
         this.loadBrands(),
-        this.loadMainCategories()
+        this.loadCategories()
       ]);
     } catch (error) {
       console.error('Error initializing component:', error);
@@ -146,13 +145,25 @@ export class ProductsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async loadMainCategories() {
+  private async loadCategories() {
     try {
-      this.mainCategories = await this.categoryService.getCategoriesByParentId(undefined);
+      const tree = await this.categoryService.getCategoryTree();
+      this.categories = this.flattenCategories(tree);
     } catch (error) {
-      console.error('Error loading main categories:', error);
+      console.error('Error loading categories:', error);
       throw error;
     }
+  }
+
+  private flattenCategories(cats: Category[], level = 0): (Category & { level: number })[] {
+    const flattened: (Category & { level: number })[] = [];
+    cats.forEach(cat => {
+      flattened.push({ ...cat, level });
+      if (cat.children && cat.children.length > 0) {
+        flattened.push(...this.flattenCategories(cat.children, level + 1));
+      }
+    });
+    return flattened;
   }
 
   togglePaymentMethod(method: string) {
@@ -167,14 +178,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
     }
   }
 
-  async onMainCategoryChange() {
-    try {
-      this.subCategories = await this.categoryService.getCategoriesByParentId(this.selectedMainCategoryId);
-      this.newProduct.categoryId = '';
-    } catch (error) {
-      console.error('Error loading subcategories:', error);
-      this.toastService.error('Failed to load subcategories');
-    }
+  onCategoryChange() {
+    this.newProduct.categoryId = this.selectedCategoryId;
   }
 
   async saveProduct() {
@@ -189,12 +194,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       this.toastService.warning('Please select a Brand');
       return;
     }
-    if (!this.selectedMainCategoryId) {
-      this.toastService.warning('Please select a Main Category');
-      return;
-    }
     if (!this.newProduct.categoryId) {
-      this.toastService.warning('Please select a Sub Category');
+      this.toastService.warning('Please select a Category');
       return;
     }
     if (!this.newProduct.price || this.newProduct.price <= 0) {
@@ -246,8 +247,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
         this.isUploadingImage = true;
         for (let i = 0; i < this.uploadedFiles.length; i++) {
           await this.productService.uploadImage(
-            savedProduct.id, 
-            this.uploadedFiles[i], 
+            savedProduct.id,
+            this.uploadedFiles[i],
             i === 0 && !savedProduct.images?.some(img => img.isPrimary)
           );
         }
@@ -276,27 +277,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
     };
     this.isEditing = true;
 
-    try {
-      const categories = await this.categoryService.getCategories();
-      const currentCategory = categories.find((c: Category) => c.id === product.categoryId);
-      if (currentCategory && currentCategory.parentId) {
-        this.selectedMainCategoryId = currentCategory.parentId;
-        this.subCategories = await this.categoryService.getCategoriesByParentId(this.selectedMainCategoryId);
-      } else if (currentCategory) {
-        this.selectedMainCategoryId = currentCategory.id;
-        this.subCategories = await this.categoryService.getCategoriesByParentId(this.selectedMainCategoryId);
-      }
-    } catch (error) {
-      console.error('Error loading categories for edit:', error);
-      this.toastService.error('Failed to load category information');
-    }
+    this.selectedCategoryId = product.categoryId || product.category?.id || '';
 
     // Scroll to form
     if (window.innerWidth < 1024) {
       setTimeout(() => {
-        document.querySelector('.form-card')?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
+        document.querySelector('.form-card')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
         });
       }, 100);
     }
@@ -392,8 +380,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.newProduct = this.getEmptyProduct();
     this.uploadedFiles = [];
     this.isEditing = false;
-    this.selectedMainCategoryId = '';
-    this.subCategories = [];
+    this.selectedCategoryId = '';
   }
 
   getEmptyProduct(): Product {
@@ -460,7 +447,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
       return this.products;
     }
     const query = this.searchQuery.toLowerCase();
-    return this.products.filter(p => 
+    return this.products.filter(p =>
       p.name.toLowerCase().includes(query) ||
       p.description?.toLowerCase().includes(query)
     );

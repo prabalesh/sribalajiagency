@@ -28,6 +28,8 @@ describe('SettingsService', () => {
         manager: {
             create: jest.fn(),
             findOne: jest.fn(),
+            update: jest.fn(),
+            save: jest.fn(),
             createQueryBuilder: jest.fn(),
         },
     };
@@ -97,7 +99,7 @@ describe('SettingsService', () => {
             mockRepo.findOne
                 .mockResolvedValueOnce(null)
                 .mockResolvedValueOnce(mockSettings);
-            
+
             mockRepo.create.mockReturnValue({ id: 1 });
             mockInsertQueryBuilder.execute.mockResolvedValue({ identifiers: [{ id: 1 }] });
 
@@ -125,10 +127,11 @@ describe('SettingsService', () => {
             const updatedSettings = { ...mockSettings, ...updateData };
 
             // Mock transaction flow
+            mockQueryRunner.manager.findOne.mockResolvedValueOnce(null); // Not found initially
             mockQueryRunner.manager.create.mockReturnValue({ id: 1, ...updateData });
-            mockQueryRunner.manager.createQueryBuilder.mockReturnValue(mockInsertQueryBuilder);
-            mockInsertQueryBuilder.execute.mockResolvedValue({ affected: 1 });
-            mockQueryRunner.manager.findOne.mockResolvedValue(updatedSettings);
+            mockQueryRunner.manager.save.mockResolvedValue({ id: 1, ...updateData });
+            mockQueryRunner.manager.update.mockResolvedValue({ affected: 1 });
+            mockQueryRunner.manager.findOne.mockResolvedValueOnce(updatedSettings); // Found after update
 
             const result = await service.updateSettings(updateData);
 
@@ -137,11 +140,12 @@ describe('SettingsService', () => {
             expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
             expect(mockQueryRunner.manager.create).toHaveBeenCalledWith(
                 SiteSettings,
-                expect.objectContaining({ id: 1, ...updateData })
+                expect.objectContaining({ id: 1 })
             );
-            expect(mockInsertQueryBuilder.orUpdate).toHaveBeenCalledWith(
-                Object.keys(updateData),
-                ['id']
+            expect(mockQueryRunner.manager.update).toHaveBeenCalledWith(
+                SiteSettings,
+                { id: 1 },
+                updateData
             );
             expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
             expect(mockQueryRunner.release).toHaveBeenCalled();
@@ -151,8 +155,8 @@ describe('SettingsService', () => {
         it('should rollback transaction on error', async () => {
             const updateData = { allowCod: false };
 
-            mockQueryRunner.manager.createQueryBuilder.mockReturnValue(mockInsertQueryBuilder);
-            mockInsertQueryBuilder.execute.mockRejectedValue(new Error('Database error'));
+            mockQueryRunner.manager.findOne.mockResolvedValue(mockSettings);
+            mockQueryRunner.manager.update.mockRejectedValue(new Error('Database error'));
 
             await expect(service.updateSettings(updateData)).rejects.toThrow('Failed to update settings');
 
@@ -164,8 +168,8 @@ describe('SettingsService', () => {
         it('should handle rollback failure gracefully', async () => {
             const updateData = { allowCod: false };
 
-            mockQueryRunner.manager.createQueryBuilder.mockReturnValue(mockInsertQueryBuilder);
-            mockInsertQueryBuilder.execute.mockRejectedValue(new Error('Database error'));
+            mockQueryRunner.manager.findOne.mockResolvedValue(mockSettings);
+            mockQueryRunner.manager.update.mockRejectedValue(new Error('Database error'));
             mockQueryRunner.rollbackTransaction.mockRejectedValue(new Error('Rollback failed'));
 
             await expect(service.updateSettings(updateData)).rejects.toThrow('Failed to update settings');

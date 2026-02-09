@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, MoreThanOrEqual, LessThanOrEqual, ILike, DataSource } from 'typeorm';
+import { Repository, Between, MoreThanOrEqual, LessThanOrEqual, ILike, DataSource, In } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { Category } from '../categories/entities/category.entity';
+import { CategoriesService } from '../categories/categories.service';
 import { Brand } from '../brands/entities/brand.entity';
 import { ProductImage } from './entities/product-image.entity';
 import { ProductVariant } from './entities/product-variant.entity';
@@ -67,6 +68,7 @@ export class ProductsService {
         private imageRepo: Repository<ProductImage>,
         @InjectRepository(ProductVariant)
         private variantRepo: Repository<ProductVariant>,
+        private categoriesService: CategoriesService,
         private fileStorageService: FileStorageService,
         private dataSource: DataSource,
     ) { }
@@ -158,14 +160,24 @@ export class ProductsService {
         // Build where clause
         const where: any = {};
 
-        // Category filter (by ID or slug)
-        if (filters.categoryId) where.category = { id: filters.categoryId };
-        if (filters.categorySlug) where.category = { slug: filters.categorySlug };
-        
+        // Category filter (including subtree)
+        if (filters.categoryId || filters.categorySlug) {
+            const categoryIds = await this.categoriesService.getSubtreeIds(
+                filters.categoryId,
+                filters.categorySlug
+            );
+            if (categoryIds.length > 0) {
+                where.category = { id: In(categoryIds) };
+            } else {
+                // If category requested but not found, return nothing
+                where.category = { id: '00000000-0000-0000-0000-000000000000' };
+            }
+        }
+
         // Brand filter (by ID or slug)
         if (filters.brandId) where.brand = { id: filters.brandId };
         if (filters.brandSlug) where.brand = { slug: filters.brandSlug };
-        
+
         // Featured filter
         if (filters.isFeatured !== undefined) where.isFeatured = filters.isFeatured;
 
@@ -230,7 +242,7 @@ export class ProductsService {
      */
     findOne(id: string) {
         this.logger.log(`Finding product by ID: ${id}`);
-        
+
         // TODO: Add error handling for invalid UUID format
         return this.productRepo.findOne({
             where: { id },
@@ -312,7 +324,7 @@ export class ProductsService {
             // Create variants if provided
             if (variants && variants.length > 0) {
                 // TODO: Validate variant SKUs are unique
-                const variantEntities = variants.map(v => 
+                const variantEntities = variants.map(v =>
                     this.variantRepo.create({ ...v, product: savedProduct })
                 );
                 await this.variantRepo.save(variantEntities);
@@ -409,13 +421,13 @@ export class ProductsService {
             if (variants) {
                 // Delete all existing variants
                 await this.variantRepo.delete({ product: { id } });
-                
+
                 // Create new variants
-                const variantEntities = variants.map(v => 
+                const variantEntities = variants.map(v =>
                     this.variantRepo.create({ ...v, product: { id } })
                 );
                 await this.variantRepo.save(variantEntities);
-                
+
                 this.logger.log(`Updated variants for product ${id}`);
             }
 
@@ -458,12 +470,12 @@ export class ProductsService {
         this.logger.log(`Deleting product: ${id}`);
 
         // TODO: Add transaction wrapper
-        
+
         // Find product with images
         const product = await this.findOne(id);
-        
+
         // TODO: Check if product has any orders before deletion
-        
+
         // Delete associated images from storage
         if (product && product.images) {
             for (const image of product.images) {
@@ -479,7 +491,7 @@ export class ProductsService {
 
         // TODO: Use soft delete instead
         const result = await this.productRepo.delete(id);
-        
+
         this.logger.log(`Product ${id} deleted successfully`);
 
         // TODO: Emit ProductDeletedEvent
@@ -529,7 +541,7 @@ export class ProductsService {
         try {
             // Upload file to storage
             const url = await this.fileStorageService.saveFile(file, `products/${productId}`);
-            
+
             // Create image record
             const image = this.imageRepo.create({
                 url,
@@ -574,15 +586,15 @@ export class ProductsService {
         this.logger.log(`Removing product image: ${imageId}`);
 
         const image = await this.imageRepo.findOneBy({ id: imageId });
-        
+
         if (image) {
             try {
                 // Delete from storage
                 await this.fileStorageService.deleteFile(image.url);
-                
+
                 // Delete from database
                 await this.imageRepo.delete(imageId);
-                
+
                 this.logger.log(`Image ${imageId} removed successfully`);
 
                 // TODO: If was primary, set another image as primary
@@ -664,10 +676,10 @@ export class ProductsService {
                     `media/generic/${Date.now()}_${Math.random().toString(36).substring(7)}`
                 )
             );
-            
+
             const urls = await Promise.all(uploadPromises);
             this.logger.log(`Uploaded ${urls.length} files successfully`);
-            
+
             return { urls };
         } catch (error) {
             this.logger.error(`Failed to upload generic files: ${error.message}`, error.stack);

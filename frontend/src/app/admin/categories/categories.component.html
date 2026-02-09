@@ -59,6 +59,23 @@
                         <small class="form-hint">Auto-generated from name, or enter custom slug</small>
                     </div>
 
+                    <div class="form-group">
+                        <label class="form-label">
+                            <lucide-icon [img]="Layers" [size]="16"></lucide-icon>
+                            <span>Parent Category</span>
+                        </label>
+                        <select 
+                            class="form-input"
+                            [(ngModel)]="newCategory.parentId" 
+                            name="parentId"
+                            [disabled]="isSaving">
+                            <option value="">None (Main Category)</option>
+                            @for (cat of availableParents; track cat.id) {
+                                <option [value]="cat.id">{{ cat.name }}</option>
+                            }
+                        </select>
+                    </div>
+
                     <div class="form-actions">
                         <button 
                             type="submit" 
@@ -128,7 +145,10 @@
                             @for (cat of filteredCategories; track cat.id) {
                                 <tr>
                                     <td>
-                                        <div class="category-cell">
+                                        <div class="category-cell" [style.padding-left.px]="cat.level * 24">
+                                            @if (cat.level > 0) {
+                                                <div class="tree-line"></div>
+                                            }
                                             <div class="category-icon">
                                                 <lucide-icon [img]="getCategoryIcon(cat)" [size]="20"></lucide-icon>
                                             </div>
@@ -177,12 +197,17 @@
                                 <div class="category-icon-large">
                                     <lucide-icon [img]="getCategoryIcon(cat)" [size]="24"></lucide-icon>
                                 </div>
-                                <div class="category-card-info">
-                                    <h4>{{ cat.name }}</h4>
+                                <div class="category-card-info" [style.padding-left.px]="cat.level * 16">
+                                    <h4>
+                                        @if (cat.level > 0) {
+                                            <span class="tree-indicator">↳</span>
+                                        }
+                                        {{ cat.name }}
+                                    </h4>
                                     <code class="slug-code">{{ cat.slug }}</code>
                                 </div>
                                 <span class="badge" [ngClass]="getCategoryBadgeClass(cat)">
-                                    {{ cat.parentId ? 'Sub' : 'Main' }}
+                                    {{ cat.level > 0 ? 'Sub' : 'Main' }}
                                 </span>
                             </div>
 

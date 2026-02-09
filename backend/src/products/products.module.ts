@@ -8,6 +8,7 @@ import { ProductVariant } from './entities/product-variant.entity';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 import { CommonModule } from '../common/common.module';
+import { CategoriesModule } from '../categories/categories.module';
 
 @Module({
     imports: [
@@ -18,7 +19,8 @@ import { CommonModule } from '../common/common.module';
             ProductImage,
             ProductVariant
         ]),
-        CommonModule
+        CommonModule,
+        CategoriesModule
     ],
     controllers: [ProductsController],
     providers: [ProductsService],

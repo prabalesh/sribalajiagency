@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity('categories')
 export class Category {
@@ -18,7 +18,11 @@ export class Category {
     gstRate: number;
 
     @ManyToOne(() => Category, (category) => category.children)
+    @JoinColumn({ name: 'parentId' })
     parent?: Category;
+
+    @Column({ nullable: true })
+    parentId?: string;
 
     @OneToMany(() => Category, (category) => category.parent)
     children: Category[];

@@ -387,6 +387,25 @@
                 font-weight: 600;
                 color: var(--text-color);
             }
+
+            .tree-line {
+                width: 16px;
+                height: 2px;
+                background: var(--border-color);
+                margin-right: -4px;
+                flex-shrink: 0;
+                position: relative;
+
+                &::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                    width: 2px;
+                    height: 2.5rem;
+                    background: var(--border-color);
+                }
+            }
         }
 
         .slug-code {
@@ -502,6 +521,12 @@
                         font-family: 'Courier New', monospace;
                         font-size: 0.8rem;
                         color: var(--text-secondary);
+                    }
+
+                    .tree-indicator {
+                        color: var(--text-secondary);
+                        margin-right: 0.25rem;
+                        font-weight: normal;
                     }
                 }
 
@@ -649,6 +674,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

@@ -50,7 +50,66 @@ export class CategoriesService {
      */
     findAll() {
         this.logger.log('Finding all categories');
-        return this.categoryRepo.find({ relations: ['parent', 'children'], order: { name: 'ASC' } });
+        return this.categoryRepo.find({ relations: ['parent'], order: { name: 'ASC' } });
+    }
+
+    /**
+     * Retrieves categories in a tree structure.
+     */
+    async getTree() {
+        this.logger.log('Fetching category tree');
+        const categories = await this.categoryRepo.find({
+            order: { name: 'ASC' }
+        });
+
+        const map = new Map<string, Category & { children: Category[] }>();
+        const roots: (Category & { children: Category[] })[] = [];
+
+        categories.forEach(cat => {
+            map.set(cat.id, { ...cat, children: [] });
+        });
+
+        categories.forEach(cat => {
+            const node = map.get(cat.id)!;
+            if (cat.parentId && map.has(cat.parentId)) {
+                map.get(cat.parentId)!.children.push(node);
+            } else {
+                roots.push(node);
+            }
+        });
+
+        return roots;
+    }
+
+    /**
+     * Helper to get all sub-category IDs recursively
+     */
+    async getSubtreeIds(categoryId?: string, categorySlug?: string): Promise<string[]> {
+        if (!categoryId && !categorySlug) return [];
+
+        let rootCategory: Category | null = null;
+        if (categoryId) {
+            rootCategory = await this.categoryRepo.findOneBy({ id: categoryId });
+        } else if (categorySlug) {
+            rootCategory = await this.categoryRepo.findOneBy({ slug: categorySlug });
+        }
+
+        if (!rootCategory) return [];
+
+        const allCategories = await this.categoryRepo.find();
+        const ids: string[] = [rootCategory.id];
+
+        const findChildren = (parentId: string) => {
+            allCategories
+                .filter(c => c.parentId === parentId)
+                .forEach(child => {
+                    ids.push(child.id);
+                    findChildren(child.id);
+                });
+        };
+
+        findChildren(rootCategory.id);
+        return ids;
     }
 
     /**
@@ -109,6 +168,13 @@ export class CategoriesService {
             this.logger.debug(`Auto-generated slug: ${data.slug}`);
         }
 
+        if (data.parentId) {
+            const parent = await this.categoryRepo.findOneBy({ id: data.parentId });
+            if (!parent) {
+                throw new NotFoundException(`Parent category with ID ${data.parentId} not found`);
+            }
+        }
+
         try {
             const category = this.categoryRepo.create(data);
             const saved = await this.categoryRepo.save(category);
@@ -150,6 +216,21 @@ export class CategoriesService {
     async update(id: string, data: UpdateCategoryDto) {
         this.logger.log(`Updating category ${id}`);
         const category = await this.findOne(id);
+
+        if (data.parentId === id) {
+            throw new BadRequestException('A category cannot be its own parent');
+        }
+
+        if (data.parentId) {
+            const parent = await this.categoryRepo.findOneBy({ id: data.parentId });
+            if (!parent) {
+                throw new NotFoundException(`Parent category with ID ${data.parentId} not found`);
+            }
+            // Simple depth-1 circular check (could be more robust with full path)
+            if (parent.parentId === id) {
+                throw new BadRequestException('Circular relationship detected: parent category is already a child of this category');
+            }
+        }
 
         try {
             await this.categoryRepo.update(id, data);

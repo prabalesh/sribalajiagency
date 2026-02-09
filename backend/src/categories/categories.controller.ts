@@ -14,6 +14,11 @@ export class CategoriesController {
         return this.categoriesService.findAll();
     }
 
+    @Get('tree')
+    getTree() {
+        return this.categoriesService.getTree();
+    }
+
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.categoriesService.findOne(id);

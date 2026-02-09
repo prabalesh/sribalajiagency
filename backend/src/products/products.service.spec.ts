@@ -10,6 +10,8 @@ import { ProductVariant } from './entities/product-variant.entity';
 import { FileStorageService } from '../common/services/file-storage.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
+import { CategoriesService } from '../categories/categories.service';
+import { In } from 'typeorm';
 
 describe('ProductsService', () => {
     let service: ProductsService;
@@ -57,6 +59,10 @@ describe('ProductsService', () => {
         deleteFile: jest.fn(),
     };
 
+    const mockCategoriesService = {
+        getSubtreeIds: jest.fn(),
+    };
+
     const mockQueryRunner = {
         connect: jest.fn(),
         startTransaction: jest.fn(),
@@ -86,6 +92,7 @@ describe('ProductsService', () => {
                 { provide: getRepositoryToken(Brand), useValue: mockBrandRepo },
                 { provide: getRepositoryToken(ProductImage), useValue: mockImageRepo },
                 { provide: getRepositoryToken(ProductVariant), useValue: mockVariantRepo },
+                { provide: CategoriesService, useValue: mockCategoriesService },
                 { provide: FileStorageService, useValue: mockFileStorageService },
                 { provide: DataSource, useValue: mockDataSource },
             ],
@@ -153,13 +160,15 @@ describe('ProductsService', () => {
 
         it('should filter by categoryId', async () => {
             mockProductRepo.findAndCount.mockResolvedValue([[], 0]);
+            mockCategoriesService.getSubtreeIds.mockResolvedValue(['cat1']);
 
             await service.findAll(1, 10, { categoryId: 'cat1' });
 
+            expect(mockCategoriesService.getSubtreeIds).toHaveBeenCalledWith('cat1', undefined);
             expect(mockProductRepo.findAndCount).toHaveBeenCalledWith(
                 expect.objectContaining({
                     where: expect.objectContaining({
-                        category: { id: 'cat1' }
+                        category: { id: In(['cat1']) }
                     })
                 })
             );
@@ -167,13 +176,15 @@ describe('ProductsService', () => {
 
         it('should filter by categorySlug', async () => {
             mockProductRepo.findAndCount.mockResolvedValue([[], 0]);
+            mockCategoriesService.getSubtreeIds.mockResolvedValue(['cat1']);
 
             await service.findAll(1, 10, { categorySlug: 'electronics' });
 
+            expect(mockCategoriesService.getSubtreeIds).toHaveBeenCalledWith(undefined, 'electronics');
             expect(mockProductRepo.findAndCount).toHaveBeenCalledWith(
                 expect.objectContaining({
                     where: expect.objectContaining({
-                        category: { slug: 'electronics' }
+                        category: { id: In(['cat1']) }
                     })
                 })
             );
@@ -299,6 +310,8 @@ describe('ProductsService', () => {
         it('should apply multiple filters together', async () => {
             mockProductRepo.findAndCount.mockResolvedValue([[], 0]);
 
+            mockCategoriesService.getSubtreeIds.mockResolvedValue(['cat1']);
+
             await service.findAll(1, 10, {
                 categoryId: 'cat1',
                 brandId: 'brand1',
@@ -312,14 +325,14 @@ describe('ProductsService', () => {
                 expect.objectContaining({
                     where: expect.arrayContaining([
                         expect.objectContaining({
-                            category: { id: 'cat1' },
+                            category: { id: In(['cat1']) },
                             brand: { id: 'brand1' },
                             isFeatured: true,
                             price: Between(100, 500),
                             name: ILike('%test%'),
                         }),
                         expect.objectContaining({
-                            category: { id: 'cat1' },
+                            category: { id: In(['cat1']) },
                             brand: { id: 'brand1' },
                             isFeatured: true,
                             price: Between(100, 500),

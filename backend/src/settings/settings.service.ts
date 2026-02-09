@@ -27,7 +27,7 @@ import { UpdateSettingsDto } from './dto/settings.dto';
 export class SettingsService {
     /** The fixed ID for the singleton settings record */
     private readonly SETTING_ID = 1;
-    
+
     /** Logger instance with service context for tracing */
     private readonly logger = new Logger(SettingsService.name);
 
@@ -65,23 +65,23 @@ export class SettingsService {
     async getSettings(): Promise<SiteSettings> {
         try {
             this.logger.log(`Fetching settings with ID: ${this.SETTING_ID}`);
-            
-            let settings = await this.settingsRepo.findOne({ 
-                where: { id: this.SETTING_ID } 
+
+            let settings = await this.settingsRepo.findOne({
+                where: { id: this.SETTING_ID }
             });
-            
+
             if (!settings) {
                 this.logger.warn(`Settings not found, creating default settings with ID: ${this.SETTING_ID}`);
-                
+
                 // Use upsert to handle race conditions during concurrent initialization
                 // If another request creates the record first, this will just retrieve it
                 settings = await this.ensureSettingsExist();
-                
+
                 this.logger.log(`Default settings initialized successfully`);
             } else {
                 this.logger.log(`Settings retrieved successfully`);
             }
-            
+
             return settings;
         } catch (error) {
             this.logger.error(
@@ -112,8 +112,8 @@ export class SettingsService {
     private async ensureSettingsExist(): Promise<SiteSettings> {
         try {
             // Create default settings object
-            const defaultSettings = this.settingsRepo.create({ 
-                id: this.SETTING_ID 
+            const defaultSettings = this.settingsRepo.create({
+                id: this.SETTING_ID
             });
 
             // Upsert: Insert if not exists, ignore if exists (handles race condition)
@@ -175,13 +175,13 @@ export class SettingsService {
         try {
             await queryRunner.connect();
             this.logger.debug('Query runner connected');
-            
+
             await queryRunner.startTransaction();
             isTransactionActive = true;
             this.logger.debug('Transaction started');
 
             this.logger.log(`Updating settings with data: ${JSON.stringify(data)}`);
-            
+
             // Ensure settings exist first
             let settings = await queryRunner.manager.findOne(SiteSettings, {
                 where: { id: this.SETTING_ID }
@@ -211,18 +211,22 @@ export class SettingsService {
             if (!updatedSettings) {
                 throw new Error('Failed to retrieve settings after update');
             }
-            
+
             await queryRunner.commitTransaction();
             isTransactionActive = false;
             this.logger.log(`Settings updated successfully: ${JSON.stringify(updatedSettings)}`);
-            
+
             return updatedSettings;
         } catch (error) {
             if (isTransactionActive) {
-                await queryRunner.rollbackTransaction();
-                this.logger.warn('Transaction rolled back due to error');
+                try {
+                    await queryRunner.rollbackTransaction();
+                    this.logger.warn('Transaction rolled back due to error');
+                } catch (rollbackError) {
+                    this.logger.error(`Rollback failed: ${rollbackError.message}`);
+                }
             }
-            
+
             this.logger.error(`Failed to update settings: ${error.message}`, error.stack);
             throw new InternalServerErrorException("Failed to update settings");
         } finally {

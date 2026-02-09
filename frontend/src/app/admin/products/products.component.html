@@ -12,495 +12,345 @@
 
     <!-- Add/Edit Product Form -->
     @if (authService.hasPermission('CREATE_PRODUCT') || (isEditing && authService.hasPermission('UPDATE_PRODUCT'))) {
-        <div class="form-card glass-card animate-fade">
-            <div class="form-header">
-                <h3>
-                    <lucide-icon [img]="isEditing ? Edit : Plus" [size]="22"></lucide-icon>
-                    <span>{{ isEditing ? 'Edit Existing Product' : 'Register New Product' }}</span>
-                </h3>
-                @if (isEditing) {
-                    <button type="button" class="btn-icon-sm" (click)="resetForm()" title="Cancel">
-                        <lucide-icon [img]="X" [size]="18"></lucide-icon>
-                    </button>
+    <div class="form-card glass-card animate-fade">
+        <div class="form-header">
+            <h3>
+                <lucide-icon [img]="isEditing ? Edit : Plus" [size]="22"></lucide-icon>
+                <span>{{ isEditing ? 'Edit Existing Product' : 'Register New Product' }}</span>
+            </h3>
+            @if (isEditing) {
+            <button type="button" class="btn-icon-sm" (click)="resetForm()" title="Cancel">
+                <lucide-icon [img]="X" [size]="18"></lucide-icon>
+            </button>
+            }
+        </div>
+
+        <form (ngSubmit)="saveProduct()">
+            <div class="form-grid">
+                <!-- Product Name -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <lucide-icon [img]="Package" [size]="16"></lucide-icon>
+                        <span>Product Name <span class="required">*</span></span>
+                    </label>
+                    <input type="text" class="form-input" [(ngModel)]="newProduct.name" name="name" required
+                        placeholder="e.g. Bosch Power Drill" [disabled]="isSaving">
+                </div>
+
+                <!-- Brand -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
+                        <span>Brand <span class="required">*</span></span>
+                    </label>
+                    <div class="select-wrapper">
+                        <select class="form-select" [(ngModel)]="newProduct.brandId" name="brandId" required
+                            [disabled]="isSaving">
+                            <option value="" disabled>Select Brand</option>
+                            @for (b of brands; track b.id) {
+                            <option [value]="b.id">{{ b.name }}</option>
+                            }
+                        </select>
+                        <lucide-icon [img]="ChevronDown" [size]="18" class="select-icon"></lucide-icon>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="form-group full-width">
+                    <label class="form-label">
+                        <lucide-icon [img]="FolderTree" [size]="16"></lucide-icon>
+                        <span>Category <span class="required">*</span></span>
+                    </label>
+                    <div class="select-wrapper">
+                        <select class="form-select" [(ngModel)]="selectedCategoryId" name="categoryId"
+                            (change)="onCategoryChange()" required [disabled]="isSaving">
+                            <option value="" disabled>Select Category</option>
+                            @for (cat of categories; track cat.id) {
+                            <option [value]="cat.id">
+                                {{ '\u00A0'.repeat(cat.level * 4) }}{{ cat.level > 0 ? '↳ ' : '' }}{{ cat.name }}
+                            </option>
+                            }
+                        </select>
+                        <lucide-icon [img]="ChevronDown" [size]="18" class="select-icon"></lucide-icon>
+                    </div>
+                </div>
+
+                <!-- Pricing -->
+                <div class="form-group full-width">
+                    <label class="form-label">
+                        <lucide-icon [img]="DollarSign" [size]="16"></lucide-icon>
+                        <span>Pricing (₹)</span>
+                    </label>
+                    <div class="inline-fields">
+                        <div class="field">
+                            <label class="field-label">Selling Price <span class="required">*</span></label>
+                            <input type="number" class="form-input" [(ngModel)]="newProduct.price" name="price"
+                                placeholder="0.00" min="0" step="0.01" [disabled]="isSaving">
+                        </div>
+                        <div class="field">
+                            <label class="field-label">MRP (Comparison Price)</label>
+                            <input type="number" class="form-input" [(ngModel)]="newProduct.comparisonPrice"
+                                name="comparisonPrice" placeholder="0.00" min="0" step="0.01" [disabled]="isSaving">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory -->
+                <div class="form-group full-width">
+                    <label class="form-label">
+                        <lucide-icon [img]="ShoppingCart" [size]="16"></lucide-icon>
+                        <span>Inventory & Controls</span>
+                    </label>
+                    <div class="inline-fields">
+                        <div class="field">
+                            <label class="field-label">Stock <span class="required">*</span></label>
+                            <input type="number" class="form-input" [(ngModel)]="newProduct.stock" name="stock"
+                                placeholder="0" min="0" [disabled]="isSaving">
+                        </div>
+                        <div class="field">
+                            <label class="field-label">Max Order Quantity</label>
+                            <input type="number" class="form-input" [(ngModel)]="newProduct.maxOrderQuantity"
+                                name="maxOrderQuantity" placeholder="No limit" min="1" [disabled]="isSaving">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status & Mode -->
+                <div class="form-group full-width">
+                    <label class="form-label">Status & Display Mode</label>
+                    <div class="toggle-row">
+                        <label class="toggle-group">
+                            <input type="checkbox" class="toggle-checkbox" [(ngModel)]="newProduct.isAvailable"
+                                name="isAvailable" [disabled]="isSaving">
+                            <span class="toggle-label">
+                                <lucide-icon [img]="Check" [size]="16"></lucide-icon>
+                                Available to Shop
+                            </span>
+                        </label>
+                        <label class="toggle-group">
+                            <input type="checkbox" class="toggle-checkbox" [(ngModel)]="newProduct.isShowcaseOnly"
+                                name="isShowcaseOnly" [disabled]="isSaving">
+                            <span class="toggle-label">
+                                <lucide-icon [img]="AlertCircle" [size]="16"></lucide-icon>
+                                Showcase Only
+                            </span>
+                        </label>
+                        <label class="toggle-group">
+                            <input type="checkbox" class="toggle-checkbox" [(ngModel)]="newProduct.isFeatured"
+                                name="isFeatured" [disabled]="isSaving">
+                            <span class="toggle-label">
+                                <lucide-icon [img]="Package" [size]="16"></lucide-icon>
+                                Featured Product
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="form-group full-width">
+                    <label class="form-label">
+                        <lucide-icon [img]="DollarSign" [size]="16"></lucide-icon>
+                        <span>Allowed Payment Methods</span>
+                    </label>
+                    <div class="checkbox-row">
+                        <label class="check-item">
+                            <input type="checkbox" class="checkbox-input"
+                                [checked]="newProduct.allowedPaymentMethods?.includes('cod')"
+                                (change)="togglePaymentMethod('cod')" [disabled]="isSaving">
+                            <span>Cash on Delivery</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group full-width">
+                    <label class="form-label">
+                        <lucide-icon [img]="Package" [size]="16"></lucide-icon>
+                        <span>Description <span class="required">*</span></span>
+                    </label>
+                    <textarea class="form-textarea" [(ngModel)]="newProduct.description" name="description" rows="4"
+                        placeholder="Technical specifications, features, and details..."
+                        [disabled]="isSaving"></textarea>
+                </div>
+
+                <!-- Upload Media -->
+                <div class="form-group full-width">
+                    <label class="form-label">
+                        <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
+                        <span>Upload Media</span>
+                    </label>
+                    <div class="upload-area" appDragDrop (fileDropped)="onFileDropped($event)">
+                        <div class="drop-zone">
+                            <input type="file" #fileInput (change)="onFileSelected($event)" multiple hidden
+                                accept="image/*" [disabled]="isSaving || isUploadingImage">
+
+                            <lucide-icon [img]="Upload" [size]="48" class="upload-icon"></lucide-icon>
+                            <p class="upload-text">
+                                Drag images here or
+                                <strong class="browse-link"
+                                    (click)="!isSaving && !isUploadingImage && fileInput.click()">
+                                    browse files
+                                </strong>
+                            </p>
+                            <small class="upload-hint">PNG, JPG or WEBP (Max 5MB each)</small>
+
+                            @if (isUploadingImage) {
+                            <div class="upload-progress">
+                                <div class="spinner-sm"></div>
+                                <span>Uploading images...</span>
+                            </div>
+                            }
+
+                            @if (uploadedFiles.length > 0) {
+                            <div class="file-previews">
+                                @for (file of uploadedFiles; track $index) {
+                                <div class="file-item">
+                                    <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
+                                    <span>{{ file.name }}</span>
+                                    <button type="button" class="remove-btn" (click)="removeUploadedFile($index)"
+                                        [disabled]="isSaving">
+                                        <lucide-icon [img]="X" [size]="14"></lucide-icon>
+                                    </button>
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Existing Images -->
+                @if (newProduct.images && newProduct.images.length > 0) {
+                <div class="form-group full-width">
+                    <label class="form-label">
+                        <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
+                        <span>Media Gallery</span>
+                    </label>
+                    <div class="image-gallery">
+                        @for (img of newProduct.images; track img.id) {
+                        <div class="image-item glass-card">
+                            <img [src]="img.url | imageUrl" alt="Product Image">
+                            <button type="button" class="delete-btn" (click)="removeImage(img.id)"
+                                [disabled]="isSaving || isUploadingImage" title="Remove image">
+                                <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                            </button>
+                            @if (img.isPrimary) {
+                            <span class="primary-badge">Primary</span>
+                            }
+                        </div>
+                        }
+                    </div>
+                </div>
                 }
+
+                <!-- Variants Section -->
+                <div class="form-group full-width variants-section">
+                    <div class="section-header">
+                        <h4>
+                            <lucide-icon [img]="Layers" [size]="20"></lucide-icon>
+                            <span>Configure Variants</span>
+                        </h4>
+                        <button type="button" class="btn-secondary btn-sm" (click)="addVariant()" [disabled]="isSaving">
+                            <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                            <span>Add Variant</span>
+                        </button>
+                    </div>
+
+                    @if (newProduct.variants && newProduct.variants.length > 0) {
+                    <div class="variants-list">
+                        @for (v of newProduct.variants; track $index) {
+                        <div class="variant-item glass-card">
+                            <div class="variant-header">
+                                <span class="variant-number">Variant {{ $index + 1 }}</span>
+                                <button type="button" class="btn-icon-danger" (click)="removeVariant($index)"
+                                    [disabled]="isSaving" title="Remove Variant">
+                                    <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                                </button>
+                            </div>
+
+                            <div class="variant-fields">
+                                <div class="field">
+                                    <label class="field-label">Variant Name</label>
+                                    <input type="text" class="form-input" [(ngModel)]="v.name"
+                                        [name]="'vName-' + $index" placeholder="e.g. 2000W Model" required
+                                        [disabled]="isSaving">
+                                </div>
+
+                                <div class="field">
+                                    <label class="field-label">Price</label>
+                                    <input type="number" class="form-input" [(ngModel)]="v.price"
+                                        [name]="'vPrice-' + $index" placeholder="0.00" min="0" step="0.01" required
+                                        [disabled]="isSaving">
+                                </div>
+
+                                <div class="field">
+                                    <label class="field-label">MRP</label>
+                                    <input type="number" class="form-input" [(ngModel)]="v.comparisonPrice"
+                                        [name]="'vCPrice-' + $index" placeholder="0.00" min="0" step="0.01"
+                                        [disabled]="isSaving">
+                                </div>
+
+                                <div class="field">
+                                    <label class="field-label">Stock</label>
+                                    <input type="number" class="form-input" [(ngModel)]="v.stock"
+                                        [name]="'vStock-' + $index" placeholder="0" min="0" required
+                                        [disabled]="isSaving">
+                                </div>
+
+                                <div class="field full-width">
+                                    <label class="field-label">Primary Image URL</label>
+                                    <input type="text" class="form-input" [(ngModel)]="v.image"
+                                        [name]="'vImage-' + $index" placeholder="https://..." [disabled]="isSaving">
+                                </div>
+
+                                <div class="field full-width">
+                                    <label class="field-label">Description (Optional)</label>
+                                    <textarea class="form-textarea" [(ngModel)]="v.description"
+                                        [name]="'vDesc-' + $index" placeholder="Variant-specific description" rows="2"
+                                        [disabled]="isSaving"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="variant-actions">
+                                <button type="button" class="btn-secondary btn-sm" (click)="variantFileInput.click()"
+                                    [disabled]="isSaving || isUploadingImage">
+                                    <lucide-icon [img]="Upload" [size]="16"></lucide-icon>
+                                    <span>Upload Images</span>
+                                </button>
+                                <input #variantFileInput type="file" style="display: none"
+                                    (change)="uploadVariantImage($event, v)" accept="image/*" multiple>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    } @else {
+                    <div class="empty-variants">
+                        <lucide-icon [img]="Layers" [size]="48"></lucide-icon>
+                        <p>No variants added yet. Add variants for different sizes, colors, or models.</p>
+                    </div>
+                    }
+                </div>
             </div>
 
-            <form (ngSubmit)="saveProduct()">
-                <div class="form-grid">
-                    <!-- Product Name -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            <lucide-icon [img]="Package" [size]="16"></lucide-icon>
-                            <span>Product Name <span class="required">*</span></span>
-                        </label>
-                        <input 
-                            type="text" 
-                            class="form-input"
-                            [(ngModel)]="newProduct.name" 
-                            name="name" 
-                            required
-                            placeholder="e.g. Bosch Power Drill" 
-                            [disabled]="isSaving">
-                    </div>
-
-                    <!-- Brand -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
-                            <span>Brand <span class="required">*</span></span>
-                        </label>
-                        <div class="select-wrapper">
-                            <select 
-                                class="form-select"
-                                [(ngModel)]="newProduct.brandId" 
-                                name="brandId" 
-                                required 
-                                [disabled]="isSaving">
-                                <option value="" disabled>Select Brand</option>
-                                @for (b of brands; track b.id) {
-                                    <option [value]="b.id">{{ b.name }}</option>
-                                }
-                            </select>
-                            <lucide-icon [img]="ChevronDown" [size]="18" class="select-icon"></lucide-icon>
-                        </div>
-                    </div>
-
-                    <!-- Main Category -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            <lucide-icon [img]="FolderTree" [size]="16"></lucide-icon>
-                            <span>Main Category <span class="required">*</span></span>
-                        </label>
-                        <div class="select-wrapper">
-                            <select 
-                                class="form-select"
-                                [(ngModel)]="selectedMainCategoryId" 
-                                name="mainCategory" 
-                                (change)="onMainCategoryChange()"
-                                required 
-                                [disabled]="isSaving">
-                                <option value="" disabled>Select Category</option>
-                                @for (cat of mainCategories; track cat.id) {
-                                    <option [value]="cat.id">{{ cat.name }}</option>
-                                }
-                            </select>
-                            <lucide-icon [img]="ChevronDown" [size]="18" class="select-icon"></lucide-icon>
-                        </div>
-                    </div>
-
-                    <!-- Sub Category -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            <lucide-icon [img]="Layers" [size]="16"></lucide-icon>
-                            <span>Sub Category <span class="required">*</span></span>
-                        </label>
-                        <div class="select-wrapper">
-                            <select 
-                                class="form-select"
-                                [(ngModel)]="newProduct.categoryId" 
-                                name="categoryId" 
-                                required
-                                [disabled]="!selectedMainCategoryId || isSaving">
-                                <option value="" disabled>Select Sub Category</option>
-                                @for (sub of subCategories; track sub.id) {
-                                    <option [value]="sub.id">{{ sub.name }}</option>
-                                }
-                            </select>
-                            <lucide-icon [img]="ChevronDown" [size]="18" class="select-icon"></lucide-icon>
-                        </div>
-                    </div>
-
-                    <!-- Pricing -->
-                    <div class="form-group full-width">
-                        <label class="form-label">
-                            <lucide-icon [img]="DollarSign" [size]="16"></lucide-icon>
-                            <span>Pricing (₹)</span>
-                        </label>
-                        <div class="inline-fields">
-                            <div class="field">
-                                <label class="field-label">Selling Price <span class="required">*</span></label>
-                                <input 
-                                    type="number" 
-                                    class="form-input"
-                                    [(ngModel)]="newProduct.price" 
-                                    name="price" 
-                                    placeholder="0.00"
-                                    min="0"
-                                    step="0.01"
-                                    [disabled]="isSaving">
-                            </div>
-                            <div class="field">
-                                <label class="field-label">MRP (Comparison Price)</label>
-                                <input 
-                                    type="number" 
-                                    class="form-input"
-                                    [(ngModel)]="newProduct.comparisonPrice" 
-                                    name="comparisonPrice"
-                                    placeholder="0.00"
-                                    min="0"
-                                    step="0.01"
-                                    [disabled]="isSaving">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Inventory -->
-                    <div class="form-group full-width">
-                        <label class="form-label">
-                            <lucide-icon [img]="ShoppingCart" [size]="16"></lucide-icon>
-                            <span>Inventory & Controls</span>
-                        </label>
-                        <div class="inline-fields">
-                            <div class="field">
-                                <label class="field-label">Stock <span class="required">*</span></label>
-                                <input 
-                                    type="number" 
-                                    class="form-input"
-                                    [(ngModel)]="newProduct.stock" 
-                                    name="stock" 
-                                    placeholder="0"
-                                    min="0"
-                                    [disabled]="isSaving">
-                            </div>
-                            <div class="field">
-                                <label class="field-label">Max Order Quantity</label>
-                                <input 
-                                    type="number" 
-                                    class="form-input"
-                                    [(ngModel)]="newProduct.maxOrderQuantity" 
-                                    name="maxOrderQuantity"
-                                    placeholder="No limit"
-                                    min="1"
-                                    [disabled]="isSaving">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Status & Mode -->
-                    <div class="form-group full-width">
-                        <label class="form-label">Status & Display Mode</label>
-                        <div class="toggle-row">
-                            <label class="toggle-group">
-                                <input 
-                                    type="checkbox" 
-                                    class="toggle-checkbox"
-                                    [(ngModel)]="newProduct.isAvailable" 
-                                    name="isAvailable"
-                                    [disabled]="isSaving">
-                                <span class="toggle-label">
-                                    <lucide-icon [img]="Check" [size]="16"></lucide-icon>
-                                    Available to Shop
-                                </span>
-                            </label>
-                            <label class="toggle-group">
-                                <input 
-                                    type="checkbox" 
-                                    class="toggle-checkbox"
-                                    [(ngModel)]="newProduct.isShowcaseOnly" 
-                                    name="isShowcaseOnly"
-                                    [disabled]="isSaving">
-                                <span class="toggle-label">
-                                    <lucide-icon [img]="AlertCircle" [size]="16"></lucide-icon>
-                                    Showcase Only
-                                </span>
-                            </label>
-                            <label class="toggle-group">
-                                <input 
-                                    type="checkbox" 
-                                    class="toggle-checkbox"
-                                    [(ngModel)]="newProduct.isFeatured" 
-                                    name="isFeatured"
-                                    [disabled]="isSaving">
-                                <span class="toggle-label">
-                                    <lucide-icon [img]="Package" [size]="16"></lucide-icon>
-                                    Featured Product
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Payment Methods -->
-                    <div class="form-group full-width">
-                        <label class="form-label">
-                            <lucide-icon [img]="DollarSign" [size]="16"></lucide-icon>
-                            <span>Allowed Payment Methods</span>
-                        </label>
-                        <div class="checkbox-row">
-                            <label class="check-item">
-                                <input 
-                                    type="checkbox" 
-                                    class="checkbox-input"
-                                    [checked]="newProduct.allowedPaymentMethods?.includes('cod')"
-                                    (change)="togglePaymentMethod('cod')" 
-                                    [disabled]="isSaving">
-                                <span>Cash on Delivery</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="form-group full-width">
-                        <label class="form-label">
-                            <lucide-icon [img]="Package" [size]="16"></lucide-icon>
-                            <span>Description <span class="required">*</span></span>
-                        </label>
-                        <textarea 
-                            class="form-textarea"
-                            [(ngModel)]="newProduct.description" 
-                            name="description" 
-                            rows="4"
-                            placeholder="Technical specifications, features, and details..."
-                            [disabled]="isSaving"></textarea>
-                    </div>
-
-                    <!-- Upload Media -->
-                    <div class="form-group full-width">
-                        <label class="form-label">
-                            <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
-                            <span>Upload Media</span>
-                        </label>
-                        <div class="upload-area" appDragDrop (fileDropped)="onFileDropped($event)">
-                            <div class="drop-zone">
-                                <input 
-                                    type="file" 
-                                    #fileInput 
-                                    (change)="onFileSelected($event)" 
-                                    multiple 
-                                    hidden
-                                    accept="image/*" 
-                                    [disabled]="isSaving || isUploadingImage">
-                                
-                                <lucide-icon [img]="Upload" [size]="48" class="upload-icon"></lucide-icon>
-                                <p class="upload-text">
-                                    Drag images here or 
-                                    <strong 
-                                        class="browse-link"
-                                        (click)="!isSaving && !isUploadingImage && fileInput.click()">
-                                        browse files
-                                    </strong>
-                                </p>
-                                <small class="upload-hint">PNG, JPG or WEBP (Max 5MB each)</small>
-
-                                @if (isUploadingImage) {
-                                    <div class="upload-progress">
-                                        <div class="spinner-sm"></div>
-                                        <span>Uploading images...</span>
-                                    </div>
-                                }
-
-                                @if (uploadedFiles.length > 0) {
-                                    <div class="file-previews">
-                                        @for (file of uploadedFiles; track $index) {
-                                            <div class="file-item">
-                                                <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
-                                                <span>{{ file.name }}</span>
-                                                <button 
-                                                    type="button" 
-                                                    class="remove-btn" 
-                                                    (click)="removeUploadedFile($index)"
-                                                    [disabled]="isSaving">
-                                                    <lucide-icon [img]="X" [size]="14"></lucide-icon>
-                                                </button>
-                                            </div>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Existing Images -->
-                    @if (newProduct.images && newProduct.images.length > 0) {
-                        <div class="form-group full-width">
-                            <label class="form-label">
-                                <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
-                                <span>Media Gallery</span>
-                            </label>
-                            <div class="image-gallery">
-                                @for (img of newProduct.images; track img.id) {
-                                    <div class="image-item glass-card">
-                                        <img [src]="img.url | imageUrl" alt="Product Image">
-                                        <button 
-                                            type="button" 
-                                            class="delete-btn" 
-                                            (click)="removeImage(img.id)"
-                                            [disabled]="isSaving || isUploadingImage"
-                                            title="Remove image">
-                                            <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
-                                        </button>
-                                        @if (img.isPrimary) {
-                                            <span class="primary-badge">Primary</span>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        </div>
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary" [disabled]="isSaving || isUploadingImage">
+                    @if (isSaving) {
+                    <span class="spinner-sm"></span>
+                    <span>{{ isEditing ? 'Updating...' : 'Adding...' }}</span>
+                    } @else {
+                    <lucide-icon [img]="isEditing ? Edit : Plus" [size]="18"></lucide-icon>
+                    <span>{{ isEditing ? 'Update Product' : 'Add Product' }}</span>
                     }
-
-                    <!-- Variants Section -->
-                    <div class="form-group full-width variants-section">
-                        <div class="section-header">
-                            <h4>
-                                <lucide-icon [img]="Layers" [size]="20"></lucide-icon>
-                                <span>Configure Variants</span>
-                            </h4>
-                            <button 
-                                type="button" 
-                                class="btn-secondary btn-sm" 
-                                (click)="addVariant()" 
-                                [disabled]="isSaving">
-                                <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
-                                <span>Add Variant</span>
-                            </button>
-                        </div>
-
-                        @if (newProduct.variants && newProduct.variants.length > 0) {
-                            <div class="variants-list">
-                                @for (v of newProduct.variants; track $index) {
-                                    <div class="variant-item glass-card">
-                                        <div class="variant-header">
-                                            <span class="variant-number">Variant {{ $index + 1 }}</span>
-                                            <button 
-                                                type="button" 
-                                                class="btn-icon-danger" 
-                                                (click)="removeVariant($index)"
-                                                [disabled]="isSaving" 
-                                                title="Remove Variant">
-                                                <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
-                                            </button>
-                                        </div>
-
-                                        <div class="variant-fields">
-                                            <div class="field">
-                                                <label class="field-label">Variant Name</label>
-                                                <input 
-                                                    type="text" 
-                                                    class="form-input"
-                                                    [(ngModel)]="v.name" 
-                                                    [name]="'vName-' + $index"
-                                                    placeholder="e.g. 2000W Model" 
-                                                    required 
-                                                    [disabled]="isSaving">
-                                            </div>
-
-                                            <div class="field">
-                                                <label class="field-label">Price</label>
-                                                <input 
-                                                    type="number" 
-                                                    class="form-input"
-                                                    [(ngModel)]="v.price" 
-                                                    [name]="'vPrice-' + $index" 
-                                                    placeholder="0.00"
-                                                    min="0"
-                                                    step="0.01"
-                                                    required 
-                                                    [disabled]="isSaving">
-                                            </div>
-
-                                            <div class="field">
-                                                <label class="field-label">MRP</label>
-                                                <input 
-                                                    type="number" 
-                                                    class="form-input"
-                                                    [(ngModel)]="v.comparisonPrice" 
-                                                    [name]="'vCPrice-' + $index"
-                                                    placeholder="0.00"
-                                                    min="0"
-                                                    step="0.01"
-                                                    [disabled]="isSaving">
-                                            </div>
-
-                                            <div class="field">
-                                                <label class="field-label">Stock</label>
-                                                <input 
-                                                    type="number" 
-                                                    class="form-input"
-                                                    [(ngModel)]="v.stock" 
-                                                    [name]="'vStock-' + $index" 
-                                                    placeholder="0"
-                                                    min="0"
-                                                    required 
-                                                    [disabled]="isSaving">
-                                            </div>
-
-                                            <div class="field full-width">
-                                                <label class="field-label">Primary Image URL</label>
-                                                <input 
-                                                    type="text" 
-                                                    class="form-input"
-                                                    [(ngModel)]="v.image" 
-                                                    [name]="'vImage-' + $index"
-                                                    placeholder="https://..." 
-                                                    [disabled]="isSaving">
-                                            </div>
-
-                                            <div class="field full-width">
-                                                <label class="field-label">Description (Optional)</label>
-                                                <textarea 
-                                                    class="form-textarea"
-                                                    [(ngModel)]="v.description" 
-                                                    [name]="'vDesc-' + $index"
-                                                    placeholder="Variant-specific description" 
-                                                    rows="2"
-                                                    [disabled]="isSaving"></textarea>
-                                            </div>
-                                        </div>
-
-                                        <div class="variant-actions">
-                                            <button 
-                                                type="button" 
-                                                class="btn-secondary btn-sm" 
-                                                (click)="variantFileInput.click()"
-                                                [disabled]="isSaving || isUploadingImage">
-                                                <lucide-icon [img]="Upload" [size]="16"></lucide-icon>
-                                                <span>Upload Images</span>
-                                            </button>
-                                            <input 
-                                                #variantFileInput 
-                                                type="file" 
-                                                style="display: none"
-                                                (change)="uploadVariantImage($event, v)" 
-                                                accept="image/*" 
-                                                multiple>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        } @else {
-                            <div class="empty-variants">
-                                <lucide-icon [img]="Layers" [size]="48"></lucide-icon>
-                                <p>No variants added yet. Add variants for different sizes, colors, or models.</p>
-                            </div>
-                        }
-                    </div>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="form-actions">
-                    <button 
-                        type="submit" 
-                        class="btn-primary"
-                        [disabled]="isSaving || isUploadingImage">
-                        @if (isSaving) {
-                            <span class="spinner-sm"></span>
-                            <span>{{ isEditing ? 'Updating...' : 'Adding...' }}</span>
-                        } @else {
-                            <lucide-icon [img]="isEditing ? Edit : Plus" [size]="18"></lucide-icon>
-                            <span>{{ isEditing ? 'Update Product' : 'Add Product' }}</span>
-                        }
-                    </button>
-                    @if (isEditing) {
-                        <button 
-                            type="button" 
-                            (click)="resetForm()" 
-                            class="btn-secondary" 
-                            [disabled]="isSaving">
-                            Cancel
-                        </button>
-                    }
-                </div>
-            </form>
-        </div>
+                </button>
+                @if (isEditing) {
+                <button type="button" (click)="resetForm()" class="btn-secondary" [disabled]="isSaving">
+                    Cancel
+                </button>
+                }
+            </div>
+        </form>
+    </div>
     }
 
     <!-- Products List -->
@@ -514,183 +364,156 @@
             <!-- Search -->
             <div class="search-box">
                 <lucide-icon [img]="Search" [size]="18"></lucide-icon>
-                <input 
-                    type="text" 
-                    class="search-input"
-                    [(ngModel)]="searchQuery"
-                    (input)="onSearchInput(searchQuery)"
-                    placeholder="Search products..."
-                    [disabled]="isLoading">
+                <input type="text" class="search-input" [(ngModel)]="searchQuery" (input)="onSearchInput(searchQuery)"
+                    placeholder="Search products..." [disabled]="isLoading">
             </div>
         </div>
 
         @if (isLoading && products.length === 0) {
-            <div class="table-loading">
-                <div class="spinner-large"></div>
-                <p>Loading products...</p>
-            </div>
+        <div class="table-loading">
+            <div class="spinner-large"></div>
+            <p>Loading products...</p>
+        </div>
         } @else if (filteredProducts.length === 0) {
-            <div class="empty-state">
-                <lucide-icon [img]="Package" [size]="48"></lucide-icon>
-                <p>{{ searchQuery ? 'No products found matching your search' : 'No products yet. Create your first product!' }}</p>
-            </div>
+        <div class="empty-state">
+            <lucide-icon [img]="Package" [size]="48"></lucide-icon>
+            <p>{{ searchQuery ? 'No products found matching your search' : 'No products yet. Create your first product!'
+                }}</p>
+        </div>
         } @else {
-            <!-- Desktop Table -->
-            <div class="table-wrapper desktop-only">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Category</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (p of filteredProducts; track p.id) {
-                            <tr [class.deleting]="isDeleting">
-                                <td>
-                                    <div class="product-cell">
-                                        @if (p.images && p.images.length > 0) {
-                                            <img 
-                                                [src]="p.images[0].url | imageUrl" 
-                                                [alt]="p.name"
-                                                class="product-thumb">
-                                        } @else {
-                                            <div class="product-thumb-placeholder">
-                                                <lucide-icon [img]="ImageIcon" [size]="20"></lucide-icon>
-                                            </div>
-                                        }
-                                        <div class="product-info">
-                                            <strong>{{ p.name }}</strong>
-                                            <span>{{ p.brand?.name || p.brandId }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="category-badge">
-                                        {{ p.category?.name || p.categoryId }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="price-cell">
-                                        <strong>₹{{ p.price | number:'1.2-2' }}</strong>
-                                        @if (p.comparisonPrice) {
-                                            <span class="strike">₹{{ p.comparisonPrice | number:'1.2-2' }}</span>
-                                        }
-                                    </div>
-                                </td>
-                                <td>
-                                    <span 
-                                        class="stock-badge"
-                                        [class.low]="((p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0) < 10">
-                                        {{ (p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0 }} units
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="table-actions">
-                                        @if (authService.hasPermission('UPDATE_PRODUCT')) {
-                                            <button 
-                                                class="btn-icon" 
-                                                (click)="editProduct(p)"
-                                                [disabled]="isSaving || isDeleting"
-                                                title="Edit product">
-                                                <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
-                                            </button>
-                                        }
-                                        @if (authService.hasPermission('DELETE_PRODUCT')) {
-                                            <button 
-                                                class="btn-icon btn-delete" 
-                                                (click)="deleteProduct(p.id)"
-                                                [disabled]="isSaving || isDeleting"
-                                                title="Delete product">
-                                                <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
-                                            </button>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Mobile Cards -->
-            <div class="mobile-cards mobile-only">
-                @for (p of filteredProducts; track p.id) {
-                    <div class="product-card">
-                        <div class="product-card-header">
-                            @if (p.images && p.images.length > 0) {
-                                <img 
-                                    [src]="p.images[0].url | imageUrl" 
-                                    [alt]="p.name"
-                                    class="product-image">
-                            } @else {
-                                <div class="product-image-placeholder">
-                                    <lucide-icon [img]="ImageIcon" [size]="32"></lucide-icon>
+        <!-- Desktop Table -->
+        <div class="table-wrapper desktop-only">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (p of filteredProducts; track p.id) {
+                    <tr [class.deleting]="isDeleting">
+                        <td>
+                            <div class="product-cell">
+                                @if (p.images && p.images.length > 0) {
+                                <img [src]="p.images[0].url | imageUrl" [alt]="p.name" class="product-thumb">
+                                } @else {
+                                <div class="product-thumb-placeholder">
+                                    <lucide-icon [img]="ImageIcon" [size]="20"></lucide-icon>
                                 </div>
-                            }
-                            <div class="product-card-info">
-                                <h4>{{ p.name }}</h4>
-                                <span class="brand-text">{{ p.brand?.name || p.brandId }}</span>
-                                <span class="category-badge">{{ p.category?.name || p.categoryId }}</span>
-                            </div>
-                        </div>
-
-                        <div class="product-card-details">
-                            <div class="detail-item">
-                                <span class="label">Price:</span>
-                                <div class="price-cell">
-                                    <strong>₹{{ p.price | number:'1.2-2' }}</strong>
-                                    @if (p.comparisonPrice) {
-                                        <span class="strike">₹{{ p.comparisonPrice | number:'1.2-2' }}</span>
-                                    }
+                                }
+                                <div class="product-info">
+                                    <strong>{{ p.name }}</strong>
+                                    <span>{{ p.brand?.name || p.brandId }}</span>
                                 </div>
                             </div>
-                            <div class="detail-item">
-                                <span class="label">Stock:</span>
-                                <span 
-                                    class="stock-badge"
-                                    [class.low]="((p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0) < 10">
-                                    {{ (p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0 }} units
-                                </span>
+                        </td>
+                        <td>
+                            <span class="category-badge">
+                                {{ p.category?.name || p.categoryId }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="price-cell">
+                                <strong>₹{{ p.price | number:'1.2-2' }}</strong>
+                                @if (p.comparisonPrice) {
+                                <span class="strike">₹{{ p.comparisonPrice | number:'1.2-2' }}</span>
+                                }
                             </div>
-                        </div>
-
-                        <div class="product-card-actions">
-                            @if (authService.hasPermission('UPDATE_PRODUCT')) {
-                                <button 
-                                    class="btn-secondary btn-sm" 
-                                    (click)="editProduct(p)"
-                                    [disabled]="isSaving || isDeleting">
+                        </td>
+                        <td>
+                            <span class="stock-badge"
+                                [class.low]="((p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0) < 10">
+                                {{ (p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0 }} units
+                            </span>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                @if (authService.hasPermission('UPDATE_PRODUCT')) {
+                                <button class="btn-icon" (click)="editProduct(p)" [disabled]="isSaving || isDeleting"
+                                    title="Edit product">
                                     <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
-                                    <span>Edit</span>
                                 </button>
-                            }
-                            @if (authService.hasPermission('DELETE_PRODUCT')) {
-                                <button 
-                                    class="btn-danger btn-sm" 
-                                    (click)="deleteProduct(p.id)"
-                                    [disabled]="isSaving || isDeleting">
+                                }
+                                @if (authService.hasPermission('DELETE_PRODUCT')) {
+                                <button class="btn-icon btn-delete" (click)="deleteProduct(p.id)"
+                                    [disabled]="isSaving || isDeleting" title="Delete product">
                                     <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
-                                    <span>Delete</span>
                                 </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="mobile-cards mobile-only">
+            @for (p of filteredProducts; track p.id) {
+            <div class="product-card">
+                <div class="product-card-header">
+                    @if (p.images && p.images.length > 0) {
+                    <img [src]="p.images[0].url | imageUrl" [alt]="p.name" class="product-image">
+                    } @else {
+                    <div class="product-image-placeholder">
+                        <lucide-icon [img]="ImageIcon" [size]="32"></lucide-icon>
+                    </div>
+                    }
+                    <div class="product-card-info">
+                        <h4>{{ p.name }}</h4>
+                        <span class="brand-text">{{ p.brand?.name || p.brandId }}</span>
+                        <span class="category-badge">{{ p.category?.name || p.categoryId }}</span>
+                    </div>
+                </div>
+
+                <div class="product-card-details">
+                    <div class="detail-item">
+                        <span class="label">Price:</span>
+                        <div class="price-cell">
+                            <strong>₹{{ p.price | number:'1.2-2' }}</strong>
+                            @if (p.comparisonPrice) {
+                            <span class="strike">₹{{ p.comparisonPrice | number:'1.2-2' }}</span>
                             }
                         </div>
                     </div>
-                }
+                    <div class="detail-item">
+                        <span class="label">Stock:</span>
+                        <span class="stock-badge"
+                            [class.low]="((p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0) < 10">
+                            {{ (p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0 }} units
+                        </span>
+                    </div>
+                </div>
+
+                <div class="product-card-actions">
+                    @if (authService.hasPermission('UPDATE_PRODUCT')) {
+                    <button class="btn-secondary btn-sm" (click)="editProduct(p)" [disabled]="isSaving || isDeleting">
+                        <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                        <span>Edit</span>
+                    </button>
+                    }
+                    @if (authService.hasPermission('DELETE_PRODUCT')) {
+                    <button class="btn-danger btn-sm" (click)="deleteProduct(p.id)" [disabled]="isSaving || isDeleting">
+                        <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                        <span>Delete</span>
+                    </button>
+                    }
+                </div>
             </div>
+            }
+        </div>
         }
     </div>
 
     <!-- Pagination -->
     @if (!isLoading && totalItems > itemsPerPage) {
-        <app-pagination 
-            [currentPage]="currentPage" 
-            [totalItems]="totalItems" 
-            [itemsPerPage]="itemsPerPage"
-            (pageChange)="onPageChange($event)">
-        </app-pagination>
+    <app-pagination [currentPage]="currentPage" [totalItems]="totalItems" [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)">
+    </app-pagination>
     }
 </div>

@@ -30,9 +30,11 @@ export class CategoriesComponent implements OnInit {
   readonly Tag = Tag;
 
   categories: Category[] = [];
+  categoryTree: Category[] = [];
   newCategory: Partial<Category> = {
     name: '',
     slug: '',
+    parentId: ''
   };
 
   isEditing = false;
@@ -48,6 +50,7 @@ export class CategoriesComponent implements OnInit {
     this.isLoading = true;
     try {
       this.categories = await this.categoryService.getCategories();
+      this.categoryTree = await this.categoryService.getCategoryTree();
     } catch (error) {
       this.toastService.apiError(error, 'Failed to load categories');
       console.error('Error loading categories:', error);
@@ -64,23 +67,23 @@ export class CategoriesComponent implements OnInit {
 
     this.isSaving = true;
     try {
+      const categoryData = {
+        ...this.newCategory,
+        parentId: this.newCategory.parentId || undefined
+      };
+
       if (this.isEditing && this.newCategory.id) {
-        await this.categoryService.updateCategory(this.newCategory as Category);
+        await this.categoryService.updateCategory(categoryData as Category);
         this.toastService.success('Category updated successfully');
       } else {
-        const category: Category = {
-          id: `cat-${Math.random().toString(36).substr(2, 9)}`,
-          name: this.newCategory.name!.trim(),
-          slug: this.newCategory.slug!.trim(),
-        };
-        await this.categoryService.addCategory(category);
+        await this.categoryService.addCategory(categoryData as Category);
         this.toastService.success('Category added successfully');
       }
       this.resetForm();
       await this.loadCategories();
     } catch (error: any) {
       this.toastService.apiError(
-        error, 
+        error,
         this.isEditing ? 'Failed to update category' : 'Failed to add category'
       );
       console.error('Error saving category:', error);
@@ -96,9 +99,9 @@ export class CategoriesComponent implements OnInit {
     // Scroll to form on mobile
     if (window.innerWidth < 1024) {
       setTimeout(() => {
-        document.querySelector('.form-card')?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
+        document.querySelector('.form-card')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
         });
       }, 100);
     }
@@ -120,13 +123,13 @@ export class CategoriesComponent implements OnInit {
   }
 
   resetForm() {
-    this.newCategory = { name: '', slug: '' };
+    this.newCategory = { name: '', slug: '', parentId: '' };
     this.isEditing = false;
   }
 
   validateCategory(): boolean {
     return !!(
-      this.newCategory.name?.trim() && 
+      this.newCategory.name?.trim() &&
       this.newCategory.slug?.trim()
     );
   }
@@ -143,15 +146,36 @@ export class CategoriesComponent implements OnInit {
     }
   }
 
-  get filteredCategories(): Category[] {
+  get filteredCategories(): (Category & { level: number })[] {
+    const flattened: (Category & { level: number })[] = [];
+
+    const flatten = (cats: Category[], level = 0) => {
+      cats.forEach(cat => {
+        flattened.push({ ...cat, level });
+        if (cat.children && cat.children.length > 0) {
+          flatten(cat.children, level + 1);
+        }
+      });
+    };
+
+    flatten(this.categoryTree);
+
     if (!this.searchQuery.trim()) {
-      return this.categories;
+      return flattened;
     }
+
     const query = this.searchQuery.toLowerCase();
-    return this.categories.filter(cat => 
+    return flattened.filter(cat =>
       cat.name.toLowerCase().includes(query) ||
       cat.slug.toLowerCase().includes(query)
     );
+  }
+
+  get availableParents(): Category[] {
+    if (this.isEditing && this.newCategory.id) {
+      return this.categories.filter(c => c.id !== this.newCategory.id);
+    }
+    return this.categories;
   }
 
   getCategoryIcon(category: Category) {
