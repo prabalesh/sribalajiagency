@@ -64,6 +64,7 @@ export class FileStorageService implements StorageProvider {
                     Key: key,
                     Body: buffer,
                     ContentType: contentType,
+                    CacheControl: 'public, max-age=31536000, immutable', // Cache for 1 year
                 }),
             );
 
