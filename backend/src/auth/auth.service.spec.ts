@@ -58,7 +58,11 @@ describe('AuthService', () => {
             rollbackTransaction: jest.fn(),
             release: jest.fn(),
             manager: {
-                save: jest.fn(),
+                save: jest.fn().mockImplementation(entity => Promise.resolve(entity)),
+                findOneBy: jest.fn(),
+                findOne: jest.fn(),
+                update: jest.fn().mockResolvedValue({}),
+                create: jest.fn().mockImplementation((entity, data) => ({ ...data })),
             },
         }),
     };
@@ -100,16 +104,17 @@ describe('AuthService', () => {
             const tokens = { access_token: 'at', refresh_token: 'rt' };
 
             (bcrypt.hash as jest.Mock).mockResolvedValue(hashedPwd);
-            mockUserRepo.create.mockReturnValue(user);
-            mockUserRepo.save.mockResolvedValue(user);
+            mockDataSource.createQueryRunner().manager.findOneBy.mockResolvedValue(null);
+            mockDataSource.createQueryRunner().manager.save.mockResolvedValue(user);
+            mockDataSource.createQueryRunner().manager.create.mockReturnValue(user);
             mockJwtService.signAsync.mockResolvedValueOnce('at').mockResolvedValueOnce('rt');
-            jest.spyOn(service, 'updateRefreshTokenHash').mockResolvedValue(undefined);
+            jest.spyOn(service, 'hashRefreshToken').mockResolvedValue('hashedRt' as any);
 
             const result = await service.signup(signupDto);
 
             expect(result.user).toEqual(user);
             expect(result.access_token).toBe('at');
-            expect(mockUserRepo.save).toHaveBeenCalled();
+            expect(mockDataSource.createQueryRunner().manager.save).toHaveBeenCalled();
         });
     });
 
@@ -121,7 +126,7 @@ describe('AuthService', () => {
             mockUserRepo.findOne.mockResolvedValue(user);
             (bcrypt.compare as jest.Mock).mockResolvedValue(true);
             mockJwtService.signAsync.mockResolvedValueOnce('at').mockResolvedValueOnce('rt');
-            jest.spyOn(service, 'updateRefreshTokenHash').mockResolvedValue(undefined);
+            jest.spyOn(service, 'hashRefreshToken').mockResolvedValue('hashedRt' as any);
 
             const result = await service.login(loginDto);
 
@@ -147,7 +152,7 @@ describe('AuthService', () => {
             mockUserRepo.findOne.mockResolvedValue(user);
             (bcrypt.compare as jest.Mock).mockResolvedValue(true);
             mockJwtService.signAsync.mockResolvedValueOnce('at2').mockResolvedValueOnce('rt2');
-            jest.spyOn(service, 'updateRefreshTokenHash').mockResolvedValue(undefined);
+            jest.spyOn(service, 'hashRefreshToken').mockResolvedValue('hashedRt2' as any);
 
             const result = await service.refreshTokens(userId, rt);
 

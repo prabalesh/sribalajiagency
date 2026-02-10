@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ForbiddenException, ConflictException, BadRequestException, Logger, HttpException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException, ConflictException, BadRequestException, Logger, HttpException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, DataSource } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -122,12 +122,8 @@ export class AuthService {
      * TODO: Consider using argon2 instead of bcrypt (more secure)
      */
     async hashData(data: string) {
-        // FIXME: Removed debug logging (was 'Hashing data') - no context
-        // FIXME: Salt rounds hardcoded to 10
-        // TODO: Use configService.get('BCRYPT_ROUNDS', 12)
-        // TODO: Add input validation
-        // TODO: Wrap in try-catch
-        return bcrypt.hash(data, 10);
+        const saltRounds = this.configService.get<number>('BCRYPT_ROUNDS', 10);
+        return bcrypt.hash(data, saltRounds);
     }
 
 
@@ -177,52 +173,32 @@ export class AuthService {
      * TODO: Add rate limiting for token generation per user
      */
     async getTokens(userId: string, email: string) {
-        // FIXME: Removed debug logging - was too generic
-        // TODO: Add structured logging with correlation ID
+        const accessTokenExpiration = this.configService.get<string>('JWT_ACCESS_EXPIRATION', '15m');
+        const refreshTokenExpiration = this.configService.get<string>('JWT_REFRESH_EXPIRATION', '7d');
 
-
-        // FIXME: Hardcoded expiration times
-        // TODO: Move to configuration
-        // TODO: Add error handling
-        // TODO: Add input validation
         const [at, rt] = await Promise.all([
             this.jwtService.signAsync(
-                { 
-                    sub: userId, 
+                {
+                    sub: userId,
                     email,
-                    // TODO: Add type: 'access'
-                    // TODO: Add roles: user.roles.map(r => r.name)
-                    // TODO: Add permissions: user.permissions.map(p => p.name)
-                    // TODO: Add jti: uuid()
-                    // TODO: Add iss: 'your-app-name'
-                    // TODO: Add aud: 'your-app-users'
-                    // TODO: Add sessionId
-                    // TODO: Add deviceId
                 },
                 {
                     secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-                    expiresIn: '15m', // FIXME: Hardcoded
-                    // TODO: Add algorithm: 'RS256' and use private key
+                    expiresIn: accessTokenExpiration as any,
                 },
             ),
             this.jwtService.signAsync(
-                { 
-                    sub: userId, 
+                {
+                    sub: userId,
                     email,
-                    // TODO: Add type: 'refresh'
-                    // TODO: Add jti: uuid()
-                    // TODO: Add sessionId (same as access token)
                 },
                 {
                     secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-                    expiresIn: '7d', // FIXME: Hardcoded
+                    expiresIn: refreshTokenExpiration as any,
                 },
             ),
         ]);
 
-
-        // FIXME: Removed debug logging - was too verbose
-        // TODO: Log token generation with user ID only (not token itself)
         return { access_token: at, refresh_token: rt };
     }
 
@@ -282,88 +258,47 @@ export class AuthService {
      * TODO: Add idempotency key support to prevent duplicate signups
      */
     async signup(dto: AuthSignupDto) {
-        this.logger.log(`User signup attempt: ${dto.email}`);
-        // TODO: Add correlation ID to log
-        // TODO: Normalize email: dto.email = dto.email.toLowerCase().trim()
-
+        this.logger.log(`User signup attempt`);
+        dto.email = dto.email.toLowerCase().trim();
 
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
 
-
-
-
         try {
-            // Check for existing user inside transaction
             const existingUser: User | null = await queryRunner.manager.findOneBy(User, { email: dto.email });
             if (existingUser) {
                 this.logger.warn(`Signup failed - email already exists: ${dto.email}`);
-                // TODO: Consider not revealing email exists (security vs UX tradeoff)
                 throw new ConflictException('Email already exists');
             }
 
-
-            // TODO: Check rate limit for this IP address
-            // TODO: Validate CAPTCHA token
-            // TODO: Check if email domain is disposable/temporary
-
             const password = await this.hashData(dto.password);
-            
+
             const newUser: User = queryRunner.manager.create(User, {
                 name: dto.name,
                 email: dto.email,
                 password,
-                // TODO: Add emailVerified: false
-                // TODO: Add isActive: false (until email verified)
-                // TODO: Add signupSource from request
-                // TODO: Add signupIp from request
-                // TODO: Add tosAcceptedAt: new Date()
-                // TODO: Add privacyPolicyAcceptedAt: new Date()
             });
-            
+
             const user = await queryRunner.manager.save(newUser);
-            
-            // TODO: Assign default role inside transaction
-            // const defaultRole = await queryRunner.manager.findOne(Role, { where: { name: 'Customer' } });
-            // if (defaultRole) {
-            //   user.roles = [defaultRole];
-            //   await queryRunner.manager.save(user);
-            // }
-            
+
             const tokens = await this.getTokens(user.id, user.email);
-            
-            const refreshTokenHash = await this.generateRefreshTokenHash(user.id, tokens.refresh_token);
+
+            const refreshTokenHash = await this.hashRefreshToken(user.id, tokens.refresh_token);
             await queryRunner.manager.update(User, user.id, { refreshToken: refreshTokenHash });
-            
+
             await queryRunner.commitTransaction();
-            
+
             this.logger.log(`User registered successfully: ${user.email}`);
-            // TODO: Log with correlation ID and user ID
 
-
-            // TODO: Send welcome email (async, don't await)
-            // TODO: Send email verification email (async, don't await)
-            // TODO: Emit UserCreatedEvent (for analytics, webhooks, etc.)
-            // TODO: Assign default role (should be done in transaction above)
-            // TODO: Create user profile record
-            // TODO: Initialize user preferences with defaults
-            // TODO: Track signup in analytics
-
-
-            // FIXME: Returns user with sensitive fields
-            // TODO: Use UserResponseDto to exclude password, refreshToken, etc.
             return { user, ...tokens };
         } catch (error) {
             await queryRunner.rollbackTransaction();
             this.logger.error(`Signup failed for email ${dto.email}: ${error.message}`, error.stack);
-            
-            // FIXME: Generic error swallows specific error types (ConflictException, etc.)
-            // TODO: Re-throw HttpExceptions, only wrap unexpected errors
+
             if (error instanceof HttpException) {
                 throw error;
             }
-            // TODO: Don't expose internal error messages to client
             throw new BadRequestException('Signup failed. Please try again.');
         } finally {
             await queryRunner.release();
@@ -431,24 +366,14 @@ export class AuthService {
      * TODO: Add device fingerprint to token payload
      */
     async login(dto: AuthLoginDto) {
-        this.logger.log(`Login attempt: ${dto.email}`);
-        // TODO: Log with IP address and User-Agent
-        // TODO: Normalize email: dto.email = dto.email.toLowerCase().trim()
-
-
-        // FIXME: No rate limiting check
-        // TODO: Check rate limit for this email (max 5 attempts per 15 min)
-        // TODO: Check rate limit for this IP (max 20 attempts per 15 min)
-        // TODO: Check if account is locked (lockUntil timestamp)
-
+        this.logger.log(`Login attempt`);
+        dto.email = dto.email.toLowerCase().trim();
 
         const user = await this.userRepository.findOne({
             where: { email: dto.email },
             relations: ['roles', 'roles.permissions'],
             select: ['id', 'email', 'password', 'name'],
-            // TODO: Add select: ['emailVerified', 'isActive', 'isBanned', 'deletedAt', 'failedLoginAttempts', 'lockedUntil']
         });
-
 
         // Timing attack prevention - always compare even if user not found
         const passwordHash = user?.password || '$2b$10$fakehashtopreventtimingattack';
@@ -457,23 +382,8 @@ export class AuthService {
 
         if (!user || !passwordMatches) {
             this.logger.warn(`Login failed for email: ${dto.email}`);
-            // TODO: Log detailed failure reason internally (user not found vs wrong password)
-            // TODO: Log with IP and User-Agent
-            // TODO: Increment failed attempt counter for user
-            // TODO: Increment failed attempt counter for IP
-            // TODO: Check if should lock account (>= 5 attempts)
-            // TODO: Emit LoginFailureEvent
-            // FIXME: Generic error - doesn't distinguish user not found vs wrong password (good for security)
             throw new ForbiddenException('Access Denied');
         }
-
-
-        // TODO: Check if user.emailVerified === true
-        // TODO: Check if user.isActive === true
-        // TODO: Check if user.isBanned === false
-        // TODO: Check if user.deletedAt === null
-        // TODO: Check if user.lockedUntil > now
-        // TODO: Check if MFA is enabled and require MFA token
 
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -483,39 +393,23 @@ export class AuthService {
 
         try {
             const tokens = await this.getTokens(user.id, user.email);
-            
-            const refreshTokenHash = await this.generateRefreshTokenHash(user.id, tokens.refresh_token);
-            await queryRunner.manager.update(User, user.id, { 
+
+            const refreshTokenHash = await this.hashRefreshToken(user.id, tokens.refresh_token);
+            await queryRunner.manager.update(User, user.id, {
                 refreshToken: refreshTokenHash,
-                // TODO: Add lastLoginAt: new Date()
-                // TODO: Add lastLoginIp: requestIp
-                // TODO: Add failedLoginAttempts: 0 (reset on success)
             });
-            
-            // TODO: Create session record in sessions table
-            // TODO: Invalidate old sessions if max concurrent sessions exceeded
-            
+
             await queryRunner.commitTransaction();
-            
+
             const { password: _, ...userWithoutPassword } = user;
 
-
             this.logger.log(`Login successful: ${user.email}`);
-            // TODO: Log with user ID and IP
-            
-            // TODO: Send login notification email if from new device/location
-            // TODO: Emit LoginSuccessEvent
-            // TODO: Track login in analytics
-            // TODO: Reset rate limit counters for this email
-
 
             return { user: userWithoutPassword, ...tokens };
         } catch (error) {
             await queryRunner.rollbackTransaction();
             this.logger.error(`Error during login token generation for user ${user.id}: ${error.message}`, error.stack);
-            
-            // FIXME: Generic error swallows all errors
-            // TODO: Re-throw HttpExceptions, only wrap unexpected errors
+
             if (error instanceof HttpException) {
                 throw error;
             }
@@ -544,21 +438,14 @@ export class AuthService {
      * TODO: Add input validation (non-empty token)
      * TODO: Consider making this a private utility method
      */
-    async generateRefreshTokenHash(userId: string, refreshToken: string) {
-        this.logger.debug(`Generating refresh token hash for user ${userId}`);
-        // FIXME: Unnecessary empty string initialization
-        let hash: string = "";
+    async hashRefreshToken(userId: string, refreshToken: string) {
+        this.logger.debug(`Hashing refresh token for user ${userId}`);
         try {
-            hash = await this.hashData(refreshToken);
+            return await this.hashData(refreshToken);
         } catch (error) {
             this.logger.error(`Error hashing refresh token for user ${userId}: ${error.message}`);
-            // FIXME: Throws BadRequestException but this is internal error
-            // TODO: Throw InternalServerErrorException instead
-            throw new BadRequestException('Failed to generate refresh token hash');
+            throw new BadRequestException('Failed to hash refresh token');
         }
-        return hash;
-        
-        // TODO: Simplify to: return await this.hashData(refreshToken);
     }
 
 
@@ -612,63 +499,28 @@ export class AuthService {
      */
     async refreshTokens(userId: string, rt: string) {
         this.logger.log(`Refreshing tokens for user ${userId}`);
-        // TODO: Log with IP and correlation ID
-
-
-        // FIXME: No rate limiting
-        // TODO: Check rate limit per user (max 10 per hour)
-        // TODO: Check if too many refreshes in short time (suspicious)
-
 
         const user = await this.userRepository.findOne({
             where: { id: userId },
             relations: ['roles', 'roles.permissions'],
             select: ['id', 'email', 'refreshToken'],
-            // TODO: Add select: ['isActive', 'emailVerified', 'isBanned', 'deletedAt']
         });
 
 
         if (!user || !user.refreshToken) {
             this.logger.warn(`Refresh failed - user not found or no token: ${userId}`);
-            // TODO: Check if user.refreshToken is null because they logged out
-            // TODO: Emit TokenRefreshFailureEvent
             throw new ForbiddenException('Access Denied');
         }
-
-
-        // TODO: Check if user.isActive === true
-        // TODO: Check if user.emailVerified === true
-        // TODO: Check if user.isBanned === false
-        // TODO: Check if user.deletedAt === null
 
 
         const rtMatches = await bcrypt.compare(rt, user.refreshToken);
         if (!rtMatches) {
             this.logger.warn(`Refresh failed - invalid token for user: ${userId}`);
-            // TODO: Detect potential token theft (reuse of revoked token in family)
-            // TODO: If token family reuse detected, revoke all tokens for user
-            // TODO: Send security alert email to user
-            // TODO: Emit SecurityAlertEvent
             throw new ForbiddenException('Access Denied');
         }
 
 
-        // TODO: Check if refresh token is blacklisted
-        // TODO: Check if refresh token family is revoked
-
-
         const tokens = await this.getTokens(user.id, user.email);
-        
-        // FIXME: Unnecessary check - tokens.refresh_token will always exist
-        // TODO: Remove this check
-        if(!tokens.refresh_token) {
-            this.logger.error(`Failed to generate new refresh token for user ${userId}`);
-            throw new BadRequestException('Failed to refresh tokens');
-        }
-
-
-        // TODO: Blacklist old refresh token before issuing new one
-
 
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
@@ -676,29 +528,20 @@ export class AuthService {
 
 
         try {
-            const refreshTokenHash = await this.generateRefreshTokenHash(user.id, tokens.refresh_token);
-            await queryRunner.manager.update(User, user.id, { 
+            const refreshTokenHash = await this.hashRefreshToken(user.id, tokens.refresh_token);
+            await queryRunner.manager.update(User, user.id, {
                 refreshToken: refreshTokenHash,
-                // TODO: Add lastActivityAt: new Date()
             });
-            
-            // TODO: Update session record if session management implemented
-            // TODO: Track refresh token family lineage
-            
+
             await queryRunner.commitTransaction();
 
-
             this.logger.log(`Tokens refreshed successfully for user ${userId}`);
-            // TODO: Log with correlation ID
-            
-            // TODO: Emit TokenRefreshedEvent
+
             return { user, ...tokens };
         } catch (error) {
             await queryRunner.rollbackTransaction();
             this.logger.error(`Error during token refresh for user ${userId}: ${error.message}`, error.stack);
-            
-            // FIXME: Generic error swallows all errors
-            // TODO: Re-throw HttpExceptions, only wrap unexpected errors
+
             if (error instanceof HttpException) {
                 throw error;
             }
@@ -760,10 +603,10 @@ export class AuthService {
             this.logger.warn(`Limit ${limit} exceeds maximum, capping to 50`);
             limit = 50;
         }
-        
+
         // FIXME: No validation for page < 1 or limit <= 0
         // TODO: Validate: if (page < 1) page = 1; if (limit < 1) limit = 20;
-        
+
         const skip = (page - 1) * limit;
 
 
@@ -782,7 +625,7 @@ export class AuthService {
 
 
         this.logger.debug(`Found ${total} total users, returning ${items.length} items`);
-        
+
         // TODO: Transform to UserListDto to exclude sensitive fields
         // TODO: Add totalPages: Math.ceil(total / limit)
         // TODO: Add hasNextPage: page * limit < total
@@ -849,15 +692,15 @@ export class AuthService {
         // FIXME: No DTO validation
         // TODO: Use UpdateUserDto and validate
         const { roleIds, ...userData } = data;
-        
+
         // TODO: Load user with old values for audit log
         const user = await this.userRepository.findOne({ where: { id }, relations: ['roles'] });
-        
+
         if (!user) {
             this.logger.warn(`User not found for update: ${id}`);
             // FIXME: Wrong exception type
             // TODO: Change to NotFoundException
-            throw new UnauthorizedException('User not found');
+            throw new NotFoundException('User not found');
         }
 
 
@@ -895,7 +738,7 @@ export class AuthService {
             const roles = await this.roleRepository.find({
                 where: { id: In(roleIds) }
             });
-            
+
             // TODO: Check if found roles count matches roleIds count
             // TODO: Validate requester can assign these roles
             // TODO: Log role changes specifically
@@ -906,7 +749,7 @@ export class AuthService {
         // TODO: Commit transaction
         const saved = await this.userRepository.save(user);
         this.logger.log(`User ${id} updated successfully`);
-        
+
         // TODO: Emit UserUpdatedEvent with old and new values
         // TODO: Add comprehensive audit logging
         // TODO: Send notification email if critical fields changed
@@ -961,7 +804,7 @@ export class AuthService {
     deleteUser(id: string) {
         this.logger.log(`Deleting user ${id}`);
         // TODO: Log who is deleting (current user ID from context)
-        
+
         // FIXME: No validation, authorization, or logging
         // TODO: Add all safety checks before deletion
         // TODO: Validate user exists
@@ -1053,18 +896,18 @@ export class AuthService {
         // TODO: Check authorization
         // TODO: Check for duplicate name
         const { permissionIds, ...roleData } = data;
-        
+
         // FIXME: Unsafe cast
         // TODO: Use proper typing
         const role = this.roleRepository.create(roleData as object) as Role;
-        
+
         if (permissionIds && permissionIds.length > 0) {
             // FIXME: No validation that permissions exist
             // TODO: Validate all permission IDs exist
             const permissions = await this.permissionRepository.find({
                 where: { id: In(permissionIds) }
             });
-            
+
             // TODO: Check permissions.length === permissionIds.length
             role.permissions = permissions;
         }
@@ -1073,7 +916,7 @@ export class AuthService {
         // TODO: Start transaction
         const saved = await this.roleRepository.save(role);
         this.logger.log(`Role created: ${saved.id}`);
-        
+
         // TODO: Emit RoleCreatedEvent
         // TODO: Audit log
         // TODO: Clear role cache
@@ -1124,11 +967,11 @@ export class AuthService {
 
         const { permissionIds, ...roleData } = data;
         const role = await this.roleRepository.findOne({ where: { id }, relations: ['permissions'] });
-        
+
         if (!role) {
             this.logger.warn(`Role not found for update: ${id}`);
             // FIXME: Wrong exception type
-            throw new UnauthorizedException('Role not found');
+            throw new NotFoundException('Role not found');
         }
 
 
@@ -1145,7 +988,7 @@ export class AuthService {
             const permissions = await this.permissionRepository.find({
                 where: { id: In(permissionIds) }
             });
-            
+
             // TODO: Check count matches
             role.permissions = permissions;
         }
@@ -1154,7 +997,7 @@ export class AuthService {
         // TODO: Start transaction
         const saved = await this.roleRepository.save(role);
         this.logger.log(`Role ${id} updated successfully`);
-        
+
         // TODO: Emit RoleUpdatedEvent
         // TODO: Audit log
         // TODO: Clear role cache
@@ -1194,7 +1037,7 @@ export class AuthService {
     deleteRole(id: string) {
         this.logger.log(`Deleting role ${id}`);
         // TODO: Log who is deleting
-        
+
         // FIXME: No validation or safety checks
         // TODO: Add all validations
         // TODO: Check if system role

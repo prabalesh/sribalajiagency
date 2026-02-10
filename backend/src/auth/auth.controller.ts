@@ -34,29 +34,17 @@ export class AuthController {
     @Post('local/signup')
     @HttpCode(HttpStatus.CREATED)
     async signup(@Body() dto: AuthSignupDto, @Res({ passthrough: true }) res: Response) {
-        try {
-            const data = await this.authService.signup(dto);
-            this.setCookies(res, data);
-            return { user: data.user };
-        } catch (error) {
-            if (error.code === '23505') { // Unique constraint violation in Postgres
-                throw new BadRequestException('Email already exists');
-            }
-            throw new InternalServerErrorException('Error during signup');
-        }
+        const data = await this.authService.signup(dto);
+        this.setCookies(res, data);
+        return { user: data.user };
     }
 
     @Post('local/signin')
     @HttpCode(HttpStatus.OK)
     async login(@Body() dto: AuthLoginDto, @Res({ passthrough: true }) res: Response) {
-        try {
-            const data = await this.authService.login(dto);
-            this.setCookies(res, data);
-            return { user: data.user };
-        } catch (error) {
-            // AuthService already throws ForbiddenException for invalid credentials
-            throw error;
-        }
+        const data = await this.authService.login(dto);
+        this.setCookies(res, data);
+        return { user: data.user };
     }
 
     @Post('logout')
@@ -71,14 +59,10 @@ export class AuthController {
     @UseGuards(AuthGuard('jwt-refresh'))
     @HttpCode(HttpStatus.OK)
     async refreshTokens(@Req() req: any, @Res({ passthrough: true }) res: Response) {
-        try {
-            const user = req.user;
-            const data = await this.authService.refreshTokens(user.sub, user.refreshToken);
-            this.setCookies(res, data);
-            return { user: data.user };
-        } catch (error) {
-            throw error;
-        }
+        const user = req.user;
+        const data = await this.authService.refreshTokens(user.sub, user.refreshToken);
+        this.setCookies(res, data);
+        return { user: data.user };
     }
 }
 

@@ -3,7 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 
 describe('AuthController', () => {
     let controller: AuthController;
@@ -62,12 +62,12 @@ describe('AuthController', () => {
             expect(service.signup).toHaveBeenCalledWith(dto);
         });
 
-        it('should throw BadRequestException on duplicate email', async () => {
-            mockAuthService.signup.mockRejectedValue({ code: '23505' });
+        it('should throw ConflictException on duplicate email', async () => {
+            mockAuthService.signup.mockRejectedValue(new ConflictException('Email already exists'));
             const res = mockResponse();
 
             await expect(controller.signup({} as any, res))
-                .rejects.toThrow(BadRequestException);
+                .rejects.toThrow(ConflictException);
         });
     });
 
