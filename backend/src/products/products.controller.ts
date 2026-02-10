@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Post, Put, Delete, Body, UseGuards, UseInterceptors, UploadedFile, UploadedFiles, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors, UploadedFile, UploadedFiles, UsePipes, ValidationPipe, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
@@ -39,6 +40,11 @@ export class ProductsController {
         });
     }
 
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.productsService.findOne(id);
+    }
+
     @Post()
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('CREATE_PRODUCT')
@@ -63,13 +69,21 @@ export class ProductsController {
     }
 
     // Image Uploads
+    // Rate Limit: Default 60s ttl, 10 requests (configured in AppModule)
     @Post(':id/images')
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard, ThrottlerGuard)
     @Permissions('UPDATE_PRODUCT')
     @UseInterceptors(FileInterceptor('file'))
     uploadImage(
         @Param('id') id: string,
-        @UploadedFile() file: Express.Multer.File,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [
+                    new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
+                    new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
+                ],
+            }),
+        ) file: Express.Multer.File,
         @Body('isPrimary') isPrimary?: string
     ) {
         return this.productsService.addProductImage(id, file, isPrimary === 'true');
@@ -85,6 +99,8 @@ export class ProductsController {
     ) {
         return this.productsService.addProductImageLink(id, url, isPrimary);
     }
+
+    @Delete(':id/images/:imageId')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('UPDATE_PRODUCT')
     removeImage(@Param('imageId') imageId: string) {
@@ -92,23 +108,27 @@ export class ProductsController {
     }
 
     @Post('media/upload')
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard, ThrottlerGuard)
     @Permissions('UPDATE_PRODUCT')
     @UseInterceptors(FileInterceptor('file'))
-    uploadMedia(@UploadedFile() file: Express.Multer.File) {
+    uploadMedia(
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [
+                    new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
+                    new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
+                ],
+            }),
+        ) file: Express.Multer.File
+    ) {
         return this.productsService.uploadGenericFile(file);
     }
 
     @Post('media/bulk-upload')
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard, ThrottlerGuard)
     @Permissions('UPDATE_PRODUCT')
     @UseInterceptors(FilesInterceptor('files'))
     bulkUploadMedia(@UploadedFiles() files: Array<Express.Multer.File>) {
         return this.productsService.uploadGenericFiles(files);
-    }
-
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.productsService.findOne(id);
     }
 }

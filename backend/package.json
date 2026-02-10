@@ -21,6 +21,7 @@
     "seed:advanced": "ts-node -r tsconfig-paths/register src/seeds/advanced-seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.986.0",
     "@nestjs/cache-manager": "^3.1.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
@@ -63,7 +64,7 @@
     "@types/inquirer": "^8.2.12",
     "@types/jest": "^30.0.0",
     "@types/multer": "^2.0.0",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.19.10",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^10.0.0",

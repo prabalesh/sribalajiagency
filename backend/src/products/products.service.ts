@@ -558,6 +558,13 @@ export class ProductsService {
     async addProductImage(productId: string, file: Express.Multer.File, isPrimary: boolean = false) {
         this.logger.log(`Adding image to product ${productId}, isPrimary: ${isPrimary}`);
 
+        // Check existing images count
+        const count = await this.imageRepo.count({ where: { product: { id: productId } } });
+        if (count >= 10) {
+            throw new BadRequestException('Maximum of 10 images allowed per product variant');
+        }
+
+        // Validate product exists
         // TODO: Validate product exists
         // TODO: Validate file type and size
         // TODO: If isPrimary, unset existing primary images

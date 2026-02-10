@@ -1,10 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as path from 'path';
-import * as fs from 'fs/promises';
-import { existsSync, mkdirSync } from 'fs';
+import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
-
 
 export interface StorageProvider {
     saveFile(file: Express.Multer.File, folder: string): Promise<string>;
@@ -14,42 +12,82 @@ export interface StorageProvider {
 @Injectable()
 export class FileStorageService implements StorageProvider {
     private readonly logger = new Logger(FileStorageService.name);
-    private readonly uploadPath = 'uploads';
+    private readonly s3Client: S3Client;
+    private readonly bucketName: string;
+    private readonly publicUrl: string;
 
-    constructor() {
-        this.ensureDirectoryExists(this.uploadPath);
-    }
+    constructor(private configService: ConfigService) {
+        const accountId = this.configService.getOrThrow<string>('R2_ACCOUNT_ID');
+        const accessKeyId = this.configService.getOrThrow<string>('R2_ACCESS_KEY_ID');
+        const secretAccessKey = this.configService.getOrThrow<string>('R2_SECRET_ACCESS_KEY');
+        this.bucketName = this.configService.getOrThrow<string>('R2_BUCKET_NAME');
+        this.publicUrl = this.configService.get<string>('R2_PUBLIC_URL', '');
 
-    private ensureDirectoryExists(dir: string) {
-        if (!existsSync(dir)) {
-            mkdirSync(dir, { recursive: true });
-        }
+        this.s3Client = new S3Client({
+            region: 'auto',
+            endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+            credentials: {
+                accessKeyId,
+                secretAccessKey,
+            },
+        });
     }
 
     async saveFile(file: Express.Multer.File, folder: string = 'images'): Promise<string> {
-        const targetDir = path.join(this.uploadPath, folder);
-        this.ensureDirectoryExists(targetDir);
+        try {
+            // Optimization: Resize and convert to WebP
+            const buffer = await sharp(file.buffer)
+                .resize({ width: 1200, withoutEnlargement: true }) // Max width 1200px
+                .webp({ quality: 80 }) // 80% quality
+                .toBuffer();
 
-        const fileName = `${uuidv4()}.webp`;
-        const filePath = path.join(targetDir, fileName);
+            const fileName = `${uuidv4()}.webp`;
+            const key = `${folder}/${fileName}`;
 
-        // Compress and convert to webp
-        await sharp(file.buffer)
-            .resize({ width: 1200, withoutEnlargement: true }) // reasonable max width
-            .webp({ quality: 80 })
-            .toFile(filePath);
+            await this.s3Client.send(
+                new PutObjectCommand({
+                    Bucket: this.bucketName,
+                    Key: key,
+                    Body: buffer,
+                    ContentType: 'image/webp',
+                }),
+            );
 
-        return `/uploads/${folder}/${fileName}`;
+            this.logger.log(`Uploaded file to R2: ${key}`);
+
+            // Return full public URL if available, else relative path (which might need prefixing on frontend)
+            // Ideally, we return the full CDN URL.
+            return this.publicUrl ? `${this.publicUrl}/${key}` : key;
+        } catch (error) {
+            this.logger.error(`Failed to upload file to R2: ${error.message}`, error.stack);
+            throw new InternalServerErrorException('Failed to upload file');
+        }
     }
 
-    async deleteFile(filePath: string): Promise<void> {
-        const fullPath = path.join(this.uploadPath, filePath);
+    async deleteFile(fileUrl: string): Promise<void> {
         try {
-            if (existsSync(fullPath)) {
-                await fs.unlink(fullPath);
+            // Extract Key from URL if necessary
+            // Assuming fileUrl is either the full URL or the Key
+            let key = fileUrl;
+            if (this.publicUrl && fileUrl.startsWith(this.publicUrl)) {
+                key = fileUrl.replace(`${this.publicUrl}/`, '');
+            } else if (fileUrl.startsWith('http')) {
+                // Try to guess key if it's a full URL but not matching publicUrl exactly (e.g. different protocol)
+                const urlParts = new URL(fileUrl);
+                key = urlParts.pathname.substring(1); // Remove leading slash
             }
+
+            await this.s3Client.send(
+                new DeleteObjectCommand({
+                    Bucket: this.bucketName,
+                    Key: key,
+                }),
+            );
+
+            this.logger.log(`Deleted file from R2: ${key}`);
         } catch (error) {
-            this.logger.error(`Failed to delete file: ${fullPath}`, error);
+            this.logger.error(`Failed to delete file from R2: ${error.message}`, error.stack);
+            // We don't throw here to avoid blocking main operation if cleanup fails
         }
     }
 }
