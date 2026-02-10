@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Put, Patch, Body, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Body, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CMSService } from './cms.service';
 import { UpdateHomeCmsDto, UpdateHeroDto, UpdateAboutDto, UpdateSocialLinksDto, UpdateVisibilityDto } from './dto/update-home-cms.dto';
@@ -51,10 +52,19 @@ export class CMSController {
     }
 
     @Post('upload')
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard, ThrottlerGuard)
     @Permissions('UPLOAD_CMS_ASSETS')
     @UseInterceptors(FileInterceptor('file'))
-    async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    async uploadImage(
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [
+                    new MaxFileSizeValidator({ maxSize: 30 * 1024 * 1024 }), // 30MB
+                    new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
+                ],
+            }),
+        ) file: Express.Multer.File
+    ) {
         return this.cmsService.uploadImage(file);
     }
 

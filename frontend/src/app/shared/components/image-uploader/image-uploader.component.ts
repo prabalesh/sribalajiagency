@@ -1,8 +1,9 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Upload, Link, X, Image as ImageIcon, AlertCircle } from 'lucide-angular';
 import { DragDropDirective } from '../../directives/drag-drop.directive';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-image-uploader',
@@ -16,10 +17,13 @@ export class ImageUploaderComponent implements OnInit {
   @Input() label: string = 'Image';
   @Input() helpText: string = 'PNG, JPG or GIF (max. 5MB)';
   @Input() required: boolean = false;
+  @Input() maxSize: number = 5; // MB
 
   @Output() fileSelected = new EventEmitter<File>();
   @Output() urlChanged = new EventEmitter<string>();
   @Output() imageRemoved = new EventEmitter<void>();
+
+  private toastService = inject(ToastService);
 
   readonly Upload = Upload;
   readonly Link = Link;
@@ -61,8 +65,15 @@ export class ImageUploaderComponent implements OnInit {
 
   private handleFile(file: File) {
     if (!file.type.startsWith('image/')) {
+      this.toastService.error('Only image files are allowed');
       return;
     }
+
+    if (file.size > this.maxSize * 1024 * 1024) {
+      this.toastService.error(`File size exceeds ${this.maxSize}MB limit`);
+      return;
+    }
+
     this.selectedFile = file;
     const reader = new FileReader();
     reader.onload = (e: any) => {

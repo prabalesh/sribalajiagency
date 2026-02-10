@@ -280,32 +280,21 @@ export class CMSService {
     async uploadImage(file: Express.Multer.File) {
         this.logger.log(`Uploading CMS image: ${file.originalname}`);
 
-        // FIXME: No validation of file type, size, etc.
-        // TODO: Add comprehensive file validation
         if (!file.mimetype.startsWith('image/')) {
             throw new BadRequestException('Only image files are allowed');
         }
 
-        // TODO: Validate file size
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        // 30MB limit for CMS images (high quality required)
+        const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
         if (file.size > MAX_FILE_SIZE) {
-            throw new BadRequestException('File size must not exceed 5MB');
+            throw new BadRequestException('File size must not exceed 30MB');
         }
 
-        // TODO: Add authorization check
-        // TODO: Generate unique filename
-        // TODO: Add virus scanning
-
         try {
-            // FIXME: Generic 'cms' folder - should be more specific
-            const url = await this.fileStorageService.saveFile(file, 'cms');
+            // Upload to 'cms' folder without optimization (preserve quality)
+            const url = await this.fileStorageService.saveFile(file, 'cms', false);
 
             this.logger.log(`CMS image uploaded successfully: ${url}`);
-
-            // TODO: Generate thumbnails
-            // TODO: Track upload in database for cleanup
-            // TODO: Add to CDN
-
             return { url };
         } catch (error) {
             this.logger.error(`Failed to upload CMS image: ${error.message}`, error.stack);

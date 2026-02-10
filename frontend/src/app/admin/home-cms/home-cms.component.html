@@ -148,7 +148,7 @@
                     </div>
                     <div class="form-group full-width">
                         <app-image-uploader [initialUrl]="cms.heroImage || null" label="Hero Image" [required]="false"
-                            (fileSelected)="onImageFileSelected($event, cms, 'heroImage')"
+                            [maxSize]="30" (fileSelected)="onImageFileSelected($event, cms, 'heroImage')"
                             (urlChanged)="onImageUrlChanged($event, cms, 'heroImage')"
                             (imageRemoved)="onImageRemoved(cms, 'heroImage')">
                         </app-image-uploader>
@@ -268,7 +268,8 @@
 
                             <div class="form-group full-width">
                                 <app-image-uploader [initialUrl]="slide.image || null" label="Slide Image"
-                                    [required]="false" (fileSelected)="onImageFileSelected($event, slide, 'image')"
+                                    [required]="false" [maxSize]="30"
+                                    (fileSelected)="onImageFileSelected($event, slide, 'image')"
                                     (urlChanged)="onImageUrlChanged($event, slide, 'image')"
                                     (imageRemoved)="onImageRemoved(slide, 'image')">
                                 </app-image-uploader>
@@ -401,7 +402,8 @@
                     </div>
                     <div class="form-group full-width">
                         <app-image-uploader [initialUrl]="cms.aboutImage || null" label="Section Image"
-                            [required]="false" (fileSelected)="onImageFileSelected($event, cms, 'aboutImage')"
+                            [required]="false" [maxSize]="30"
+                            (fileSelected)="onImageFileSelected($event, cms, 'aboutImage')"
                             (urlChanged)="onImageUrlChanged($event, cms, 'aboutImage')"
                             (imageRemoved)="onImageRemoved(cms, 'aboutImage')">
                         </app-image-uploader>

@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Post, Put, Delete, Body, UseGuards, UseInterceptors, UploadedFile, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Param, Post, Put, Delete, Body, UseGuards, UseInterceptors, UploadedFile, UsePipes, ValidationPipe, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BrandsService } from './brands.service';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
@@ -54,12 +55,19 @@ export class BrandsController {
     }
 
     @Post(':id/image')
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard, ThrottlerGuard)
     @Permissions('UPDATE_BRAND')
     @UseInterceptors(FileInterceptor('file'))
     uploadImage(
         @Param('id') id: string,
-        @UploadedFile() file: Express.Multer.File
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [
+                    new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
+                    new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
+                ],
+            }),
+        ) file: Express.Multer.File
     ) {
         return this.brandsService.uploadImage(id, file);
     }

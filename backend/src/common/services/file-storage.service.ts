@@ -33,15 +33,29 @@ export class FileStorageService implements StorageProvider {
         });
     }
 
-    async saveFile(file: Express.Multer.File, folder: string = 'images'): Promise<string> {
+    async saveFile(file: Express.Multer.File, folder: string = 'images', optimize: boolean = true): Promise<string> {
         try {
-            // Optimization: Resize and convert to WebP
-            const buffer = await sharp(file.buffer)
-                .resize({ width: 1200, withoutEnlargement: true }) // Max width 1200px
-                .webp({ quality: 80 }) // 80% quality
-                .toBuffer();
+            let buffer: Buffer;
+            let contentType: string;
+            let extension: string;
 
-            const fileName = `${uuidv4()}.webp`;
+            if (optimize) {
+                // Optimization: Resize and convert to WebP
+                buffer = await sharp(file.buffer)
+                    .resize({ width: 1200, withoutEnlargement: true }) // Max width 1200px
+                    .webp({ quality: 80 }) // 80% quality
+                    .toBuffer();
+                contentType = 'image/webp';
+                extension = 'webp';
+            } else {
+                // No optimization: Use original buffer
+                buffer = file.buffer;
+                contentType = file.mimetype;
+                // Extract extension from original filename or mimetype
+                extension = file.originalname.split('.').pop() || 'bin';
+            }
+
+            const fileName = `${uuidv4()}.${extension}`;
             const key = `${folder}/${fileName}`;
 
             await this.s3Client.send(
@@ -49,11 +63,11 @@ export class FileStorageService implements StorageProvider {
                     Bucket: this.bucketName,
                     Key: key,
                     Body: buffer,
-                    ContentType: 'image/webp',
+                    ContentType: contentType,
                 }),
             );
 
-            this.logger.log(`Uploaded file to R2: ${key}`);
+            this.logger.log(`Uploaded file to R2: ${key} (optimized: ${optimize})`);
 
             // Return full public URL if available, else relative path (which might need prefixing on frontend)
             // Ideally, we return the full CDN URL.
