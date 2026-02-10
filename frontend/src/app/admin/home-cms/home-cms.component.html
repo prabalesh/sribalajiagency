@@ -8,6 +8,13 @@
             </div>
             <div class="header-actions">
                 @if (authService.hasPermission('UPDATE_CMS')) {
+                <button type="button" class="btn-preview" (click)="preview()">
+                    <svg class="icon-preview" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>Preview Storefront</span>
+                </button>
                 <button type="button" class="btn-save" (click)="saveCMS()" [disabled]="isSaving || isUploading()"
                     [class.saving]="isSaving">
                     @if (isSaving) {
@@ -75,10 +82,6 @@
         <!-- Hero Tab -->
         @if (activeTab === 'hero') {
         <div class="tab-panel animate-fade">
-            <!-- Preview Section -->
-            <div class="preview-section">
-                <app-cms-preview [cms]="cms" [currentSlideIndex]="0"></app-cms-preview>
-            </div>
 
             <div class="panel-header">
                 <div>

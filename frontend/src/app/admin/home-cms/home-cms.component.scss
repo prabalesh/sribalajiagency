@@ -57,8 +57,42 @@
     }
 
     .header-actions {
+        display: flex;
+        gap: 1rem;
+
         @media (max-width: 768px) {
             width: 100%;
+            flex-direction: column;
+        }
+
+        .btn-preview {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.875rem 1.75rem;
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.3s var(--transition-curve);
+
+            @media (max-width: 768px) {
+                width: 100%;
+                justify-content: center;
+                padding: 1rem;
+            }
+
+            .icon-preview {
+                width: 18px;
+                height: 18px;
+            }
+
+            &:hover {
+                background: var(--surface-color-secondary);
+                border-color: var(--primary-color);
+            }
         }
     }
 }

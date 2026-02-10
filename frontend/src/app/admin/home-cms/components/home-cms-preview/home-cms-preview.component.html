@@ -1,0 +1,59 @@
+<div class="preview-page">
+    <header class="preview-toolbar">
+        <div class="toolbar-left">
+            <button class="btn-toolbar" (click)="goBack()">
+                <lucide-icon name="arrow-left"></lucide-icon>
+                <span>Back to Editor</span>
+            </button>
+            <div class="divider"></div>
+            <div class="preview-label">
+                <lucide-icon name="monitor"></lucide-icon>
+                <span>Desktop Preview</span>
+            </div>
+        </div>
+
+        <div class="toolbar-center">
+            <span class="preview-mode-text">You are previewing unsaved changes</span>
+        </div>
+
+        <div class="toolbar-right">
+            <button class="btn-toolbar primary" (click)="saveChanges()" [disabled]="isSaving">
+                @if (isSaving) {
+                <span class="spinner"></span>
+                <span>Saving...</span>
+                } @else {
+                <lucide-icon name="save"></lucide-icon>
+                <span>Save Changes</span>
+                }
+            </button>
+        </div>
+    </header>
+
+    <main class="preview-viewport">
+        @if (cms) {
+        <div class="home-wrapper">
+            <!-- Hero Section -->
+            <app-hero [cms]="cms"></app-hero>
+
+            <!-- Category Grid -->
+            <app-category-grid [categories]="categories" [showCategories]="cms.showCategories"></app-category-grid>
+
+            <!-- Featured Products -->
+            <app-featured-products [products]="featuredProducts" [showFeatured]="cms.showFeatured">
+            </app-featured-products>
+
+            <!-- About Section -->
+            <app-about-section [cms]="cms"></app-about-section>
+
+            <!-- Brand Shelf -->
+            <app-brand-shelf [brands]="brands" [showBrands]="cms.showBrands"></app-brand-shelf>
+
+            <!-- Trust Markers -->
+            <app-trust-markers [showTrustMarkers]="cms.showTrustMarkers"></app-trust-markers>
+
+            <!-- Social Section -->
+            <app-social-section [socialLinks]="cms.socialLinks"></app-social-section>
+        </div>
+        }
+    </main>
+</div>

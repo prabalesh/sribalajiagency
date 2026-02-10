@@ -181,6 +181,10 @@ export const routes: Routes = [
             {
                 path: 'home-cms',
                 loadComponent: () => import('./admin/home-cms/home-cms.component').then(m => m.HomeCMSComponent)
+            },
+            {
+                path: 'home-cms/preview',
+                loadComponent: () => import('./admin/home-cms/components/home-cms-preview/home-cms-preview.component').then(m => m.HomeCMSPreviewComponent)
             }
         ]
     },

@@ -1,20 +1,21 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { CmsService, HomeCMS, HeroSlide, SocialLink } from '../../core/services/api/cms.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { CmsPreviewService } from '../../core/services/cms-preview.service';
 import { ImageUploaderComponent } from '../../shared/components/image-uploader/image-uploader.component';
 
 type TabType = 'hero' | 'sections' | 'about' | 'social';
 
-import { CmsPreviewComponent } from './components/cms-preview/cms-preview.component';
 
 @Component({
     selector: 'app-admin-home-cms',
     standalone: true,
-    imports: [CommonModule, FormsModule, CmsPreviewComponent, ImageUploaderComponent],
+    imports: [CommonModule, FormsModule, ImageUploaderComponent],
     templateUrl: './home-cms.component.html',
     styleUrl: './home-cms.component.scss'
 })
@@ -22,6 +23,8 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
     private cmsService = inject(CmsService);
     public authService = inject(AuthService);
     private toastService = inject(ToastService);
+    private previewService = inject(CmsPreviewService);
+    private router = inject(Router);
 
     cms: HomeCMS = {
         id: '',
@@ -121,6 +124,11 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
 
     async saveCMS() {
         await this.saveCMSInternal(true);
+    }
+
+    async preview() {
+        this.previewService.setPreviewData(this.cms);
+        this.router.navigate(['/dashboard/home-cms/preview']);
     }
 
     private async saveCMSInternal(showToast: boolean = true) {
