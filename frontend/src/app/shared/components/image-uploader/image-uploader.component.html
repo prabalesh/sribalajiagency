@@ -1,1 +1,76 @@
-<p>image-uploader works!</p>
+<div class="uploader-container">
+  <label class="uploader-label">
+    {{ label }} <span *ngIf="required" class="required">*</span>
+  </label>
+
+  <div class="mode-toggle">
+    <button 
+      type="button" 
+      class="toggle-btn" 
+      [class.active]="mode === 'upload'"
+      (click)="setMode('upload')"
+    >
+      <lucide-icon [name]="Upload" [size]="16"></lucide-icon>
+      Upload
+    </button>
+    <button 
+      type="button" 
+      class="toggle-btn" 
+      [class.active]="mode === 'link'"
+      (click)="setMode('link')"
+    >
+      <lucide-icon [name]="Link" [size]="16"></lucide-icon>
+      External Link
+    </button>
+  </div>
+
+  <div class="uploader-content">
+    <!-- Preview Section -->
+    <div *ngIf="previewUrl" class="preview-area">
+      <img [src]="previewUrl" alt="Preview" class="preview-img">
+      <button type="button" class="remove-btn" (click)="removeImage()">
+        <lucide-icon [name]="X" [size]="16"></lucide-icon>
+      </button>
+    </div>
+
+    <!-- Upload Mode -->
+    <div *ngIf="!previewUrl && mode === 'upload'" 
+         class="drop-zone"
+         appDragDrop
+         (fileDropped)="onFileDropped($event)">
+      <input 
+        type="file" 
+        #fileInput 
+        (change)="onFileSelected($event)" 
+        accept="image/*" 
+        class="hidden-input"
+      >
+      <div class="drop-zone-content" (click)="fileInput.click()">
+        <div class="icon-circle">
+          <lucide-icon [name]="Upload" [size]="24"></lucide-icon>
+        </div>
+        <div class="text-content">
+          <p class="main-text">Click to upload or drag and drop</p>
+          <p class="sub-text">{{ helpText }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Link Mode -->
+    <div *ngIf="!previewUrl && mode === 'link'" class="link-input-area">
+      <div class="input-group">
+        <div class="input-prefix">
+          <lucide-icon [name]="Link" [size]="18"></lucide-icon>
+        </div>
+        <input 
+          type="text" 
+          [(ngModel)]="externalUrl" 
+          (ngModelChange)="onUrlChange()"
+          placeholder="https://example.com/image.jpg"
+          class="url-input"
+        >
+      </div>
+      <p class="help-text">Paste the direct image URL above.</p>
+    </div>
+  </div>
+</div>

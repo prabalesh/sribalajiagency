@@ -5,6 +5,7 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { CmsService, HomeCMS, HeroSlide, SocialLink } from '../../core/services/api/cms.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { ImageUploaderComponent } from '../../shared/components/image-uploader/image-uploader.component';
 
 type TabType = 'hero' | 'sections' | 'about' | 'social';
 
@@ -13,7 +14,7 @@ import { CmsPreviewComponent } from './components/cms-preview/cms-preview.compon
 @Component({
     selector: 'app-admin-home-cms',
     standalone: true,
-    imports: [CommonModule, FormsModule, CmsPreviewComponent],
+    imports: [CommonModule, FormsModule, CmsPreviewComponent, ImageUploaderComponent],
     templateUrl: './home-cms.component.html',
     styleUrl: './home-cms.component.scss'
 })
@@ -98,23 +99,8 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
                 socialLinks: data.socialLinks || []
             };
 
-            // Detect image source
-            if (this.cms.heroImage && this.cms.heroImage.startsWith('http') && !this.cms.heroImage.includes('localhost:3000')) {
-                this.imageSource['heroImage'] = 'link';
-            }
-            if (this.cms.aboutImage && this.cms.aboutImage.startsWith('http') && !this.cms.aboutImage.includes('localhost:3000')) {
-                this.imageSource['aboutImage'] = 'link';
-            }
-
-            // For slides, we'll assume upload for now if it's local, or link if it's external
-            this.cms.heroSlides.forEach((slide, idx) => {
-                const key = `slideImage-${idx}`;
-                if (slide.image && slide.image.startsWith('http') && !slide.image.includes('localhost:3000')) {
-                    this.imageSource[key] = 'link';
-                } else {
-                    this.imageSource[key] = 'upload';
-                }
-                // Initialize slide alignment if missing
+            // Initialize slide alignment if missing
+            this.cms.heroSlides.forEach((slide) => {
                 if (!slide.alignment) {
                     slide.alignment = 'center';
                 }
@@ -215,24 +201,7 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
         this.onCmsChange();
     }
 
-    async onFileSelected(event: Event, target: HeroSlide | HomeCMS, field: keyof HeroSlide | keyof HomeCMS = 'image') {
-        const input = event.target as HTMLInputElement;
-        const file = input.files?.[0];
-
-        if (!file) return;
-
-        // Validate file
-        if (!file.type.startsWith('image/')) {
-            this.toastService.error('Please select an image file');
-            return;
-        }
-
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.size > maxSize) {
-            this.toastService.error('Image size must be less than 5MB');
-            return;
-        }
-
+    async onImageFileSelected(file: File, target: HeroSlide | HomeCMS, field: keyof HeroSlide | keyof HomeCMS) {
         const uploadKey = `${field}-${Date.now()}`;
         this.uploadingFiles.add(uploadKey);
 
@@ -247,26 +216,25 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
             console.error('Upload error:', error);
         } finally {
             this.uploadingFiles.delete(uploadKey);
-            input.value = ''; // Reset input
         }
     }
 
-    async removeImage(target: HeroSlide | HomeCMS, field: keyof HeroSlide | keyof HomeCMS) {
-        if (!confirm('Are you sure you want to remove this image?')) return;
+    onImageUrlChanged(url: string, target: HeroSlide | HomeCMS, field: keyof HeroSlide | keyof HomeCMS) {
+        (target as any)[field] = url;
+        this.onCmsChange();
+    }
 
+    async onImageRemoved(target: HeroSlide | HomeCMS, field: keyof HeroSlide | keyof HomeCMS) {
         const imageUrl = (target as any)[field];
-        if (imageUrl) {
+        if (imageUrl && !imageUrl.startsWith('http')) {
             try {
                 await this.cmsService.deleteCmsFile(imageUrl);
-                (target as any)[field] = '';
-                this.onCmsChange();
-                this.toastService.success('Image removed successfully');
             } catch (error) {
-                const errorMessage = this.extractErrorMessage(error);
-                this.toastService.error(errorMessage || 'Failed to remove image');
                 console.error('Delete error:', error);
             }
         }
+        (target as any)[field] = '';
+        this.onCmsChange();
     }
 
     addSocialLink() {
@@ -300,15 +268,6 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
     }
 
     onSlideImageChange(index: number) {
-        const slide = this.cms.heroSlides[index];
-        const key = `slideImage-${index}`;
-
-        if (slide.image && (slide.image.startsWith('http://') || slide.image.startsWith('https://'))) {
-            if (this.imageSource[key] !== 'link') {
-                this.imageSource[key] = 'link';
-                this.toastService.info('Switched to Link mode for external image');
-            }
-        }
         this.onCmsChange();
     }
 

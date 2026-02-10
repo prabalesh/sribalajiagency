@@ -55,6 +55,11 @@ export class ProductService {
     return res.data;
   }
 
+  async addImageLink(productId: string, url: string, isPrimary: boolean = false) {
+    const res = await this.api.post<any>(`/products/${productId}/images/link`, { url, isPrimary });
+    return res.data;
+  }
+
   async uploadGenericImage(file: File) {
     const formData = new FormData();
     formData.append('file', file);
@@ -83,4 +88,3 @@ export class ProductService {
     return this.getProducts({ q: query, page, limit });
   }
 }
-

@@ -177,46 +177,50 @@
                 <div class="form-group full-width">
                     <label class="form-label">
                         <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
-                        <span>Upload Media</span>
+                        <span>Add Media (File or Link)</span>
                     </label>
-                    <div class="upload-area" appDragDrop (fileDropped)="onFileDropped($event)">
-                        <div class="drop-zone">
-                            <input type="file" #fileInput (change)="onFileSelected($event)" multiple hidden
-                                accept="image/*" [disabled]="isSaving || isUploadingImage">
+                    <div class="media-uploader-container">
+                        <app-image-uploader label="Add to Gallery" [required]="false"
+                            (fileSelected)="onMainFileSelected($event)" (urlChanged)="onMainUrlChanged($event)"
+                            (imageRemoved)="onMainImageRemoved()">
+                        </app-image-uploader>
 
-                            <lucide-icon [img]="Upload" [size]="48" class="upload-icon"></lucide-icon>
-                            <p class="upload-text">
-                                Drag images here or
-                                <strong class="browse-link"
-                                    (click)="!isSaving && !isUploadingImage && fileInput.click()">
-                                    browse files
-                                </strong>
-                            </p>
-                            <small class="upload-hint">PNG, JPG or WEBP (Max 5MB each)</small>
+                        @if (pendingImageUrl) {
+                        <button type="button" class="btn-add-url" (click)="addPendingUrl()">
+                            <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                            <span>Add URL to Gallery</span>
+                        </button>
+                        }
+                    </div>
 
-                            @if (isUploadingImage) {
-                            <div class="upload-progress">
-                                <div class="spinner-sm"></div>
-                                <span>Uploading images...</span>
+                    <!-- Pending Files and URLs -->
+                    @if (uploadedFiles.length > 0 || pendingUrls.length > 0) {
+                    <div class="pending-media-list">
+                        <h6>Pending Gallery Additions</h6>
+                        <div class="file-previews">
+                            @for (file of uploadedFiles; track $index) {
+                            <div class="file-item">
+                                <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
+                                <span>{{ file.name }} (Upload)</span>
+                                <button type="button" class="remove-btn" (click)="removeUploadedFile($index)"
+                                    [disabled]="isSaving">
+                                    <lucide-icon [img]="X" [size]="14"></lucide-icon>
+                                </button>
                             </div>
                             }
-
-                            @if (uploadedFiles.length > 0) {
-                            <div class="file-previews">
-                                @for (file of uploadedFiles; track $index) {
-                                <div class="file-item">
-                                    <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
-                                    <span>{{ file.name }}</span>
-                                    <button type="button" class="remove-btn" (click)="removeUploadedFile($index)"
-                                        [disabled]="isSaving">
-                                        <lucide-icon [img]="X" [size]="14"></lucide-icon>
-                                    </button>
-                                </div>
-                                }
+                            @for (url of pendingUrls; track $index) {
+                            <div class="file-item url-item">
+                                <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
+                                <span class="url-text">{{ url }} (Link)</span>
+                                <button type="button" class="remove-btn" (click)="removePendingUrl($index)"
+                                    [disabled]="isSaving">
+                                    <lucide-icon [img]="X" [size]="14"></lucide-icon>
+                                </button>
                             </div>
                             }
                         </div>
                     </div>
+                    }
                 </div>
 
                 <!-- Existing Images -->
@@ -298,31 +302,16 @@
                                 </div>
 
                                 <div class="field full-width">
-                                    <label class="field-label">Primary Image URL</label>
-                                    <input type="text" class="form-input" [(ngModel)]="v.image"
-                                        [name]="'vImage-' + $index" placeholder="https://..." [disabled]="isSaving">
+                                    <app-image-uploader [initialUrl]="v.image || null" label="Variant Image"
+                                        [required]="false" (fileSelected)="onVariantFileSelected($event, v)"
+                                        (urlChanged)="onVariantUrlChanged($event, v)"
+                                        (imageRemoved)="onVariantImageRemoved(v)">
+                                    </app-image-uploader>
                                 </div>
-
-                                <div class="field full-width">
-                                    <label class="field-label">Description (Optional)</label>
-                                    <textarea class="form-textarea" [(ngModel)]="v.description"
-                                        [name]="'vDesc-' + $index" placeholder="Variant-specific description" rows="2"
-                                        [disabled]="isSaving"></textarea>
-                                </div>
-                            </div>
-
-                            <div class="variant-actions">
-                                <button type="button" class="btn-secondary btn-sm" (click)="variantFileInput.click()"
-                                    [disabled]="isSaving || isUploadingImage">
-                                    <lucide-icon [img]="Upload" [size]="16"></lucide-icon>
-                                    <span>Upload Images</span>
-                                </button>
-                                <input #variantFileInput type="file" style="display: none"
-                                    (change)="uploadVariantImage($event, v)" accept="image/*" multiple>
-                            </div>
-                        </div>
+                            </div> <!-- closes variant-fields -->
+                        </div> <!-- closes variant-item -->
                         }
-                    </div>
+                    </div> <!-- closes variants-list -->
                     } @else {
                     <div class="empty-variants">
                         <lucide-icon [img]="Layers" [size]="48"></lucide-icon>

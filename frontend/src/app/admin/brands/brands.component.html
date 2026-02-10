@@ -13,118 +13,73 @@
     <div class="crud-layout">
         <!-- Add/Edit Brand Form -->
         @if (authService.hasPermission('CREATE_BRAND') || (isEditing && authService.hasPermission('UPDATE_BRAND'))) {
-            <div class="form-card glass-card">
-                <div class="form-header">
-                    <h3>
-                        <lucide-icon [img]="isEditing ? Edit : Plus" [size]="20"></lucide-icon>
-                        <span>{{ isEditing ? 'Edit Brand' : 'Add New Brand' }}</span>
-                    </h3>
-                    @if (isEditing) {
-                        <button type="button" class="btn-icon-sm" (click)="resetForm()" title="Cancel">
-                            <lucide-icon [img]="X" [size]="18"></lucide-icon>
-                        </button>
-                    }
+        <div class="form-card glass-card">
+            <div class="form-header">
+                <h3>
+                    <lucide-icon [img]="isEditing ? Edit : Plus" [size]="20"></lucide-icon>
+                    <span>{{ isEditing ? 'Edit Brand' : 'Add New Brand' }}</span>
+                </h3>
+                @if (isEditing) {
+                <button type="button" class="btn-icon-sm" (click)="resetForm()" title="Cancel">
+                    <lucide-icon [img]="X" [size]="18"></lucide-icon>
+                </button>
+                }
+            </div>
+
+            <form (ngSubmit)="addBrand()">
+                <div class="form-group">
+                    <label class="form-label">
+                        <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
+                        <span>Brand Name</span>
+                    </label>
+                    <input type="text" class="form-input" [(ngModel)]="newBrand.name" name="name"
+                        (input)="autoGenerateSlug()" placeholder="e.g. Samsung" required [disabled]="isSaving">
                 </div>
 
-                <form (ngSubmit)="addBrand()">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
-                            <span>Brand Name</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            class="form-input"
-                            [(ngModel)]="newBrand.name" 
-                            name="name" 
-                            (input)="autoGenerateSlug()"
-                            placeholder="e.g. Samsung"
-                            required
-                            [disabled]="isSaving">
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
+                        <span>Slug (URL-friendly)</span>
+                    </label>
+                    <input type="text" class="form-input" [(ngModel)]="newBrand.slug" name="slug"
+                        placeholder="e.g. samsung" [disabled]="isSaving">
+                    <small class="form-hint">Auto-generated from name if left empty</small>
+                </div>
 
-                    <div class="form-group">
-                        <label class="form-label">
-                            <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
-                            <span>Slug (URL-friendly)</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            class="form-input"
-                            [(ngModel)]="newBrand.slug" 
-                            name="slug" 
-                            placeholder="e.g. samsung"
-                            [disabled]="isSaving">
-                        <small class="form-hint">Auto-generated from name if left empty</small>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
+                        <span>Description (Optional)</span>
+                    </label>
+                    <textarea class="form-textarea" [(ngModel)]="newBrand.description" name="description" rows="3"
+                        placeholder="Brief description about the brand" [disabled]="isSaving"></textarea>
+                </div>
 
-                    <div class="form-group">
-                        <label class="form-label">
-                            <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
-                            <span>Description (Optional)</span>
-                        </label>
-                        <textarea 
-                            class="form-textarea"
-                            [(ngModel)]="newBrand.description" 
-                            name="description" 
-                            rows="3"
-                            placeholder="Brief description about the brand"
-                            [disabled]="isSaving"></textarea>
-                    </div>
+                <div class="form-group">
+                    <app-image-uploader [initialUrl]="newBrand.image || null" label="Brand Logo" [required]="false"
+                        (fileSelected)="onFileSelected($event)" (urlChanged)="onUrlChanged($event)"
+                        (imageRemoved)="onImageRemoved()">
+                    </app-image-uploader>
+                </div>
 
-                    <div class="form-group">
-                        <label class="form-label">
-                            <lucide-icon [img]="Image" [size]="16"></lucide-icon>
-                            <span>Brand Logo</span>
-                        </label>
-                        
-                        @if (previewUrl) {
-                            <div class="image-preview-container">
-                                <img [src]="previewUrl" alt="Preview" class="image-preview">
-                                <button 
-                                    type="button" 
-                                    class="btn-remove-preview"
-                                    (click)="removePreview()"
-                                    [disabled]="isSaving">
-                                    <lucide-icon [img]="X" [size]="16"></lucide-icon>
-                                </button>
-                            </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" [disabled]="!validateBrand() || isSaving">
+                        @if (isSaving) {
+                        <span class="spinner-small"></span>
+                        <span>{{ isEditing ? 'Updating...' : 'Adding...' }}</span>
+                        } @else {
+                        <lucide-icon [img]="isEditing ? Edit : Plus" [size]="18"></lucide-icon>
+                        <span>{{ isEditing ? 'Update' : 'Add' }} Brand</span>
                         }
-
-                        <label class="file-upload-label">
-                            <input 
-                                type="file" 
-                                class="file-input-hidden"
-                                (change)="onFileSelected($event)" 
-                                accept="image/*"
-                                [disabled]="isSaving">
-                            <lucide-icon [img]="Upload" [size]="20"></lucide-icon>
-                            <span>{{ selectedFile ? selectedFile.name : 'Choose logo image' }}</span>
-                        </label>
-                        <small class="form-hint">PNG, JPG or WEBP (Max 5MB)</small>
-                    </div>
-
-                    <div class="form-actions">
-                        <button 
-                            type="submit" 
-                            class="btn-primary"
-                            [disabled]="!validateBrand() || isSaving">
-                            @if (isSaving) {
-                                <span class="spinner-small"></span>
-                                <span>{{ isEditing ? 'Updating...' : 'Adding...' }}</span>
-                            } @else {
-                                <lucide-icon [img]="isEditing ? Edit : Plus" [size]="18"></lucide-icon>
-                                <span>{{ isEditing ? 'Update' : 'Add' }} Brand</span>
-                            }
-                        </button>
-                        @if (isEditing) {
-                            <button type="button" (click)="resetForm()" class="btn-secondary" [disabled]="isSaving">
-                                Cancel
-                            </button>
-                        }
-                    </div>
-                </form>
-            </div>
+                    </button>
+                    @if (isEditing) {
+                    <button type="button" (click)="resetForm()" class="btn-secondary" [disabled]="isSaving">
+                        Cancel
+                    </button>
+                    }
+                </div>
+            </form>
+        </div>
         }
 
         <!-- Brands List -->
@@ -134,143 +89,121 @@
                     <lucide-icon [img]="Tag" [size]="20"></lucide-icon>
                     <span>Existing Brands</span>
                 </h3>
-                
+
                 <!-- Search Bar -->
                 <div class="search-box">
                     <lucide-icon [img]="Search" [size]="18"></lucide-icon>
-                    <input 
-                        type="text" 
-                        class="search-input"
-                        [(ngModel)]="searchQuery"
-                        placeholder="Search brands..."
+                    <input type="text" class="search-input" [(ngModel)]="searchQuery" placeholder="Search brands..."
                         [disabled]="isLoading">
                 </div>
             </div>
 
             @if (isLoading) {
-                <div class="loading-state">
-                    <div class="spinner-large"></div>
-                    <p>Loading brands...</p>
-                </div>
+            <div class="loading-state">
+                <div class="spinner-large"></div>
+                <p>Loading brands...</p>
+            </div>
             } @else if (filteredBrands.length === 0) {
-                <div class="empty-state">
-                    <lucide-icon [img]="Tag" [size]="48"></lucide-icon>
-                    <p>{{ searchQuery ? 'No brands found matching your search' : 'No brands yet. Create your first brand!' }}</p>
-                </div>
+            <div class="empty-state">
+                <lucide-icon [img]="Tag" [size]="48"></lucide-icon>
+                <p>{{ searchQuery ? 'No brands found matching your search' : 'No brands yet. Create your first brand!'
+                    }}</p>
+            </div>
             } @else {
-                <!-- Desktop Table -->
-                <div class="table-wrapper desktop-only">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Logo</th>
-                                <th>Name</th>
-                                <th>Slug</th>
-                                <th>Description</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (brand of filteredBrands; track brand.id) {
-                                <tr>
-                                    <td>
-                                        <div class="brand-logo-container">
-                                            <img 
-                                                [src]="getBrandImageUrl(brand)" 
-                                                [alt]="brand.name"
-                                                class="brand-logo">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <strong>{{ brand.name }}</strong>
-                                    </td>
-                                    <td>
-                                        <code class="slug-code">{{ brand.slug }}</code>
-                                    </td>
-                                    <td>
-                                        <span class="description-text">
-                                            {{ brand.description || '—' }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="table-actions">
-                                            @if (authService.hasPermission('UPDATE_BRAND')) {
-                                                <button 
-                                                    class="btn-icon" 
-                                                    (click)="editBrand(brand)"
-                                                    title="Edit brand">
-                                                    <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
-                                                </button>
-                                            }
-                                            @if (authService.hasPermission('DELETE_BRAND')) {
-                                                <button 
-                                                    class="btn-icon btn-delete" 
-                                                    (click)="openDeleteConfirm(brand.id, brand.name)"
-                                                    title="Delete brand">
-                                                    <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
-                                                </button>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Mobile Cards -->
-                <div class="mobile-cards mobile-only">
-                    @for (brand of filteredBrands; track brand.id) {
-                        <div class="brand-card">
-                            <div class="brand-card-header">
-                                <div class="brand-logo-large">
-                                    <img 
-                                        [src]="getBrandImageUrl(brand)" 
-                                        [alt]="brand.name">
+            <!-- Desktop Table -->
+            <div class="table-wrapper desktop-only">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Logo</th>
+                            <th>Name</th>
+                            <th>Slug</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (brand of filteredBrands; track brand.id) {
+                        <tr>
+                            <td>
+                                <div class="brand-logo-container">
+                                    <img [src]="getBrandImageUrl(brand)" [alt]="brand.name" class="brand-logo">
                                 </div>
-                                <div class="brand-card-info">
-                                    <h4>{{ brand.name }}</h4>
-                                    <code class="slug-code">{{ brand.slug }}</code>
-                                </div>
-                            </div>
-
-                            @if (brand.description) {
-                                <p class="brand-card-description">{{ brand.description }}</p>
-                            }
-
-                            <div class="brand-card-actions">
-                                @if (authService.hasPermission('UPDATE_BRAND')) {
-                                    <button 
-                                        class="btn-secondary btn-sm" 
-                                        (click)="editBrand(brand)">
+                            </td>
+                            <td>
+                                <strong>{{ brand.name }}</strong>
+                            </td>
+                            <td>
+                                <code class="slug-code">{{ brand.slug }}</code>
+                            </td>
+                            <td>
+                                <span class="description-text">
+                                    {{ brand.description || '—' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    @if (authService.hasPermission('UPDATE_BRAND')) {
+                                    <button class="btn-icon" (click)="editBrand(brand)" title="Edit brand">
                                         <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
-                                        <span>Edit</span>
                                     </button>
-                                }
-                                @if (authService.hasPermission('DELETE_BRAND')) {
-                                    <button 
-                                        class="btn-danger btn-sm" 
-                                        (click)="openDeleteConfirm(brand.id, brand.name)">
+                                    }
+                                    @if (authService.hasPermission('DELETE_BRAND')) {
+                                    <button class="btn-icon btn-delete"
+                                        (click)="openDeleteConfirm(brand.id, brand.name)" title="Delete brand">
                                         <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
-                                        <span>Delete</span>
                                     </button>
-                                }
-                            </div>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Cards -->
+            <div class="mobile-cards mobile-only">
+                @for (brand of filteredBrands; track brand.id) {
+                <div class="brand-card">
+                    <div class="brand-card-header">
+                        <div class="brand-logo-large">
+                            <img [src]="getBrandImageUrl(brand)" [alt]="brand.name">
                         </div>
+                        <div class="brand-card-info">
+                            <h4>{{ brand.name }}</h4>
+                            <code class="slug-code">{{ brand.slug }}</code>
+                        </div>
+                    </div>
+
+                    @if (brand.description) {
+                    <p class="brand-card-description">{{ brand.description }}</p>
                     }
+
+                    <div class="brand-card-actions">
+                        @if (authService.hasPermission('UPDATE_BRAND')) {
+                        <button class="btn-secondary btn-sm" (click)="editBrand(brand)">
+                            <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                            <span>Edit</span>
+                        </button>
+                        }
+                        @if (authService.hasPermission('DELETE_BRAND')) {
+                        <button class="btn-danger btn-sm" (click)="openDeleteConfirm(brand.id, brand.name)">
+                            <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                            <span>Delete</span>
+                        </button>
+                        }
+                    </div>
                 </div>
+                }
+            </div>
             }
         </div>
     </div>
 
     <!-- Delete Confirmation Dialog -->
-    <app-confirm-dialog 
-        [isOpen]="showDeleteConfirm" 
-        [title]="'Delete Brand'"
+    <app-confirm-dialog [isOpen]="showDeleteConfirm" [title]="'Delete Brand'"
         [message]="'Are you sure you want to delete ' + (brandToDelete?.name || '') + '? This action cannot be undone.'"
-        [confirmText]="'Delete'" 
-        [cancelText]="'Cancel'" 
-        (confirm)="confirmDelete()" 
-        (cancel)="closeDeleteConfirm()">
+        [confirmText]="'Delete'" [cancelText]="'Cancel'" (confirm)="confirmDelete()" (cancel)="closeDeleteConfirm()">
     </app-confirm-dialog>
 </div>

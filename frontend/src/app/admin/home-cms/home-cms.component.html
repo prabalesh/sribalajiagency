@@ -97,16 +97,8 @@
 
             @if (cms.heroType !== 'carousel' && cms.heroType !== 'classic-carousel') {
             <div class="content-card">
-                <div class="card-header-with-toggle">
+                <div class="card-header">
                     <h3 class="card-title">{{ cms.heroType | titlecase }} Hero Configuration</h3>
-                    <div class="source-toggle">
-                        <button type="button" class="btn-toggle" [class.active]="imageSource['heroImage'] === 'upload'"
-                            (click)="imageSource['heroImage'] = 'upload'"
-                            [disabled]="!authService.hasPermission('UPDATE_CMS')">Upload</button>
-                        <button type="button" class="btn-toggle" [class.active]="imageSource['heroImage'] === 'link'"
-                            (click)="imageSource['heroImage'] = 'link'"
-                            [disabled]="!authService.hasPermission('UPDATE_CMS')">Link</button>
-                    </div>
                 </div>
                 <div class="form-grid">
                     <div class="alignment-section full-width">
@@ -123,14 +115,6 @@
                         </div>
                     </div>
 
-                    @if (imageSource['heroImage'] === 'link') {
-                    <div class="form-group full-width">
-                        <label class="form-label">Hero Image URL</label>
-                        <input type="text" class="form-input" [(ngModel)]="cms.heroImage"
-                            (ngModelChange)="onCmsChange()" name="heroImageLink" placeholder="https://..."
-                            [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                    </div>
-                    }
 
                     <div class="form-group">
                         <label class="form-label">Badge Text</label>
@@ -163,35 +147,11 @@
                             [disabled]="!authService.hasPermission('UPDATE_CMS')">
                     </div>
                     <div class="form-group full-width">
-                        <label class="form-label">Hero Image</label>
-                        <div class="image-upload-container">
-                            @if (cms.heroImage) {
-                            <div class="image-preview-wrapper">
-                                <img [src]="getImageUrl(cms.heroImage)" alt="Hero" class="image-preview">
-                                @if (authService.hasPermission('UPDATE_CMS')) {
-                                <button type="button" class="btn-remove-image" (click)="removeImage(cms, 'heroImage')">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                                }
-                            </div>
-                            }
-                            @if (authService.hasPermission('UPLOAD_CMS_ASSETS')) {
-                            <label class="file-upload-label">
-                                <input type="file" class="file-upload-input"
-                                    (change)="onFileSelected($event, cms, 'heroImage')" accept="image/*">
-                                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="17 8 12 3 7 8"></polyline>
-                                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                                </svg>
-                                <span>{{ cms.heroImage ? 'Change Image' : 'Upload Image' }}</span>
-                            </label>
-                            }
-                        </div>
+                        <app-image-uploader [initialUrl]="cms.heroImage || null" label="Hero Image" [required]="false"
+                            (fileSelected)="onImageFileSelected($event, cms, 'heroImage')"
+                            (urlChanged)="onImageUrlChanged($event, cms, 'heroImage')"
+                            (imageRemoved)="onImageRemoved(cms, 'heroImage')">
+                        </app-image-uploader>
                     </div>
                 </div>
             </div>
@@ -230,15 +190,6 @@
                             <div class="slide-number">Slide {{ $index + 1 }}</div>
                             <div class="slide-actions">
                                 @if (authService.hasPermission('UPDATE_CMS')) {
-                                <div class="source-toggle mini">
-                                    <button type="button" class="btn-toggle"
-                                        [class.active]="imageSource['slideImage-' + $index] === 'upload'"
-                                        (click)="imageSource['slideImage-' + $index] = 'upload'">Upload</button>
-                                    <button type="button" class="btn-toggle"
-                                        [class.active]="imageSource['slideImage-' + $index] === 'link'"
-                                        (click)="imageSource['slideImage-' + $index] = 'link'">Link</button>
-                                </div>
-
                                 <div class="slide-control-buttons">
                                     @if ($index > 0) {
                                     <button type="button" class="btn-icon" (click)="moveSlide($index, 'up')"
@@ -314,47 +265,13 @@
                                 </div>
                             </div>
 
-                            @if (imageSource['slideImage-' + $index] === 'link') {
-                            <div class="form-group full-width">
-                                <label class="form-label">Slide Image URL</label>
-                                <input type="text" class="form-input" [(ngModel)]="slide.image"
-                                    (ngModelChange)="onSlideImageChange($index)" [name]="'slideLink-' + $index"
-                                    placeholder="https://..." [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                            </div>
-                            }
 
                             <div class="form-group full-width">
-                                <label class="form-label">Slide Image</label>
-                                <div class="image-upload-container">
-                                    @if (slide.image) {
-                                    <div class="image-preview-wrapper">
-                                        <img [src]="getImageUrl(slide.image)" alt="Slide {{ $index + 1 }}"
-                                            class="image-preview">
-                                        @if (authService.hasPermission('UPDATE_CMS')) {
-                                        <button type="button" class="btn-remove-image"
-                                            (click)="removeImage(slide, 'image')">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                                            </svg>
-                                        </button>
-                                        }
-                                    </div>
-                                    }
-                                    @if (authService.hasPermission('UPLOAD_CMS_ASSETS')) {
-                                    <label class="file-upload-label">
-                                        <input type="file" class="file-upload-input"
-                                            (change)="onFileSelected($event, slide, 'image')" accept="image/*">
-                                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2">
-                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                            <polyline points="17 8 12 3 7 8"></polyline>
-                                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                                        </svg>
-                                        <span>{{ slide.image ? 'Change' : 'Upload' }}</span>
-                                    </label>
-                                    }
-                                </div>
+                                <app-image-uploader [initialUrl]="slide.image || null" label="Slide Image"
+                                    [required]="false" (fileSelected)="onImageFileSelected($event, slide, 'image')"
+                                    (urlChanged)="onImageUrlChanged($event, slide, 'image')"
+                                    (imageRemoved)="onImageRemoved(slide, 'image')">
+                                </app-image-uploader>
                             </div>
                         </div>
                     </div>
@@ -483,54 +400,11 @@
                             [disabled]="!authService.hasPermission('UPDATE_CMS')"></textarea>
                     </div>
                     <div class="form-group full-width">
-                        <div class="card-header-with-toggle">
-                            <label class="form-label">Section Image</label>
-                            <div class="source-toggle">
-                                <button type="button" class="btn-toggle"
-                                    [class.active]="imageSource['aboutImage'] === 'upload'"
-                                    (click)="imageSource['aboutImage'] = 'upload'"
-                                    [disabled]="!authService.hasPermission('UPDATE_CMS')">Upload</button>
-                                <button type="button" class="btn-toggle"
-                                    [class.active]="imageSource['aboutImage'] === 'link'"
-                                    (click)="imageSource['aboutImage'] = 'link'"
-                                    [disabled]="!authService.hasPermission('UPDATE_CMS')">Link</button>
-                            </div>
-                        </div>
-
-                        @if (imageSource['aboutImage'] === 'link') {
-                        <input type="text" class="form-input input-spacing" [(ngModel)]="cms.aboutImage"
-                            (ngModelChange)="onCmsChange()" name="aboutImageLink" placeholder="https://..."
-                            [disabled]="!authService.hasPermission('UPDATE_CMS')">
-                        }
-
-                        <div class="image-upload-container">
-                            @if (cms.aboutImage) {
-                            <div class="image-preview-wrapper">
-                                <img [src]="getImageUrl(cms.aboutImage)" alt="About" class="image-preview">
-                                @if (authService.hasPermission('UPDATE_CMS')) {
-                                <button type="button" class="btn-remove-image" (click)="removeImage(cms, 'aboutImage')">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                                }
-                            </div>
-                            }
-                            @if (authService.hasPermission('UPLOAD_CMS_ASSETS')) {
-                            <label class="file-upload-label">
-                                <input type="file" class="file-upload-input"
-                                    (change)="onFileSelected($event, cms, 'aboutImage')" accept="image/*">
-                                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="17 8 12 3 7 8"></polyline>
-                                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                                </svg>
-                                <span>{{ cms.aboutImage ? 'Change Image' : 'Upload Image' }}</span>
-                            </label>
-                            }
-                        </div>
+                        <app-image-uploader [initialUrl]="cms.aboutImage || null" label="Section Image"
+                            [required]="false" (fileSelected)="onImageFileSelected($event, cms, 'aboutImage')"
+                            (urlChanged)="onImageUrlChanged($event, cms, 'aboutImage')"
+                            (imageRemoved)="onImageRemoved(cms, 'aboutImage')">
+                        </app-image-uploader>
                     </div>
                 </div>
             </div>

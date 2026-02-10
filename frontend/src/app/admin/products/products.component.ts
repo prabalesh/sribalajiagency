@@ -13,6 +13,7 @@ import { DragDropDirective } from '../../shared/directives/drag-drop.directive';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { ImageUploaderComponent } from '../../shared/components/image-uploader/image-uploader.component';
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import {
   LucideAngularModule,
@@ -40,8 +41,8 @@ import {
   imports: [
     CommonModule,
     FormsModule,
-    DragDropDirective,
     PaginationComponent,
+    ImageUploaderComponent,
     ImageUrlPipe,
     LucideAngularModule
   ],
@@ -76,7 +77,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
   products: Product[] = [];
   newProduct: Product = this.getEmptyProduct();
   isEditing = false;
-  uploadedFiles: any[] = [];
+  uploadedFiles: File[] = [];
+  pendingImageUrl: string = '';
+  pendingUrls: string[] = [];
 
   // Loading States
   isLoading = false;
@@ -242,6 +245,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
         savedProduct = await this.productService.addProduct(productData);
       }
 
+      // Handle image deletions if any (already handled by removeImage tool)
+
       // Handle Image Uploads
       if (this.uploadedFiles.length > 0) {
         this.isUploadingImage = true;
@@ -252,8 +257,20 @@ export class ProductsComponent implements OnInit, OnDestroy {
             i === 0 && !savedProduct.images?.some(img => img.isPrimary)
           );
         }
-        this.isUploadingImage = false;
       }
+
+      // Handle Image URLs
+      if (this.pendingUrls.length > 0) {
+        this.isUploadingImage = true;
+        for (let i = 0; i < this.pendingUrls.length; i++) {
+          await this.productService.addImageLink(
+            savedProduct.id,
+            this.pendingUrls[i],
+            !savedProduct.images?.some(img => img.isPrimary) && i === 0 && this.uploadedFiles.length === 0
+          );
+        }
+      }
+      this.isUploadingImage = false;
 
       // Refresh list
       await this.loadProducts();
@@ -348,7 +365,33 @@ export class ProductsComponent implements OnInit, OnDestroy {
         this.isUploadingImage = false;
       }
     }
-    event.target.value = '';
+    if (event.target) event.target.value = '';
+  }
+
+  async onVariantFileSelected(file: File, variant: any) {
+    this.isUploadingImage = true;
+    try {
+      const res = await this.productService.uploadGenericImages([file] as any);
+      if (res.urls && res.urls.length > 0) {
+        variant.image = res.urls[0];
+        if (!variant.images) variant.images = [];
+        variant.images.push(res.urls[0]);
+        this.toastService.success('Variant image uploaded');
+      }
+    } catch (err) {
+      console.error(err);
+      this.toastService.error('Failed to upload variant image');
+    } finally {
+      this.isUploadingImage = false;
+    }
+  }
+
+  onVariantUrlChanged(url: string, variant: any) {
+    variant.image = url;
+  }
+
+  onVariantImageRemoved(variant: any) {
+    variant.image = '';
   }
 
   // Image Management
@@ -379,6 +422,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
   resetForm() {
     this.newProduct = this.getEmptyProduct();
     this.uploadedFiles = [];
+    this.pendingUrls = [];
+    this.pendingImageUrl = '';
     this.isEditing = false;
     this.selectedCategoryId = '';
   }
@@ -402,20 +447,35 @@ export class ProductsComponent implements OnInit, OnDestroy {
     };
   }
 
-  onFileDropped(files: FileList) {
-    for (let i = 0; i < files.length; i++) {
-      this.uploadedFiles.push(files[i]);
+  async onMainFileSelected(file: File) {
+    this.uploadedFiles.push(file);
+    this.toastService.success('Image added to gallery');
+  }
+
+  onMainUrlChanged(url: string) {
+    this.pendingImageUrl = url;
+  }
+
+  addPendingUrl() {
+    if (this.pendingImageUrl) {
+      // In this app, we'll store temporary URLs in a separate list or push to images with a flag
+      if (!this.newProduct.images) this.newProduct.images = [];
+
+      // We'll use a specific indicator for new URL-based images
+      // The backend doesn't support URLs in CreateProductDto yet, so we'll need a workaround
+      // For now, let's just add it to a list we'll handle on submit
+      this.pendingUrls.push(this.pendingImageUrl);
+      this.pendingImageUrl = '';
+      this.toastService.success('URL added to gallery');
     }
   }
 
-  onFileSelected(event: any) {
-    const files = event.target.files;
-    if (files) {
-      for (let i = 0; i < files.length; i++) {
-        this.uploadedFiles.push(files[i]);
-      }
-    }
-    event.target.value = '';
+  removePendingUrl(index: number) {
+    this.pendingUrls.splice(index, 1);
+  }
+
+  onMainImageRemoved() {
+    this.pendingImageUrl = '';
   }
 
   async loadProducts() {

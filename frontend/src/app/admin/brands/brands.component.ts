@@ -6,12 +6,13 @@ import { BrandService } from '../../core/services/api/brand.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ImageUploaderComponent } from '../../shared/components/image-uploader/image-uploader.component';
 import { LucideAngularModule, Tag, Edit, Trash2, Plus, X, Image, Upload, Search } from 'lucide-angular';
 
 @Component({
   selector: 'app-admin-brands',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmDialogComponent, LucideAngularModule],
+  imports: [CommonModule, FormsModule, ConfirmDialogComponent, ImageUploaderComponent, LucideAngularModule],
   templateUrl: './brands.component.html',
   styleUrl: './brands.component.scss'
 })
@@ -101,49 +102,33 @@ export class BrandsComponent implements OnInit {
     }
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      this.toastService.error('Please select an image file');
-      return;
-    }
-
-    // Validate file size (5MB)
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      this.toastService.error('Image size must be less than 5MB');
-      return;
-    }
-
+  onFileSelected(file: File) {
     this.selectedFile = file;
-
-    // Generate preview
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.previewUrl = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    this.newBrand.image = ''; // Clear link if file is selected
   }
 
-  removePreview() {
+  onUrlChanged(url: string) {
+    this.newBrand.image = url;
+    this.selectedFile = null; // Clear file if link is provided
+  }
+
+  onImageRemoved() {
     this.selectedFile = null;
+    this.newBrand.image = '';
     this.previewUrl = null;
   }
 
   editBrand(brand: Brand) {
     this.newBrand = { ...brand };
     this.isEditing = true;
-    this.previewUrl = brand.image ? `http://localhost:3000${brand.image}` : null;
+    this.previewUrl = null; // ImageUploader handles its own preview via initialUrl
 
     // Scroll to form on mobile
     if (window.innerWidth < 1024) {
       setTimeout(() => {
-        document.querySelector('.form-card')?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
+        document.querySelector('.form-card')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
         });
       }, 100);
     }
@@ -175,7 +160,7 @@ export class BrandsComponent implements OnInit {
   }
 
   resetForm() {
-    this.newBrand = { id: '', name: '', slug: '', description: '' };
+    this.newBrand = { id: '', name: '', slug: '', description: '', image: '' };
     this.selectedFile = null;
     this.previewUrl = null;
     this.isEditing = false;
@@ -200,8 +185,8 @@ export class BrandsComponent implements OnInit {
   }
 
   getBrandImageUrl(brand: Brand): string {
-    return brand.image 
-      ? `http://localhost:3000${brand.image}` 
+    return brand.image
+      ? `http://localhost:3000${brand.image}`
       : 'https://placehold.co/200x200?text=No+Logo';
   }
 
@@ -210,7 +195,7 @@ export class BrandsComponent implements OnInit {
       return this.brands;
     }
     const query = this.searchQuery.toLowerCase();
-    return this.brands.filter(brand => 
+    return this.brands.filter(brand =>
       brand.name.toLowerCase().includes(query) ||
       brand.description?.toLowerCase().includes(query) ||
       brand.slug.toLowerCase().includes(query)

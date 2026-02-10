@@ -75,7 +75,16 @@ export class ProductsController {
         return this.productsService.addProductImage(id, file, isPrimary === 'true');
     }
 
-    @Delete('images/:imageId')
+    @Post(':id/images/link')
+    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+    @Permissions('UPDATE_PRODUCT')
+    uploadImageLink(
+        @Param('id') id: string,
+        @Body('url') url: string,
+        @Body('isPrimary') isPrimary?: boolean
+    ) {
+        return this.productsService.addProductImageLink(id, url, isPrimary);
+    }
     @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('UPDATE_PRODUCT')
     removeImage(@Param('imageId') imageId: string) {

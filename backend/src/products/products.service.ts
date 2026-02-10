@@ -608,6 +608,35 @@ export class ProductsService {
     }
 
     /**
+     * Adds an image to a product via an external URL.
+     * 
+     * @param productId - Product ID to add image to
+     * @param url - External image URL
+     * @param isPrimary - Whether this is the primary product image
+     * @returns Promise resolving to created ProductImage entity
+     */
+    async addProductImageLink(productId: string, url: string, isPrimary: boolean = false) {
+        this.logger.log(`Adding image link to product ${productId}, url: ${url}, isPrimary: ${isPrimary}`);
+
+        try {
+            // Create image record directly with the URL
+            const image = this.imageRepo.create({
+                url,
+                isPrimary,
+                product: { id: productId }
+            });
+
+            const saved = await this.imageRepo.save(image);
+            this.logger.log(`Image link added successfully: ${saved.id}`);
+
+            return saved;
+        } catch (error) {
+            this.logger.error(`Failed to add image link to product ${productId}: ${error.message}`, error.stack);
+            throw new BadRequestException('Failed to add product image link');
+        }
+    }
+
+    /**
      * Uploads a generic file (not associated with a product).
      * 
      * Useful for CMS content, descriptions, or temporary uploads.
