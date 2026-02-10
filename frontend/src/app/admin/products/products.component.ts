@@ -9,7 +9,6 @@ import { Brand } from '../../core/models/brand.model';
 import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
 import { BrandService } from '../../core/services/api/brand.service';
-import { DragDropDirective } from '../../shared/directives/drag-drop.directive';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
@@ -228,13 +227,24 @@ export class ProductsComponent implements OnInit, OnDestroy {
         categoryId: this.newProduct.categoryId,
         brandId: this.newProduct.brandId,
         isFeatured: this.newProduct.isFeatured,
-        variants: this.newProduct.variants?.map(v => {
-          const { sku, specifications, ...variantData } = v;
-          return {
-            ...variantData,
-            id: v.id && v.id !== '' ? v.id : undefined
-          };
-        })
+        // isFeatured: this.newProduct.isFeatured,
+        variants: (this.newProduct.variants && this.newProduct.variants.length > 0)
+          ? this.newProduct.variants.map(v => {
+            const { sku, specifications, ...variantData } = v;
+            return {
+              ...variantData,
+              id: v.id && v.id !== '' ? v.id : undefined
+            };
+          })
+          : [{
+            name: 'Default',
+            price: this.newProduct.price,
+            comparisonPrice: this.newProduct.comparisonPrice,
+            stock: this.newProduct.stock,
+            sku: this.generateSku(this.newProduct.name),
+            image: this.newProduct.images && this.newProduct.images.length > 0 ? this.newProduct.images[0].url : '',
+            images: this.newProduct.images && this.newProduct.images.length > 0 ? [this.newProduct.images[0].url] : []
+          }]
       };
 
       let savedProduct: Product;
@@ -515,5 +525,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.searchSubject.complete();
+  }
+
+  private generateSku(name: string): string {
+    return `${name.replace(/\s+/g, '-').toUpperCase()}-DEF`;
   }
 }

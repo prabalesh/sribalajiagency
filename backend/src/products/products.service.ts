@@ -329,6 +329,18 @@ export class ProductsService {
                 );
                 await this.variantRepo.save(variantEntities);
                 this.logger.log(`Created ${variants.length} variants for product ${savedProduct.id}`);
+            } else {
+                // Creates a default variant for simple products
+                const defaultVariant = this.variantRepo.create({
+                    name: 'Default',
+                    price: savedProduct.price,
+                    comparisonPrice: savedProduct.comparisonPrice,
+                    sku: `${savedProduct.name.replace(/\s+/g, '-').toUpperCase()}-DEF`,
+                    stock: savedProduct.stock,
+                    product: savedProduct
+                });
+                await this.variantRepo.save(defaultVariant);
+                this.logger.log(`Created default variant for product ${savedProduct.id}`);
             }
 
             // TODO: Emit ProductCreatedEvent
@@ -429,6 +441,18 @@ export class ProductsService {
                 await this.variantRepo.save(variantEntities);
 
                 this.logger.log(`Updated variants for product ${id}`);
+            } else if (productData.stock !== undefined) {
+                // If variants are NOT being replaced, but stock IS updated,
+                // we need to sync the 'Default' variant if it exists.
+                const defaultVariant = await this.variantRepo.findOne({
+                    where: { product: { id }, name: 'Default' }
+                });
+
+                if (defaultVariant) {
+                    defaultVariant.stock = productData.stock;
+                    await this.variantRepo.save(defaultVariant);
+                    this.logger.log(`Synced default variant stock for product ${id}`);
+                }
             }
 
             // TODO: Emit ProductUpdatedEvent
