@@ -34,10 +34,11 @@ import { CommonModule } from './common/common.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { Review } from './reviews/entities/review.entity';
 import { VigileEyeModule } from '@prabalesh/vigileye-nestjs';
-import { SeedAdminRoleAndPermissions1738890000000 } from './database/migrations/1738890000000-SeedAdminRoleAndPermissions';
+// Auto-seeder service for permissions and admin role
 import { CartsModule } from './carts/carts.module';
 import { Cart } from './carts/entities/cart.entity';
 import { CartItem } from './carts/entities/cart-item.entity';
+import { DatabaseSeederService } from './database/database-seeder.service';
 
 @Module({
   imports: [
@@ -82,10 +83,13 @@ import { CartItem } from './carts/entities/cart-item.entity';
         entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Coupon, LocationRestriction, HomeCMS, UserAddress, Review, Cart, CartItem],
 
         synchronize: config.get('NODE_ENV') !== 'production',
-        migrationsRun: true,
-        migrations: [SeedAdminRoleAndPermissions1738890000000],
+        // Migrations disabled - use seed script instead to avoid timing issues
+        // migrationsRun: false,
+        // migrations: [],
       }),
     }),
+    // Import entities for DatabaseSeederService
+    TypeOrmModule.forFeature([Role, Permission]),
   ],
   providers: [
     {
@@ -93,6 +97,7 @@ import { CartItem } from './carts/entities/cart-item.entity';
       useClass: ThrottlerGuard,
     },
     AppService,
+    DatabaseSeederService, // Auto-seeds permissions and admin role on startup
   ],
   controllers: [AppController],
 })

@@ -1,16 +1,18 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection, APP_INITIALIZER } from '@angular/core';
 import { provideRouter, withInMemoryScrolling, withPreloading } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { CustomPreloadingStrategy } from './core/strategies/custom-preloading.strategy';
 import { IMAGE_LOADER } from '@angular/common';
 import { sbaImageLoader } from './core/loaders/image-loader';
+import { AuthService } from './core/services/auth/auth.service';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor])),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withPreloading(CustomPreloadingStrategy), withInMemoryScrolling(
       { scrollPositionRestoration: 'top', anchorScrolling: 'enabled' }
@@ -19,6 +21,12 @@ export const appConfig: ApplicationConfig = {
     {
       provide: IMAGE_LOADER,
       useValue: sbaImageLoader
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (authService: AuthService) => () => authService.fetchCurrentUser(),
+      deps: [AuthService],
+      multi: true
     }
   ]
 };

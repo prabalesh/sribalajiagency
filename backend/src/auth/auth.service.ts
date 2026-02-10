@@ -419,6 +419,26 @@ export class AuthService {
         }
     }
 
+    /**
+     * Get user by ID with roles and permissions
+     * Used by /auth/me endpoint to fetch current user data
+     */
+    async getUserById(userId: string) {
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['roles', 'roles.permissions']
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        // Remove sensitive data
+        const { password, refreshToken, ...userWithoutSensitiveData } = user;
+
+        return userWithoutSensitiveData;
+    }
+
 
     /**
      * Generates hashed refresh token for storage.

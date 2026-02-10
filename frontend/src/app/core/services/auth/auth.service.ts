@@ -16,17 +16,9 @@ export class AuthService {
 
   constructor(@Inject(PLATFORM_ID) platformId: object) {
     this.isBrowser = isPlatformBrowser(platformId);
-    if (this.isBrowser) {
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        try {
-          this.currentUser.set(JSON.parse(savedUser));
-        } catch (e) {
-          console.error('Error parsing user', e);
-        }
-      }
-    }
-    this.isInitialCheckDone.set(true);
+    // User data is no longer stored in localStorage for security
+    // It will be fetched via APP_INITIALIZER
+    this.isInitialCheckDone.set(false); // Will be true after fetchCurrentUser
   }
 
   user = this.currentUser.asReadonly();
@@ -43,13 +35,40 @@ export class AuthService {
     return this.permissions().includes(permission);
   }
 
+  /**
+   * Fetch current user from server
+   * Called on app initialization and when refreshing permissions
+   */
+  async fetchCurrentUser(): Promise<boolean> {
+    try {
+      const res = await this.api.get<{ user: User }>('/auth/me');
+      if (res && res.data && res.data.user) {
+        this.currentUser.set(res.data.user);
+        this.isInitialCheckDone.set(true);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      this.currentUser.set(null);
+      this.isInitialCheckDone.set(true);
+      return false;
+    }
+  }
+
+  /**
+   * Force refresh user data (roles/permissions) from server
+   */
+  async refreshUser() {
+    await this.fetchCurrentUser();
+  }
+
   async login(email: string, password: string) {
     try {
       const res = await this.api.post<any>('/auth/local/signin', { email, password });
       const { user } = res.data;
 
       if (this.isBrowser) {
-        localStorage.setItem('user', JSON.stringify(user));
+        // Only store ID for analytics if needed, no sensitive data
         localStorage.setItem('user_id', user.id);
       }
 
@@ -86,7 +105,9 @@ export class AuthService {
     this.currentUser.set(null);
     if (this.isBrowser) {
       const savedTheme = localStorage.getItem('theme');
-      localStorage.clear();
+      // Clear user related items but keep theme
+      localStorage.removeItem('user_id');
+
       if (savedTheme) {
         localStorage.setItem('theme', savedTheme);
       }
@@ -130,9 +151,7 @@ export class AuthService {
       const res = await this.api.put<User>(`/users/profile`, { name, email });
       const updated = res.data;
       this.currentUser.set(updated);
-      if (this.isBrowser) {
-        localStorage.setItem('user', JSON.stringify(updated));
-      }
+      // No localStorage update needed
     }
   }
 

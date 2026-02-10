@@ -34,10 +34,12 @@ export class ApiService {
                     } catch (refreshError) {
                         // Logout user or redirect to login
                         if (this.isBrowser) {
-                            const theme = localStorage.getItem('theme');
-                            localStorage.clear();
-                            if (theme) localStorage.setItem('theme', theme);
-                            this.redirect('/login');
+                            // Only redirect if it's NOT the initial auth check
+                            // This prevents infinite loop when user is just visiting the site logged out
+                            if (!originalRequest.url?.includes('/auth/me')) {
+                                localStorage.removeItem('user_id');
+                                this.redirect('/login');
+                            }
                         }
                         return Promise.reject(refreshError);
                     }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Req, Res, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards, Req, Res, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
@@ -63,6 +63,16 @@ export class AuthController {
         const data = await this.authService.refreshTokens(user.sub, user.refreshToken);
         this.setCookies(res, data);
         return { user: data.user };
+    }
+
+    @Get('me')
+    @UseGuards(AuthGuard('jwt'))
+    @HttpCode(HttpStatus.OK)
+    async getCurrentUser(@Req() req: any) {
+        // Return current user from JWT with fresh data from database
+        const userId = req.user.sub;
+        const user = await this.authService.getUserById(userId);
+        return { user };
     }
 }
 
