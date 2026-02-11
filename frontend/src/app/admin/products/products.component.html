@@ -155,6 +155,12 @@
                     <div class="checkbox-row">
                         <label class="check-item">
                             <input type="checkbox" class="checkbox-input"
+                                [checked]="newProduct.allowedPaymentMethods?.includes('online')"
+                                (change)="togglePaymentMethod('online')" [disabled]="isSaving">
+                            <span>Online Payment</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" class="checkbox-input"
                                 [checked]="newProduct.allowedPaymentMethods?.includes('cod')"
                                 (change)="togglePaymentMethod('cod')" [disabled]="isSaving">
                             <span>Cash on Delivery</span>
