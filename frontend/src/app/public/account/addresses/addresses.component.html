@@ -1,17 +1,16 @@
-
 <!-- Header -->
 <header class="page-header">
-    <div>
+    <div class="header-content">
         <h1>Addresses</h1>
         <p>Manage your shipping locations</p>
     </div>
     @if (!isAdding) {
-    <button class="btn-primary" (click)="toggleAdd()">
+    <button class="btn-add" (click)="toggleAdd()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
-        <span class="btn-text">Add Address</span>
+        <span>Add Address</span>
     </button>
     }
 </header>
@@ -21,7 +20,7 @@
 <section class="address-form">
     <div class="form-header">
         <h2>{{ isEditingAddress ? 'Edit Address' : 'New Address' }}</h2>
-        <button class="btn-icon" (click)="toggleAdd()" aria-label="Close form">
+        <button class="btn-close" (click)="toggleAdd()" aria-label="Close form">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -31,17 +30,17 @@
 
     <div class="form-content">
         <!-- Basic Info -->
-        <div class="form-row">
-            <div class="form-group">
-                <label>Name</label>
+        <div class="form-grid">
+            <div class="form-field">
+                <label>Name <span class="required">*</span></label>
                 <input type="text" 
-                        [(ngModel)]="newAddress.name" 
-                        placeholder="e.g., Home, Office"
-                        class="form-input">
+                       [(ngModel)]="newAddress.name" 
+                       placeholder="e.g., Home, Office"
+                       class="input">
             </div>
-            <div class="form-group">
+            <div class="form-field">
                 <label>Type</label>
-                <select [(ngModel)]="newAddress.type" class="form-input">
+                <select [(ngModel)]="newAddress.type" class="input">
                     <option value="Home">Home</option>
                     <option value="Work">Work</option>
                     <option value="Warehouse">Warehouse</option>
@@ -50,50 +49,53 @@
         </div>
 
         <!-- Phone Numbers -->
-        <div class="form-row">
-            <div class="form-group">
+        <div class="form-grid">
+            <div class="form-field">
                 <label>Phone <span class="required">*</span></label>
                 <input type="tel" 
-                        [(ngModel)]="newAddress.phonePrimary" 
-                        placeholder="9876543210"
-                        maxlength="10"
-                        class="form-input"
-                        [class.error]="newAddress.phonePrimary && !isValidPhone(newAddress.phonePrimary)">
+                       [(ngModel)]="newAddress.phonePrimary" 
+                       placeholder="9876543210"
+                       maxlength="10"
+                       class="input"
+                       [class.error]="newAddress.phonePrimary && !isValidPhone(newAddress.phonePrimary)">
+                @if (newAddress.phonePrimary && !isValidPhone(newAddress.phonePrimary)) {
+                <span class="error-msg">Invalid phone number</span>
+                }
             </div>
-            <div class="form-group">
+            <div class="form-field">
                 <label>Alternate Phone</label>
                 <input type="tel" 
-                        [(ngModel)]="newAddress.phoneSecondary" 
-                        placeholder="Optional"
-                        maxlength="10"
-                        class="form-input">
+                       [(ngModel)]="newAddress.phoneSecondary" 
+                       placeholder="Optional"
+                       maxlength="10"
+                       class="input">
             </div>
         </div>
 
         <!-- Street Address -->
-        <div class="form-group">
+        <div class="form-field">
             <label>Street Address <span class="required">*</span></label>
             <input type="text" 
-                    [(ngModel)]="newAddress.street" 
-                    placeholder="123 Main Street, Block A"
-                    class="form-input">
+                   [(ngModel)]="newAddress.street" 
+                   placeholder="123 Main Street, Block A"
+                   class="input">
         </div>
 
         <!-- Location Details -->
-        <div class="form-row form-row-3">
-            <div class="form-group">
+        <div class="form-grid-3">
+            <div class="form-field">
                 <label>State <span class="required">*</span></label>
-                <select [(ngModel)]="newAddress.state" class="form-input">
+                <select [(ngModel)]="newAddress.state" class="input">
                     <option value="">Select</option>
                     @for (state of states; track state) {
                     <option [value]="state">{{ state }}</option>
                     }
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-field">
                 <label>City <span class="required">*</span></label>
                 <select [(ngModel)]="newAddress.city" 
-                        class="form-input" 
+                        class="input" 
                         [disabled]="!newAddress.state">
                     <option value="">Select</option>
                     @for (city of availableCities; track city) {
@@ -101,24 +103,24 @@
                     }
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-field">
                 <label>Pincode <span class="required">*</span></label>
                 <input type="text" 
-                        [(ngModel)]="newAddress.zip" 
-                        (blur)="onZipChange()" 
-                        placeholder="641001"
-                        maxlength="6"
-                        class="form-input"
-                        [class.error]="newAddress.zip && !isValidZip()">
+                       [(ngModel)]="newAddress.zip" 
+                       (blur)="onZipChange()" 
+                       placeholder="641001"
+                       maxlength="6"
+                       class="input"
+                       [class.error]="newAddress.zip && !isValidZip()">
                 @if (newAddress.zip && !isValidZip()) {
-                <span class="error-text">Invalid pincode</span>
+                <span class="error-msg">Invalid pincode</span>
                 }
             </div>
         </div>
 
         <!-- Map Section -->
         <div class="map-section">
-            <button type="button" class="btn-map-toggle" (click)="toggleMap()">
+            <button type="button" class="btn-map" (click)="toggleMap()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                     <circle cx="12" cy="10" r="3"></circle>
@@ -127,20 +129,20 @@
             </button>
 
             @if (showMap) {
-            <div class="map-container-wrapper">
+            <div class="map-wrapper">
                 <div id="map-container" class="map-container"></div>
                 <div class="map-info">
                     <span class="map-hint">Click to pin your exact location</span>
                     @if (verificationStatus !== 'none') {
-                    <span class="verify-badge" [class]="verificationStatus">
+                    <span class="badge" [class]="verificationStatus">
                         @if (verificationStatus === 'pending') {
                         <span class="spinner-sm"></span> Checking...
                         } @else if (verificationStatus === 'verified') {
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg> Verified
                         } @else if (verificationStatus === 'mismatch') {
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg> Mismatch
@@ -153,15 +155,15 @@
         </div>
 
         <!-- Default Checkbox -->
-        <label class="checkbox-group">
+        <label class="checkbox">
             <input type="checkbox" [(ngModel)]="newAddress.isDefault">
             <span>Set as default address</span>
         </label>
 
         <!-- Actions -->
         <div class="form-actions">
-            <button class="btn-secondary" (click)="toggleAdd()">Cancel</button>
-            <button class="btn-primary" 
+            <button class="btn btn-secondary" (click)="toggleAdd()">Cancel</button>
+            <button class="btn btn-primary" 
                     (click)="saveAddress()"
                     [disabled]="!newAddress.name || !newAddress.street || !newAddress.city || !newAddress.zip || !isValidZip()">
                 {{ isEditingAddress ? 'Update' : 'Save' }} Address
@@ -173,36 +175,38 @@
 
 <!-- Loading State -->
 @if (isLoading) {
-<div class="loading-state">
+<div class="loading">
     <div class="spinner"></div>
     <p>Loading addresses...</p>
 </div>
 }
 
 <!-- Address List -->
-@if (!isLoading) {
-<div class="address-list">
+@if (!isLoading && !isAdding) {
+<div class="addresses">
     @for (addr of addresses; track addr.id) {
-    <div class="address-card" [class.default]="addr.isDefault">
-        <div class="card-header">
-            <div class="header-left">
-                <span class="type-badge">{{ addr.type }}</span>
+    <div class="card" [class.is-default]="addr.isDefault">
+        <!-- Card Header -->
+        <div class="card-top">
+            <div class="tags">
+                <span class="tag">{{ addr.type }}</span>
                 @if (addr.lat) {
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pin-icon">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-pin">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                     <circle cx="12" cy="10" r="3"></circle>
                 </svg>
                 }
             </div>
             @if (addr.isDefault) {
-            <span class="default-badge">Default</span>
+            <span class="badge-default">Default</span>
             }
         </div>
 
+        <!-- Card Body -->
         <div class="card-body">
             <h3>{{ addr.name }}</h3>
-            <p class="address-text">{{ addr.street }}</p>
-            <p class="address-text">{{ addr.city }}, {{ addr.state }} {{ addr.zip }}</p>
+            <p>{{ addr.street }}</p>
+            <p>{{ addr.city }}, {{ addr.state }} {{ addr.zip }}</p>
             @if (addr.phonePrimary) {
             <p class="phone">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -213,12 +217,13 @@
             }
         </div>
 
+        <!-- Card Actions -->
         <div class="card-actions">
-            <button class="btn-text" (click)="editAddress(addr)">Edit</button>
+            <button class="action-btn" (click)="editAddress(addr)">Edit</button>
             @if (!addr.isDefault) {
-            <button class="btn-text" (click)="setDefault(addr.id)">Set Default</button>
+            <button class="action-btn" (click)="setDefault(addr.id)">Set Default</button>
             }
-            <button class="btn-text delete" (click)="deleteAddress(addr.id)">
+            <button class="action-btn delete" (click)="deleteAddress(addr.id)">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 6h18"></path>
                     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
@@ -228,14 +233,14 @@
         </div>
     </div>
     } @empty {
-    <div class="empty-state">
+    <div class="empty">
         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
             <circle cx="12" cy="10" r="3"></circle>
         </svg>
         <h2>No addresses saved</h2>
         <p>Add your first delivery address</p>
-        <button class="btn-primary" (click)="toggleAdd()">Add Address</button>
+        <button class="btn btn-primary" (click)="toggleAdd()">Add Address</button>
     </div>
     }
 </div>

@@ -1,0 +1,162 @@
+<div class="order-detail container">
+  @if (isLoading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Loading order details...</p>
+  </div>
+  } @else if (order) {
+  <!-- Header -->
+  <header class="page-header">
+    <a routerLink="/account/orders" class="back-link">
+      <lucide-icon [img]="ArrowLeft" [size]="18"></lucide-icon>
+      <span>Back to Orders</span>
+    </a>
+
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Order #{{ order.id.substring(0, 8) }}</h1>
+        <span class="badge" [class]="getStatusColor(order.status)">
+          {{ order.status }}
+        </span>
+      </div>
+      <button class="btn-print" (click)="printInvoice()">
+        <lucide-icon [img]="Printer" [size]="18"></lucide-icon>
+        <span>Print Invoice</span>
+      </button>
+    </div>
+
+    <p class="date">
+      <lucide-icon [img]="Clock" [size]="14"></lucide-icon>
+      {{ order.createdAt | date:'medium' }}
+    </p>
+  </header>
+
+  <!-- Progress Tracker -->
+  <section class="card progress-card">
+    <div class="progress-track">
+      @for (step of getProgressSteps(); track step.status) {
+      <div class="progress-step" [class.completed]="step.completed" [class.active]="step.active">
+        <div class="step-icon">
+          @if (step.completed) {
+          <lucide-icon [img]="CheckCircle2" [size]="18"></lucide-icon>
+          } @else {
+          <span>{{ step.index }}</span>
+          }
+        </div>
+        <div class="step-content">
+          <div class="step-label">{{ step.label }}</div>
+          @if (step.date) {
+          <div class="step-date">{{ step.date | date:'shortDate' }}</div>
+          }
+        </div>
+        @if (step.message) {
+        <div class="step-message">{{ step.message }}</div>
+        }
+      </div>
+      }
+    </div>
+  </section>
+
+  <div class="content-grid">
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Items -->
+      <section class="card">
+        <div class="card-header">
+          <lucide-icon [img]="Package" [size]="20"></lucide-icon>
+          <h2>Order Items</h2>
+        </div>
+        <div class="items-list">
+          @for (item of order.items; track item.productId) {
+          <div class="item" (click)="viewProduct(item.productId)">
+            <div class="item-info">
+              <h3>{{ item.productName }}</h3>
+              @if (item.variantName) {
+              <p class="variant">{{ item.variantName }}</p>
+              }
+              <p class="quantity">Qty: {{ item.quantity }}</p>
+            </div>
+            <div class="item-price">
+              ₹{{ item.price * item.quantity | number }}
+            </div>
+          </div>
+          }
+        </div>
+        <div class="total">
+          <span class="label">Total Amount</span>
+          <span class="amount">₹{{ order.totalAmount | number }}</span>
+        </div>
+      </section>
+
+      <!-- Delivery & Payment Info -->
+      <section class="card info-grid">
+        <!-- Delivery Address -->
+        <div class="info-block">
+          <div class="info-header">
+            <lucide-icon [img]="MapPin" [size]="18"></lucide-icon>
+            <h3>Delivery Address</h3>
+          </div>
+          <p class="text">{{ order.deliveryAddress }}</p>
+          <p class="text"><strong>Phone:</strong> {{ order.deliveryPhone }}</p>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="info-block">
+          <div class="info-header">
+            <lucide-icon [img]="CreditCard" [size]="18"></lucide-icon>
+            <h3>Payment Method</h3>
+          </div>
+          <p class="text">{{ order.paymentMethod === 'online' ? 'Online Payment' : 'Cash on Delivery' }}</p>
+        </div>
+
+        <!-- Delivery Notes -->
+        @if (order.deliveryNotes) {
+        <div class="info-block full-width">
+          <div class="info-header">
+            <lucide-icon [img]="StickyNote" [size]="18"></lucide-icon>
+            <h3>Delivery Notes</h3>
+          </div>
+          <p class="text">{{ order.deliveryNotes }}</p>
+        </div>
+        }
+      </section>
+    </div>
+
+    <!-- Timeline Sidebar -->
+    <aside class="sidebar">
+      <section class="card timeline-card">
+        <h2>Order History</h2>
+        <div class="timeline">
+          @for (event of orderHistory; track event.id; let last = $last) {
+          <div class="timeline-item" [class.latest]="last">
+            <div class="timeline-marker">
+              @if (last) {
+              <lucide-icon [img]="CheckCircle2" [size]="14"></lucide-icon>
+              }
+            </div>
+            <div class="timeline-content">
+              <h4>{{ event.status }}</h4>
+              <p class="time">{{ event.createdAt | date:'short' }}</p>
+              @if (event.message) {
+              <p class="message">{{ event.message }}</p>
+              }
+            </div>
+          </div>
+          }
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- Hidden Invoice for Printing -->
+  <div class="print-only">
+    <app-invoice [order]="order"></app-invoice>
+  </div>
+  } @else {
+  <div class="empty">
+    <h2>Order not found</h2>
+    <p>The order you're looking for doesn't exist or has been removed</p>
+    <a routerLink="/account/orders" class="btn btn-primary">Back to Orders</a>
+  </div>
+  }
+</div>

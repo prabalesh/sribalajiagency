@@ -12,7 +12,7 @@ import { AccountSidebarComponent } from '../../../shared/components/account-side
 @Component({
   selector: 'app-addresses',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, AccountSidebarComponent],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './addresses.component.html',
   styleUrl: './addresses.component.scss'
 })

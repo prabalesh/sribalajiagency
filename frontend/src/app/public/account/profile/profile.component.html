@@ -1,58 +1,110 @@
-<main class="account-content animate-fade">
-    <header class="content-header">
-        <h1>Account Settings</h1>
-        <p>Manage your personal information and preferences.</p>
-    </header>
+<!-- Header -->
+<header class="page-header">
+    <div>
+        <h1>Profile</h1>
+        <p>Manage your personal information</p>
+    </div>
+</header>
 
-    <section class="profile-section glass-card">
-        <div class="section-header">
+<!-- Success Message -->
+@if (message) {
+<div class="alert-success">
+    <lucide-icon [img]="Check" [size]="18"></lucide-icon>
+    <span>{{ message }}</span>
+</div>
+}
+
+<!-- Personal Information -->
+<section class="card">
+    <div class="card-header">
+        <div class="header-left">
+            <lucide-icon [img]="User" [size]="20"></lucide-icon>
             <h2>Personal Information</h2>
-            <button class="btn-secondary" (click)="isEditing = !isEditing">
-                {{ isEditing ? 'Cancel' : 'Edit' }}
-            </button>
+        </div>
+        @if (!isEditing) {
+        <button class="btn-edit" (click)="isEditing = true">
+            <lucide-icon [img]="Edit2" [size]="16"></lucide-icon>
+            <span>Edit</span>
+        </button>
+        }
+    </div>
+
+    <div class="card-body">
+        <!-- Full Name -->
+        <div class="field">
+            <label>
+                <lucide-icon [img]="User" [size]="16"></lucide-icon>
+                <span>Full Name</span>
+            </label>
+            @if (!isEditing) {
+            <p class="value">{{ name }}</p>
+            } @else {
+            <input type="text" 
+                   [(ngModel)]="name" 
+                   placeholder="Enter your name"
+                   class="input">
+            }
         </div>
 
-        <div *ngIf="message" class="success-banner">{{ message }}</div>
+        <!-- Email Address -->
+        <div class="field">
+            <label>
+                <lucide-icon [img]="Mail" [size]="16"></lucide-icon>
+                <span>Email Address</span>
+            </label>
+            @if (!isEditing) {
+            <p class="value">{{ email }}</p>
+            } @else {
+            <input type="email" 
+                   [(ngModel)]="email" 
+                   placeholder="Enter your email"
+                   class="input">
+            }
+        </div>
 
-        <div class="profile-form">
-            <div class="form-group">
-                <label>Full Name</label>
-                @if (!isEditing) {
-                <p class="value">{{ name }}</p>
-                } @else {
-                <input type="text" [(ngModel)]="name" class="form-control">
-                }
-            </div>
+        <!-- Member Since -->
+        <div class="field">
+            <label>
+                <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+                <span>Member Since</span>
+            </label>
+            <p class="value">{{ authService.user()?.createdAt | date:'longDate' }}</p>
+        </div>
 
-            <div class="form-group">
-                <label>Email Address</label>
-                @if (!isEditing) {
-                <p class="value">{{ email }}</p>
-                } @else {
-                <input type="email" [(ngModel)]="email" class="form-control">
-                }
-            </div>
-
-            <div class="form-group">
-                <label>Member Since</label>
-                <p class="value">{{ authService.user()?.createdAt | date:'longDate' }}</p>
-            </div>
-
-            <button *ngIf="isEditing" class="btn-primary" (click)="saveProfile()">
-                Save Changes
+        <!-- Edit Actions -->
+        @if (isEditing) {
+        <div class="actions">
+            <button class="btn btn-secondary" (click)="cancelEdit()">
+                <lucide-icon [img]="X" [size]="16"></lucide-icon>
+                <span>Cancel</span>
+            </button>
+            <button class="btn btn-primary" (click)="saveProfile()">
+                <lucide-icon [img]="Check" [size]="16"></lucide-icon>
+                <span>Save Changes</span>
             </button>
         </div>
-    </section>
+        }
+    </div>
+</section>
 
-    <section class="security-section glass-card">
-        <div class="section-header">
+<!-- Security -->
+<section class="card">
+    <div class="card-header">
+        <div class="header-left">
+            <lucide-icon [img]="Lock" [size]="20"></lucide-icon>
             <h2>Security</h2>
         </div>
-        <div class="security-row">
-            <div class="text">
-                <strong>Password</strong>
-                <p>Change your account password regularly for better security.</p>
+    </div>
+
+    <div class="card-body">
+        <div class="security-item">
+            <div class="security-info">
+                <h3>Password</h3>
+                <p>Change your account password regularly for better security</p>
             </div>
-            <button class="btn-secondary" routerLink="/forgot-password">Change Password</button>
+            <button class="btn btn-secondary" routerLink="/forgot-password">
+                Change Password
+            </button>
         </div>
-    </section>
+    </div>
+</section>

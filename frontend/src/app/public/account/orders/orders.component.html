@@ -1,16 +1,25 @@
-
-<main class="account-content animate-fade">
-<header class="content-header">
-    <div>
+<!-- Header -->
+<header class="page-header">
+    <div class="header-content">
         <h1>My Orders</h1>
-        <p>View and track your previous purchases.</p>
+        <p>View and track your purchases</p>
     </div>
-    <div class="filter-controls">
+    
+    <div class="filters">
+        <!-- Search -->
         <div class="search-box">
-            <input type="text" [(ngModel)]="searchQuery" placeholder="Search by Order ID or Product..."
-                class="search-input">
+            <lucide-icon [img]="Search" [size]="18" class="search-icon"></lucide-icon>
+            <input type="text" 
+                   [(ngModel)]="searchQuery"
+                   (ngModelChange)="filterOrders()"
+                   placeholder="Search orders..."
+                   class="search-input">
         </div>
-        <select [(ngModel)]="statusFilter" (change)="filterOrders()" class="status-select">
+
+        <!-- Status Filter -->
+        <select [(ngModel)]="statusFilter" 
+                (change)="filterOrders()" 
+                class="filter-select">
             <option value="All">All Orders</option>
             @for (status of statusOptions; track status) {
             <option [value]="status">{{ status }}</option>
@@ -19,83 +28,113 @@
     </div>
 </header>
 
+<!-- Loading State -->
 @if (isLoading) {
-<div class="loading">Loading orders...</div>
-} @else {
-<div class="orders-list">
+<div class="loading">
+    <div class="spinner"></div>
+    <p>Loading orders...</p>
+</div>
+}
+
+<!-- Orders List -->
+@if (!isLoading) {
+<div class="orders">
     @for (order of filteredOrders; track order.id) {
-    <div class="order-item glass-card">
-        <div class="order-header">
-            <div class="info">
+    <div class="order-card">
+        <!-- Card Header -->
+        <div class="card-header">
+            <div class="header-left">
                 <h3>
-                    <a [routerLink]="['/account/orders', order.id]" class="order-link">Order #{{
-                        order.id.substring(0, 8) }}</a>
+                    <a [routerLink]="['/account/orders', order.id]" class="order-id">
+                        Order #{{ order.id.substring(0, 8) }}
+                    </a>
                 </h3>
-                <p>Placed on {{ order.createdAt | date:'longDate' }}</p>
+                <p class="date">
+                    <lucide-icon [img]="Calendar" [size]="14"></lucide-icon>
+                    {{ order.createdAt | date:'mediumDate' }}
+                </p>
             </div>
-            <span class="status-badge" [ngClass]="getStatusColor(order.status)">
+            <span class="badge" [class]="getStatusColor(order.status)">
                 {{ order.status }}
             </span>
         </div>
 
-        <div class="order-details">
+        <!-- Card Body -->
+        <div class="card-body">
+            <!-- Items -->
             <div class="section">
-                <h4>Items</h4>
-                @for (item of order.items; track item.productId) {
-                <div class="product-row" (click)="viewProduct(item.productId)">
-                    <span class="name">
-                        <strong>{{ item.quantity }}x</strong> {{ item.productName }}
-                    </span>
-                    <span class="price">₹{{ item.price * item.quantity | number }}</span>
+                <h4>
+                    <lucide-icon [img]="Package" [size]="16"></lucide-icon>
+                    Items
+                </h4>
+                <div class="items-list">
+                    @for (item of order.items; track item.productId) {
+                    <div class="item" (click)="viewProduct(item.productId)">
+                        <span class="item-name">
+                            <strong>{{ item.quantity }}×</strong> {{ item.productName }}
+                        </span>
+                        <span class="item-price">₹{{ item.price * item.quantity | number }}</span>
+                    </div>
+                    }
                 </div>
-                }
             </div>
 
+            <!-- Delivery Address -->
             @if (order.deliveryAddress) {
             <div class="section">
-                <h4>Delivery Information</h4>
-                <p class="delivery-info">
-                    <strong>Address:</strong> {{ order.deliveryAddress }}<br>
-                    <strong>Phone:</strong> {{ order.deliveryPhone }}
-                </p>
+                <h4>
+                    <lucide-icon [img]="MapPin" [size]="16"></lucide-icon>
+                    Delivery Address
+                </h4>
+                <p class="text">{{ order.deliveryAddress }}</p>
+                @if (order.deliveryPhone) {
+                <p class="text">Phone: {{ order.deliveryPhone }}</p>
+                }
             </div>
             }
 
+            <!-- Payment Method -->
             @if (order.paymentMethod) {
             <div class="section">
-                <h4>Payment Method</h4>
-                <p>{{ order.paymentMethod === 'online' ? 'Online Payment' : 'Cash on Delivery' }}</p>
+                <h4>
+                    <lucide-icon [img]="CreditCard" [size]="16"></lucide-icon>
+                    Payment
+                </h4>
+                <p class="text">{{ order.paymentMethod === 'online' ? 'Online Payment' : 'Cash on Delivery' }}</p>
             </div>
             }
         </div>
 
-        <div class="order-footer">
-            <span class="total-label">Order Total</span>
-            <span class="total-amount">₹{{ order.totalAmount | number }}</span>
-            <div>
-                <a [routerLink]="['/account/orders', order.id]" class="btn-secondary">View Full Details &
-                    History
-                    →</a>
+        <!-- Card Footer -->
+        <div class="card-footer">
+            <div class="total">
+                <span class="label">Order Total</span>
+                <span class="amount">₹{{ order.totalAmount | number }}</span>
             </div>
+            <a [routerLink]="['/account/orders', order.id]" class="btn-details">
+                View Details
+                <lucide-icon [img]="ExternalLink" [size]="16"></lucide-icon>
+            </a>
         </div>
-
     </div>
     } @empty {
-    <div class="empty-state glass-card">
-        <div class="icon">🛍️</div>
+    <!-- Empty State -->
+    <div class="empty">
+        <lucide-icon [img]="ShoppingBag" [size]="64" [strokeWidth]="1.5"></lucide-icon>
         <h2>No orders yet</h2>
-        <p>Looks like you haven't made any purchases yet.</p>
-        <button class="btn-primary" routerLink="/products">Start Shopping</button>
+        <p>Start shopping to see your orders here</p>
+        <button class="btn btn-primary" routerLink="/products">Browse Products</button>
     </div>
     }
 
-    @if (totalPages > 1) {
+    <!-- Pagination -->
+    @if (totalPages > 1 && filteredOrders.length > 0) {
     <div class="pagination">
-        <button class="page-btn prev" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            <span>Previous</span>
+        <button class="btn-page" 
+                [disabled]="currentPage === 1" 
+                (click)="onPageChange(currentPage - 1)">
+            <lucide-icon [img]="ChevronLeft" [size]="18"></lucide-icon>
+            <span class="btn-text">Previous</span>
         </button>
 
         <div class="page-numbers">
@@ -103,19 +142,20 @@
             @if (page === '...') {
             <span class="ellipsis">{{ page }}</span>
             } @else {
-            <button class="page-num" [class.active]="page === currentPage" (click)="onPageChange(page)">
+            <button class="page-num" 
+                    [class.active]="page === currentPage" 
+                    (click)="onPageChange(page)">
                 {{ page }}
             </button>
             }
             }
         </div>
 
-        <button class="page-btn next" [disabled]="currentPage === totalPages"
-            (click)="onPageChange(currentPage + 1)">
-            <span>Next</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
+        <button class="btn-page" 
+                [disabled]="currentPage === totalPages" 
+                (click)="onPageChange(currentPage + 1)">
+            <span class="btn-text">Next</span>
+            <lucide-icon [img]="ChevronRight" [size]="18"></lucide-icon>
         </button>
     </div>
     }
