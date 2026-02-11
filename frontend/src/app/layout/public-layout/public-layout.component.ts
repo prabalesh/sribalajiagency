@@ -2,21 +2,19 @@ import { Component, inject, signal, afterNextRender, OnInit, OnDestroy } from '@
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd, NavigationCancel, NavigationError, RouteConfigLoadStart, RouteConfigLoadEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subscription, filter } from 'rxjs';
+import { LucideAngularModule, Search, Sun, Moon, ShoppingBag, User, Menu, X, LogIn, LogOut, Package, MapPin, ExternalLink } from 'lucide-angular';
 import { ThemeService } from '../../core/store/theme.service';
 import { CartService } from '../../core/store/cart.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { CmsService } from '../../core/services/api/cms.service';
 import { RouteLoadingService } from '../../core/services/route-loading.service';
-import { LucideAngularModule, ExternalLink } from 'lucide-angular';
-import { Subscription, filter } from 'rxjs';
-
-import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { RouteLoadingComponent } from '../../shared/components/route-loading/route-loading.component';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent, LucideAngularModule, RouteLoadingComponent],
+  imports: [CommonModule, RouterModule, FormsModule, LucideAngularModule, RouteLoadingComponent],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.scss'
 })
@@ -28,9 +26,19 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
   private cmsService = inject(CmsService);
   routeLoadingService = inject(RouteLoadingService);
 
-  readonly icons = {
-    ExternalLink
-  };
+  // Lucide icons
+  readonly Search = Search;
+  readonly Sun = Sun;
+  readonly Moon = Moon;
+  readonly ShoppingBag = ShoppingBag;
+  readonly User = User;
+  readonly Menu = Menu;
+  readonly X = X;
+  readonly LogIn = LogIn;
+  readonly LogOut = LogOut;
+  readonly Package = Package;
+  readonly MapPin = MapPin;
+  readonly ExternalLink = ExternalLink;
 
   searchQuery: string = '';
   isSearchOpen = false;
@@ -53,7 +61,6 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Optimized router event handling
     this.routerSubscription = this.router.events
       .pipe(
         filter(event => 
@@ -71,10 +78,8 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
           this.routeLoadingService.hide();
         }
         
-        // Close mobile menu and dropdowns on navigation
         if (event instanceof NavigationEnd) {
-          this.isMobileMenuOpen = false;
-          this.isUserDropdownOpen = false;
+          this.closeAll();
         }
       });
   }
@@ -93,8 +98,7 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
   onSearch() {
     if (this.searchQuery.trim()) {
       this.router.navigate(['/search'], { queryParams: { q: this.searchQuery } });
-      this.isSearchOpen = false;
-      this.searchQuery = '';
+      this.closeAll();
     }
   }
 
@@ -102,11 +106,10 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
     this.themeService.toggleTheme();
   }
 
-  closeUserDropdown() {
+  closeAll() {
+    this.isSearchOpen = false;
     this.isUserDropdownOpen = false;
-  }
-
-  closeMobileMenu() {
     this.isMobileMenuOpen = false;
+    this.searchQuery = '';
   }
 }

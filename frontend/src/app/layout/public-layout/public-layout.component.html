@@ -1,315 +1,213 @@
-<div class="public-layout" [attr.data-theme]="themeService.currentTheme()">
-    <!-- Route Loading Screen -->
-    @if (routeLoadingService.isLoading()) {
-    <app-route-loading></app-route-loading>
-    }
+<div class="layout" [attr.data-theme]="themeService.currentTheme()">
+  <!-- Route Loading -->
+  @if (routeLoadingService.isLoading()) {
+  <app-route-loading></app-route-loading>
+  }
 
-    <!-- User Dropdown Backdrop -->
-    @if (isUserDropdownOpen) {
-    <div class="dropdown-backdrop" (click)="closeUserDropdown()"></div>
-    }
+  <!-- Backdrop -->
+  @if (isUserDropdownOpen || isMobileMenuOpen || isSearchOpen) {
+  <div class="backdrop" (click)="closeAll()"></div>
+  }
 
-    <header class="main-header glass-card">
-        <div class="container header-content">
-            <div class="brand" routerLink="/">
-                <img src="/logo.png" alt="Sri Balaji Agency" class="logo-img" loading="lazy" width="120" height="45">
-            </div>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <!-- Logo -->
+        <a class="logo" routerLink="/">
+          <img src="/logo.png" alt="Sri Balaji Agency" width="120" height="45">
+        </a>
 
-            <nav class="desktop-nav" aria-label="Main navigation">
-                <ul>
-                    <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
-                    <li><a routerLink="/products" routerLinkActive="active">Catalog</a></li>
-                    <li><a routerLink="/brands" routerLinkActive="active">Brands</a></li>
-                    <li><a routerLink="/account/orders" routerLinkActive="active">Orders</a></li>
-                </ul>
-            </nav>
-
-            <div class="header-actions">
-                <!-- Search Button -->
-                <button class="icon-btn search-btn" (click)="toggleSearch()" title="Search" aria-label="Toggle Search">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </button>
-
-                <!-- Theme Toggle -->
-                @if (isLoading()) {
-                <app-skeleton width="40px" height="40px" shape="circle"></app-skeleton>
-                } @else {
-                <button class="icon-btn theme-btn" (click)="toggleTheme()" aria-label="Toggle Theme"
-                    [title]="themeService.currentTheme() === 'light' ? 'Dark Mode' : 'Light Mode'">
-                    @if (themeService.currentTheme() === 'light') {
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                    } @else {
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                    }
-                </button>
-                }
-
-                <!-- Cart Button -->
-                @if (isLoading()) {
-                <app-skeleton width="40px" height="40px" shape="circle"></app-skeleton>
-                } @else {
-                <a class="cart-wrapper" routerLink="/cart" aria-label="View Cart">
-                    <div class="icon-btn cart-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <path d="M16 10a4 4 0 0 1-8 0"></path>
-                        </svg>
-                    </div>
-                    @if (cartService.count() > 0) {
-                    <span class="cart-badge">{{ cartService.count() }}</span>
-                    }
-                </a>
-                }
-
-                <!-- User Section -->
-                <div class="user-section">
-                    @if (isLoading()) {
-                    <app-skeleton width="80px" height="40px" shape="rect"></app-skeleton>
-                    } @else {
-                    @if (authService.isLoggedIn()) {
-                    <button class="icon-btn user-btn" 
-                            (click)="isUserDropdownOpen = !isUserDropdownOpen"
-                            aria-label="User Menu"
-                            [attr.aria-expanded]="isUserDropdownOpen">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </button>
-                    
-                    @if (isUserDropdownOpen) {
-                    <div class="user-dropdown animate-fade">
-                        <div class="dropdown-header">
-                            <div class="user-avatar">
-                                <div class="avatar-circle">
-                                    {{ authService.user()?.name?.charAt(0)?.toUpperCase() }}
-                                </div>
-                            </div>
-                            <div class="user-info">
-                                <h4 class="user-name">{{ authService.user()?.name }}</h4>
-                                <p class="user-email">{{ authService.user()?.email }}</p>
-                            </div>
-                        </div>
-
-                        <div class="dropdown-divider"></div>
-
-                        <nav class="dropdown-menu">
-                            <a routerLink="/account/profile" 
-                               class="dropdown-item" 
-                               (click)="closeUserDropdown()">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                                <span>My Profile</span>
-                            </a>
-
-                            <a routerLink="/account/orders" 
-                               class="dropdown-item" 
-                               (click)="closeUserDropdown()">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                </svg>
-                                <span>My Orders</span>
-                            </a>
-
-                            <a routerLink="/account/addresses" 
-                               class="dropdown-item"
-                               (click)="closeUserDropdown()">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                    <circle cx="12" cy="10" r="3"></circle>
-                                </svg>
-                                <span>Addresses</span>
-                            </a>
-                        </nav>
-
-                        <div class="dropdown-divider"></div>
-
-                        <div class="dropdown-footer">
-                            <button class="btn-logout" 
-                                    (click)="authService.logout(); closeUserDropdown()">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                    <polyline points="16 17 21 12 16 7"></polyline>
-                                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                                </svg>
-                                <span>Sign Out</span>
-                            </button>
-                        </div>
-                    </div>
-                    }
-                    } @else {
-                    <button class="btn-primary login-btn desktop-login-btn" routerLink="/login">Sign In</button>
-                    <button class="icon-btn login-btn mobile-login-btn" routerLink="/login" aria-label="Sign In">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                            <polyline points="10 17 15 12 10 7"></polyline>
-                            <line x1="15" y1="12" x2="3" y2="12"></line>
-                        </svg>
-                    </button>
-                    }
-                    }
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <button class="icon-btn mobile-menu-btn" 
-                        (click)="isMobileMenuOpen = !isMobileMenuOpen"
-                        aria-label="Toggle Mobile Menu"
-                        [attr.aria-expanded]="isMobileMenuOpen">
-                    @if (!isMobileMenuOpen) {
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                    } @else {
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                    }
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Mobile Navigation Overlay -->
-    <div class="mobile-nav-overlay" 
-         [class.open]="isMobileMenuOpen" 
-         (click)="closeMobileMenu()">
-        <nav class="mobile-nav glass-card" (click)="$event.stopPropagation()">
-            <div class="mobile-nav-header">
-                <div class="brand">
-                    <span class="logo-icon">SB</span>
-                    <span class="logo-text">Sri Balaji</span>
-                </div>
-                <button class="close-btn" (click)="closeMobileMenu()" aria-label="Close menu">×</button>
-            </div>
-            <ul>
-                <li><a routerLink="/" 
-                       routerLinkActive="active" 
-                       [routerLinkActiveOptions]="{exact: true}"
-                       (click)="closeMobileMenu()">Home</a></li>
-                <li><a routerLink="/products" 
-                       routerLinkActive="active" 
-                       (click)="closeMobileMenu()">Catalog</a></li>
-                <li><a routerLink="/brands" 
-                       routerLinkActive="active" 
-                       (click)="closeMobileMenu()">Brands</a></li>
-                @if (authService.isLoggedIn()) {
-                <li><a routerLink="/account/orders" 
-                       routerLinkActive="active"
-                       (click)="closeMobileMenu()">Orders</a></li>
-                }
-                <li>
-                    @if (!authService.isLoggedIn()) {
-                    <button class="btn-primary w-full" 
-                            routerLink="/login" 
-                            (click)="closeMobileMenu()">Sign In</button>
-                    } @else {
-                    <button class="btn-secondary w-full" 
-                            (click)="authService.logout(); closeMobileMenu()">Sign Out</button>
-                    }
-                </li>
-            </ul>
+        <!-- Desktop Nav -->
+        <nav class="nav-desktop">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+          <a routerLink="/products" routerLinkActive="active">Catalog</a>
+          <a routerLink="/brands" routerLinkActive="active">Brands</a>
+          <a routerLink="/account/orders" routerLinkActive="active">Orders</a>
         </nav>
-    </div>
 
-    <!-- Search Overlay -->
-    @if (isSearchOpen) {
-    <div class="search-overlay" (click)="toggleSearch()">
-        <div class="container search-container">
-            <div class="search-box glass-card" (click)="$event.stopPropagation()">
-                <input type="search" 
-                       [(ngModel)]="searchQuery" 
-                       (keyup.enter)="onSearch()"
-                       placeholder="What are you looking for today?" 
-                       autofocus
-                       aria-label="Search products">
-                <div class="search-actions">
-                    <button class="btn-primary" 
-                            (click)="onSearch()"
-                            [disabled]="!searchQuery.trim()">Search</button>
-                    <button class="close-btn" 
-                            (click)="toggleSearch()"
-                            aria-label="Close search">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
+        <!-- Actions -->
+        <div class="actions">
+          <!-- Search -->
+          <button class="btn-icon" (click)="toggleSearch()" aria-label="Search">
+            <lucide-icon [img]="Search" [size]="20"></lucide-icon>
+          </button>
+
+          <!-- Theme -->
+          @if (!isLoading()) {
+          <button class="btn-icon" (click)="toggleTheme()" aria-label="Toggle Theme">
+            @if (themeService.currentTheme() === 'light') {
+            <lucide-icon [img]="Moon" [size]="20"></lucide-icon>
+            } @else {
+            <lucide-icon [img]="Sun" [size]="20"></lucide-icon>
+            }
+          </button>
+          }
+
+          <!-- Cart -->
+          @if (!isLoading()) {
+          <a class="btn-icon cart" routerLink="/cart" aria-label="Cart">
+            <lucide-icon [img]="ShoppingBag" [size]="20"></lucide-icon>
+            @if (cartService.count() > 0) {
+            <span class="badge">{{ cartService.count() }}</span>
+            }
+          </a>
+          }
+
+          <!-- User -->
+          @if (!isLoading()) {
+          <div class="user-menu">
+            @if (authService.isLoggedIn()) {
+            <button class="btn-icon" 
+                    (click)="isUserDropdownOpen = !isUserDropdownOpen"
+                    aria-label="User Menu">
+              <lucide-icon [img]="User" [size]="20"></lucide-icon>
+            </button>
+
+            @if (isUserDropdownOpen) {
+            <div class="dropdown">
+              <div class="dropdown-header">
+                <div class="avatar">
+                  {{ authService.user()?.name?.charAt(0)?.toUpperCase() }}
                 </div>
+                <div class="user-info">
+                  <h4>{{ authService.user()?.name }}</h4>
+                  <p>{{ authService.user()?.email }}</p>
+                </div>
+              </div>
+
+              <div class="dropdown-menu">
+                <a routerLink="/account/profile" (click)="closeAll()">
+                  <lucide-icon [img]="User" [size]="18"></lucide-icon>
+                  <span>My Profile</span>
+                </a>
+                <a routerLink="/account/orders" (click)="closeAll()">
+                  <lucide-icon [img]="Package" [size]="18"></lucide-icon>
+                  <span>My Orders</span>
+                </a>
+                <a routerLink="/account/addresses" (click)="closeAll()">
+                  <lucide-icon [img]="MapPin" [size]="18"></lucide-icon>
+                  <span>Addresses</span>
+                </a>
+              </div>
+
+              <div class="dropdown-footer">
+                <button class="btn-logout" (click)="authService.logout(); closeAll()">
+                  <lucide-icon [img]="LogOut" [size]="18"></lucide-icon>
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
+            }
+            } @else {
+            <button class="btn-primary btn-login" routerLink="/login">Sign In</button>
+            <button class="btn-icon btn-login-mobile" routerLink="/login" aria-label="Sign In">
+              <lucide-icon [img]="LogIn" [size]="20"></lucide-icon>
+            </button>
+            }
+          </div>
+          }
+
+          <!-- Mobile Menu Button -->
+          <button class="btn-icon btn-menu" 
+                  (click)="isMobileMenuOpen = !isMobileMenuOpen"
+                  aria-label="Menu">
+            @if (!isMobileMenuOpen) {
+            <lucide-icon [img]="Menu" [size]="24"></lucide-icon>
+            } @else {
+            <lucide-icon [img]="X" [size]="24"></lucide-icon>
+            }
+          </button>
         </div>
+      </div>
     </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  @if (isMobileMenuOpen) {
+  <nav class="nav-mobile">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeAll()">Home</a>
+    <a routerLink="/products" routerLinkActive="active" (click)="closeAll()">Catalog</a>
+    <a routerLink="/brands" routerLinkActive="active" (click)="closeAll()">Brands</a>
+    @if (authService.isLoggedIn()) {
+    <a routerLink="/account/orders" routerLinkActive="active" (click)="closeAll()">Orders</a>
     }
+    @if (!authService.isLoggedIn()) {
+    <button class="btn-primary" routerLink="/login" (click)="closeAll()">Sign In</button>
+    } @else {
+    <button class="btn-secondary" (click)="authService.logout(); closeAll()">Sign Out</button>
+    }
+  </nav>
+  }
 
-    <main class="content">
-        <router-outlet></router-outlet>
-    </main>
+  <!-- Search Overlay -->
+  @if (isSearchOpen) {
+  <div class="search-overlay">
+    <div class="container">
+      <div class="search-box">
+        <input type="search" 
+               [(ngModel)]="searchQuery"
+               (keyup.enter)="onSearch()"
+               placeholder="What are you looking for?"
+               autofocus>
+        <button class="btn-primary" 
+                (click)="onSearch()"
+                [disabled]="!searchQuery.trim()">
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+  }
 
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-section brand-info">
-                    <img src="/logo.png" alt="Sri Balaji Agency" class="footer-logo" loading="lazy" width="120" height="50">
-                    <p>Coimbatore's premier destination for high-quality industrial tools and home appliances.
-                        Delivering excellence since 1995.</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a routerLink="/products">Our Catalog</a></li>
-                        <li><a routerLink="/brands">Top Brands</a></li>
-                        <li><a routerLink="/request-quote">Get a Quotation</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Customer Care</h4>
-                    <ul>
-                        <li><a routerLink="/contact">Contact Us</a></li>
-                        <li><a routerLink="/feedback">Give Feedback</a></li>
-                        <li><a href="#">Shipping Info</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section socials">
-                    <h4>Connect</h4>
-                    <div class="social-links">
-                        @for (link of cms?.socialLinks; track $index) {
-                        <a [href]="link.url" 
-                           target="_blank" 
-                           rel="noopener noreferrer"
-                           class="social-item" 
-                           [title]="link.platform">
-                            <lucide-icon [img]="icons.ExternalLink" [size]="18"></lucide-icon>
-                            <span>{{ link.platform }}</span>
-                        </a>
-                        }
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Sri Balaji Agency. All rights reserved.</p>
-            </div>
+  <!-- Main Content -->
+  <main class="main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <img src="/logo.png" alt="Sri Balaji Agency" width="120" height="50">
+          <p>Coimbatore's premier destination for high-quality industrial tools and home appliances since 1995.</p>
         </div>
-    </footer>
+
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a routerLink="/products">Catalog</a></li>
+            <li><a routerLink="/brands">Brands</a></li>
+            <li><a routerLink="/request-quote">Get Quote</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a routerLink="/contact">Contact Us</a></li>
+            <li><a routerLink="/feedback">Feedback</a></li>
+            <li><a href="#">Shipping Info</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <div class="social-links">
+            @for (link of cms?.socialLinks; track $index) {
+            <a [href]="link.url" target="_blank" rel="noopener noreferrer">
+              <lucide-icon [img]="ExternalLink" [size]="16"></lucide-icon>
+              <span>{{ link.platform }}</span>
+            </a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Sri Balaji Agency. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
 </div>
