@@ -1,0 +1,153 @@
+@if (isLoading) {
+<div class="loading-state glass-card">
+    <div class="spinner-large"></div>
+    <p>Loading orders...</p>
+</div>
+} @else if (orders.length === 0) {
+<div class="empty-state glass-card">
+    <lucide-icon [img]="ShoppingCart" [size]="64"></lucide-icon>
+    <p>No orders found matching your filters.</p>
+</div>
+} @else {
+<!-- Desktop Table -->
+<div class="table-container glass-card desktop-only">
+    <table class="orders-table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (order of orders; track order.id) {
+            <tr>
+                <td class="id-col">
+                    <a [routerLink]="['/dashboard/orders', order.id]" class="id-link">
+                        #{{ getTruncatedId(order.id) }}
+                    </a>
+                </td>
+                <td>{{ order.createdAt | date:'mediumDate' }}</td>
+                <td>
+                    <div class="customer-info">
+                        <span class="name">{{ order.user?.name || 'Guest' }}</span>
+                        <span class="email">{{ order.user?.email }}</span>
+                    </div>
+                </td>
+                <td class="amount">₹{{ order.totalAmount | number:'1.2-2' }}</td>
+                <td>
+                    <span class="payment-badge" [class.cod]="order.paymentMethod === 'cod'">
+                        <lucide-icon [img]="order.paymentMethod === 'online' ? CreditCard : IndianRupee" [size]="14">
+                        </lucide-icon>
+                        {{ order.paymentMethod === 'online' ? 'Online' : 'COD' }}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge" [ngClass]="getStatusColor(order.status)">
+                        <lucide-icon [img]="getStatusIcon(order.status)" [size]="14"></lucide-icon>
+                        {{ order.status }}
+                    </span>
+                </td>
+                <td>
+                    <div class="table-actions">
+                        <button class="btn-icon" [routerLink]="['/dashboard/orders', order.id]" title="View details">
+                            <lucide-icon [img]="Eye" [size]="16"></lucide-icon>
+                        </button>
+                        @if (authService.hasPermission(PERMISSIONS.UPDATE_ORDER)) {
+                        <button class="btn-icon" (click)="onEdit(order)" title="Update status">
+                            <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                        </button>
+                        }
+                    </div>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    @if (totalItems > itemsPerPage) {
+    <app-pagination [currentPage]="currentPage" [totalItems]="totalItems" [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)">
+    </app-pagination>
+    }
+</div>
+
+<!-- Mobile Cards -->
+<div class="mobile-cards mobile-only">
+    @for (order of orders; track order.id) {
+    <div class="order-card glass-card">
+        <div class="order-card-header">
+            <div class="order-id">
+                <a [routerLink]="['/dashboard/orders', order.id]">
+                    #{{ getTruncatedId(order.id) }}
+                </a>
+            </div>
+            <span class="status-badge" [ngClass]="getStatusColor(order.status)">
+                <lucide-icon [img]="getStatusIcon(order.status)" [size]="12"></lucide-icon>
+                {{ order.status }}
+            </span>
+        </div>
+
+        <div class="order-card-body">
+            <div class="order-detail">
+                <lucide-icon [img]="User" [size]="16"></lucide-icon>
+                <div class="detail-content">
+                    <span class="label">Customer</span>
+                    <span class="value">{{ order.user?.name || 'Guest' }}</span>
+                </div>
+            </div>
+
+            <div class="order-detail">
+                <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+                <div class="detail-content">
+                    <span class="label">Date</span>
+                    <span class="value">{{ order.createdAt | date:'mediumDate' }}</span>
+                </div>
+            </div>
+
+            <div class="order-detail">
+                <lucide-icon [img]="IndianRupee" [size]="16"></lucide-icon>
+                <div class="detail-content">
+                    <span class="label">Total</span>
+                    <span class="value amount">₹{{ order.totalAmount | number:'1.2-2' }}</span>
+                </div>
+            </div>
+
+            <div class="order-detail">
+                <lucide-icon [img]="order.paymentMethod === 'online' ? CreditCard : IndianRupee" [size]="16">
+                </lucide-icon>
+                <div class="detail-content">
+                    <span class="label">Payment</span>
+                    <span class="value">{{ order.paymentMethod === 'online' ? 'Online' : 'COD' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-card-actions">
+            <button class="btn-secondary btn-sm" [routerLink]="['/dashboard/orders', order.id]">
+                <lucide-icon [img]="Eye" [size]="16"></lucide-icon>
+                <span>View</span>
+            </button>
+            @if (authService.hasPermission(PERMISSIONS.UPDATE_ORDER)) {
+            <button class="btn-primary btn-sm" (click)="onEdit(order)">
+                <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                <span>Update</span>
+            </button>
+            }
+        </div>
+    </div>
+    }
+
+    <!-- Mobile Pagination -->
+    @if (totalItems > itemsPerPage) {
+    <app-pagination [currentPage]="currentPage" [totalItems]="totalItems" [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)">
+    </app-pagination>
+    }
+</div>
+}

@@ -1,0 +1,36 @@
+<div class="filters-bar glass-card">
+    <div class="search-group">
+        <lucide-icon [img]="Search" [size]="18"></lucide-icon>
+        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" (keyup.enter)="onEnter()"
+            placeholder="Search orders, customers, phone..." class="search-input">
+    </div>
+
+    <div class="filter-group">
+        <div class="filter-item">
+            <lucide-icon [img]="Filter" [size]="16"></lucide-icon>
+            <select [(ngModel)]="statusFilter" (change)="onStatusChange()" class="filter-select">
+                <option value="All">All Statuses</option>
+                @for (status of statusOptions; track status) {
+                <option [value]="status">{{ status }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="filter-item">
+            <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+            <input type="date" [(ngModel)]="startDate" (change)="onStartDateChange()" class="filter-date"
+                placeholder="Start Date">
+        </div>
+
+        <div class="filter-item">
+            <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+            <input type="date" [(ngModel)]="endDate" (change)="onEndDateChange()" class="filter-date"
+                placeholder="End Date">
+        </div>
+
+        <button type="button" class="btn-secondary btn-sm" (click)="onReset()">
+            <lucide-icon [img]="X" [size]="16"></lucide-icon>
+            <span>Reset</span>
+        </button>
+    </div>
+</div>

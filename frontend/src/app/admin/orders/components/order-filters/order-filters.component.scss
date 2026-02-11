@@ -1,0 +1,172 @@
+@use "../../../../core/styles/glass" as *;
+
+.filters-bar {
+    @include glass-card;
+    padding: 1.5rem;
+    margin-bottom: 0;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    background: var(--surface-color);
+
+    @media (max-width: 1024px) {
+        flex-direction: column;
+        padding: 1.25rem;
+    }
+
+    @media (max-width: 480px) {
+        padding: 1rem;
+    }
+
+    .search-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1rem;
+        background: var(--surface-color-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        flex: 1;
+        min-width: 280px;
+        transition: all 0.3s ease;
+
+        @media (max-width: 1024px) {
+            width: 100%;
+            min-width: auto;
+        }
+
+        @media (max-width: 480px) {
+            padding: 0.75rem 0.875rem;
+        }
+
+        lucide-icon {
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        &:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            outline: none;
+
+            @media (max-width: 480px) {
+                font-size: 0.9rem;
+            }
+
+            &::placeholder {
+                color: var(--text-secondary);
+                opacity: 0.6;
+            }
+        }
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+
+        @media (max-width: 1024px) {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            gap: 0.5rem;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1rem;
+            background: var(--surface-color-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            transition: all 0.3s ease;
+
+            @media (max-width: 768px) {
+                flex: 1;
+                min-width: calc(50% - 0.25rem);
+            }
+
+            @media (max-width: 480px) {
+                padding: 0.75rem 0.875rem;
+                min-width: 100%;
+            }
+
+            lucide-icon {
+                color: var(--text-secondary);
+                flex-shrink: 0;
+            }
+
+            &:focus-within {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+            }
+        }
+
+        .filter-select,
+        .filter-date {
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            min-width: 120px;
+            width: 100%;
+
+            @media (max-width: 768px) {
+                min-width: auto;
+                flex: 1;
+            }
+
+            @media (max-width: 480px) {
+                font-size: 0.85rem;
+            }
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0 1.25rem;
+            height: 46px;
+            border-radius: var(--border-radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--surface-color-secondary);
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            @media (max-width: 480px) {
+                height: 42px;
+                padding: 0 1rem;
+                font-size: 0.85rem;
+            }
+
+            &:hover {
+                background: var(--border-color);
+                transform: translateY(-1px);
+            }
+
+            @media (max-width: 768px) {
+                width: 100%;
+            }
+        }
+
+        .btn-sm {
+            white-space: nowrap;
+        }
+    }
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -7,37 +7,24 @@ import { Order, OrderStatus } from '../../core/models/order.model';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { APP_PERMISSIONS } from '../../core/constants/permissions.constants';
-import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
-import { 
-  LucideAngularModule, 
-  ShoppingCart, 
-  Truck, 
-  Search, 
-  Filter, 
-  Calendar, 
-  Edit, 
-  Eye, 
-  X,
-  Check,
-  Clock,
-  Package,
-  AlertCircle,
-  User,
-  Mail,
-  Phone,
-  IndianRupee,
-  CreditCard
-} from 'lucide-angular';
+import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
+import { OrderQueueTabsComponent } from './components/order-queue-tabs/order-queue-tabs.component';
+import { OrderFiltersComponent } from './components/order-filters/order-filters.component';
+import { OrderListComponent } from './components/order-list/order-list.component';
+import { OrderStatusModalComponent } from './components/order-status-modal/order-status-modal.component';
 
 @Component({
     selector: 'app-admin-orders',
     standalone: true,
     imports: [
-        CommonModule, 
-        FormsModule, 
-        PaginationComponent, 
+        CommonModule,
+        FormsModule,
         RouterModule,
-        LucideAngularModule
+        LucideAngularModule,
+        OrderQueueTabsComponent,
+        OrderFiltersComponent,
+        OrderListComponent,
+        OrderStatusModalComponent
     ],
     templateUrl: './orders.component.html',
     styleUrl: './orders.component.scss'
@@ -47,25 +34,7 @@ export class OrdersComponent implements OnInit {
     public authService = inject(AuthService);
     private toastService = inject(ToastService);
 
-    // Icon references
     readonly ShoppingCart = ShoppingCart;
-    readonly Truck = Truck;
-    readonly Search = Search;
-    readonly Filter = Filter;
-    readonly Calendar = Calendar;
-    readonly Edit = Edit;
-    readonly Eye = Eye;
-    readonly X = X;
-    readonly Check = Check;
-    readonly Clock = Clock;
-    readonly Package = Package;
-    readonly AlertCircle = AlertCircle;
-    readonly User = User;
-    readonly Mail = Mail;
-    readonly Phone = Phone;
-    readonly IndianRupee = IndianRupee;
-    readonly CreditCard = CreditCard;
-
     readonly PERMISSIONS = APP_PERMISSIONS;
 
     activeTab: 'orders' | 'delivery' = 'orders';
@@ -87,14 +56,28 @@ export class OrdersComponent implements OnInit {
     // Status update modal
     showStatusModal = false;
     selectedOrder: Order | null = null;
-    newStatus: OrderStatus | '' = '';
-    statusMessage: string = '';
-
     statusOptions: OrderStatus[] = ['Pending', 'Confirmed', 'Packaging', 'Dispatched', 'Delivered', 'Cancelled'];
 
-    get filteredOrders(): Order[] {
-        return this.orders.filter(order => {
-            // Search
+    async ngOnInit() {
+        await this.loadOrders();
+    }
+
+    async loadOrders() {
+        this.isLoading = true;
+        try {
+            const data = await this.orderService.getOrdersByQueue(this.activeTab, this.currentPage, this.itemsPerPage);
+            this.orders = this.applyClientFilters(data.items);
+            this.totalItems = data.total;
+        } catch (error) {
+            console.error('Failed to load orders:', error);
+            this.toastService.error('Failed to load orders');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    private applyClientFilters(orders: Order[]): Order[] {
+        return orders.filter(order => {
             const searchLower = this.searchTerm.toLowerCase();
             const matchesSearch = !this.searchTerm ||
                 order.id.toLowerCase().includes(searchLower) ||
@@ -102,10 +85,8 @@ export class OrdersComponent implements OnInit {
                 order.user?.email.toLowerCase().includes(searchLower) ||
                 order.deliveryPhone?.includes(searchLower);
 
-            // Status
             const matchesStatus = this.statusFilter === 'All' || order.status === this.statusFilter;
 
-            // Date Range
             let matchesDate = true;
             if (this.startDate) {
                 matchesDate = matchesDate && new Date(order.createdAt) >= new Date(this.startDate);
@@ -120,29 +101,7 @@ export class OrdersComponent implements OnInit {
         });
     }
 
-    get paginatedOrders(): Order[] {
-        return this.orders;
-    }
-
-    async ngOnInit() {
-        await this.loadOrders();
-    }
-
-    async loadOrders() {
-        this.isLoading = true;
-        try {
-            const data = await this.orderService.getOrdersByQueue(this.activeTab, this.currentPage, this.itemsPerPage);
-            this.orders = data.items;
-            this.totalItems = data.total;
-        } catch (error) {
-            console.error('Failed to load orders:', error);
-            this.toastService.error('Failed to load orders');
-        } finally {
-            this.isLoading = false;
-        }
-    }
-
-    async switchTab(tab: 'orders' | 'delivery') {
+    async onTabChange(tab: 'orders' | 'delivery') {
         this.activeTab = tab;
         this.resetFilters();
         await this.loadOrders();
@@ -156,48 +115,32 @@ export class OrdersComponent implements OnInit {
         this.currentPage = 1;
     }
 
-    applyFilters() {
-        this.currentPage = 1;
-    }
-
     onPageChange(page: number) {
         this.currentPage = page;
         this.loadOrders();
     }
 
-    openStatusModal(order: Order) {
+    onEditOrder(order: Order) {
         if (!this.authService.hasPermission(this.PERMISSIONS.UPDATE_ORDER)) {
             this.toastService.error('You do not have permission to update orders');
             return;
         }
         this.selectedOrder = order;
-        this.newStatus = order.status;
-        this.statusMessage = '';
         this.showStatusModal = true;
     }
 
-    closeStatusModal() {
-        this.showStatusModal = false;
-        this.selectedOrder = null;
-        this.newStatus = '';
-        this.statusMessage = '';
-    }
-
-    async updateStatus() {
-        if (!this.selectedOrder || !this.newStatus) {
-            this.toastService.warning('Please select a status');
-            return;
-        }
+    async onUpdateStatus(event: { status: OrderStatus, message: string }) {
+        if (!this.selectedOrder) return;
 
         this.isUpdating = true;
         try {
             await this.orderService.updateOrderStatus(
                 this.selectedOrder.id,
-                this.newStatus,
-                this.statusMessage || undefined
+                event.status,
+                event.message || undefined
             );
             this.toastService.success('Order status updated successfully');
-            this.closeStatusModal();
+            this.onCloseModal();
             await this.loadOrders();
         } catch (error) {
             console.error('Failed to update status:', error);
@@ -207,31 +150,8 @@ export class OrdersComponent implements OnInit {
         }
     }
 
-    getStatusColor(status: string): string {
-        const colors: Record<string, string> = {
-            'Pending': 'warning',
-            'Confirmed': 'info',
-            'Packaging': 'info',
-            'Dispatched': 'primary',
-            'Delivered': 'success',
-            'Cancelled': 'danger'
-        };
-        return colors[status] || 'secondary';
-    }
-
-    getStatusIcon(status: string) {
-        const icons: Record<string, any> = {
-            'Pending': this.Clock,
-            'Confirmed': this.Check,
-            'Packaging': this.Package,
-            'Dispatched': this.Truck,
-            'Delivered': this.Check,
-            'Cancelled': this.X
-        };
-        return icons[status] || this.AlertCircle;
-    }
-
-    getTruncatedId(id: string): string {
-        return id.substring(0, 8);
+    onCloseModal() {
+        this.showStatusModal = false;
+        this.selectedOrder = null;
     }
 }

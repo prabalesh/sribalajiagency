@@ -1,0 +1,10 @@
+<div class="queue-tabs glass-card">
+    <button class="tab-btn" [class.active]="activeTab === 'orders'" (click)="onTabClick('orders')">
+        <lucide-icon [img]="ShoppingCart" [size]="20"></lucide-icon>
+        <span>Orders Queue</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'delivery'" (click)="onTabClick('delivery')">
+        <lucide-icon [img]="Truck" [size]="20"></lucide-icon>
+        <span>Delivery Queue</span>
+    </button>
+</div>
