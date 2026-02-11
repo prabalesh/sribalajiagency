@@ -32,7 +32,7 @@
     object-fit: contain;
 
     &:hover {
-        translate: calc(11.1rem);
+        translate: scale(1.1);
     }
 
     @media (max-width: 600px) {
