@@ -1,0 +1,55 @@
+:host {
+    display: block;
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 4rem 2rem;
+    max-width: 400px;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+        padding: 3rem 1.5rem;
+    }
+
+    lucide-icon {
+        color: var(--text-color-muted);
+        opacity: 0.3;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 var(--spacing-sm) 0;
+        color: var(--text-color);
+    }
+
+    p {
+        color: var(--text-color-muted);
+        margin: 0 0 var(--spacing-xl) 0;
+        font-size: 0.9375rem;
+    }
+
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        transition: var(--transition);
+        cursor: pointer;
+        border: none;
+        min-height: 44px;
+        background: var(--primary-color);
+        color: white;
+
+        &:hover {
+            background: var(--primary-color-hover, var(--primary-color));
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+    }
+}

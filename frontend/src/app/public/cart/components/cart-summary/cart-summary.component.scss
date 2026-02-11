@@ -1,0 +1,110 @@
+:host {
+    display: block;
+}
+
+.order-summary {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: var(--spacing-lg);
+    position: sticky;
+    top: var(--spacing-lg);
+
+    @media (max-width: 991px) {
+        position: static;
+    }
+
+    .summary-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 var(--spacing-lg) 0;
+        color: var(--text-color);
+    }
+
+    .summary-content {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+        font-size: 0.9375rem;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        span {
+            color: var(--text-color-muted);
+        }
+
+        .value {
+            font-weight: 600;
+            color: var(--text-color);
+
+            &.free {
+                color: var(--success-color);
+                font-weight: 700;
+            }
+        }
+
+        &.total {
+            font-size: 1.125rem;
+            font-weight: 700;
+            padding-top: var(--spacing-md);
+
+            span {
+                color: var(--text-color);
+            }
+
+            .value {
+                font-size: 1.5rem;
+                color: var(--primary-color);
+            }
+        }
+    }
+
+    .summary-divider {
+        height: 1px;
+        background: var(--border-color);
+        margin: var(--spacing-lg) 0;
+    }
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: var(--transition);
+    cursor: pointer;
+    border: none;
+    min-height: 44px;
+    background: var(--primary-color);
+    color: white;
+
+    &:hover:not(:disabled) {
+        background: var(--primary-color-hover, var(--primary-color));
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.btn-block {
+    width: 100%;
+}

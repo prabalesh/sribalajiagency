@@ -10,7 +10,12 @@ import { AddressService } from '../../core/services/api/address.service';
 import { LocationService } from '../../core/services/api/location.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Address } from '../../core/models/address.model';
-import { LucideAngularModule, AlertCircle, Trash2, Minus, Plus, Truck, Lock, ShieldCheck, CreditCard, Banknote, CheckCircle, Sparkles, ArrowLeft, ShoppingBag, TrendingUp, Tag, ShoppingCart, MapPin, Phone, Home, Briefcase, PlusCircle, XCircle } from 'lucide-angular';
+import { LucideAngularModule, ShoppingBag } from 'lucide-angular';
+
+import { CartItemComponent } from './components/cart-item/cart-item.component';
+import { CartSummaryComponent } from './components/cart-summary/cart-summary.component';
+import { CheckoutFormComponent } from './components/checkout-form/checkout-form.component';
+import { EmptyCartComponent } from './components/empty-cart/empty-cart.component';
 
 @Component({
   selector: 'app-cart',
@@ -19,7 +24,11 @@ import { LucideAngularModule, AlertCircle, Trash2, Minus, Plus, Truck, Lock, Shi
     CommonModule,
     RouterModule,
     FormsModule,
-    LucideAngularModule
+    LucideAngularModule,
+    CartItemComponent,
+    CartSummaryComponent,
+    CheckoutFormComponent,
+    EmptyCartComponent
   ],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.scss'
@@ -35,28 +44,8 @@ export class CartComponent implements OnInit {
   private toastService = inject(ToastService);
 
   // Register Lucide icons
-  readonly AlertCircle = AlertCircle;
-  readonly Trash2 = Trash2;
-  readonly Minus = Minus;
-  readonly Plus = Plus;
-  readonly Truck = Truck;
-  readonly Lock = Lock;
-  readonly ShieldCheck = ShieldCheck;
-  readonly CreditCard = CreditCard;
-  readonly Banknote = Banknote;
-  readonly CheckCircle = CheckCircle;
-  readonly Sparkles = Sparkles;
-  readonly ArrowLeft = ArrowLeft;
   readonly ShoppingBag = ShoppingBag;
-  readonly TrendingUp = TrendingUp;
-  readonly Tag = Tag;
-  readonly ShoppingCart = ShoppingCart;
-  readonly MapPin = MapPin;
-  readonly Phone = Phone;
-  readonly Home = Home;
-  readonly Briefcase = Briefcase;
-  readonly PlusCircle = PlusCircle;
-  readonly XCircle = XCircle;
+
 
   settings: any;
   selectedPayment: 'online' | 'cod' | '' = '';

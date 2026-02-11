@@ -14,208 +14,28 @@
     <div class="cart-layout">
         <!-- Cart Items -->
         <div class="cart-items">
-            @for (item of cartService.items(); track item.productId) {
-            <div class="cart-item">
-                <img [src]="item.imageUrl || 'https://placehold.co/200x200?text=Product'" 
-                     [alt]="item.productName"
-                     class="item-image"
-                     loading="lazy">
-                
-                <div class="item-details">
-                    <div class="item-header">
-                        <div>
-                            <span class="item-tag" [class.unavailable]="!item.available">
-                                {{ item.available ? 'In Stock' : 'Out of Stock' }}
-                            </span>
-                            <h3 class="item-name">{{ item.productName }}</h3>
-                            @if (item.variantName) {
-                            <p class="item-variant">{{ item.variantName }}</p>
-                            }
-                        </div>
-                        <button class="btn-icon remove-btn" 
-                                (click)="removeItem(item.productId, item.variantId)"
-                                [attr.aria-label]="'Remove ' + item.productName">
-                            <lucide-icon [img]="Trash2" [size]="18"></lucide-icon>
-                        </button>
-                    </div>
-
-                    <div class="item-footer">
-                        <div class="qty-control">
-                            <button (click)="updateQty(item.productId, -1, item.quantity, item.variantId)"
-                                    [disabled]="item.quantity <= 1"
-                                    class="btn-icon"
-                                    aria-label="Decrease quantity">
-                                <lucide-icon [img]="Minus" [size]="16"></lucide-icon>
-                            </button>
-                            <span class="qty-value">{{ item.quantity }}</span>
-                            <button (click)="updateQty(item.productId, 1, item.quantity, item.variantId)"
-                                    class="btn-icon"
-                                    aria-label="Increase quantity">
-                                <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
-                            </button>
-                        </div>
-                        <div class="item-price">
-                            <span class="price-label">₹{{ item.price | number }}</span>
-                            @if (item.quantity > 1) {
-                            <span class="price-total">₹{{ item.price * item.quantity | number }}</span>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @for (item of cartService.items(); track (item.productId + (item.variantId || ''))) {
+            <app-cart-item [item]="item"
+                (updateQty)="updateQty(item.productId, $event.delta, item.quantity, item.variantId)"
+                (remove)="removeItem(item.productId, item.variantId)">
+            </app-cart-item>
             }
         </div>
 
-        <!-- Order Summary -->
-        <aside class="order-summary">
-            <h3 class="summary-title">Order Summary</h3>
-            
-            <div class="summary-content">
-                <div class="summary-row">
-                    <span>Subtotal</span>
-                    <span class="value">₹{{ cartService.total() | number }}</span>
-                </div>
-                <div class="summary-row">
-                    <span>Shipping</span>
-                    <span class="value free">FREE</span>
-                </div>
-                <div class="summary-row">
-                    <span>Tax (GST)</span>
-                    <span class="value">₹{{ cartService.total() * 0.18 | number:'1.0-0' }}</span>
-                </div>
-                
-                <div class="summary-divider"></div>
-                
-                <div class="summary-row total">
-                    <span>Total</span>
-                    <span class="value">₹{{ cartService.total() * 1.18 | number:'1.0-0' }}</span>
-                </div>
-            </div>
+        <!-- Order Summary & Checkout -->
+        <aside class="order-summary-wrapper">
+            <app-cart-summary [subtotal]="cartService.total()" [isCheckoutMode]="isCheckoutMode"
+                (proceedToCheckout)="proceedToCheckout()">
+            </app-cart-summary>
 
-            @if (!isCheckoutMode) {
-            <button class="btn-primary btn-block" (click)="proceedToCheckout()">
-                <lucide-icon [img]="Lock" [size]="18"></lucide-icon>
-                <span>Proceed to Checkout</span>
-            </button>
-            } @else {
-            <!-- Checkout Form -->
-            <div class="checkout-form">
-                <!-- Shipping Address -->
-                <section class="form-section">
-                    <div class="section-header">
-                        <lucide-icon [img]="MapPin" [size]="20"></lucide-icon>
-                        <h4>Shipping Address</h4>
-                        <button class="btn-text" (click)="navigateToAddresses()">
-                            + Add New
-                        </button>
-                    </div>
-
-                    @if (addresses.length > 0) {
-                    <div class="address-list">
-                        @for (address of addresses; track address.id) {
-                        <label class="address-option" [class.selected]="selectedAddressId === address.id">
-                            <input type="radio" 
-                                   name="address" 
-                                   [value]="address.id"
-                                   [(ngModel)]="selectedAddressId"
-                                   (change)="selectAddress(address)">
-                            <div class="address-content">
-                                <div class="address-type">
-                                    <lucide-icon [img]="address.type === 'Home' ? Home : Briefcase" [size]="14"></lucide-icon>
-                                    {{ address.type }}
-                                </div>
-                                <p class="address-name">{{ address.name }}</p>
-                                <p class="address-text">{{ address.street }}, {{ address.city }}, {{ address.state }} {{ address.zip }}</p>
-                                <p class="address-phone">{{ address.phonePrimary }}</p>
-                            </div>
-                            <lucide-icon [img]="CheckCircle" [size]="20" class="check-icon"></lucide-icon>
-                        </label>
-                        }
-                    </div>
-                    } @else {
-                    <div class="empty-state">
-                        <p>No saved addresses</p>
-                        <button class="btn-secondary btn-sm" (click)="navigateToAddresses()">
-                            Add Address
-                        </button>
-                    </div>
-                    }
-
-                    @if (selectedAddressId) {
-                    <div class="delivery-status" 
-                         [class.checking]="checkingEligibility"
-                         [class.available]="isLocationEligible"
-                         [class.unavailable]="!isLocationEligible && !checkingEligibility">
-                        @if (checkingEligibility) {
-                        <div class="spinner"></div>
-                        <span>Checking availability...</span>
-                        } @else if (isLocationEligible) {
-                        <lucide-icon [img]="CheckCircle" [size]="18"></lucide-icon>
-                        <span>Delivery available</span>
-                        } @else {
-                        <lucide-icon [img]="XCircle" [size]="18"></lucide-icon>
-                        <span>Not available in this area</span>
-                        }
-                    </div>
-                    }
-
-                    <textarea class="form-input" 
-                              [(ngModel)]="deliveryNotes"
-                              placeholder="Delivery instructions (optional)"
-                              rows="2"></textarea>
-                </section>
-
-                <!-- Payment Method -->
-                <section class="form-section">
-                    <div class="section-header">
-                        <lucide-icon [img]="CreditCard" [size]="20"></lucide-icon>
-                        <h4>Payment Method</h4>
-                    </div>
-
-                    <div class="payment-options">
-                        @if (allowedMethods.includes('online')) {
-                        <label class="payment-option" [class.selected]="selectedPayment === 'online'">
-                            <input type="radio" name="payment" value="online" [(ngModel)]="selectedPayment">
-                            <div class="option-content">
-                                <lucide-icon [img]="CreditCard" [size]="24"></lucide-icon>
-                                <div>
-                                    <strong>Online Payment</strong>
-                                    <span>UPI, Cards, Netbanking</span>
-                                </div>
-                            </div>
-                            <lucide-icon [img]="CheckCircle" [size]="20" class="check-icon"></lucide-icon>
-                        </label>
-                        }
-
-                        @if (allowedMethods.includes('cod')) {
-                        <label class="payment-option" [class.selected]="selectedPayment === 'cod'">
-                            <input type="radio" name="payment" value="cod" [(ngModel)]="selectedPayment">
-                            <div class="option-content">
-                                <lucide-icon [img]="Banknote" [size]="24"></lucide-icon>
-                                <div>
-                                    <strong>Cash on Delivery</strong>
-                                    <span>Pay when you receive</span>
-                                </div>
-                            </div>
-                            <lucide-icon [img]="CheckCircle" [size]="20" class="check-icon"></lucide-icon>
-                        </label>
-                        }
-                    </div>
-                </section>
-
-                <div class="checkout-actions">
-                    <button class="btn-primary btn-block"
-                            [disabled]="!selectedPayment || !selectedAddressId || !isLocationEligible || isProcessingOrder"
-                            (click)="finalizeOrder()">
-                        {{ isProcessingOrder ? 'Processing...' : 'Place Order' }}
-                    </button>
-                    <button class="btn-secondary btn-block" 
-                            (click)="isCheckoutMode = false"
-                            [disabled]="isProcessingOrder">
-                        Back to Cart
-                    </button>
-                </div>
-            </div>
+            @if (isCheckoutMode) {
+            <app-checkout-form [addresses]="addresses" [selectedAddressId]="selectedAddressId"
+                [isLocationEligible]="isLocationEligible" [checkingEligibility]="checkingEligibility"
+                [allowedMethods]="allowedMethods" [isProcessingOrder]="isProcessingOrder"
+                (addressSelected)="selectAddress($event)" (paymentSelected)="selectedPayment = $event"
+                (finalizeOrder)="deliveryNotes = $event.notes; finalizeOrder()" (backToCart)="isCheckoutMode = false"
+                (addNewAddress)="navigateToAddresses()">
+            </app-checkout-form>
             }
         </aside>
     </div>
@@ -234,14 +54,6 @@
     }
 
     } @else {
-    <!-- Empty Cart -->
-    <div class="empty-cart">
-        <lucide-icon [img]="ShoppingBag" [size]="64" [strokeWidth]="1.5"></lucide-icon>
-        <h2>Your cart is empty</h2>
-        <p>Add items to get started</p>
-        <button class="btn-primary" routerLink="/products">
-            Browse Products
-        </button>
-    </div>
+    <app-empty-cart></app-empty-cart>
     }
 </div>

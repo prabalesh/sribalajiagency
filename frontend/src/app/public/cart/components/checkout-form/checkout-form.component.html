@@ -1,0 +1,111 @@
+<div class="checkout-form">
+    <!-- Shipping Address -->
+    <section class="form-section">
+        <div class="section-header">
+            <lucide-icon [img]="MapPin" [size]="20"></lucide-icon>
+            <h4>Shipping Address</h4>
+            <button class="btn-text" (click)="onAddAddress()">
+                + Add New
+            </button>
+        </div>
+
+        @if (addresses.length > 0) {
+        <div class="address-list">
+            @for (address of addresses; track address.id) {
+            <label class="address-option" [class.selected]="selectedAddressId === address.id">
+                <input type="radio" name="address" [value]="address.id" [ngModel]="selectedAddressId"
+                    (ngModelChange)="onSelectAddress(address)">
+                <div class="address-content">
+                    <div class="address-type">
+                        <lucide-icon [img]="address.type === 'Home' ? Home : Briefcase" [size]="14"></lucide-icon>
+                        {{ address.type }}
+                    </div>
+                    <p class="address-name">{{ address.name }}</p>
+                    <p class="address-text">{{ address.street }}, {{ address.city }}, {{ address.state }} {{ address.zip
+                        }}</p>
+                    <p class="address-phone">{{ address.phonePrimary }}</p>
+                </div>
+                <lucide-icon [img]="CheckCircle" [size]="20" class="check-icon"></lucide-icon>
+            </label>
+            }
+        </div>
+        } @else {
+        <div class="empty-state">
+            <p>No saved addresses</p>
+            <button class="btn-secondary btn-sm" (click)="onAddAddress()">
+                Add Address
+            </button>
+        </div>
+        }
+
+        @if (selectedAddressId) {
+        <div class="delivery-status" [class.checking]="checkingEligibility" [class.available]="isLocationEligible"
+            [class.unavailable]="!isLocationEligible && !checkingEligibility">
+            @if (checkingEligibility) {
+            <div class="spinner"></div>
+            <span>Checking availability...</span>
+            } @else if (isLocationEligible) {
+            <lucide-icon [img]="CheckCircle" [size]="18"></lucide-icon>
+            <span>Delivery available</span>
+            } @else {
+            <lucide-icon [img]="XCircle" [size]="18"></lucide-icon>
+            <span>Not available in this area</span>
+            }
+        </div>
+        }
+
+        <textarea class="form-input" [(ngModel)]="deliveryNotes" placeholder="Delivery instructions (optional)"
+            rows="2"></textarea>
+    </section>
+
+    <!-- Payment Method -->
+    <section class="form-section">
+        <div class="section-header">
+            <lucide-icon [img]="CreditCard" [size]="20"></lucide-icon>
+            <h4>Payment Method</h4>
+        </div>
+
+        <div class="payment-options">
+            @if (allowedMethods.includes('online')) {
+            <label class="payment-option" [class.selected]="selectedPayment === 'online'">
+                <input type="radio" name="payment" value="online" [ngModel]="selectedPayment"
+                    (ngModelChange)="onSelectPayment('online')">
+                <div class="option-content">
+                    <lucide-icon [img]="CreditCard" [size]="24"></lucide-icon>
+                    <div>
+                        <strong>Online Payment</strong>
+                        <span>UPI, Cards, Netbanking</span>
+                    </div>
+                </div>
+                <lucide-icon [img]="CheckCircle" [size]="20" class="check-icon"></lucide-icon>
+            </label>
+            }
+
+            @if (allowedMethods.includes('cod')) {
+            <label class="payment-option" [class.selected]="selectedPayment === 'cod'">
+                <input type="radio" name="payment" value="cod" [ngModel]="selectedPayment"
+                    (ngModelChange)="onSelectPayment('cod')">
+                <div class="option-content">
+                    <lucide-icon [img]="Banknote" [size]="24"></lucide-icon>
+                    <div>
+                        <strong>Cash on Delivery</strong>
+                        <span>Pay when you receive</span>
+                    </div>
+                </div>
+                <lucide-icon [img]="CheckCircle" [size]="20" class="check-icon"></lucide-icon>
+            </label>
+            }
+        </div>
+    </section>
+
+    <div class="checkout-actions">
+        <button class="btn-primary btn-block"
+            [disabled]="!selectedPayment || !selectedAddressId || !isLocationEligible || isProcessingOrder"
+            (click)="onFinalize()">
+            {{ isProcessingOrder ? 'Processing...' : 'Place Order' }}
+        </button>
+        <button class="btn-secondary btn-block" (click)="onBack()" [disabled]="isProcessingOrder">
+            Back to Cart
+        </button>
+    </div>
+</div>

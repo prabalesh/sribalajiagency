@@ -1,0 +1,40 @@
+<div class="cart-item">
+    <img [src]="item.imageUrl || 'https://placehold.co/200x200?text=Product'" [alt]="item.productName"
+        class="item-image" loading="lazy">
+
+    <div class="item-details">
+        <div class="item-header">
+            <div>
+                <span class="item-tag" [class.unavailable]="!item.available">
+                    {{ item.available ? 'In Stock' : 'Out of Stock' }}
+                </span>
+                <h3 class="item-name">{{ item.productName }}</h3>
+                @if (item.variantName) {
+                <p class="item-variant">{{ item.variantName }}</p>
+                }
+            </div>
+            <button class="btn-icon remove-btn" (click)="onRemove()" [attr.aria-label]="'Remove ' + item.productName">
+                <lucide-icon [img]="Trash2" [size]="18"></lucide-icon>
+            </button>
+        </div>
+
+        <div class="item-footer">
+            <div class="qty-control">
+                <button (click)="onUpdateQty(-1)" [disabled]="item.quantity <= 1" class="btn-icon"
+                    aria-label="Decrease quantity">
+                    <lucide-icon [img]="Minus" [size]="16"></lucide-icon>
+                </button>
+                <span class="qty-value">{{ item.quantity }}</span>
+                <button (click)="onUpdateQty(1)" class="btn-icon" aria-label="Increase quantity">
+                    <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                </button>
+            </div>
+            <div class="item-price">
+                <span class="price-label">₹{{ item.price | number }}</span>
+                @if (item.quantity > 1) {
+                <span class="price-total">₹{{ item.price * item.quantity | number }}</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
