@@ -82,7 +82,7 @@ import { DatabaseSeederService } from './database/database-seeder.service';
         database: config.get<string>('DB_NAME', 'sribalaji'),
         entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, SiteSettings, Order, OrderItem, OrderStatusHistory, Coupon, LocationRestriction, HomeCMS, UserAddress, Review, Cart, CartItem],
 
-        synchronize: config.get('NODE_ENV') !== 'production',
+        synchronize: true, // Auto-sync entities with database - disable in production
         // Migrations disabled - use seed script instead to avoid timing issues
         // migrationsRun: false,
         // migrations: [],
