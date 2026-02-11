@@ -391,7 +391,6 @@ p {
         max-width: 600px;
         height: auto;
         object-fit: contain;
-        animation: heroFloat 10s ease-in-out infinite;
 
         @media (max-width: 991px) {
             max-width: 500px;
@@ -628,18 +627,6 @@ p {
 /* ============================================
    ANIMATIONS
    ============================================ */
-
-@keyframes heroFloat {
-
-    0%,
-    100% {
-        transform: translateY(0) rotate(0deg);
-    }
-
-    50% {
-        transform: translateY(-20px) rotate(1deg);
-    }
-}
 
 @keyframes fadeInUp {
     from {

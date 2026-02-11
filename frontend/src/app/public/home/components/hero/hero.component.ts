@@ -13,34 +13,43 @@ import { LucideAngularModule, ChevronLeft, ChevronRight } from 'lucide-angular';
 export class HeroComponent implements OnInit, OnDestroy {
     @Input() cms: any;
 
-    // Lucide icons
     readonly ChevronLeft = ChevronLeft;
     readonly ChevronRight = ChevronRight;
 
     currentSlideIndex = 0;
-    private slideInterval: any;
+    private slideInterval: any = null;
     private touchStartX = 0;
-    private touchEndX = 0;
+    private isAutoPlayEnabled = true;
 
     ngOnInit() {
-        const isCarouselType = this.cms?.heroType === 'carousel' || this.cms?.heroType === 'classic-carousel';
-        if (isCarouselType && this.cms?.heroSlides?.length > 1) {
-            this.startSlideShow();
+        // Start auto-play after a short delay to let page load
+        if (this.shouldAutoPlay()) {
+            setTimeout(() => {
+                this.startAutoPlay();
+            }, 1000);
         }
     }
 
     ngOnDestroy() {
-        this.stopSlideShow();
+        this.stopAutoPlay();
     }
 
-    startSlideShow() {
-        this.stopSlideShow();
+    private shouldAutoPlay(): boolean {
+        return (
+            (this.cms?.heroType === 'carousel' || this.cms?.heroType === 'classic-carousel') &&
+            this.cms?.heroSlides?.length > 1
+        );
+    }
+
+    private startAutoPlay() {
+        if (!this.isAutoPlayEnabled || this.slideInterval) return;
+        
         this.slideInterval = setInterval(() => {
             this.nextSlide();
         }, 5000);
     }
 
-    stopSlideShow() {
+    private stopAutoPlay() {
         if (this.slideInterval) {
             clearInterval(this.slideInterval);
             this.slideInterval = null;
@@ -48,25 +57,28 @@ export class HeroComponent implements OnInit, OnDestroy {
     }
 
     nextSlide() {
-        if (this.cms?.heroSlides && this.cms.heroSlides.length > 0) {
+        if (this.cms?.heroSlides?.length > 0) {
             this.currentSlideIndex = (this.currentSlideIndex + 1) % this.cms.heroSlides.length;
         }
     }
 
     prevSlide() {
-        if (this.cms?.heroSlides && this.cms.heroSlides.length > 0) {
+        if (this.cms?.heroSlides?.length > 0) {
             this.currentSlideIndex = (this.currentSlideIndex - 1 + this.cms.heroSlides.length) % this.cms.heroSlides.length;
         }
     }
 
     goToSlide(index: number) {
         this.currentSlideIndex = index;
-        this.startSlideShow(); // Restart the timer when manually changing slides
+        // Restart auto-play after manual navigation
+        this.stopAutoPlay();
+        if (this.isAutoPlayEnabled) {
+            this.startAutoPlay();
+        }
     }
 
-    // Get alignment CSS value from alignment string
     getAlignment(alignment: string): string {
-        const alignmentMap: { [key: string]: string } = {
+        const map: Record<string, string> = {
             'top-left': 'flex-start',
             'top-center': 'center',
             'top-right': 'flex-end',
@@ -77,48 +89,38 @@ export class HeroComponent implements OnInit, OnDestroy {
             'bottom-center': 'center',
             'bottom-right': 'flex-end'
         };
-        return alignmentMap[alignment] || 'center';
+        return map[alignment] || 'center';
     }
 
-    // Touch handlers for swipe gestures
     onTouchStart(event: TouchEvent) {
         this.touchStartX = event.changedTouches[0].screenX;
-        this.stopSlideShow();
+        this.stopAutoPlay();
     }
 
     onTouchEnd(event: TouchEvent) {
-        this.touchEndX = event.changedTouches[0].screenX;
-        this.handleSwipe();
-        this.startSlideShow();
-    }
-
-    private handleSwipe() {
-        const swipeThreshold = 50;
-        const diff = this.touchStartX - this.touchEndX;
-
-        if (Math.abs(diff) > swipeThreshold) {
-            if (diff > 0) {
-                this.nextSlide();
-            } else {
-                this.prevSlide();
-            }
+        const diff = this.touchStartX - event.changedTouches[0].screenX;
+        if (Math.abs(diff) > 50) {
+            diff > 0 ? this.nextSlide() : this.prevSlide();
+        }
+        // Restart auto-play after swipe
+        if (this.isAutoPlayEnabled) {
+            this.startAutoPlay();
         }
     }
 
-    // Pause on hover (desktop only)
     @HostListener('mouseenter')
     onMouseEnter() {
-        const isCarouselType = this.cms?.heroType === 'carousel' || this.cms?.heroType === 'classic-carousel';
-        if (isCarouselType && this.cms?.heroSlides?.length > 1) {
-            this.stopSlideShow();
-        }
+        // Pause on hover (desktop only)
+        this.isAutoPlayEnabled = false;
+        this.stopAutoPlay();
     }
 
     @HostListener('mouseleave')
     onMouseLeave() {
-        const isCarouselType = this.cms?.heroType === 'carousel' || this.cms?.heroType === 'classic-carousel';
-        if (isCarouselType && this.cms?.heroSlides?.length > 1) {
-            this.startSlideShow();
+        // Resume on mouse leave
+        this.isAutoPlayEnabled = true;
+        if (this.shouldAutoPlay()) {
+            this.startAutoPlay();
         }
     }
 }
