@@ -1,62 +1,58 @@
-<div class="account-page container">
-    <app-account-sidebar></app-account-sidebar>
-    <main class="account-content animate-fade">
-        <header class="content-header">
-            <h1>Account Settings</h1>
-            <p>Manage your personal information and preferences.</p>
-        </header>
+<main class="account-content animate-fade">
+    <header class="content-header">
+        <h1>Account Settings</h1>
+        <p>Manage your personal information and preferences.</p>
+    </header>
 
-        <section class="profile-section glass-card">
-            <div class="section-header">
-                <h2>Personal Information</h2>
-                <button class="btn-secondary" (click)="isEditing = !isEditing">
-                    {{ isEditing ? 'Cancel' : 'Edit' }}
-                </button>
+    <section class="profile-section glass-card">
+        <div class="section-header">
+            <h2>Personal Information</h2>
+            <button class="btn-secondary" (click)="isEditing = !isEditing">
+                {{ isEditing ? 'Cancel' : 'Edit' }}
+            </button>
+        </div>
+
+        <div *ngIf="message" class="success-banner">{{ message }}</div>
+
+        <div class="profile-form">
+            <div class="form-group">
+                <label>Full Name</label>
+                @if (!isEditing) {
+                <p class="value">{{ name }}</p>
+                } @else {
+                <input type="text" [(ngModel)]="name" class="form-control">
+                }
             </div>
 
-            <div *ngIf="message" class="success-banner">{{ message }}</div>
-
-            <div class="profile-form">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    @if (!isEditing) {
-                    <p class="value">{{ name }}</p>
-                    } @else {
-                    <input type="text" [(ngModel)]="name" class="form-control">
-                    }
-                </div>
-
-                <div class="form-group">
-                    <label>Email Address</label>
-                    @if (!isEditing) {
-                    <p class="value">{{ email }}</p>
-                    } @else {
-                    <input type="email" [(ngModel)]="email" class="form-control">
-                    }
-                </div>
-
-                <div class="form-group">
-                    <label>Member Since</label>
-                    <p class="value">{{ authService.user()?.createdAt | date:'longDate' }}</p>
-                </div>
-
-                <button *ngIf="isEditing" class="btn-primary" (click)="saveProfile()">
-                    Save Changes
-                </button>
+            <div class="form-group">
+                <label>Email Address</label>
+                @if (!isEditing) {
+                <p class="value">{{ email }}</p>
+                } @else {
+                <input type="email" [(ngModel)]="email" class="form-control">
+                }
             </div>
-        </section>
 
-        <section class="security-section glass-card">
-            <div class="section-header">
-                <h2>Security</h2>
+            <div class="form-group">
+                <label>Member Since</label>
+                <p class="value">{{ authService.user()?.createdAt | date:'longDate' }}</p>
             </div>
-            <div class="security-row">
-                <div class="text">
-                    <strong>Password</strong>
-                    <p>Change your account password regularly for better security.</p>
-                </div>
-                <button class="btn-secondary" routerLink="/forgot-password">Change Password</button>
+
+            <button *ngIf="isEditing" class="btn-primary" (click)="saveProfile()">
+                Save Changes
+            </button>
+        </div>
+    </section>
+
+    <section class="security-section glass-card">
+        <div class="section-header">
+            <h2>Security</h2>
+        </div>
+        <div class="security-row">
+            <div class="text">
+                <strong>Password</strong>
+                <p>Change your account password regularly for better security.</p>
             </div>
-        </section>
-    </main>
-</div>
+            <button class="btn-secondary" routerLink="/forgot-password">Change Password</button>
+        </div>
+    </section>

@@ -90,6 +90,8 @@ export const routes: Routes = [
             {
                 path: 'account',
                 canActivate: [authGuard],
+                loadComponent: () => import('./layout/account-layout/account-layout.component').then(m => m.AccountLayoutComponent),
+                data: { preload: true },
                 children: [
                     {
                         path: 'profile',
