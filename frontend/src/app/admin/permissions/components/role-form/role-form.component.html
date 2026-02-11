@@ -1,0 +1,61 @@
+<div class="form-card glass-card animate-fade">
+    <div class="form-header">
+        <h3>
+            <lucide-icon [img]="isEditing ? Edit : Plus" [size]="22"></lucide-icon>
+            <span>{{ isEditing ? 'Modify Role' : 'Create New Security Role' }}</span>
+        </h3>
+        @if (isEditing) {
+        <button type="button" class="btn-icon-sm" (click)="onCancel()" title="Cancel">
+            <lucide-icon [img]="X" [size]="18"></lucide-icon>
+        </button>
+        }
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+            <!-- Role Name -->
+            <div class="form-group">
+                <label class="form-label">
+                    <lucide-icon [img]="ShieldCheck" [size]="16"></lucide-icon>
+                    <span>Role Identifier <span class="required">*</span></span>
+                </label>
+                <input type="text" class="form-input" [(ngModel)]="newRole.name" name="name" required
+                    placeholder="e.g. Content Manager" [disabled]="isSaving">
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label class="form-label">
+                    <lucide-icon [img]="Users" [size]="16"></lucide-icon>
+                    <span>Short Description</span>
+                </label>
+                <input type="text" class="form-input" [(ngModel)]="newRole.description" name="description"
+                    placeholder="Describe access level..." [disabled]="isSaving">
+            </div>
+
+            <!-- Permissions Section -->
+            <app-permission-selector [selectedPermissionIds]="newRole.permissionIds" [permissions]="permissions"
+                [isSaving]="isSaving" (toggle)="onTogglePermission($event)" (selectAll)="onSelectAllPermissions($event)"
+                (deselectAll)="onDeselectAllPermissions()">
+            </app-permission-selector>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="!newRole.name || isSaving">
+                @if (isSaving) {
+                <span class="spinner-sm"></span>
+                <span>{{ isEditing ? 'Saving...' : 'Creating...' }}</span>
+                } @else {
+                <lucide-icon [img]="isEditing ? Check : Plus" [size]="18"></lucide-icon>
+                <span>{{ isEditing ? 'Save Changes' : 'Create Role' }}</span>
+                }
+            </button>
+            @if (isEditing) {
+            <button type="button" (click)="onCancel()" class="btn-secondary" [disabled]="isSaving">
+                Cancel
+            </button>
+            }
+        </div>
+    </form>
+</div>

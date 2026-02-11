@@ -4,28 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Permission, Role } from '../../core/models/auth.model';
-import { 
-    LucideAngularModule, 
-    Shield,
-    ShieldCheck,
-    Plus,
-    Edit,
-    Trash2,
-    X,
-    Check,
-    Lock,
-    Unlock,
-    Users,
-    Key,
-    AlertCircle,
-    Search,
-    Filter
-} from 'lucide-angular';
+import { LucideAngularModule, Shield, Key } from 'lucide-angular';
+import { RoleFormComponent } from './components/role-form/role-form.component';
+import { RoleListComponent } from './components/role-list/role-list.component';
 
 @Component({
     selector: 'app-admin-permissions',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule],
+    imports: [CommonModule, FormsModule, LucideAngularModule, RoleFormComponent, RoleListComponent],
     templateUrl: './permissions.component.html',
     styleUrl: './permissions.component.scss'
 })
@@ -35,19 +21,7 @@ export class PermissionsComponent implements OnInit {
 
     // Icon references
     readonly Shield = Shield;
-    readonly ShieldCheck = ShieldCheck;
-    readonly Plus = Plus;
-    readonly Edit = Edit;
-    readonly Trash2 = Trash2;
-    readonly X = X;
-    readonly Check = Check;
-    readonly Lock = Lock;
-    readonly Unlock = Unlock;
-    readonly Users = Users;
     readonly Key = Key;
-    readonly AlertCircle = AlertCircle;
-    readonly Search = Search;
-    readonly Filter = Filter;
 
     roles: Role[] = [];
     permissions: Permission[] = [];
@@ -56,10 +30,6 @@ export class PermissionsComponent implements OnInit {
     isLoading = true;
     isSaving = false;
     isDeleting = false;
-
-    // Search & Filter
-    searchTerm = '';
-    selectedCategory = 'all';
 
     async ngOnInit() {
         await this.loadData();
@@ -126,9 +96,9 @@ export class PermissionsComponent implements OnInit {
         // Scroll to form on mobile
         if (window.innerWidth < 1024) {
             setTimeout(() => {
-                document.querySelector('.form-card')?.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
+                document.querySelector('.form-card')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
                 });
             }, 100);
         }
@@ -152,28 +122,9 @@ export class PermissionsComponent implements OnInit {
         }
     }
 
-    togglePermission(id: string) {
-        const index = this.newRole.permissionIds.indexOf(id);
-        if (index > -1) {
-            this.newRole.permissionIds.splice(index, 1);
-        } else {
-            this.newRole.permissionIds.push(id);
-        }
-    }
-
-    selectAllPermissions() {
-        this.newRole.permissionIds = this.filteredPermissions.map(p => p.id);
-    }
-
-    deselectAllPermissions() {
-        this.newRole.permissionIds = [];
-    }
-
     resetForm() {
         this.newRole = this.getEmptyRole();
         this.isEditing = false;
-        this.searchTerm = '';
-        this.selectedCategory = 'all';
     }
 
     getEmptyRole() {
@@ -182,35 +133,5 @@ export class PermissionsComponent implements OnInit {
             description: '',
             permissionIds: []
         };
-    }
-
-    get filteredPermissions(): Permission[] {
-        return this.permissions.filter(p => {
-            const matchesSearch = !this.searchTerm || 
-                p.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                p.description?.toLowerCase().includes(this.searchTerm.toLowerCase());
-
-            const matchesCategory = this.selectedCategory === 'all' || 
-                p.name.toLowerCase().startsWith(this.selectedCategory.toLowerCase());
-
-            return matchesSearch && matchesCategory;
-        });
-    }
-
-    get permissionCategories(): string[] {
-        const categories = new Set<string>();
-        this.permissions.forEach(p => {
-            const category = p.name.split('_')[0];
-            categories.add(category);
-        });
-        return ['all', ...Array.from(categories)];
-    }
-
-    getSelectedCount(): number {
-        return this.newRole.permissionIds.length;
-    }
-
-    getTotalCount(): number {
-        return this.filteredPermissions.length;
     }
 }
