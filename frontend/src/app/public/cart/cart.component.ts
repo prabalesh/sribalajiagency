@@ -10,7 +10,7 @@ import { AddressService } from '../../core/services/api/address.service';
 import { LocationService } from '../../core/services/api/location.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Address } from '../../core/models/address.model';
-import { LucideAngularModule, Trash2, Minus, Plus, Truck, Lock, ShieldCheck, CreditCard, Banknote, CheckCircle, Sparkles, ArrowLeft, ShoppingBag, TrendingUp, Tag, ShoppingCart, MapPin, Phone, Home, Briefcase, PlusCircle, XCircle } from 'lucide-angular';
+import { LucideAngularModule, AlertCircle, Trash2, Minus, Plus, Truck, Lock, ShieldCheck, CreditCard, Banknote, CheckCircle, Sparkles, ArrowLeft, ShoppingBag, TrendingUp, Tag, ShoppingCart, MapPin, Phone, Home, Briefcase, PlusCircle, XCircle } from 'lucide-angular';
 
 @Component({
   selector: 'app-cart',
@@ -35,6 +35,7 @@ export class CartComponent implements OnInit {
   private toastService = inject(ToastService);
 
   // Register Lucide icons
+  readonly AlertCircle = AlertCircle;
   readonly Trash2 = Trash2;
   readonly Minus = Minus;
   readonly Plus = Plus;

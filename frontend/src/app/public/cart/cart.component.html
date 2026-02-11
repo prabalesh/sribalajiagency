@@ -1,73 +1,64 @@
 <div class="cart-page container">
+    <!-- Simple Header -->
     <header class="page-header">
-        <div class="header-content">
-            <div class="header-badge">
-                <lucide-icon [img]="ShoppingBag" [size]="20"></lucide-icon>
-                <span>Shopping Bag</span>
-            </div>
-            <p *ngIf="cartService.count() > 0" class="item-count">
-                <span class="count-pill">{{ cartService.count() }}</span>
-                {{ cartService.count() === 1 ? 'item ready' : 'items ready' }} to checkout
-            </p>
+        <div class="header-badge">
+            <lucide-icon [img]="ShoppingBag" [size]="20"></lucide-icon>
+            <span>Shopping Cart</span>
         </div>
-        <div class="header-decoration">
-            <div class="blob blob-1"></div>
-            <div class="blob blob-2"></div>
-        </div>
+        @if (cartService.count() > 0) {
+        <p class="item-count">{{ cartService.count() }} {{ cartService.count() === 1 ? 'item' : 'items' }}</p>
+        }
     </header>
 
     @if (cartService.count() > 0) {
     <div class="cart-layout">
+        <!-- Cart Items -->
         <div class="cart-items">
-            @for (item of cartService.items(); track item.productId; let i = $index) {
-            <div class="cart-item glass-card animate-slide-in" [style.animation-delay]="i * 0.1 + 's'">
-                <div class="item-badge">#{{ i + 1 }}</div>
-                <div class="item-img">
-                    <div class="img-glow"></div>
-                    <img [src]="item.imageUrl || 'https://placehold.co/100x100?text=Product'" [alt]="item.productName">
-                </div>
-                <div class="item-info">
-                    <div class="info-header">
+            @for (item of cartService.items(); track item.productId) {
+            <div class="cart-item">
+                <img [src]="item.imageUrl || 'https://placehold.co/200x200?text=Product'" 
+                     [alt]="item.productName"
+                     class="item-image"
+                     loading="lazy">
+                
+                <div class="item-details">
+                    <div class="item-header">
                         <div>
-                            <span class="item-tag" [class.unavailable]="!item.available">{{ item.available ? 'In Stock'
-                                : 'Unavailable' }}</span>
-                            <h3>
-                                {{ item.productName }}
-                                <span *ngIf="item.variantName" class="variant-info">({{ item.variantName }})</span>
-                            </h3>
-                            <div *ngIf="item.quantityAdjusted" class="quantity-warning">
-                                ⚠️ Quantity adjusted from {{ item.originalQuantity }} to {{ item.quantity }}
-                            </div>
+                            <span class="item-tag" [class.unavailable]="!item.available">
+                                {{ item.available ? 'In Stock' : 'Out of Stock' }}
+                            </span>
+                            <h3 class="item-name">{{ item.productName }}</h3>
+                            @if (item.variantName) {
+                            <p class="item-variant">{{ item.variantName }}</p>
+                            }
                         </div>
-                        <button class="remove-btn" (click)="removeItem(item.productId, item.variantId)"
-                            title="Remove item">
+                        <button class="btn-icon remove-btn" 
+                                (click)="removeItem(item.productId, item.variantId)"
+                                [attr.aria-label]="'Remove ' + item.productName">
                             <lucide-icon [img]="Trash2" [size]="18"></lucide-icon>
                         </button>
                     </div>
-                    <div class="price-section">
-                        <div class="price-tag">
-                            <span class="label">Unit Price</span>
-                            <span class="amount">₹{{ item.price | number }}</span>
-                        </div>
-                    </div>
 
                     <div class="item-footer">
-                        <div class="qty-section">
-                            <span class="qty-label">Quantity</span>
-                            <div class="qty-control glass-card">
-                                <button (click)="updateQty(item.productId, -1, item.quantity, item.variantId)"
-                                    [disabled]="item.quantity <= 1">
-                                    <lucide-icon [img]="Minus" [size]="14"></lucide-icon>
-                                </button>
-                                <span class="qty-value">{{ item.quantity }}</span>
-                                <button (click)="updateQty(item.productId, 1, item.quantity, item.variantId)">
-                                    <lucide-icon [img]="Plus" [size]="14"></lucide-icon>
-                                </button>
-                            </div>
+                        <div class="qty-control">
+                            <button (click)="updateQty(item.productId, -1, item.quantity, item.variantId)"
+                                    [disabled]="item.quantity <= 1"
+                                    class="btn-icon"
+                                    aria-label="Decrease quantity">
+                                <lucide-icon [img]="Minus" [size]="16"></lucide-icon>
+                            </button>
+                            <span class="qty-value">{{ item.quantity }}</span>
+                            <button (click)="updateQty(item.productId, 1, item.quantity, item.variantId)"
+                                    class="btn-icon"
+                                    aria-label="Increase quantity">
+                                <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                            </button>
                         </div>
-                        <div class="subtotal-section">
-                            <span class="subtotal-label">Subtotal</span>
-                            <span class="subtotal">₹{{ item.price * item.quantity | number }}</span>
+                        <div class="item-price">
+                            <span class="price-label">₹{{ item.price | number }}</span>
+                            @if (item.quantity > 1) {
+                            <span class="price-total">₹{{ item.price * item.quantity | number }}</span>
+                            }
                         </div>
                     </div>
                 </div>
@@ -75,261 +66,182 @@
             }
         </div>
 
-        <div class="cart-summary glass-card">
-            <div class="summary-header">
-                <lucide-icon [img]="Sparkles" [size]="24" class="sparkle-icon"></lucide-icon>
-                <h3>Order Summary</h3>
-            </div>
-
-            <div class="summary-body">
+        <!-- Order Summary -->
+        <aside class="order-summary">
+            <h3 class="summary-title">Order Summary</h3>
+            
+            <div class="summary-content">
                 <div class="summary-row">
-                    <span>Subtotal ({{ cartService.count() }} items)</span>
+                    <span>Subtotal</span>
                     <span class="value">₹{{ cartService.total() | number }}</span>
                 </div>
-                <div class="summary-row highlight">
-                    <span class="with-icon">
-                        <lucide-icon [img]="Truck" [size]="16"></lucide-icon>
-                        Shipping
-                    </span>
-                    <span class="free-badge">FREE</span>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span class="value free">FREE</span>
                 </div>
-                <div class="summary-row" *ngIf="!taxBreakdown">
-                    <span>GST (Estimated)</span>
+                <div class="summary-row">
+                    <span>Tax (GST)</span>
                     <span class="value">₹{{ cartService.total() * 0.18 | number:'1.0-0' }}</span>
                 </div>
-
-                <ng-container *ngIf="taxBreakdown">
-                    <div class="summary-row tax-detail" *ngIf="taxBreakdown.breakdown.cgst > 0">
-                        <span>CGST</span>
-                        <span class="value">₹{{ taxBreakdown.breakdown.cgst | number }}</span>
-                    </div>
-                    <div class="summary-row tax-detail" *ngIf="taxBreakdown.breakdown.sgst > 0">
-                        <span>SGST</span>
-                        <span class="value">₹{{ taxBreakdown.breakdown.sgst | number }}</span>
-                    </div>
-                    <div class="summary-row tax-detail" *ngIf="taxBreakdown.breakdown.igst > 0">
-                        <span>IGST</span>
-                        <span class="value">₹{{ taxBreakdown.breakdown.igst | number }}</span>
-                    </div>
-                </ng-container>
-
+                
                 <div class="summary-divider"></div>
-
-                <div class="summary-total">
-                    <div class="total-label">
-                        <span>Total Amount</span>
-                        <span class="savings">Inclusive of all taxes</span>
-                    </div>
-                    <div class="total-amount">₹{{ (taxBreakdown ? taxBreakdown.grandTotal : (cartService.total() *
-                        1.18)) | number:'1.0-0' }}</div>
+                
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span class="value">₹{{ cartService.total() * 1.18 | number:'1.0-0' }}</span>
                 </div>
             </div>
 
-            <div class="checkout-actions" *ngIf="!isCheckoutMode; else paymentSection">
-                <button class="btn-primary checkout-btn pulse-btn" (click)="proceedToCheckout()">
-                    <lucide-icon [img]="Lock" [size]="18"></lucide-icon>
-                    <span>Proceed to Checkout</span>
-                    <div class="btn-shine"></div>
-                </button>
-                <div class="security-note">
-                    <lucide-icon [img]="ShieldCheck" [size]="16"></lucide-icon>
-                    <span>Secure & encrypted checkout</span>
-                </div>
-            </div>
-
-            <ng-template #paymentSection>
-                <div class="payment-selection animate-fade">
-                    <!-- Delivery Information Section -->
-                    <div class="delivery-section">
-                        <div class="delivery-header">
-                            <div class="header-main">
-                                <lucide-icon [img]="MapPin" [size]="24"></lucide-icon>
-                                <h4>Shipping Details</h4>
-                            </div>
-                            <button class="btn-add-address" (click)="navigateToAddresses()"
-                                title="Add a new shipping address">
-                                <lucide-icon [img]="PlusCircle" [size]="18"></lucide-icon>
-                                <span>New Address</span>
-                            </button>
-                        </div>
-
-                        <!-- Address Selection List -->
-                        <div class="address-list">
-                            <div *ngFor="let address of addresses; let i = index"
-                                class="address-card glass-card animate-slide-in" [style.animation-delay]="i * 0.1 + 's'"
-                                [class.selected]="selectedAddressId === address.id" (click)="selectAddress(address)">
-                                <div class="card-radio">
-                                    <div class="radio-outer">
-                                        <div class="radio-inner"></div>
-                                    </div>
-                                </div>
-                                <div class="address-details">
-                                    <div class="address-type">
-                                        <lucide-icon [img]="address.type === 'Home' ? Home : Briefcase"
-                                            [size]="14"></lucide-icon>
-                                        <span>{{ address.type }}</span>
-                                    </div>
-                                    <p class="address-name">{{ address.name }}</p>
-                                    <p class="address-text">{{ address.street }}, {{ address.city }}, {{ address.state
-                                        }} - {{ address.zip }}</p>
-                                    <div class="address-phone">
-                                        <lucide-icon [img]="Phone" [size]="16"></lucide-icon>
-                                        <span>{{ address.phonePrimary }}</span>
-                                    </div>
-                                </div>
-                                <div class="selection-indicator">
-                                    <lucide-icon [img]="CheckCircle" [size]="24"></lucide-icon>
-                                </div>
-                            </div>
-
-                            <div *ngIf="addresses.length === 0" class="no-address-state glass-card">
-                                <div class="empty-address-icon">
-                                    <lucide-icon [img]="MapPin" [size]="48" style="opacity: 0.2;"></lucide-icon>
-                                </div>
-                                <p>You haven't saved any addresses yet.</p>
-                                <button class="btn-primary" (click)="navigateToAddresses()">
-                                    <lucide-icon [img]="PlusCircle" [size]="20"></lucide-icon>
-                                    <span>Add Shipping Address</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Eligibility Check Status -->
-                        <div class="eligibility-status" *ngIf="selectedAddressId && !checkingEligibility">
-                            <div class="status-box" [class.eligible]="isLocationEligible"
-                                [class.not-eligible]="!isLocationEligible">
-                                <lucide-icon [img]="isLocationEligible ? CheckCircle : XCircle"
-                                    [size]="20"></lucide-icon>
-                                <span>{{ isLocationEligible ? 'Verified: We deliver to this location!' : 'Sorry:
-                                    Location currently outside delivery zone' }}</span>
-                            </div>
-                        </div>
-
-                        <div class="eligibility-loader" *ngIf="checkingEligibility">
-                            <div class="spinner-small"></div>
-                            <span>Verifying delivery network...</span>
-                        </div>
-
-                        <div class="notes-section">
-                            <div class="form-group">
-                                <label for="deliveryNotes">Special Delivery Instructions</label>
-                                <textarea id="deliveryNotes" [(ngModel)]="deliveryNotes" class="glass-card"
-                                    placeholder="e.g. Gate code, near landmark, etc." rows="2"></textarea>
-                            </div>
-                        </div>
+            @if (!isCheckoutMode) {
+            <button class="btn-primary btn-block" (click)="proceedToCheckout()">
+                <lucide-icon [img]="Lock" [size]="18"></lucide-icon>
+                <span>Proceed to Checkout</span>
+            </button>
+            } @else {
+            <!-- Checkout Form -->
+            <div class="checkout-form">
+                <!-- Shipping Address -->
+                <section class="form-section">
+                    <div class="section-header">
+                        <lucide-icon [img]="MapPin" [size]="20"></lucide-icon>
+                        <h4>Shipping Address</h4>
+                        <button class="btn-text" (click)="navigateToAddresses()">
+                            + Add New
+                        </button>
                     </div>
 
-                    <div class="section-divider"></div>
-
-                    <!-- Payment Method Section -->
-                    <div class="payment-header">
-                        <lucide-icon [img]="CreditCard" [size]="22"></lucide-icon>
-                        <h4>Choose Payment Method</h4>
-                    </div>
-
-                    <div class="method-options">
-                        <label class="method-radio glass-card" *ngIf="allowedMethods.includes('online')"
-                            [class.selected]="selectedPayment === 'online'">
-                            <input type="radio" name="payment" [(ngModel)]="selectedPayment" value="online">
-                            <div class="radio-content">
-                                <div class="radio-icon">
-                                    <lucide-icon [img]="CreditCard" [size]="24"></lucide-icon>
+                    @if (addresses.length > 0) {
+                    <div class="address-list">
+                        @for (address of addresses; track address.id) {
+                        <label class="address-option" [class.selected]="selectedAddressId === address.id">
+                            <input type="radio" 
+                                   name="address" 
+                                   [value]="address.id"
+                                   [(ngModel)]="selectedAddressId"
+                                   (change)="selectAddress(address)">
+                            <div class="address-content">
+                                <div class="address-type">
+                                    <lucide-icon [img]="address.type === 'Home' ? Home : Briefcase" [size]="14"></lucide-icon>
+                                    {{ address.type }}
                                 </div>
-                                <div class="radio-text">
-                                    <strong>Online Payment</strong>
-                                    <span>UPI, Cards, Netbanking & More</span>
-                                </div>
-                                <div class="radio-check">
-                                    <lucide-icon [img]="CheckCircle" [size]="22"></lucide-icon>
-                                </div>
+                                <p class="address-name">{{ address.name }}</p>
+                                <p class="address-text">{{ address.street }}, {{ address.city }}, {{ address.state }} {{ address.zip }}</p>
+                                <p class="address-phone">{{ address.phonePrimary }}</p>
                             </div>
-                            <div class="selection-glow"></div>
+                            <lucide-icon [img]="CheckCircle" [size]="20" class="check-icon"></lucide-icon>
                         </label>
+                        }
+                    </div>
+                    } @else {
+                    <div class="empty-state">
+                        <p>No saved addresses</p>
+                        <button class="btn-secondary btn-sm" (click)="navigateToAddresses()">
+                            Add Address
+                        </button>
+                    </div>
+                    }
 
-                        <label class="method-radio glass-card" *ngIf="allowedMethods.includes('cod')"
-                            [class.selected]="selectedPayment === 'cod'">
-                            <input type="radio" name="payment" [(ngModel)]="selectedPayment" value="cod">
-                            <div class="radio-content">
-                                <div class="radio-icon">
-                                    <lucide-icon [img]="Banknote" [size]="24"></lucide-icon>
+                    @if (selectedAddressId) {
+                    <div class="delivery-status" 
+                         [class.checking]="checkingEligibility"
+                         [class.available]="isLocationEligible"
+                         [class.unavailable]="!isLocationEligible && !checkingEligibility">
+                        @if (checkingEligibility) {
+                        <div class="spinner"></div>
+                        <span>Checking availability...</span>
+                        } @else if (isLocationEligible) {
+                        <lucide-icon [img]="CheckCircle" [size]="18"></lucide-icon>
+                        <span>Delivery available</span>
+                        } @else {
+                        <lucide-icon [img]="XCircle" [size]="18"></lucide-icon>
+                        <span>Not available in this area</span>
+                        }
+                    </div>
+                    }
+
+                    <textarea class="form-input" 
+                              [(ngModel)]="deliveryNotes"
+                              placeholder="Delivery instructions (optional)"
+                              rows="2"></textarea>
+                </section>
+
+                <!-- Payment Method -->
+                <section class="form-section">
+                    <div class="section-header">
+                        <lucide-icon [img]="CreditCard" [size]="20"></lucide-icon>
+                        <h4>Payment Method</h4>
+                    </div>
+
+                    <div class="payment-options">
+                        @if (allowedMethods.includes('online')) {
+                        <label class="payment-option" [class.selected]="selectedPayment === 'online'">
+                            <input type="radio" name="payment" value="online" [(ngModel)]="selectedPayment">
+                            <div class="option-content">
+                                <lucide-icon [img]="CreditCard" [size]="24"></lucide-icon>
+                                <div>
+                                    <strong>Online Payment</strong>
+                                    <span>UPI, Cards, Netbanking</span>
                                 </div>
-                                <div class="radio-text">
+                            </div>
+                            <lucide-icon [img]="CheckCircle" [size]="20" class="check-icon"></lucide-icon>
+                        </label>
+                        }
+
+                        @if (allowedMethods.includes('cod')) {
+                        <label class="payment-option" [class.selected]="selectedPayment === 'cod'">
+                            <input type="radio" name="payment" value="cod" [(ngModel)]="selectedPayment">
+                            <div class="option-content">
+                                <lucide-icon [img]="Banknote" [size]="24"></lucide-icon>
+                                <div>
                                     <strong>Cash on Delivery</strong>
                                     <span>Pay when you receive</span>
                                 </div>
-                                <div class="radio-check">
-                                    <lucide-icon [img]="CheckCircle" [size]="22"></lucide-icon>
-                                </div>
                             </div>
-                            <div class="selection-glow"></div>
+                            <lucide-icon [img]="CheckCircle" [size]="20" class="check-icon"></lucide-icon>
                         </label>
+                        }
                     </div>
+                </section>
 
-                    <div class="checkout-footer">
-                        <button *ngIf="isLocationEligible" class="btn-primary finalize-btn"
-                            [disabled]="!selectedPayment || !selectedAddressId || isProcessingOrder || checkingEligibility"
+                <div class="checkout-actions">
+                    <button class="btn-primary btn-block"
+                            [disabled]="!selectedPayment || !selectedAddressId || !isLocationEligible || isProcessingOrder"
                             (click)="finalizeOrder()">
-                            <lucide-icon [img]="Sparkles" [size]="18"></lucide-icon>
-                            <span>{{ isProcessingOrder ? 'Processing...' : 'Complete Order' }}</span>
-                            <div class="btn-shine"></div>
-                        </button>
-
-                        <div *ngIf="!isLocationEligible && selectedAddressId && !checkingEligibility"
-                            class="delivery-unavailable-warning">
-                            <lucide-icon [img]="XCircle" [size]="20"></lucide-icon>
-                            <span>We currently do not deliver to the selected location</span>
-                        </div>
-
-                        <button class="btn-secondary back-btn" (click)="isCheckoutMode = false"
+                        {{ isProcessingOrder ? 'Processing...' : 'Place Order' }}
+                    </button>
+                    <button class="btn-secondary btn-block" 
+                            (click)="isCheckoutMode = false"
                             [disabled]="isProcessingOrder">
-                            <lucide-icon [img]="ArrowLeft" [size]="16"></lucide-icon>
-                            <span>Back to Cart</span>
-                        </button>
-                    </div>
-                </div>
-            </ng-template>
-
-            <div class="trust-badges">
-                <div class="trust-item">
-                    <lucide-icon [img]="ShieldCheck" [size]="16" class="icons"></lucide-icon>
-                    <span>Secure</span>
-                </div>
-                <div class="trust-item">
-                    <lucide-icon [img]="Truck" [size]="16" class="icons"></lucide-icon>
-                    <span>Fast Delivery</span>
-                </div>
-                <div class="trust-item">
-                    <lucide-icon [img]="CheckCircle" [size]="16" class="icons"></lucide-icon>
-                    <span>Verified</span>
+                        Back to Cart
+                    </button>
                 </div>
             </div>
-        </div>
+            }
+        </aside>
     </div>
-    } @else {
-    <div class="empty-cart glass-card">
-        <div class="empty-animation">
-            <div class="cart-icon-wrapper">
-                <lucide-icon [img]="ShoppingBag" class="icons" [size]="80" [strokeWidth]="1.5"></lucide-icon>
-                <div class="floating-items">
-                    <div class="float-item" style="--delay: 0s">✨</div>
-                    <div class="float-item" style="--delay: 0.5s">🛍️</div>
-                    <div class="float-item" style="--delay: 1s">💫</div>
-                </div>
-            </div>
+
+    <!-- Sticky Mobile Checkout (shown when not in checkout mode) -->
+    @if (!isCheckoutMode) {
+    <div class="mobile-checkout-bar">
+        <div class="checkout-info">
+            <span class="total-label">Total</span>
+            <span class="total-value">₹{{ cartService.total() * 1.18 | number:'1.0-0' }}</span>
         </div>
-        <h2>Your cart's feeling lonely</h2>
-        <p class="empty-subtitle">It's so empty, tumbleweeds are rolling through it.</p>
-
-        <button class="btn-primary shop-btn" routerLink="/products">
-            <lucide-icon [img]="ShoppingCart" [size]="18"></lucide-icon>
-            <span>Start Shopping</span>
-            <div class="btn-shine"></div>
+        <button class="btn-primary" (click)="proceedToCheckout()">
+            Checkout
         </button>
+    </div>
+    }
 
-        <p class="empty-footnote">
-            <lucide-icon [img]="Sparkles" [size]="14"></lucide-icon>
-            We won't judge. Everyone starts somewhere.
-        </p>
+    } @else {
+    <!-- Empty Cart -->
+    <div class="empty-cart">
+        <lucide-icon [img]="ShoppingBag" [size]="64" [strokeWidth]="1.5"></lucide-icon>
+        <h2>Your cart is empty</h2>
+        <p>Add items to get started</p>
+        <button class="btn-primary" routerLink="/products">
+            Browse Products
+        </button>
     </div>
     }
 </div>
