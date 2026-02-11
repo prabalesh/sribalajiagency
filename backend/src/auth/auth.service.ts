@@ -424,6 +424,7 @@ export class AuthService {
      * Used by /auth/me endpoint to fetch current user data
      */
     async getUserById(userId: string) {
+        // console.log(userId)
         const user = await this.userRepository.findOne({
             where: { id: userId },
             relations: ['roles', 'roles.permissions']

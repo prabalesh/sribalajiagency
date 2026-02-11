@@ -70,7 +70,7 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     async getCurrentUser(@Req() req: any) {
         // Return current user from JWT with fresh data from database
-        const userId = req.user.sub;
+        const userId = req.user.id;
         const user = await this.authService.getUserById(userId);
         return { user };
     }
