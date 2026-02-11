@@ -1,0 +1,290 @@
+<div class="form-card glass-card animate-fade">
+    <div class="form-header">
+        <h3>
+            <lucide-icon [img]="isEditing ? Edit : Plus" [size]="22"></lucide-icon>
+            <span>{{ isEditing ? 'Edit Existing Product' : 'Register New Product' }}</span>
+        </h3>
+        @if (isEditing) {
+        <button type="button" class="btn-icon-sm" (click)="onCancel()" title="Cancel">
+            <lucide-icon [img]="X" [size]="18"></lucide-icon>
+        </button>
+        }
+    </div>
+
+    <form (ngSubmit)="onSave()">
+        <div class="form-grid">
+            <!-- Product Name -->
+            <div class="form-group">
+                <label class="form-label">
+                    <lucide-icon [img]="Package" [size]="16"></lucide-icon>
+                    <span>Product Name <span class="required">*</span></span>
+                </label>
+                <input type="text" class="form-input" [(ngModel)]="product.name" name="name" required
+                    placeholder="e.g. Bosch Power Drill" [disabled]="isSaving">
+            </div>
+
+            <!-- Brand -->
+            <div class="form-group">
+                <label class="form-label">
+                    <lucide-icon [img]="Tag" [size]="16"></lucide-icon>
+                    <span>Brand <span class="required">*</span></span>
+                </label>
+                <div class="select-wrapper">
+                    <select class="form-select" [(ngModel)]="product.brandId" name="brandId" required
+                        [disabled]="isSaving">
+                        <option value="" disabled>Select Brand</option>
+                        @for (b of brands; track b.id) {
+                        <option [value]="b.id">{{ b.name }}</option>
+                        }
+                    </select>
+                    <lucide-icon [img]="ChevronDown" [size]="18" class="select-icon"></lucide-icon>
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group full-width">
+                <label class="form-label">
+                    <lucide-icon [img]="FolderTree" [size]="16"></lucide-icon>
+                    <span>Category <span class="required">*</span></span>
+                </label>
+                <div class="select-wrapper">
+                    <select class="form-select" [(ngModel)]="selectedCategoryId" name="categoryId"
+                        (change)="onCategoryChange()" required [disabled]="isSaving">
+                        <option value="" disabled>Select Category</option>
+                        @for (cat of categories; track cat.id) {
+                        <option [value]="cat.id">
+                            {{ '\u00A0'.repeat(cat.level * 4) }}{{ cat.level > 0 ? '↳ ' : '' }}{{ cat.name }}
+                        </option>
+                        }
+                    </select>
+                    <lucide-icon [img]="ChevronDown" [size]="18" class="select-icon"></lucide-icon>
+                </div>
+            </div>
+
+            <!-- Pricing -->
+            <div class="form-group full-width">
+                <label class="form-label">
+                    <lucide-icon [img]="DollarSign" [size]="16"></lucide-icon>
+                    <span>Pricing (₹)</span>
+                </label>
+                <div class="inline-fields">
+                    <div class="field">
+                        <label class="field-label">Selling Price <span class="required">*</span></label>
+                        <input type="number" class="form-input" [(ngModel)]="product.price" name="price"
+                            placeholder="0.00" min="0" step="0.01" [disabled]="isSaving">
+                    </div>
+                    <div class="field">
+                        <label class="field-label">MRP (Comparison Price)</label>
+                        <input type="number" class="form-input" [(ngModel)]="product.comparisonPrice"
+                            name="comparisonPrice" placeholder="0.00" min="0" step="0.01" [disabled]="isSaving">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory -->
+            <div class="form-group full-width">
+                <label class="form-label">
+                    <lucide-icon [img]="ShoppingCart" [size]="16"></lucide-icon>
+                    <span>Inventory & Controls</span>
+                </label>
+                <div class="inline-fields">
+                    <div class="field">
+                        <label class="field-label">Stock <span class="required">*</span></label>
+                        <input type="number" class="form-input" [(ngModel)]="product.stock" name="stock" placeholder="0"
+                            min="0" [disabled]="isSaving">
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Max Order Quantity</label>
+                        <input type="number" class="form-input" [(ngModel)]="product.maxOrderQuantity"
+                            name="maxOrderQuantity" placeholder="No limit" min="1" [disabled]="isSaving">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status & Mode -->
+            <div class="form-group full-width">
+                <label class="form-label">Status & Display Mode</label>
+                <div class="toggle-row">
+                    <label class="toggle-group">
+                        <input type="checkbox" class="toggle-checkbox" [(ngModel)]="product.isAvailable"
+                            name="isAvailable" [disabled]="isSaving">
+                        <span class="toggle-label">
+                            <lucide-icon [img]="Check" [size]="16"></lucide-icon>
+                            Available to Shop
+                        </span>
+                    </label>
+                    <label class="toggle-group">
+                        <input type="checkbox" class="toggle-checkbox" [(ngModel)]="product.isShowcaseOnly"
+                            name="isShowcaseOnly" [disabled]="isSaving">
+                        <span class="toggle-label">
+                            <lucide-icon [img]="AlertCircle" [size]="16"></lucide-icon>
+                            Showcase Only
+                        </span>
+                    </label>
+                    <label class="toggle-group">
+                        <input type="checkbox" class="toggle-checkbox" [(ngModel)]="product.isFeatured"
+                            name="isFeatured" [disabled]="isSaving">
+                        <span class="toggle-label">
+                            <lucide-icon [img]="Package" [size]="16"></lucide-icon>
+                            Featured Product
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="form-group full-width">
+                <label class="form-label">
+                    <lucide-icon [img]="DollarSign" [size]="16"></lucide-icon>
+                    <span>Allowed Payment Methods</span>
+                </label>
+                <div class="checkbox-row">
+                    <label class="check-item">
+                        <input type="checkbox" class="checkbox-input"
+                            [checked]="product.allowedPaymentMethods?.includes('online')"
+                            (change)="onPaymentMethodToggle('online')" [disabled]="isSaving">
+                        <span>Online Payment</span>
+                    </label>
+                    <label class="check-item">
+                        <input type="checkbox" class="checkbox-input"
+                            [checked]="product.allowedPaymentMethods?.includes('cod')"
+                            (change)="onPaymentMethodToggle('cod')" [disabled]="isSaving">
+                        <span>Cash on Delivery</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group full-width">
+                <label class="form-label">
+                    <lucide-icon [img]="Package" [size]="16"></lucide-icon>
+                    <span>Description <span class="required">*</span></span>
+                </label>
+                <textarea class="form-textarea" [(ngModel)]="product.description" name="description" rows="4"
+                    placeholder="Technical specifications, features, and details..." [disabled]="isSaving"></textarea>
+            </div>
+
+            <!-- Upload Media -->
+            <div class="form-group full-width">
+                <label class="form-label">
+                    <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
+                    <span>Add Media (File or Link)</span>
+                </label>
+                <div class="media-uploader-container">
+                    <app-image-uploader label="Add to Gallery" [required]="false"
+                        (fileSelected)="onFileSelected($event)" (urlChanged)="onUrlChanged($event)"
+                        (imageRemoved)="urlChanged.emit('')">
+                    </app-image-uploader>
+
+                    @if (pendingImageUrl) {
+                    <button type="button" class="btn-add-url" (click)="onAddPendingUrl()">
+                        <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                        <span>Add URL to Gallery</span>
+                    </button>
+                    }
+                </div>
+
+                <!-- Pending Files and URLs -->
+                @if (uploadedFiles.length > 0 || pendingUrls.length > 0) {
+                <div class="pending-media-list">
+                    <h6>Pending Gallery Additions</h6>
+                    <div class="file-previews">
+                        @for (file of uploadedFiles; track $index) {
+                        <div class="file-item">
+                            <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
+                            <span>{{ file.name }} (Upload)</span>
+                            <button type="button" class="remove-btn" (click)="onRemoveUploadedFile($index)"
+                                [disabled]="isSaving">
+                                <lucide-icon [img]="X" [size]="14"></lucide-icon>
+                            </button>
+                        </div>
+                        }
+                        @for (url of pendingUrls; track $index) {
+                        <div class="file-item url-item">
+                            <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
+                            <span class="url-text">{{ url }} (Link)</span>
+                            <button type="button" class="remove-btn" (click)="onRemovePendingUrl($index)"
+                                [disabled]="isSaving">
+                                <lucide-icon [img]="X" [size]="14"></lucide-icon>
+                            </button>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+
+            <!-- Existing Images -->
+            @if (product.images && product.images.length > 0) {
+            <div class="form-group full-width">
+                <label class="form-label">
+                    <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
+                    <span>Media Gallery</span>
+                </label>
+                <div class="image-gallery">
+                    @for (img of product.images; track img.id) {
+                    <div class="image-item glass-card">
+                        <img [src]="img.url | imageUrl" alt="Product Image">
+                        <button type="button" class="delete-btn" (click)="onRemoveImage(img.id)"
+                            [disabled]="isSaving || isUploadingImage" title="Remove image">
+                            <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                        </button>
+                        @if (img.isPrimary) {
+                        <span class="primary-badge">Primary</span>
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- Variants Section -->
+            <div class="form-group full-width variants-section">
+                <div class="section-header">
+                    <h4>
+                        <lucide-icon [img]="Layers" [size]="20"></lucide-icon>
+                        <span>Configure Variants</span>
+                    </h4>
+                    <button type="button" class="btn-secondary btn-sm" (click)="onAddVariant()" [disabled]="isSaving">
+                        <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                        <span>Add Variant</span>
+                    </button>
+                </div>
+
+                @if (product.variants && product.variants.length > 0) {
+                <div class="variants-list">
+                    @for (v of product.variants; track $index) {
+                    <app-product-variant-form [variant]="v" [index]="$index" [isSaving]="isSaving"
+                        (remove)="onRemoveVariant($event)" (fileSelected)="onVariantFileSelected($event, v)"
+                        (urlChanged)="onVariantUrlChanged($event, v)" (imageRemoved)="onVariantImageRemoved(v)">
+                    </app-product-variant-form>
+                    }
+                </div>
+                } @else {
+                <div class="empty-variants">
+                    <lucide-icon [img]="Layers" [size]="48"></lucide-icon>
+                    <p>No variants added yet. Add variants for different sizes, colors, or models.</p>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="isSaving || isUploadingImage">
+                @if (isSaving) {
+                <span class="spinner-sm"></span>
+                <span>{{ isEditing ? 'Updating...' : 'Adding...' }}</span>
+                } @else {
+                <lucide-icon [img]="isEditing ? Edit : Plus" [size]="18"></lucide-icon>
+                <span>{{ isEditing ? 'Update Product' : 'Add Product' }}</span>
+                }
+            </button>
+            @if (isEditing) {
+            <button type="button" (click)="onCancel()" class="btn-secondary" [disabled]="isSaving">
+                Cancel
+            </button>
+            }
+        </div>
+    </form>
+</div>

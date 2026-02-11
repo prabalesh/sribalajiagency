@@ -1,0 +1,41 @@
+<div class="variant-item glass-card">
+    <div class="variant-header">
+        <span class="variant-number">Variant {{ index + 1 }}</span>
+        <button type="button" class="btn-icon-danger" (click)="onRemove()" [disabled]="isSaving" title="Remove Variant">
+            <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+        </button>
+    </div>
+
+    <div class="variant-fields">
+        <div class="field">
+            <label class="field-label">Variant Name</label>
+            <input type="text" class="form-input" [(ngModel)]="variant.name" [name]="'vName-' + index"
+                placeholder="e.g. 2000W Model" required [disabled]="isSaving">
+        </div>
+
+        <div class="field">
+            <label class="field-label">Price</label>
+            <input type="number" class="form-input" [(ngModel)]="variant.price" [name]="'vPrice-' + index"
+                placeholder="0.00" min="0" step="0.01" required [disabled]="isSaving">
+        </div>
+
+        <div class="field">
+            <label class="field-label">MRP</label>
+            <input type="number" class="form-input" [(ngModel)]="variant.comparisonPrice" [name]="'vCPrice-' + index"
+                placeholder="0.00" min="0" step="0.01" [disabled]="isSaving">
+        </div>
+
+        <div class="field">
+            <label class="field-label">Stock</label>
+            <input type="number" class="form-input" [(ngModel)]="variant.stock" [name]="'vStock-' + index"
+                placeholder="0" min="0" required [disabled]="isSaving">
+        </div>
+
+        <div class="field full-width">
+            <app-image-uploader [initialUrl]="variant.image || null" label="Variant Image" [required]="false"
+                (fileSelected)="onFileSelected($event)" (urlChanged)="onUrlChanged($event)"
+                (imageRemoved)="onImageRemoved()">
+            </app-image-uploader>
+        </div>
+    </div>
+</div>

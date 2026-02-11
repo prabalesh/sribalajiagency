@@ -11,28 +11,9 @@ import { CategoryService } from '../../core/services/api/category.service';
 import { BrandService } from '../../core/services/api/brand.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth/auth.service';
-import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
-import { ImageUploaderComponent } from '../../shared/components/image-uploader/image-uploader.component';
-import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
-import {
-  LucideAngularModule,
-  Package,
-  Edit,
-  Trash2,
-  Plus,
-  X,
-  Upload,
-  Image as ImageIcon,
-  Tag,
-  DollarSign,
-  Layers,
-  ShoppingCart,
-  AlertCircle,
-  Check,
-  Search,
-  FolderTree,
-  ChevronDown
-} from 'lucide-angular';
+import { LucideAngularModule, Package } from 'lucide-angular';
+import { ProductFormComponent } from './components/product-form/product-form.component';
+import { ProductListComponent } from './components/product-list/product-list.component';
 
 @Component({
   selector: 'app-admin-products',
@@ -40,10 +21,9 @@ import {
   imports: [
     CommonModule,
     FormsModule,
-    PaginationComponent,
-    ImageUploaderComponent,
-    ImageUrlPipe,
-    LucideAngularModule
+    LucideAngularModule,
+    ProductFormComponent,
+    ProductListComponent
   ],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
@@ -55,23 +35,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private toastService = inject(ToastService);
   public authService = inject(AuthService);
 
-  // Icon references
   readonly Package = Package;
-  readonly Edit = Edit;
-  readonly Trash2 = Trash2;
-  readonly Plus = Plus;
-  readonly X = X;
-  readonly Upload = Upload;
-  readonly ImageIcon = ImageIcon;
-  readonly Tag = Tag;
-  readonly DollarSign = DollarSign;
-  readonly Layers = Layers;
-  readonly ShoppingCart = ShoppingCart;
-  readonly AlertCircle = AlertCircle;
-  readonly Check = Check;
-  readonly Search = Search;
-  readonly FolderTree = FolderTree;
-  readonly ChevronDown = ChevronDown;
 
   products: Product[] = [];
   newProduct: Product = this.getEmptyProduct();
@@ -131,10 +95,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   private async performSearch(searchTerm: string) {
     console.log('Searching for:', searchTerm);
-    // Implement search logic here when needed
   }
 
   onSearchInput(searchTerm: string) {
+    this.searchQuery = searchTerm;
     this.searchSubject.next(searchTerm);
   }
 
@@ -180,14 +144,12 @@ export class ProductsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onCategoryChange() {
-    this.newProduct.categoryId = this.selectedCategoryId;
+  onCategoryChange(categoryId: string) {
+    this.selectedCategoryId = categoryId;
+    this.newProduct.categoryId = categoryId;
   }
 
   async saveProduct() {
-    console.log('AdminProducts: Attempting to save product', this.newProduct);
-
-    // Validation
     if (!this.newProduct.name) {
       this.toastService.warning('Product Name is required');
       return;
@@ -227,7 +189,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
         categoryId: this.newProduct.categoryId,
         brandId: this.newProduct.brandId,
         isFeatured: this.newProduct.isFeatured,
-        // isFeatured: this.newProduct.isFeatured,
         variants: (this.newProduct.variants && this.newProduct.variants.length > 0)
           ? this.newProduct.variants.map(v => {
             const { sku, specifications, ...variantData } = v;
@@ -249,15 +210,11 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
       let savedProduct: Product;
       if (this.isEditing) {
-        console.log('AdminProducts: Attempting to update product', this.newProduct);
         savedProduct = await this.productService.updateProduct(this.newProduct.id, productData);
       } else {
         savedProduct = await this.productService.addProduct(productData);
       }
 
-      // Handle image deletions if any (already handled by removeImage tool)
-
-      // Handle Image Uploads
       if (this.uploadedFiles.length > 0) {
         this.isUploadingImage = true;
         for (let i = 0; i < this.uploadedFiles.length; i++) {
@@ -269,7 +226,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
         }
       }
 
-      // Handle Image URLs
       if (this.pendingUrls.length > 0) {
         this.isUploadingImage = true;
         for (let i = 0; i < this.pendingUrls.length; i++) {
@@ -282,7 +238,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
       }
       this.isUploadingImage = false;
 
-      // Refresh list
       await this.loadProducts();
       this.resetForm();
       this.toastService.success(`Product ${this.isEditing ? 'updated' : 'added'} successfully!`);
@@ -295,7 +250,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   async editProduct(product: Product) {
-    console.log('AdminProducts: Attempting to edit product', product);
     this.newProduct = {
       ...product,
       variants: product.variants ? [...product.variants] : [],
@@ -303,10 +257,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       brandId: product.brandId || product.brand?.id || ''
     };
     this.isEditing = true;
-
     this.selectedCategoryId = product.categoryId || product.category?.id || '';
 
-    // Scroll to form
     if (window.innerWidth < 1024) {
       setTimeout(() => {
         document.querySelector('.form-card')?.scrollIntoView({
@@ -335,7 +287,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Variant Management
   addVariant() {
     if (!this.newProduct.variants) this.newProduct.variants = [];
     this.newProduct.variants.push({
@@ -354,38 +305,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.newProduct.variants?.splice(index, 1);
   }
 
-  async uploadVariantImage(event: any, variant: any) {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      this.isUploadingImage = true;
-      try {
-        const res = await this.productService.uploadGenericImages(files);
-        if (!variant.images) variant.images = [];
-
-        if (res.urls && res.urls.length > 0) {
-          variant.images.push(...res.urls);
-          if (!variant.image) variant.image = res.urls[0];
-        }
-
-        this.toastService.success(`${files.length} image(s) uploaded`);
-      } catch (err) {
-        console.error(err);
-        this.toastService.error('Failed to upload images');
-      } finally {
-        this.isUploadingImage = false;
-      }
-    }
-    if (event.target) event.target.value = '';
-  }
-
-  async onVariantFileSelected(file: File, variant: any) {
+  async onVariantFileSelected(event: { file: File, variant: any }) {
     this.isUploadingImage = true;
     try {
-      const res = await this.productService.uploadGenericImages([file] as any);
+      const res = await this.productService.uploadGenericImages([event.file] as any);
       if (res.urls && res.urls.length > 0) {
-        variant.image = res.urls[0];
-        if (!variant.images) variant.images = [];
-        variant.images.push(res.urls[0]);
+        event.variant.image = res.urls[0];
+        if (!event.variant.images) event.variant.images = [];
+        event.variant.images.push(res.urls[0]);
         this.toastService.success('Variant image uploaded');
       }
     } catch (err) {
@@ -396,15 +323,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onVariantUrlChanged(url: string, variant: any) {
-    variant.image = url;
+  onVariantUrlChanged(event: { url: string, variant: any }) {
+    event.variant.image = event.url;
   }
 
   onVariantImageRemoved(variant: any) {
     variant.image = '';
   }
 
-  // Image Management
   async removeImage(imageId: string) {
     if (!confirm('Remove this image?')) {
       return;
@@ -457,7 +383,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     };
   }
 
-  async onMainFileSelected(file: File) {
+  onMainFileSelected(file: File) {
     this.uploadedFiles.push(file);
     this.toastService.success('Image added to gallery');
   }
@@ -468,12 +394,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   addPendingUrl() {
     if (this.pendingImageUrl) {
-      // In this app, we'll store temporary URLs in a separate list or push to images with a flag
-      if (!this.newProduct.images) this.newProduct.images = [];
-
-      // We'll use a specific indicator for new URL-based images
-      // The backend doesn't support URLs in CreateProductDto yet, so we'll need a workaround
-      // For now, let's just add it to a list we'll handle on submit
       this.pendingUrls.push(this.pendingImageUrl);
       this.pendingImageUrl = '';
       this.toastService.success('URL added to gallery');
@@ -482,10 +402,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   removePendingUrl(index: number) {
     this.pendingUrls.splice(index, 1);
-  }
-
-  onMainImageRemoved() {
-    this.pendingImageUrl = '';
   }
 
   async loadProducts() {
@@ -510,17 +426,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
   onPageChange(page: number) {
     this.currentPage = page;
     this.loadProducts();
-  }
-
-  get filteredProducts(): Product[] {
-    if (!this.searchQuery.trim()) {
-      return this.products;
-    }
-    const query = this.searchQuery.toLowerCase();
-    return this.products.filter(p =>
-      p.name.toLowerCase().includes(query) ||
-      p.description?.toLowerCase().includes(query)
-    );
   }
 
   ngOnDestroy() {
