@@ -116,162 +116,804 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
     </div>
   `,
   styles: [`
+        /* ============================================
+      PRODUCT REVIEWS COMPONENT
+      ============================================ */
+
     .reviews-section {
       padding: 2rem 0;
-      border-top: 1px solid var(--border-color);
+      border-top: 2px solid var(--border-color);
       margin-top: 3rem;
     }
+
+    /* ============================================
+      REVIEWS HEADER
+      ============================================ */
+
     .reviews-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      gap: 1.5rem;
       margin-bottom: 2rem;
+
+      .header-main {
+        flex: 1;
+
+        h2 {
+          font-size: 1.75rem;
+          font-weight: 800;
+          color: var(--text-color);
+          margin-bottom: 0.75rem;
+        }
+      }
+
+      .rating-summary {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+
+        .review-count {
+          color: var(--text-secondary);
+          font-size: 0.875rem;
+          font-weight: 600;
+        }
+      }
+
+      .btn-primary {
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
     }
-    .header-main h2 {
-      margin: 0;
-      font-size: 1.5rem;
-      color: var(--text-primary);
-    }
-    .rating-summary {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .review-count {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-    }
+
+    /* ============================================
+      REVIEW FORM
+      ============================================ */
+
     .review-form-container {
-      background: var(--surface-card);
-      border-radius: 12px;
-      padding: 1.5rem;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-md);
+      padding: 1.75rem;
       margin-bottom: 2rem;
-      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+
+      h3 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+      }
+
+      .rating-input,
+      .comment-input {
+        margin-bottom: 1.5rem;
+
+        label {
+          display: block;
+          margin-bottom: 0.625rem;
+          font-weight: 700;
+          font-size: 0.875rem;
+          color: var(--text-color);
+        }
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 1rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-family: var(--font-family);
+        font-size: 0.9375rem;
+        line-height: 1.6;
+        resize: vertical;
+        transition: all var(--transition-speed) var(--transition-curve);
+
+        &:focus {
+          outline: none;
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        &::placeholder {
+          color: var(--text-secondary);
+        }
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+
+        .btn-primary {
+          min-width: 140px;
+        }
+      }
     }
-    .rating-input, .comment-input {
-      margin-bottom: 1.5rem;
-    }
-    .rating-input label, .comment-input label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-    textarea {
-      width: 100%;
-      min-height: 100px;
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background: var(--surface-hover);
-      color: var(--text-primary);
-      resize: vertical;
-    }
+
+    /* ============================================
+      LOGIN PROMPT
+      ============================================ */
+
     .login-prompt {
       padding: 1.5rem;
-      background: var(--surface-card);
-      border-radius: 12px;
+      background: var(--surface-color-secondary);
+      border: 2px dashed var(--border-color);
+      border-radius: var(--border-radius-md);
       text-align: center;
       margin-bottom: 2rem;
-      border: 1px dashed var(--border-color);
+
+      p {
+        color: var(--text-secondary);
+        font-size: 0.9375rem;
+        margin: 0;
+
+        a {
+          color: var(--primary-color);
+          font-weight: 700;
+          text-decoration: underline;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: var(--primary-hover);
+          }
+        }
+      }
     }
+
+    /* ============================================
+      REVIEWS LIST
+      ============================================ */
+
     .reviews-list {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      margin-bottom: 2rem;
+
+      &.loading {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      .reviews-loading,
+      .no-reviews {
+        padding: 3rem 2rem;
+        text-align: center;
+        background: var(--surface-color-secondary);
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--border-color);
+
+        p {
+          color: var(--text-secondary);
+          font-size: 0.9375rem;
+          margin: 0;
+        }
+      }
     }
+
+    /* ============================================
+      REVIEW CARD
+      ============================================ */
+
     .review-card {
-      background: var(--surface-card);
-      border-radius: 12px;
-      padding: 1.5rem;
+      background: var(--surface-color);
       border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-md);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-speed) var(--transition-curve);
+
+      &:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+      }
+
+      .review-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+
+        .review-info {
+          flex: 1;
+        }
+
+        .review-actions {
+          flex-shrink: 0;
+        }
+      }
+
+      .reviewer-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+
+        .reviewer-name {
+          font-weight: 700;
+          font-size: 0.9375rem;
+          color: var(--text-color);
+        }
+
+        .review-date {
+          font-size: 0.8125rem;
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+      }
+
+      .review-comment {
+        margin: 1rem 0 0;
+        line-height: 1.7;
+        color: var(--text-color);
+        font-size: 0.9375rem;
+      }
+
+      .btn-icon-danger {
+        background: none;
+        border: none;
+        color: var(--danger-color);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        transition: all 0.2s ease;
+
+        i {
+          font-style: normal;
+        }
+
+        &:hover {
+          background: rgba(var(--danger-color-rgb), 0.1);
+          transform: scale(1.05);
+        }
+      }
     }
-    .review-main {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-    .reviewer-meta {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
-    }
-    .reviewer-name {
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    .review-date {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-    .review-comment {
-      margin: 1rem 0 0;
-      line-height: 1.6;
-      color: var(--text-primary);
-    }
+
+    /* ============================================
+      MERCHANT REPLY
+      ============================================ */
+
     .merchant-reply {
       margin-top: 1.5rem;
-      padding: 1rem;
-      background: var(--surface-active);
-      border-radius: 8px;
+      padding: 1.25rem;
+      background: var(--surface-color-secondary);
+      border-radius: var(--border-radius-sm);
       border-left: 4px solid var(--primary-color);
+
+      .reply-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        gap: 1rem;
+
+        .merchant-label {
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: var(--primary-color);
+        }
+
+        .reply-date {
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+      }
+
+      .reply-text {
+        margin: 0;
+        font-size: 0.9375rem;
+        line-height: 1.6;
+        color: var(--text-color);
+      }
     }
-    .reply-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-    }
-    .merchant-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--primary-color);
-    }
-    .reply-text {
-      margin: 0;
-      font-size: 0.9375rem;
-      color: var(--text-primary);
-    }
+
+    /* ============================================
+      ADMIN REPLY FORM
+      ============================================ */
+
     .reply-form {
-      margin-top: 1rem;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border-color);
+
+      .btn-text {
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0.5rem 0;
+        transition: all 0.2s ease;
+
+        &:hover {
+          color: var(--primary-hover);
+          text-decoration: underline;
+        }
+      }
+
+      .reply-input-container {
+        margin-top: 1rem;
+
+        textarea {
+          width: 100%;
+          min-height: 100px;
+          padding: 1rem;
+          border-radius: var(--border-radius-sm);
+          border: 1px solid var(--border-color);
+          background: var(--bg-color);
+          color: var(--text-color);
+          font-family: var(--font-family);
+          font-size: 0.875rem;
+          line-height: 1.6;
+          resize: vertical;
+          transition: all var(--transition-speed) var(--transition-curve);
+
+          &:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+          }
+
+          &::placeholder {
+            color: var(--text-secondary);
+          }
+        }
+
+        .reply-actions {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: 1rem;
+          margin-top: 0.75rem;
+
+          .btn-text {
+            padding: 0.5rem 1rem;
+          }
+
+          .btn-primary-sm {
+            padding: 0.5rem 1.25rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.875rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover:not(:disabled) {
+              background: var(--primary-hover);
+              transform: translateY(-2px);
+            }
+
+            &:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+            }
+          }
+        }
+      }
     }
-    .reply-input-container {
-      margin-top: 1rem;
+
+    /* ============================================
+      RESPONSIVE DESIGN
+      ============================================ */
+
+    /* Tablet (1024px and below) */
+    @media (max-width: 1024px) {
+      .reviews-section {
+        padding: 1.75rem 0;
+        margin-top: 2.5rem;
+      }
+
+      .reviews-header {
+        gap: 1.25rem;
+
+        .header-main h2 {
+          font-size: 1.5rem;
+        }
+
+        .rating-summary {
+          gap: 0.625rem;
+
+          .review-count {
+            font-size: 0.8125rem;
+          }
+        }
+      }
+
+      .review-form-container {
+        padding: 1.5rem;
+
+        h3 {
+          font-size: 1rem;
+        }
+
+        textarea {
+          min-height: 100px;
+          font-size: 0.875rem;
+        }
+      }
+
+      .review-card {
+        padding: 1.25rem;
+
+        .reviewer-meta {
+          .reviewer-name {
+            font-size: 0.875rem;
+          }
+
+          .review-date {
+            font-size: 0.75rem;
+          }
+        }
+
+        .review-comment {
+          font-size: 0.875rem;
+        }
+      }
+
+      .merchant-reply {
+        padding: 1rem;
+
+        .reply-text {
+          font-size: 0.875rem;
+        }
+      }
     }
-    .reply-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 1rem;
-      margin-top: 0.5rem;
+
+    /* Mobile Large (768px and below) */
+    @media (max-width: 768px) {
+      .reviews-section {
+        padding: 1.5rem 0;
+        margin-top: 2rem;
+      }
+
+      .reviews-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+
+        .header-main h2 {
+          font-size: 1.375rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .rating-summary {
+          margin-top: 0.375rem;
+
+          .review-count {
+            font-size: 0.75rem;
+          }
+        }
+
+        .btn-primary {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      .review-form-container {
+        padding: 1.25rem;
+
+        h3 {
+          font-size: 0.9375rem;
+          margin-bottom: 1.25rem;
+        }
+
+        .rating-input,
+        .comment-input {
+          margin-bottom: 1.25rem;
+
+          label {
+            font-size: 0.8125rem;
+            margin-bottom: 0.5rem;
+          }
+        }
+
+        textarea {
+          min-height: 90px;
+          padding: 0.875rem;
+          font-size: 0.8125rem;
+        }
+
+        .form-actions {
+          .btn-primary {
+            width: 100%;
+            min-width: auto;
+          }
+        }
+      }
+
+      .login-prompt {
+        padding: 1.25rem;
+
+        p {
+          font-size: 0.875rem;
+        }
+      }
+
+      .reviews-list {
+        gap: 1.25rem;
+
+        .reviews-loading,
+        .no-reviews {
+          padding: 2.5rem 1.5rem;
+
+          p {
+            font-size: 0.875rem;
+          }
+        }
+      }
+
+      .review-card {
+        padding: 1rem;
+
+        .review-main {
+          flex-direction: column;
+          gap: 0.75rem;
+
+          .review-actions {
+            align-self: flex-end;
+          }
+        }
+
+        .reviewer-meta {
+          gap: 0.75rem;
+
+          .reviewer-name {
+            font-size: 0.8125rem;
+          }
+
+          .review-date {
+            font-size: 0.6875rem;
+          }
+        }
+
+        .review-comment {
+          margin-top: 0.75rem;
+          font-size: 0.8125rem;
+          line-height: 1.6;
+        }
+
+        .btn-icon-danger {
+          padding: 0.375rem 0.625rem;
+          font-size: 0.75rem;
+        }
+      }
+
+      .merchant-reply {
+        margin-top: 1.25rem;
+        padding: 0.875rem;
+
+        .reply-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.375rem;
+          margin-bottom: 0.625rem;
+
+          .merchant-label {
+            font-size: 0.6875rem;
+          }
+
+          .reply-date {
+            font-size: 0.6875rem;
+          }
+        }
+
+        .reply-text {
+          font-size: 0.8125rem;
+          line-height: 1.5;
+        }
+      }
+
+      .reply-form {
+        margin-top: 1rem;
+        padding-top: 1rem;
+
+        .btn-text {
+          font-size: 0.8125rem;
+          padding: 0.375rem 0;
+        }
+
+        .reply-input-container {
+          textarea {
+            min-height: 90px;
+            padding: 0.875rem;
+            font-size: 0.8125rem;
+          }
+
+          .reply-actions {
+            flex-direction: column;
+            align-items: stretch;
+
+            .btn-text,
+            .btn-primary-sm {
+              width: 100%;
+              text-align: center;
+              justify-content: center;
+            }
+
+            .btn-primary-sm {
+              font-size: 0.8125rem;
+              padding: 0.625rem 1rem;
+            }
+          }
+        }
+      }
     }
-    .btn-text {
-      background: none;
-      border: none;
-      color: var(--primary-color);
-      font-size: 0.875rem;
-      cursor: pointer;
-      padding: 0;
-    }
-    .btn-primary-sm {
-      padding: 0.4rem 0.8rem;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 0.875rem;
-      cursor: pointer;
-    }
-    .btn-icon-danger {
-       background: none;
-       border: none;
-       color: #ef4444;
-       cursor: pointer;
-       font-size: 0.75rem;
-    }
-    .loading {
-      opacity: 0.6;
-      pointer-events: none;
+
+    /* Mobile Small (480px and below) */
+    @media (max-width: 480px) {
+      .reviews-section {
+        padding: 1.25rem 0;
+        margin-top: 1.5rem;
+      }
+
+      .reviews-header {
+        gap: 0.875rem;
+
+        .header-main h2 {
+          font-size: 1.125rem;
+          margin-bottom: 0.375rem;
+        }
+
+        .rating-summary {
+          margin-top: 0.25rem;
+          gap: 0.5rem;
+
+          .review-count {
+            font-size: 0.6875rem;
+          }
+        }
+
+        .btn-primary {
+          padding: 0.75rem 1.5rem;
+          font-size: 0.875rem;
+        }
+      }
+
+      .review-form-container {
+        padding: 1rem;
+
+        h3 {
+          font-size: 0.875rem;
+          margin-bottom: 1rem;
+        }
+
+        .rating-input,
+        .comment-input {
+          margin-bottom: 1rem;
+
+          label {
+            font-size: 0.75rem;
+          }
+        }
+
+        textarea {
+          min-height: 80px;
+          padding: 0.75rem;
+          font-size: 0.75rem;
+        }
+
+        .form-actions .btn-primary {
+          padding: 0.75rem 1.5rem;
+          font-size: 0.875rem;
+        }
+      }
+
+      .login-prompt {
+        padding: 1rem;
+
+        p {
+          font-size: 0.8125rem;
+        }
+      }
+
+      .reviews-list {
+        gap: 1rem;
+
+        .reviews-loading,
+        .no-reviews {
+          padding: 2rem 1rem;
+
+          p {
+            font-size: 0.8125rem;
+          }
+        }
+      }
+
+      .review-card {
+        padding: 0.875rem;
+
+        .reviewer-meta {
+          gap: 0.5rem;
+          margin-bottom: 0.625rem;
+
+          .reviewer-name {
+            font-size: 0.75rem;
+          }
+
+          .review-date {
+            font-size: 0.625rem;
+          }
+        }
+
+        .review-comment {
+          margin-top: 0.625rem;
+          font-size: 0.75rem;
+          line-height: 1.5;
+        }
+
+        .btn-icon-danger {
+          padding: 0.3125rem 0.5rem;
+          font-size: 0.6875rem;
+        }
+      }
+
+      .merchant-reply {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        border-left-width: 3px;
+
+        .reply-header {
+          gap: 0.25rem;
+          margin-bottom: 0.5rem;
+
+          .merchant-label,
+          .reply-date {
+            font-size: 0.625rem;
+          }
+        }
+
+        .reply-text {
+          font-size: 0.75rem;
+          line-height: 1.5;
+        }
+      }
+
+      .reply-form {
+        margin-top: 0.875rem;
+        padding-top: 0.875rem;
+
+        .btn-text {
+          font-size: 0.75rem;
+          padding: 0.3125rem 0;
+        }
+
+        .reply-input-container {
+          textarea {
+            min-height: 80px;
+            padding: 0.75rem;
+            font-size: 0.75rem;
+          }
+
+          .reply-actions {
+            margin-top: 0.625rem;
+            gap: 0.75rem;
+
+            .btn-primary-sm {
+              font-size: 0.75rem;
+              padding: 0.5rem 0.875rem;
+            }
+          }
+        }
+      }
     }
   `]
 })

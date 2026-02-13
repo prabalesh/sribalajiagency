@@ -50,26 +50,15 @@
         <div class="product-gallery">
             <div class="main-image">
                 @if (displayImages.length > 0) {
-                    <img 
-                        [ngSrc]="displayImages[selectedImageIndex].url" 
-                        [alt]="product.name" 
-                        fill 
-                        priority>
+                <img [ngSrc]="displayImages[selectedImageIndex].url" [alt]="product.name" fill priority>
                 }
             </div>
-            
+
             <div class="image-thumbnails" *ngIf="displayImages.length > 1">
                 @for (image of displayImages; track $index) {
-                    <div 
-                        class="thumbnail"
-                        [class.active]="$index === selectedImageIndex" 
-                        (click)="selectImage($index)">
-                        <img 
-                            [ngSrc]="image.url" 
-                            [alt]="product.name" 
-                            width="100" 
-                            height="100">
-                    </div>
+                <div class="thumbnail" [class.active]="$index === selectedImageIndex" (click)="selectImage($index)">
+                    <img [ngSrc]="image.url" [alt]="product.name" width="100" height="100">
+                </div>
                 }
             </div>
 
@@ -91,9 +80,9 @@
                         {{ brand.name }}
                     </span>
                     @if (discountPercentage) {
-                        <span class="discount-badge">
-                            {{ discountPercentage }}% OFF
-                        </span>
+                    <span class="discount-badge">
+                        {{ discountPercentage }}% OFF
+                    </span>
                     }
                 </div>
 
@@ -107,26 +96,15 @@
                             ₹{{ currentComparisonPrice | number:'1.2-2' }}
                         </span>
                     </div>
-                    
+
                     <!-- Stock Status -->
-                    <span 
-                        class="stock-status"
-                        [class.out]="currentStock <= 0"
+                    <span class="stock-status" [class.out]="currentStock <= 0"
                         [class.low]="currentStock > 0 && currentStock <= 5">
-                        <lucide-icon 
-                            [img]="currentStock > 0 ? Check : X" 
-                            [size]="16">
+                        <lucide-icon [img]="currentStock > 0 ? Check : X" [size]="16">
                         </lucide-icon>
                         @if (currentStock > 0) {
-                            @if (currentStock <= 5) {
-                                Only {{ currentStock }} left!
-                            } @else {
-                                In Stock
-                            }
-                        } @else {
-                            Out of Stock
-                        }
-                    </span>
+                        @if (currentStock <= 5) { Only {{ currentStock }} left! } @else { In Stock } } @else { Out of
+                            Stock } </span>
                 </div>
             </div>
 
@@ -138,17 +116,12 @@
                 </label>
                 <div class="variant-chips">
                     @for (v of product.variants; track v.id) {
-                        <button 
-                            class="variant-chip"
-                            [class.active]="selectedVariant?.id === v.id"
-                            [class.disabled]="v.stock <= 0"
-                            (click)="selectVariant(v)"
-                            [disabled]="v.stock <= 0">
-                            {{ v.name }}
-                            @if (v.stock <= 0) {
-                                <span class="sold-out">Sold Out</span>
+                    <button class="variant-chip" [class.active]="selectedVariant?.id === v.id"
+                        [class.disabled]="v.stock <= 0" (click)="selectVariant(v)" [disabled]="v.stock <= 0">
+                        {{ v.name }}
+                        @if (v.stock <= 0) { <span class="sold-out">Sold Out</span>
                             }
-                        </button>
+                    </button>
                     }
                 </div>
             </div>
@@ -160,8 +133,7 @@
             </div>
 
             <!-- Order Limit Note -->
-            <div 
-                class="limit-note"
+            <div class="limit-note"
                 *ngIf="product.maxOrderQuantity && product.maxOrderQuantity < currentStock && !product.isShowcaseOnly">
                 <lucide-icon [img]="AlertCircle" [size]="16"></lucide-icon>
                 <span>Limit {{ product.maxOrderQuantity }} per order</span>
@@ -170,31 +142,24 @@
             <!-- Purchase Actions -->
             <div class="purchase-actions" *ngIf="product.isAvailable && !product.isShowcaseOnly">
                 <div class="quantity-selector" *ngIf="currentStock > 0">
-                    <button 
-                        (click)="updateQuantity(-1)" 
-                        [disabled]="quantity <= 1"
-                        aria-label="Decrease quantity">
+                    <button (click)="updateQuantity(-1)" [disabled]="quantity <= 1" aria-label="Decrease quantity">
                         <lucide-icon [img]="Minus" [size]="18"></lucide-icon>
                     </button>
                     <span class="quantity-value">{{ quantity }}</span>
-                    <button 
-                        (click)="updateQuantity(1)"
-                        [disabled]="quantity >= maxQuantity"
+                    <button (click)="updateQuantity(1)" [disabled]="quantity >= maxQuantity"
                         aria-label="Increase quantity">
                         <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
                     </button>
                 </div>
-                
-                <button 
-                    class="btn-primary add-to-cart"
-                    (click)="addToCart()"
+
+                <button class="btn-primary" (click)="addToCart()"
                     [disabled]="currentStock <= 0 || (product.variants.length > 0 && !selectedVariant) || isAddingToCart">
                     @if (isAddingToCart) {
-                        <span class="spinner-sm"></span>
-                        <span>Adding...</span>
+                    <span class="spinner-sm"></span>
+                    <span>Adding...</span>
                     } @else {
-                        <lucide-icon [img]="ShoppingCart" [size]="20"></lucide-icon>
-                        <span>Add to Cart</span>
+                    <lucide-icon [img]="ShoppingCart" [size]="20"></lucide-icon>
+                    <span>Add to Cart</span>
                     }
                 </button>
             </div>
@@ -206,34 +171,27 @@
                 </div>
                 <div class="note-text">
                     <h3>In-Store Exclusive</h3>
-                    <p>This item is currently available for showcase only. Please visit our agency for a live demonstration and purchase.</p>
+                    <p>This item is currently available for showcase only. Please visit our agency for a live
+                        demonstration and purchase.</p>
                 </div>
-                <button 
-                    class="btn-primary" 
-                    [routerLink]="['/request-quote', { productId: product.id }]">
+                <button class="btn-primary" [routerLink]="['/request-quote', { productId: product.id }]">
                     <lucide-icon [img]="Package" [size]="18"></lucide-icon>
                     <span>Enquire Now</span>
                 </button>
             </div>
 
             <!-- Payment Methods Info -->
-            <div 
-                class="payment-methods-info" 
-                *ngIf="!product.isShowcaseOnly && product.allowedPaymentMethods?.length">
+            <div class="payment-methods-info" *ngIf="!product.isShowcaseOnly && product.allowedPaymentMethods?.length">
                 <label>
                     <lucide-icon [img]="CreditCard" [size]="16"></lucide-icon>
                     <span>Accepted Payments:</span>
                 </label>
                 <div class="payment-methods">
-                    <span 
-                        class="method" 
-                        *ngIf="product.allowedPaymentMethods?.includes('cod')">
+                    <span class="method" *ngIf="product.allowedPaymentMethods?.includes('cod')">
                         <lucide-icon [img]="Wallet" [size]="16"></lucide-icon>
                         COD
                     </span>
-                    <span 
-                        class="method" 
-                        *ngIf="product.allowedPaymentMethods?.includes('online')">
+                    <span class="method" *ngIf="product.allowedPaymentMethods?.includes('online')">
                         <lucide-icon [img]="CreditCard" [size]="16"></lucide-icon>
                         Online
                     </span>
@@ -281,54 +239,43 @@
                     <span class="value">1 Year Domestic</span>
                 </div>
                 @if (selectedVariant) {
-                    <div class="spec-row">
-                        <span class="label">Variant:</span>
-                        <span class="value">{{ selectedVariant.name }}</span>
-                    </div>
+                <div class="spec-row">
+                    <span class="label">Variant:</span>
+                    <span class="value">{{ selectedVariant.name }}</span>
+                </div>
                 }
             </div>
 
             <!-- Product Reviews -->
-            <app-product-reviews 
-                [productId]="product.id" 
-                [averageRating]="product.rating || 0">
+            <app-product-reviews [productId]="product.id" [averageRating]="product.rating || 0">
             </app-product-reviews>
         </div>
     </div>
 
     <!-- Related Products -->
     @if (relatedProducts.length > 0) {
-        <section class="related-products">
-            <h2>
-                <lucide-icon [img]="Package" [size]="28"></lucide-icon>
-                <span>You Might Also Like</span>
-            </h2>
-            
-            <div class="carousel-container">
-                <button 
-                    class="nav-btn prev desktop-only" 
-                    (click)="scrollCarousel('left')" 
-                    aria-label="Previous products">
-                    <lucide-icon [img]="ChevronLeft" [size]="24"></lucide-icon>
-                </button>
+    <section class="related-products">
+        <h2>
+            <lucide-icon [img]="Package" [size]="28"></lucide-icon>
+            <span>You Might Also Like</span>
+        </h2>
 
-                <div class="product-grid" #productGrid>
-                    @for (p of relatedProducts; track p.id) {
-                        <app-product-card 
-                            [product]="p" 
-                            (addToCart)="onCardAddToCart($event)" 
-                            class="carousel-item">
-                        </app-product-card>
-                    }
-                </div>
+        <div class="carousel-container">
+            <button class="nav-btn prev desktop-only" (click)="scrollCarousel('left')" aria-label="Previous products">
+                <lucide-icon [img]="ChevronLeft" [size]="24"></lucide-icon>
+            </button>
 
-                <button 
-                    class="nav-btn next desktop-only" 
-                    (click)="scrollCarousel('right')" 
-                    aria-label="Next products">
-                    <lucide-icon [img]="ChevronRight" [size]="24"></lucide-icon>
-                </button>
+            <div class="product-grid" #productGrid>
+                @for (p of relatedProducts; track p.id) {
+                <app-product-card [product]="p" (addToCart)="onCardAddToCart($event)" class="carousel-item">
+                </app-product-card>
+                }
             </div>
-        </section>
+
+            <button class="nav-btn next desktop-only" (click)="scrollCarousel('right')" aria-label="Next products">
+                <lucide-icon [img]="ChevronRight" [size]="24"></lucide-icon>
+            </button>
+        </div>
+    </section>
     }
 </div>

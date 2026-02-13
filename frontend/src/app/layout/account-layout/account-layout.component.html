@@ -21,24 +21,18 @@
 
         <!-- Row 2: Centered Tabs -->
         <nav class="tabs-nav">
-            <a routerLink="/account/profile" 
-               routerLinkActive="active"
-               [routerLinkActiveOptions]="{exact: false}"
-               class="tab">
+            <a routerLink="/account/profile" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}"
+                class="tab">
                 <lucide-icon [img]="User" [size]="18"></lucide-icon>
                 <span>Profile</span>
             </a>
-            <a routerLink="/account/orders" 
-               routerLinkActive="active"
-               [routerLinkActiveOptions]="{exact: false}"
-               class="tab">
+            <a routerLink="/account/orders" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}"
+                class="tab">
                 <lucide-icon [img]="Package" [size]="18"></lucide-icon>
                 <span>Orders</span>
             </a>
-            <a routerLink="/account/addresses" 
-               routerLinkActive="active"
-               [routerLinkActiveOptions]="{exact: false}"
-               class="tab">
+            <a routerLink="/account/addresses" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}"
+                class="tab">
                 <lucide-icon [img]="MapPin" [size]="18"></lucide-icon>
                 <span>Addresses</span>
             </a>
@@ -52,33 +46,22 @@
 
     <!-- Mobile: Bottom Navigation -->
     <nav class="mobile-nav">
-        <a routerLink="/account/profile" 
-           routerLinkActive="active"
-           [routerLinkActiveOptions]="{exact: false}"
-           class="nav-item"
-           aria-label="Profile">
+        <a routerLink="/account/profile" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}"
+            class="nav-item" aria-label="Profile">
             <lucide-icon [img]="User" [size]="20"></lucide-icon>
             <span class="nav-label">Profile</span>
         </a>
-        <a routerLink="/account/orders" 
-           routerLinkActive="active"
-           [routerLinkActiveOptions]="{exact: false}"
-           class="nav-item"
-           aria-label="Orders">
+        <a routerLink="/account/orders" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}"
+            class="nav-item" aria-label="Orders">
             <lucide-icon [img]="Package" [size]="20"></lucide-icon>
             <span class="nav-label">Orders</span>
         </a>
-        <a routerLink="/account/addresses" 
-           routerLinkActive="active"
-           [routerLinkActiveOptions]="{exact: false}"
-           class="nav-item"
-           aria-label="Addresses">
+        <a routerLink="/account/addresses" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}"
+            class="nav-item" aria-label="Addresses">
             <lucide-icon [img]="MapPin" [size]="20"></lucide-icon>
             <span class="nav-label">Addresses</span>
         </a>
-        <button (click)="logout()" 
-                class="nav-item logout-mobile"
-                aria-label="Sign out">
+        <button (click)="logout()" class="nav-item logout-mobile" aria-label="Sign out">
             <lucide-icon [img]="LogOut" [size]="20"></lucide-icon>
             <span class="nav-label">Logout</span>
         </button>
