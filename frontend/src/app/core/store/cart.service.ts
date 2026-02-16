@@ -1,5 +1,6 @@
-import { Injectable, signal, computed, Inject, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, signal, computed, Inject, PLATFORM_ID, inject, OnDestroy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { Subject, debounceTime, switchMap, from, catchError, of } from 'rxjs';
 import { CartItem, ValidatedCartItem } from '../models/cart.model';
 import { ToastService } from '../services/toast.service';
 import { CartApiService } from '../services/api/cart-api.service';
@@ -11,15 +12,16 @@ const DEBOUNCE_MS = 500;
 @Injectable({
     providedIn: 'root'
 })
-export class CartService {
+export class CartService implements OnDestroy {
     private cartItems = signal<ValidatedCartItem[]>([]);
     private isLoadingSignal = signal<boolean>(false);
     private toast = inject(ToastService);
     private cartApi = inject(CartApiService);
     private authService = inject(AuthService);
     private isBrowser: boolean;
-    private saveTimeout: any;
     private visibilityListener?: () => void;
+    private syncSubject = new Subject<CartItem[]>();
+    private lastValidItems: ValidatedCartItem[] = [];
 
     constructor(@Inject(PLATFORM_ID) platformId: object) {
         this.isBrowser = isPlatformBrowser(platformId);
@@ -31,7 +33,20 @@ export class CartService {
         if (this.isBrowser) {
             this.loadCart();
             this.setupVisibilityListener();
+            this.setupSyncPipe();
         }
+    }
+
+    private setupSyncPipe() {
+        this.syncSubject.pipe(
+            debounceTime(DEBOUNCE_MS),
+            switchMap(items => from(this.performSync(items)).pipe(
+                catchError(error => {
+                    console.error('Debounced sync failed:', error);
+                    return of(null);
+                })
+            ))
+        ).subscribe();
     }
 
     // Public readonly signals
@@ -105,16 +120,37 @@ export class CartService {
     private async validateAndSetCart(items: CartItem[]) {
         if (items.length === 0) {
             this.cartItems.set([]);
+            this.lastValidItems = [];
             return;
         }
 
         try {
             const validated = await this.cartApi.validateCart(items);
             this.cartItems.set(validated);
+            this.lastValidItems = [...validated];
             this.showValidationNotifications(validated);
         } catch (error) {
             console.error('Cart validation failed:', error);
-            this.cartItems.set([]);
+            // If validation fails, we keep the last valid items or clear if none
+            if (this.lastValidItems.length > 0) {
+                this.cartItems.set(this.lastValidItems);
+            }
+        }
+    }
+
+    // Perform the actual synchronization (validate + save)
+    private async performSync(items: CartItem[]) {
+        this.isLoadingSignal.set(true);
+        try {
+            await this.validateAndSetCart(items);
+
+            if (this.authService.isLoggedIn()) {
+                await this.cartApi.updateCart(items);
+            } else {
+                this.saveToLocalStorage(items);
+            }
+        } finally {
+            this.isLoadingSignal.set(false);
         }
     }
 
@@ -136,26 +172,15 @@ export class CartService {
         }
     }
 
+    // Save cart (to localStorage or database based on auth state)
+    private save(items: CartItem[]) {
+        this.syncSubject.next(items);
+    }
+
     // Save to localStorage
     private saveToLocalStorage(items: CartItem[]) {
         if (!this.isBrowser) return;
         localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
-    }
-
-    // Save to database (debounced)
-    private saveToDatabaseDebounced(items: CartItem[]) {
-        if (this.saveTimeout) {
-            clearTimeout(this.saveTimeout);
-        }
-
-        this.saveTimeout = setTimeout(async () => {
-            try {
-                await this.cartApi.updateCart(items);
-            } catch (error) {
-                console.error('Failed to save cart to database:', error);
-                this.toast.error('Failed to sync cart. Please try again.');
-            }
-        }, DEBOUNCE_MS);
     }
 
     // Convert validated items to minimal cart items
@@ -175,35 +200,40 @@ export class CartService {
             (item.variantId || null) === (variantId || null)
         );
 
-        let newItems: CartItem[];
+        let newItems: ValidatedCartItem[];
         if (existingIndex > -1) {
-            // Update existing item
+            // Update existing item optimistically
             const updated = [...current];
+            const existingItem = updated[existingIndex];
             updated[existingIndex] = {
-                ...updated[existingIndex],
-                quantity: updated[existingIndex].quantity + quantity
+                ...existingItem,
+                quantity: existingItem.quantity + quantity
             };
-            newItems = this.toCartItems(updated);
+            newItems = updated;
+
+            this.cartItems.set(newItems);
+            this.save(this.toCartItems(newItems));
+
+            this.toast.success(`${existingItem.productName} quantity updated!`);
         } else {
-            // Add new item
-            newItems = [...this.toCartItems(current), { productId, variantId, quantity }];
-        }
+            // For brand new items, we can't fully update optimistically without names/prices
+            // but we can at least push to sync and wait if needed, or if we want it fast:
+            // For now, let's just trigger the sync. 
+            // If we had product details passed in, we could do better.
+            const minimalItems = [...this.toCartItems(current), { productId, variantId, quantity }];
+            await this.performSync(minimalItems);
 
-        // Validate and save
-        await this.validateAndSetCart(newItems);
-        this.save(newItems);
-
-        // Show success message only if item is available after validation
-        const addedItem = this.cartItems().find(item =>
-            item.productId === productId && (item.variantId || null) === (variantId || null)
-        );
-        if (addedItem && addedItem.available) {
-            this.toast.success(`${addedItem.productName}${addedItem.variantName ? ' (' + addedItem.variantName + ')' : ''} added to cart!`);
+            const addedItem = this.cartItems().find(item =>
+                item.productId === productId && (item.variantId || null) === (variantId || null)
+            );
+            if (addedItem && addedItem.available) {
+                this.toast.success(`${addedItem.productName}${addedItem.variantName ? ' (' + addedItem.variantName + ')' : ''} added to cart!`);
+            }
         }
     }
 
     // Update quantity
-    async updateQuantity(productId: string, quantity: number, variantId?: string) {
+    updateQuantity(productId: string, quantity: number, variantId?: string) {
         if (quantity <= 0) {
             this.removeFromCart(productId, variantId);
             return;
@@ -216,9 +246,8 @@ export class CartService {
                 : item
         );
 
-        const newItems = this.toCartItems(updated);
-        await this.validateAndSetCart(newItems);
-        this.save(newItems);
+        this.cartItems.set(updated); // Optimistic update
+        this.save(this.toCartItems(updated));
     }
 
     // Remove from cart
@@ -228,9 +257,8 @@ export class CartService {
             !(item.productId === productId && (item.variantId || null) === (variantId || null))
         );
 
-        this.cartItems.set(filtered);
-        const newItems = this.toCartItems(filtered);
-        this.save(newItems);
+        this.cartItems.set(filtered); // Optimistic update
+        this.save(this.toCartItems(filtered));
     }
 
     // Clear cart
@@ -239,10 +267,12 @@ export class CartService {
         this.save([]);
     }
 
-    // Save cart (to localStorage or database based on auth state)
-    private save(items: CartItem[]) {
+    /**
+     * @deprecated Use syncSubject via save() instead
+     */
+    private legacySave(items: CartItem[]) {
         if (this.authService.isLoggedIn()) {
-            this.saveToDatabaseDebounced(items);
+            // Logic moved to performSync
         } else {
             this.saveToLocalStorage(items);
         }
@@ -311,8 +341,6 @@ export class CartService {
         if (this.visibilityListener && this.isBrowser) {
             document.removeEventListener('visibilitychange', this.visibilityListener);
         }
-        if (this.saveTimeout) {
-            clearTimeout(this.saveTimeout);
-        }
+        this.syncSubject.complete();
     }
 }

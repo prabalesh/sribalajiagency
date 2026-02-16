@@ -46,7 +46,6 @@ export class CartComponent implements OnInit {
   // Register Lucide icons
   readonly ShoppingBag = ShoppingBag;
 
-
   settings: any;
   selectedPayment: 'online' | 'cod' | '' = '';
   isCheckoutMode = false;
@@ -56,7 +55,6 @@ export class CartComponent implements OnInit {
   selectedAddressId: string = '';
   isLocationEligible = false;
   checkingEligibility = false;
-
 
   deliveryNotes: string = '';
   isProcessingOrder = false;
