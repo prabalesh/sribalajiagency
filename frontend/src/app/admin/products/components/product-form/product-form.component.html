@@ -81,18 +81,13 @@
                 </div>
             </div>
 
-            <!-- Inventory -->
+            <!-- Inventory & Controls -->
             <div class="form-group full-width">
                 <label class="form-label">
                     <lucide-icon [img]="ShoppingCart" [size]="16"></lucide-icon>
-                    <span>Inventory & Controls</span>
+                    <span>Ordering Controls</span>
                 </label>
                 <div class="inline-fields">
-                    <div class="field">
-                        <label class="field-label">Stock <span class="required">*</span></label>
-                        <input type="number" class="form-input" [(ngModel)]="product.stock" name="stock" placeholder="0"
-                            min="0" [disabled]="isSaving">
-                    </div>
                     <div class="field">
                         <label class="field-label">Max Order Quantity</label>
                         <input type="number" class="form-input" [(ngModel)]="product.maxOrderQuantity"

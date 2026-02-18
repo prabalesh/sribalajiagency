@@ -63,4 +63,6 @@ export class ProductListComponent {
             p.description?.toLowerCase().includes(query)
         );
     }
+
+    sumStock = (acc: number, variant: any) => acc + (variant.stock || 0);
 }

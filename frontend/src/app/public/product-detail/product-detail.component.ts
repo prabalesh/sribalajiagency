@@ -14,7 +14,7 @@ import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/br
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { ProductReviewsComponent } from './components/product-reviews/product-reviews.component';
 import { ToastService } from '../../core/services/toast.service';
-import { 
+import {
     LucideAngularModule,
     ShoppingCart,
     Plus,
@@ -41,14 +41,14 @@ import {
     selector: 'app-product-detail',
     standalone: true,
     imports: [
-        CommonModule, 
-        RouterModule, 
+        CommonModule,
+        RouterModule,
         FormsModule,
         NgOptimizedImage,
         LucideAngularModule,
-        SkeletonComponent, 
-        ProductCardComponent, 
-        BreadcrumbsComponent, 
+        SkeletonComponent,
+        ProductCardComponent,
+        BreadcrumbsComponent,
         ProductReviewsComponent
     ],
     templateUrl: './product-detail.component.html',
@@ -87,7 +87,7 @@ export class ProductDetailComponent implements OnInit {
     private isBrowser = false;
 
     @ViewChild('productGrid') productGrid!: ElementRef<HTMLElement>;
-    
+
     product?: Product;
     category?: Category;
     brand?: Brand;
@@ -221,7 +221,7 @@ export class ProductDetailComponent implements OnInit {
         if (this.product?.variants?.length) {
             return this.selectedVariant ? this.selectedVariant.stock : 0;
         }
-        return this.product?.stock || 0;
+        return 0;
     }
 
     get maxQuantity(): number {
@@ -246,8 +246,8 @@ export class ProductDetailComponent implements OnInit {
         this.isAddingToCart = true;
         try {
             await this.cartService.addToCart(
-                this.product.id, 
-                this.quantity, 
+                this.product.id,
+                this.quantity,
                 this.selectedVariant?.id
             );
             this.toastService.success('Added to cart successfully');

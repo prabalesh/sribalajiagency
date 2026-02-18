@@ -31,8 +31,6 @@ export class Product {
     @Column({ default: true })
     isAvailable: boolean;
 
-    @Column({ default: 0 })
-    stock: number;
 
     @Column({ nullable: true })
     maxOrderQuantity: number;

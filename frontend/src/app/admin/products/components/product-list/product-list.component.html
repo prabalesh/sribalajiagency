@@ -69,9 +69,8 @@
                         </div>
                     </td>
                     <td>
-                        <span class="stock-badge"
-                            [class.low]="((p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0) < 10">
-                            {{ (p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0 }} units
+                        <span class="stock-badge" [class.low]="((p.variants.reduce(sumStock, 0) || 0) < 10)">
+                            {{ (p.variants.reduce(sumStock, 0) || 0) }} units
                         </span>
                     </td>
                     <td>
@@ -127,9 +126,8 @@
                 </div>
                 <div class="detail-item">
                     <span class="label">Stock:</span>
-                    <span class="stock-badge"
-                        [class.low]="((p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0) < 10">
-                        {{ (p.variants && p.variants.length > 0 ? p.variants[0].stock : p.stock) || 0 }} units
+                    <span class="stock-badge" [class.low]="((p.variants.reduce(sumStock, 0) || 0) < 10)">
+                        {{ (p.variants.reduce(sumStock, 0) || 0) }} units
                     </span>
                 </div>
             </div>

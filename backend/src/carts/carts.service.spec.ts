@@ -166,10 +166,10 @@ describe('CartsService', () => {
                 id: 'p1',
                 name: 'Product 1',
                 price: 100,
-                stock: 5,
                 isAvailable: true,
                 isShowcaseOnly: false,
-                images: [{ url: 'img1' }]
+                images: [{ url: 'img1' }],
+                variants: [{ id: 'v1', stock: 5 }]
             };
 
             mockProductRepo.findOne.mockResolvedValue(product);

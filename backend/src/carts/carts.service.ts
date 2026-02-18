@@ -466,7 +466,13 @@ export class CartsService {
             // Determine price and stock
             if (validatedItem.available) {
                 validatedItem.price = variant ? variant.price : product.price;
-                validatedItem.stockAvailable = variant ? variant.stock : product.stock;
+
+                // Use selected variant stock, or sum of all variants if none selected
+                if (variant) {
+                    validatedItem.stockAvailable = variant.stock;
+                } else {
+                    validatedItem.stockAvailable = product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
+                }
 
                 // Get image URL (variant image or first product image)
                 // FIXME: Complex nested conditions - could be simplified

@@ -336,7 +336,7 @@ export class ProductsService {
                     price: savedProduct.price,
                     comparisonPrice: savedProduct.comparisonPrice,
                     sku: `${savedProduct.name.replace(/\s+/g, '-').toUpperCase()}-DEF`,
-                    stock: savedProduct.stock,
+                    stock: 0, // Default to 0, admin will update via variant
                     product: savedProduct
                 });
                 await this.variantRepo.save(defaultVariant);
@@ -441,18 +441,6 @@ export class ProductsService {
                 await this.variantRepo.save(variantEntities);
 
                 this.logger.log(`Updated variants for product ${id}`);
-            } else if (productData.stock !== undefined) {
-                // If variants are NOT being replaced, but stock IS updated,
-                // we need to sync the 'Default' variant if it exists.
-                const defaultVariant = await this.variantRepo.findOne({
-                    where: { product: { id }, name: 'Default' }
-                });
-
-                if (defaultVariant) {
-                    defaultVariant.stock = productData.stock;
-                    await this.variantRepo.save(defaultVariant);
-                    this.logger.log(`Synced default variant stock for product ${id}`);
-                }
             }
 
             // TODO: Emit ProductUpdatedEvent

@@ -18,4 +18,9 @@ export class ProductCardComponent {
     event.stopPropagation();
     this.addToCart.emit(this.product);
   }
+
+  get stock(): number {
+    if (!this.product.variants || this.product.variants.length === 0) return 0;
+    return this.product.variants.reduce((acc, v) => acc + (v.stock || 0), 0);
+  }
 }

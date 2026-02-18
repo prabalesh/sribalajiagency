@@ -170,11 +170,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
       this.toastService.warning('Description is required');
       return;
     }
-    if (this.newProduct.stock < 0) {
-      this.toastService.warning('Stock cannot be negative');
-      return;
-    }
-
     this.isSaving = true;
     try {
       const productData = {
@@ -183,7 +178,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
         price: this.newProduct.price,
         comparisonPrice: this.newProduct.comparisonPrice,
         isAvailable: this.newProduct.isAvailable,
-        stock: this.newProduct.stock,
         isShowcaseOnly: this.newProduct.isShowcaseOnly,
         allowedPaymentMethods: this.newProduct.allowedPaymentMethods,
         categoryId: this.newProduct.categoryId,
@@ -201,7 +195,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
             name: 'Default',
             price: this.newProduct.price,
             comparisonPrice: this.newProduct.comparisonPrice,
-            stock: this.newProduct.stock,
+            stock: 0,
             sku: this.generateSku(this.newProduct.name),
             image: this.newProduct.images && this.newProduct.images.length > 0 ? this.newProduct.images[0].url : '',
             images: this.newProduct.images && this.newProduct.images.length > 0 ? [this.newProduct.images[0].url] : []
@@ -377,7 +371,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
       variants: [],
       isAvailable: true,
       isFeatured: false,
-      stock: 0,
       isShowcaseOnly: false,
       allowedPaymentMethods: ['online', 'cod']
     };

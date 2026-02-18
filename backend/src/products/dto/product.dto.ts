@@ -60,10 +60,6 @@ export class CreateProductDto {
     @IsBoolean()
     isAvailable?: boolean;
 
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    stock?: number;
 
     @IsOptional()
     @IsBoolean()
@@ -123,10 +119,6 @@ export class UpdateProductDto {
     @IsBoolean()
     isAvailable?: boolean;
 
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    stock?: number;
 
     @IsOptional()
     @IsBoolean()

@@ -34,7 +34,6 @@ export interface Product {
     variants: ProductVariant[];
     isAvailable: boolean;
     isFeatured: boolean;
-    stock: number;
     maxOrderQuantity?: number;
     isShowcaseOnly: boolean;
     allowedPaymentMethods?: string[];

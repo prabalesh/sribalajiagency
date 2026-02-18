@@ -46,6 +46,7 @@ describe('ProductsService', () => {
         save: jest.fn(),
         findOneBy: jest.fn(),
         delete: jest.fn(),
+        count: jest.fn(),
     };
 
     const mockVariantRepo = {
