@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany, Index } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
 import { OrderItem } from './order-item.entity';
 import { OrderStatusHistory } from './order-status-history.entity';
@@ -25,6 +25,7 @@ export class Order {
     @Column({ type: 'jsonb', nullable: true })
     taxDetails: any;
 
+    @Index()
     @Column({ default: 'Pending' })
     status: OrderStatus;
 
@@ -43,6 +44,7 @@ export class Order {
     @OneToMany(() => OrderStatusHistory, (history) => history.order, { cascade: true })
     statusHistory: OrderStatusHistory[];
 
+    @Index()
     @CreateDateColumn()
     createdAt: Date;
 

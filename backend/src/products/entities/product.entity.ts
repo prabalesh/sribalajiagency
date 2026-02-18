@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, Index } from 'typeorm';
 import { Category } from '../../categories/entities/category.entity';
 import { Brand } from '../../brands/entities/brand.entity';
 import { ProductImage } from './product-image.entity';
@@ -10,6 +10,7 @@ export class Product {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
+    @Index()
     @Column()
     name: string;
 
@@ -22,6 +23,7 @@ export class Product {
     @OneToMany(() => ProductVariant, (variant) => variant.product, { cascade: true })
     variants: ProductVariant[];
 
+    @Index()
     @Column({ default: true })
     isAvailable: boolean;
 
@@ -44,21 +46,25 @@ export class Product {
     @Column({ default: 0 })
     reviewCount: number;
 
+    @Index()
     @Column({ default: false })
     isFeatured: boolean;
 
     @ManyToOne(() => Category)
     category: Category;
 
+    @Index()
     @Column({ nullable: true })
     categoryId: string;
 
     @ManyToOne(() => Brand)
     brand: Brand;
 
+    @Index()
     @Column({ nullable: true })
     brandId: string;
 
+    @Index()
     @CreateDateColumn()
     createdAt: Date;
 

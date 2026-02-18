@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn, Index } from 'typeorm';
 
 @Entity('categories')
 export class Category {
@@ -21,6 +21,7 @@ export class Category {
     @JoinColumn({ name: 'parentId' })
     parent?: Category;
 
+    @Index()
     @Column({ nullable: true })
     parentId?: string;
 

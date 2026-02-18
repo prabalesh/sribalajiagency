@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Index } from 'typeorm';
 import { Cart } from './cart.entity';
 import { Product } from '../../products/entities/product.entity';
 import { ProductVariant } from '../../products/entities/product-variant.entity';
@@ -11,12 +11,14 @@ export class CartItem {
     @ManyToOne(() => Cart, (cart) => cart.items, { onDelete: 'CASCADE' })
     cart: Cart;
 
+    @Index()
     @Column()
     productId: string;
 
     @ManyToOne(() => Product, { eager: true })
     product: Product;
 
+    @Index()
     @Column({ nullable: true })
     variantId: string;
 

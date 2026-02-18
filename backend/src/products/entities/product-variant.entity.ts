@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { Product } from './product.entity';
 import { ColumnNumericTransformer } from '../../common/transformers/numeric.transformer';
 
@@ -10,12 +10,14 @@ export class ProductVariant {
     @Column()
     name: string; // e.g., 'Large', 'Blue'
 
+    @Index()
     @Column({ type: 'decimal', precision: 12, scale: 2, transformer: new ColumnNumericTransformer() })
     price: number;
 
     @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true, transformer: new ColumnNumericTransformer() })
     comparisonPrice: number;
 
+    @Index()
     @Column({ nullable: true })
     sku: string;
 
@@ -34,6 +36,7 @@ export class ProductVariant {
     @Column({ type: 'text', nullable: true })
     description: string;
 
+    @Index()
     @ManyToOne(() => Product, (product) => product.variants, { onDelete: 'CASCADE' })
     product: Product;
 
