@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProductService } from '../../core/services/api/product.service';
@@ -18,6 +19,7 @@ import { BrandShelfComponent } from './components/brand-shelf/brand-shelf.compon
 import { TrustMarkersComponent } from './components/trust-markers/trust-markers.component';
 import { SocialSectionComponent } from './components/social-section/social-section.component';
 import { Brand } from '../../core/models/brand.model';
+import { HomeMobileComponent } from './components/home-mobile/home-mobile.component';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -31,7 +33,8 @@ import { Brand } from '../../core/models/brand.model';
     AboutSectionComponent,
     BrandShelfComponent,
     TrustMarkersComponent,
-    SocialSectionComponent
+    SocialSectionComponent,
+    HomeMobileComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
@@ -48,7 +51,22 @@ export class HomeComponent implements OnInit {
   brands: Brand[] = [];
   cms: any = null;
 
+  isMobile = signal(false);
+  private platformId = inject(PLATFORM_ID);
+
+  @HostListener('window:resize')
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.isMobile.set(window.innerWidth < 768);
+    }
+  }
+
   async ngOnInit() {
+    this.checkScreenSize();
     [this.categories, this.brands, this.cms] = await Promise.all([
       this.categoryService.getCategories(),
       this.brandService.getBrands(),

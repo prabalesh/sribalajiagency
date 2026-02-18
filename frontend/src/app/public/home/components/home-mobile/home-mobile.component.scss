@@ -1,0 +1,30 @@
+.home-mobile-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-bottom: 2rem;
+  background-color: var(--bg-primary);
+
+  // Smooth scroll for anchors
+  scroll-behavior: smooth;
+
+  // Optimize sections for mobile
+  app-hero,
+  app-category-grid,
+  app-featured-products,
+  app-about-section,
+  app-brand-shelf,
+  app-trust-markers,
+  app-social-section {
+    display: block;
+    width: 100%;
+  }
+
+  // Adjust spacing for mobile
+  app-category-grid,
+  app-featured-products,
+  app-about-section,
+  app-brand-shelf {
+    padding-inline: 1rem;
+  }
+}

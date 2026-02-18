@@ -1,9 +1,4 @@
-@if (isMobile()) {
-<app-home-mobile [categories]="categories" [featuredProducts]="featuredProducts" [brands]="brands" [cms]="cms"
-    (addToCart)="addToCart($event)">
-</app-home-mobile>
-} @else {
-<div class="home-wrapper">
+<div class="home-mobile-wrapper">
     <!-- Hero Section -->
     <app-hero [cms]="cms"></app-hero>
 
@@ -12,7 +7,7 @@
 
     <!-- Featured Products -->
     <app-featured-products [products]="featuredProducts" [showFeatured]="cms?.showFeatured"
-        (addToCart)="addToCart($event)">
+        (addToCart)="onAddToCart($event)">
     </app-featured-products>
 
     <!-- About Section -->
@@ -27,4 +22,3 @@
     <!-- Social Section -->
     <app-social-section [socialLinks]="cms?.socialLinks"></app-social-section>
 </div>
-}
