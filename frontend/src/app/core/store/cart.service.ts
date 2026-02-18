@@ -96,7 +96,12 @@ export class CartService implements OnDestroy {
         if (saved) {
             try {
                 const items: CartItem[] = JSON.parse(saved);
-                await this.validateAndSetCart(items);
+                const validated = await this.validateAndSetCart(items);
+
+                // If items were adjusted during load, persist them
+                if (validated.some(item => item.quantityAdjusted || !item.available)) {
+                    this.saveToLocalStorage(this.toCartItems(validated));
+                }
             } catch (e) {
                 console.error('Error parsing guest cart', e);
                 localStorage.removeItem(GUEST_CART_KEY);
@@ -104,11 +109,17 @@ export class CartService implements OnDestroy {
         }
     }
 
+
     // Load from database (logged-in users)
     private async loadFromDatabase() {
         try {
             const items = await this.cartApi.getCart();
-            await this.validateAndSetCart(items);
+            const validated = await this.validateAndSetCart(items);
+
+            // If items were adjusted during load from database, persist them back to db
+            if (validated.some(item => item.quantityAdjusted || !item.available)) {
+                await this.cartApi.updateCart(this.toCartItems(validated));
+            }
         } catch (error) {
             console.error('Failed to load cart from database:', error);
             // Fallback to empty cart
@@ -117,11 +128,11 @@ export class CartService implements OnDestroy {
     }
 
     // Validate cart items and update state
-    private async validateAndSetCart(items: CartItem[]) {
+    private async validateAndSetCart(items: CartItem[]): Promise<ValidatedCartItem[]> {
         if (items.length === 0) {
             this.cartItems.set([]);
             this.lastValidItems = [];
-            return;
+            return [];
         }
 
         try {
@@ -129,12 +140,14 @@ export class CartService implements OnDestroy {
             this.cartItems.set(validated);
             this.lastValidItems = [...validated];
             this.showValidationNotifications(validated);
+            return validated;
         } catch (error) {
             console.error('Cart validation failed:', error);
             // If validation fails, we keep the last valid items or clear if none
             if (this.lastValidItems.length > 0) {
                 this.cartItems.set(this.lastValidItems);
             }
+            return this.lastValidItems;
         }
     }
 
@@ -142,12 +155,13 @@ export class CartService implements OnDestroy {
     private async performSync(items: CartItem[]) {
         this.isLoadingSignal.set(true);
         try {
-            await this.validateAndSetCart(items);
+            const validated = await this.validateAndSetCart(items);
+            const itemsToSave = this.toCartItems(validated);
 
             if (this.authService.isLoggedIn()) {
-                await this.cartApi.updateCart(items);
+                await this.cartApi.updateCart(itemsToSave);
             } else {
-                this.saveToLocalStorage(items);
+                this.saveToLocalStorage(itemsToSave);
             }
         } finally {
             this.isLoadingSignal.set(false);
