@@ -47,15 +47,6 @@ export class CreateProductDto {
     @IsNotEmpty({ message: 'Description is required' })
     description: string;
 
-    @IsNumber()
-    @Min(0)
-    price: number;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    comparisonPrice?: number;
-
     @IsOptional()
     @IsBoolean()
     isAvailable?: boolean;
@@ -104,16 +95,6 @@ export class UpdateProductDto {
     @IsOptional()
     @IsString()
     description?: string;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    price?: number;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    comparisonPrice?: number;
 
     @IsOptional()
     @IsBoolean()

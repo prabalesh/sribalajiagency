@@ -12,10 +12,7 @@ export interface ProductVariantDto {
 export interface CreateProductDto {
     name: string;
     description: string;
-    price: number;
-    comparisonPrice?: number;
     isAvailable?: boolean;
-    stock?: number;
     isShowcaseOnly?: boolean;
     allowedPaymentMethods?: string[];
     gstRate?: number;

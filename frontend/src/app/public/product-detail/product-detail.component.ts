@@ -204,11 +204,11 @@ export class ProductDetailComponent implements OnInit {
     }
 
     get currentPrice(): number {
-        return this.selectedVariant ? this.selectedVariant.price : (this.product?.price || 0);
+        return this.selectedVariant ? this.selectedVariant.price : (this.product?.variants?.[0]?.price || 0);
     }
 
     get currentComparisonPrice(): number | undefined {
-        return this.selectedVariant?.comparisonPrice || this.product?.comparisonPrice;
+        return this.selectedVariant?.comparisonPrice || this.product?.variants?.[0]?.comparisonPrice;
     }
 
     get discountPercentage(): number | undefined {

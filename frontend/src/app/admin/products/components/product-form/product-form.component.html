@@ -61,25 +61,7 @@
                 </div>
             </div>
 
-            <!-- Pricing -->
-            <div class="form-group full-width">
-                <label class="form-label">
-                    <lucide-icon [img]="DollarSign" [size]="16"></lucide-icon>
-                    <span>Pricing (₹)</span>
-                </label>
-                <div class="inline-fields">
-                    <div class="field">
-                        <label class="field-label">Selling Price <span class="required">*</span></label>
-                        <input type="number" class="form-input" [(ngModel)]="product.price" name="price"
-                            placeholder="0.00" min="0" step="0.01" [disabled]="isSaving">
-                    </div>
-                    <div class="field">
-                        <label class="field-label">MRP (Comparison Price)</label>
-                        <input type="number" class="form-input" [(ngModel)]="product.comparisonPrice"
-                            name="comparisonPrice" placeholder="0.00" min="0" step="0.01" [disabled]="isSaving">
-                    </div>
-                </div>
-            </div>
+
 
             <!-- Inventory & Controls -->
             <div class="form-group full-width">

@@ -456,7 +456,7 @@ export class OrdersService {
             // TODO: Validate status transition is allowed
             await this.orderRepo.update(id, { status: updateOrderDto.status });
             currentStatus = updateOrderDto.status;
-            
+
             this.logger.log(`Order ${id} status updated to ${currentStatus}`);
         } else {
             // Fetch current status if not updating
@@ -575,10 +575,10 @@ export class OrdersService {
 
         let subtotal: number = 0;
         let totalTax: number = 0;
-        
+
         // FIXME: Hardcoded store state - should come from config
         const STORE_STATE = 'Tamil Nadu'; // TODO: Move to ConfigService
-        
+
         // FIXME: Case-sensitive comparison after trim may fail
         // TODO: Normalize state names (handle abbreviations, case variations)
         const isIntraState = state.toLowerCase().trim() === STORE_STATE.toLowerCase().trim();
@@ -592,7 +592,7 @@ export class OrdersService {
         const [products, variants] = await Promise.all([
             this.productRepo.find({
                 where: { id: In(productIds) },
-                relations: ['category']
+                relations: ['category', 'variants']
             }),
             variantIds.length > 0 ? this.variantRepo.find({ where: { id: In(variantIds) } }) : Promise.resolve([])
         ]);
@@ -610,7 +610,7 @@ export class OrdersService {
 
             // Get variant price if applicable
             const variant = item.variantId ? variants.find(v => v.id === item.variantId) : null;
-            const price = variant ? +variant.price : +product.price;
+            const price = variant ? +variant.price : (product.variants?.[0]?.price || 0);
 
             // Determine GST rate (product > category > default 18%)
             // FIXME: Complex validation logic - should be extracted to separate method

@@ -62,9 +62,9 @@
                     </td>
                     <td>
                         <div class="price-cell">
-                            <strong>₹{{ p.price | number:'1.2-2' }}</strong>
-                            @if (p.comparisonPrice) {
-                            <span class="strike">₹{{ p.comparisonPrice | number:'1.2-2' }}</span>
+                            <strong>₹{{ getMinPrice(p) | number:'1.2-2' }}</strong>
+                            @if (getMinComparisonPrice(p)) {
+                            <span class="strike">₹{{ getMinComparisonPrice(p) | number:'1.2-2' }}</span>
                             }
                         </div>
                     </td>
@@ -118,9 +118,9 @@
                 <div class="detail-item">
                     <span class="label">Price:</span>
                     <div class="price-cell">
-                        <strong>₹{{ p.price | number:'1.2-2' }}</strong>
-                        @if (p.comparisonPrice) {
-                        <span class="strike">₹{{ p.comparisonPrice | number:'1.2-2' }}</span>
+                        <strong>₹{{ getMinPrice(p) | number:'1.2-2' }}</strong>
+                        @if (getMinComparisonPrice(p)) {
+                        <span class="strike">₹{{ getMinComparisonPrice(p) | number:'1.2-2' }}</span>
                         }
                     </div>
                 </div>

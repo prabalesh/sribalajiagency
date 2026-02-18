@@ -65,4 +65,17 @@ export class ProductListComponent {
     }
 
     sumStock = (acc: number, variant: any) => acc + (variant.stock || 0);
+
+    getMinPrice(product: Product): number {
+        if (!product.variants || product.variants.length === 0) return 0;
+        return Math.min(...product.variants.map(v => v.price));
+    }
+
+    getMinComparisonPrice(product: Product): number | undefined {
+        if (!product.variants || product.variants.length === 0) return undefined;
+        const comparisonPrices = product.variants
+            .map(v => v.comparisonPrice)
+            .filter((p): p is number => p !== undefined && p !== null);
+        return comparisonPrices.length > 0 ? Math.min(...comparisonPrices) : undefined;
+    }
 }

@@ -23,4 +23,12 @@ export class ProductCardComponent {
     if (!this.product.variants || this.product.variants.length === 0) return 0;
     return this.product.variants.reduce((acc, v) => acc + (v.stock || 0), 0);
   }
+
+  get displayPrice(): number {
+    return this.product.variants?.[0]?.price || 0;
+  }
+
+  get displayComparisonPrice(): number | undefined {
+    return this.product.variants?.[0]?.comparisonPrice;
+  }
 }

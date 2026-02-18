@@ -150,56 +150,24 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   async saveProduct() {
-    if (!this.newProduct.name) {
-      this.toastService.warning('Product Name is required');
-      return;
-    }
-    if (!this.newProduct.brandId) {
-      this.toastService.warning('Please select a Brand');
-      return;
-    }
-    if (!this.newProduct.categoryId) {
-      this.toastService.warning('Please select a Category');
-      return;
-    }
-    if (!this.newProduct.price || this.newProduct.price <= 0) {
-      this.toastService.warning('Price must be greater than 0');
-      return;
-    }
-    if (!this.newProduct.description) {
-      this.toastService.warning('Description is required');
-      return;
-    }
     this.isSaving = true;
     try {
       const productData = {
         name: this.newProduct.name,
         description: this.newProduct.description,
-        price: this.newProduct.price,
-        comparisonPrice: this.newProduct.comparisonPrice,
         isAvailable: this.newProduct.isAvailable,
         isShowcaseOnly: this.newProduct.isShowcaseOnly,
         allowedPaymentMethods: this.newProduct.allowedPaymentMethods,
         categoryId: this.newProduct.categoryId,
         brandId: this.newProduct.brandId,
         isFeatured: this.newProduct.isFeatured,
-        variants: (this.newProduct.variants && this.newProduct.variants.length > 0)
-          ? this.newProduct.variants.map(v => {
-            const { sku, specifications, ...variantData } = v;
-            return {
-              ...variantData,
-              id: v.id && v.id !== '' ? v.id : undefined
-            };
-          })
-          : [{
-            name: 'Default',
-            price: this.newProduct.price,
-            comparisonPrice: this.newProduct.comparisonPrice,
-            stock: 0,
-            sku: this.generateSku(this.newProduct.name),
-            image: this.newProduct.images && this.newProduct.images.length > 0 ? this.newProduct.images[0].url : '',
-            images: this.newProduct.images && this.newProduct.images.length > 0 ? [this.newProduct.images[0].url] : []
-          }]
+        variants: this.newProduct.variants?.map(v => {
+          const { sku, specifications, ...variantData } = v;
+          return {
+            ...variantData,
+            id: v.id && v.id !== '' ? v.id : undefined
+          };
+        }) || []
       };
 
       let savedProduct: Product;
@@ -282,12 +250,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   addVariant() {
-    if (!this.newProduct.variants) this.newProduct.variants = [];
+    const lastPrice = this.newProduct.variants?.[this.newProduct.variants.length - 1]?.price || 0;
+    const lastComparisonPrice = this.newProduct.variants?.[this.newProduct.variants.length - 1]?.comparisonPrice;
+
     this.newProduct.variants.push({
       id: '',
       name: '',
-      price: this.newProduct.price,
-      comparisonPrice: this.newProduct.comparisonPrice,
+      price: lastPrice,
+      comparisonPrice: lastComparisonPrice,
       stock: 0,
       image: '',
       images: [],
@@ -365,10 +335,17 @@ export class ProductsComponent implements OnInit, OnDestroy {
       description: '',
       brandId: '',
       categoryId: '',
-      price: 0,
-      comparisonPrice: undefined,
       images: [],
-      variants: [],
+      variants: [{
+        id: '',
+        name: 'Default',
+        price: 0,
+        stock: 0,
+        sku: 'DEFAULT-SKU',
+        image: '',
+        images: [],
+        description: ''
+      }],
       isAvailable: true,
       isFeatured: false,
       isShowcaseOnly: false,

@@ -28,8 +28,6 @@ export interface Product {
     brand?: Brand;
     categoryId: string;
     category?: Category;
-    price: number;
-    comparisonPrice?: number;
     images: ProductImage[];
     variants: ProductVariant[];
     isAvailable: boolean;

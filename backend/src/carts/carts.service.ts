@@ -465,7 +465,8 @@ export class CartsService {
 
             // Determine price and stock
             if (validatedItem.available) {
-                validatedItem.price = variant ? variant.price : product.price;
+                // Fallback to first variant's price if no variantId or variant not found
+                validatedItem.price = variant ? variant.price : (product.variants?.[0]?.price || 0);
 
                 // Use selected variant stock, or sum of all variants if none selected
                 if (variant) {

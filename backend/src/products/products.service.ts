@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, MoreThanOrEqual, LessThanOrEqual, ILike, DataSource, In } from 'typeorm';
+import { EntityRepository, Repository, In, Between, MoreThanOrEqual, LessThanOrEqual, ILike, DataSource, Brackets } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { Category } from '../categories/entities/category.entity';
 import { CategoriesService } from '../categories/categories.service';
@@ -147,18 +147,11 @@ export class ProductsService {
         // TODO: Validate page and limit are positive integers
         const skip = (page - 1) * limit;
 
-        // Build sort order
-        let order: any = {};
-        if (filters.sortBy) {
-            // TODO: Whitelist allowed sort fields to prevent SQL injection
-            order[filters.sortBy] = filters.sortOrder || 'ASC';
-        } else {
-            // Default sorting: available products first, then by name
-            order = { isAvailable: 'DESC', name: 'ASC' };
-        }
-
-        // Build where clause
-        const where: any = {};
+        const query = this.productRepo.createQueryBuilder('product')
+            .leftJoinAndSelect('product.category', 'category')
+            .leftJoinAndSelect('product.brand', 'brand')
+            .leftJoinAndSelect('product.images', 'images')
+            .leftJoinAndSelect('product.variants', 'variants');
 
         // Category filter (including subtree)
         if (filters.categoryId || filters.categorySlug) {
@@ -167,54 +160,68 @@ export class ProductsService {
                 filters.categorySlug
             );
             if (categoryIds.length > 0) {
-                where.category = { id: In(categoryIds) };
+                query.andWhere('product.categoryId IN (:...categoryIds)', { categoryIds });
             } else {
-                // If category requested but not found, return nothing
-                where.category = { id: '00000000-0000-0000-0000-000000000000' };
+                query.andWhere('product.id = :dummyId', { dummyId: '00000000-0000-0000-0000-000000000000' });
             }
         }
 
         // Brand filter (by ID or slug)
-        if (filters.brandId) where.brand = { id: filters.brandId };
-        if (filters.brandSlug) where.brand = { slug: filters.brandSlug };
+        if (filters.brandId) {
+            query.andWhere('product.brandId = :brandId', { brandId: filters.brandId });
+        }
+        if (filters.brandSlug) {
+            query.andWhere('brand.slug = :brandSlug', { brandSlug: filters.brandSlug });
+        }
 
         // Featured filter
-        if (filters.isFeatured !== undefined) where.isFeatured = filters.isFeatured;
+        if (filters.isFeatured !== undefined) {
+            query.andWhere('product.isFeatured = :isFeatured', { isFeatured: filters.isFeatured });
+        }
 
         // Price range filtering
-        // TODO: Consider using separate priceMin/priceMax fields for better indexing
-        if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
-            where.price = Between(filters.minPrice, filters.maxPrice);
-        } else if (filters.minPrice !== undefined) {
-            where.price = MoreThanOrEqual(filters.minPrice);
-        } else if (filters.maxPrice !== undefined) {
-            where.price = LessThanOrEqual(filters.maxPrice);
+        if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+            query.leftJoin('product.variants', 'v_filter');
+            if (filters.minPrice !== undefined) {
+                query.andWhere('v_filter.price >= :minPrice', { minPrice: filters.minPrice });
+            }
+            if (filters.maxPrice !== undefined) {
+                query.andWhere('v_filter.price <= :maxPrice', { maxPrice: filters.maxPrice });
+            }
         }
 
         // Search query (name or description)
-        // TODO: Replace with full-text search or Elasticsearch for better performance
-        let whereClause = where;
         if (filters.q) {
-            // Search in both name and description
-            whereClause = [
-                { ...where, name: ILike(`%${filters.q}%`) },
-                { ...where, description: ILike(`%${filters.q}%`) }
-            ];
+            query.andWhere(
+                new Brackets(qb => {
+                    qb.where('product.name ILike :q', { q: `%${filters.q}%` })
+                        .orWhere('product.description ILike :q', { q: `%${filters.q}%` });
+                })
+            );
         }
 
-        // TODO: Add query timing for performance monitoring
-        const [items, total] = await this.productRepo.findAndCount({
-            relations: ['category', 'brand', 'images', 'variants'],
-            order,
-            take: limit,
-            skip: skip,
-            where: whereClause
-        });
+        // Sorting
+        if (filters.sortBy) {
+            if (filters.sortBy === 'price') {
+                // Sort by the minimum variant price
+                // Note: This requires a subquery or careful join if we want absolute correctness
+                // For now, sorting by the first variant's price linked in the main join
+                query.leftJoin('product.variants', 'v_sort');
+                query.orderBy('v_sort.price', filters.sortOrder || 'ASC');
+            } else {
+                query.orderBy(`product.${filters.sortBy}`, filters.sortOrder || 'ASC');
+            }
+        } else {
+            query.orderBy('product.isAvailable', 'DESC')
+                .addOrderBy('product.name', 'ASC');
+        }
+
+        const [items, total] = await query
+            .take(limit)
+            .skip(skip)
+            .getManyAndCount();
 
         this.logger.log(`Found ${total} products, returning page ${page} with ${items.length} items`);
-
-        // TODO: Transform response to exclude sensitive data
-        // TODO: Add metadata (availableFilters, priceRange, etc.)
         return { items, total, page, limit };
     }
 
@@ -330,17 +337,18 @@ export class ProductsService {
                 await this.variantRepo.save(variantEntities);
                 this.logger.log(`Created ${variants.length} variants for product ${savedProduct.id}`);
             } else {
-                // Creates a default variant for simple products
+                // Creates a default variant
+                // Since product doesn't have price, we might want to throw error if variants empty
+                // But for safety, we'll create one with 0 price if somehow it reaches here
                 const defaultVariant = this.variantRepo.create({
                     name: 'Default',
-                    price: savedProduct.price,
-                    comparisonPrice: savedProduct.comparisonPrice,
+                    price: 0,
                     sku: `${savedProduct.name.replace(/\s+/g, '-').toUpperCase()}-DEF`,
-                    stock: 0, // Default to 0, admin will update via variant
+                    stock: 0,
                     product: savedProduct
                 });
                 await this.variantRepo.save(defaultVariant);
-                this.logger.log(`Created default variant for product ${savedProduct.id}`);
+                this.logger.log(`Created fallback default variant for product ${savedProduct.id}`);
             }
 
             // TODO: Emit ProductCreatedEvent

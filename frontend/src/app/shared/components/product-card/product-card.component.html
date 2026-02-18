@@ -29,8 +29,8 @@
 
         <div class="p-footer">
             <div class="p-price-area">
-                <span class="p-price">₹{{ product.price | number }}</span>
-                <span *ngIf="product.comparisonPrice" class="p-mrp">₹{{ product.comparisonPrice | number }}</span>
+                <span class="p-price">₹{{ displayPrice | number }}</span>
+                <span *ngIf="displayComparisonPrice" class="p-mrp">₹{{ displayComparisonPrice | number }}</span>
             </div>
             <div class="p-rating">
                 <ng-container *ngIf="product.rating; else noRating">
