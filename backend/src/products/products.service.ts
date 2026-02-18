@@ -190,14 +190,22 @@ export class ProductsService {
             }
         }
 
-        // Search query (name or description)
+        // Search query (name, description, category, brand, or variant)
         if (filters.q) {
-            query.andWhere(
-                new Brackets(qb => {
-                    qb.where('product.name ILike :q', { q: `%${filters.q}%` })
-                        .orWhere('product.description ILike :q', { q: `%${filters.q}%` });
-                })
-            );
+            const keywords = filters.q.trim().split(/\s+/);
+            keywords.forEach((keyword, index) => {
+                const paramName = `q_${index}`;
+                query.andWhere(
+                    new Brackets(qb => {
+                        qb.where('product.name ILike :' + paramName, { [paramName]: `%${keyword}%` })
+                            .orWhere('product.description ILike :' + paramName, { [paramName]: `%${keyword}%` })
+                            .orWhere('category.name ILike :' + paramName, { [paramName]: `%${keyword}%` })
+                            .orWhere('brand.name ILike :' + paramName, { [paramName]: `%${keyword}%` })
+                            .orWhere('variants.name ILike :' + paramName, { [paramName]: `%${keyword}%` })
+                            .orWhere('variants.sku ILike :' + paramName, { [paramName]: `%${keyword}%` });
+                    })
+                );
+            });
         }
 
         // Sorting
