@@ -193,6 +193,21 @@ export class ProductDetailComponent implements OnInit {
         this.quantity = 1; // Reset quantity on variant change
     }
 
+    get groupedVariants() {
+        if (!this.product?.variants) return {};
+        const groups: { [key: string]: { type: any, variants: ProductVariant[] } } = {};
+
+        this.product.variants.forEach(v => {
+            const typeName = v.variantType?.displayName || v.variantType?.name || 'Options';
+            if (!groups[typeName]) {
+                groups[typeName] = { type: v.variantType, variants: [] };
+            }
+            groups[typeName].variants.push(v);
+        });
+
+        return groups;
+    }
+
     get displayImages(): any[] {
         if (this.selectedVariant?.images?.length) {
             return this.selectedVariant.images.map(url => ({ url, isPrimary: false }));

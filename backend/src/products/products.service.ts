@@ -447,14 +447,33 @@ export class ProductsService {
             // Update variants if provided (complete replacement)
             // TODO: Implement smarter variant updates (add/update/delete individually)
             if (variants) {
-                // Delete all existing variants
-                await this.variantRepo.delete({ product: { id } });
+                // Fetch current variants
+                const currentVariants = await this.variantRepo.find({ where: { product: { id } } });
+                const incomingVariantIds = variants.filter(v => v.id).map(v => v.id);
 
-                // Create new variants
-                const variantEntities = variants.map(v =>
-                    this.variantRepo.create({ ...v, product: { id } })
-                );
-                await this.variantRepo.save(variantEntities);
+                // 1. Delete variants that are no longer present and NOT referenced by orders
+                const toDelete = currentVariants.filter(cv => !incomingVariantIds.includes(cv.id));
+                for (const variant of toDelete) {
+                    try {
+                        await this.variantRepo.delete(variant.id);
+                        this.logger.log(`Deleted unused variant ${variant.id}`);
+                    } catch (err) {
+                        this.logger.warn(`Could not delete variant ${variant.id} (likely referenced by orders): ${err.message}`);
+                        // Optionally: Mark as inactive if we had such a field
+                    }
+                }
+
+                // 2. Update existing or Create new variants
+                for (const v of variants) {
+                    if (v.id) {
+                        // Update existing
+                        await this.variantRepo.update(v.id, { ...v, product: { id } });
+                    } else {
+                        // Create new
+                        const newV = this.variantRepo.create({ ...v, product: { id } });
+                        await this.variantRepo.save(newV);
+                    }
+                }
 
                 this.logger.log(`Updated variants for product ${id}`);
             }

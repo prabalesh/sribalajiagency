@@ -14,101 +14,88 @@
         <nav class="sidebar-nav">
             <ul>
                 <li>
-                    <a routerLink="/dashboard" 
-                       routerLinkActive="active" 
-                       [routerLinkActiveOptions]="{exact: true}"
-                       (click)="closeSidebar()">
+                    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                        (click)="closeSidebar()">
                         <lucide-icon [img]="BarChart3" [size]="20"></lucide-icon>
                         <span>Dashboard</span>
                     </a>
                 </li>
 
                 @if (authService.hasPermission('VIEW_USERS')) {
-                    <li>
-                        <a routerLink="/dashboard/users" 
-                           routerLinkActive="active" 
-                           (click)="closeSidebar()">
-                            <lucide-icon [img]="Users" [size]="20"></lucide-icon>
-                            <span>Users</span>
-                        </a>
-                    </li>
+                <li>
+                    <a routerLink="/dashboard/users" routerLinkActive="active" (click)="closeSidebar()">
+                        <lucide-icon [img]="Users" [size]="20"></lucide-icon>
+                        <span>Users</span>
+                    </a>
+                </li>
                 }
 
                 @if (authService.hasPermission('VIEW_CATEGORIES')) {
-                    <li>
-                        <a routerLink="/dashboard/categories" 
-                           routerLinkActive="active" 
-                           (click)="closeSidebar()">
-                            <lucide-icon [img]="FolderTree" [size]="20"></lucide-icon>
-                            <span>Categories</span>
-                        </a>
-                    </li>
+                <li>
+                    <a routerLink="/dashboard/categories" routerLinkActive="active" (click)="closeSidebar()">
+                        <lucide-icon [img]="FolderTree" [size]="20"></lucide-icon>
+                        <span>Categories</span>
+                    </a>
+                </li>
                 }
 
                 @if (authService.hasPermission('VIEW_BRANDS')) {
-                    <li>
-                        <a routerLink="/dashboard/brands" 
-                           routerLinkActive="active" 
-                           (click)="closeSidebar()">
-                            <lucide-icon [img]="Tag" [size]="20"></lucide-icon>
-                            <span>Brands</span>
-                        </a>
-                    </li>
+                <li>
+                    <a routerLink="/dashboard/brands" routerLinkActive="active" (click)="closeSidebar()">
+                        <lucide-icon [img]="Tag" [size]="20"></lucide-icon>
+                        <span>Brands</span>
+                    </a>
+                </li>
                 }
 
-                @if (authService.hasPermission('VIEW_PRODUCTS')) {
-                    <li>
-                        <a routerLink="/dashboard/products" 
-                           routerLinkActive="active" 
-                           (click)="closeSidebar()">
-                            <lucide-icon [img]="Package" [size]="20"></lucide-icon>
-                            <span>Products</span>
-                        </a>
-                    </li>
-                }
+                <li>
+                    <a routerLink="/dashboard/products" routerLinkActive="active" (click)="closeSidebar()">
+                        <lucide-icon [img]="Package" [size]="20"></lucide-icon>
+                        <span>Products</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a routerLink="/dashboard/variant-types" routerLinkActive="active" (click)="closeSidebar()">
+                        <lucide-icon [img]="Layers" [size]="20"></lucide-icon>
+                        <span>Variant Types</span>
+                    </a>
+                </li>
 
                 @if (authService.hasPermission('VIEW_ORDERS')) {
-                    <li>
-                        <a routerLink="/dashboard/orders" 
-                           routerLinkActive="active" 
-                           (click)="closeSidebar()">
-                            <lucide-icon [img]="ShoppingCart" [size]="20"></lucide-icon>
-                            <span>Orders</span>
-                        </a>
-                    </li>
+                <li>
+                    <a routerLink="/dashboard/orders" routerLinkActive="active" (click)="closeSidebar()">
+                        <lucide-icon [img]="ShoppingCart" [size]="20"></lucide-icon>
+                        <span>Orders</span>
+                    </a>
+                </li>
                 }
 
                 @if (authService.hasPermission('VIEW_PRODUCTS')) {
-                    <li>
-                        <a routerLink="/dashboard/coupons" 
-                           routerLinkActive="active" 
-                           (click)="closeSidebar()">
-                            <lucide-icon [img]="Ticket" [size]="20"></lucide-icon>
-                            <span>Coupons</span>
-                        </a>
-                    </li>
+                <li>
+                    <a routerLink="/dashboard/coupons" routerLinkActive="active" (click)="closeSidebar()">
+                        <lucide-icon [img]="Ticket" [size]="20"></lucide-icon>
+                        <span>Coupons</span>
+                    </a>
+                </li>
                 }
 
                 @if (authService.hasPermission('MANAGE_ROLES')) {
-                    <li>
-                        <a routerLink="/dashboard/permissions" 
-                           routerLinkActive="active" 
-                           (click)="closeSidebar()">
-                            <lucide-icon [img]="Shield" [size]="20"></lucide-icon>
-                            <span>Permissions</span>
-                        </a>
-                    </li>
+                <li>
+                    <a routerLink="/dashboard/permissions" routerLinkActive="active" (click)="closeSidebar()">
+                        <lucide-icon [img]="Shield" [size]="20"></lucide-icon>
+                        <span>Permissions</span>
+                    </a>
+                </li>
                 }
 
                 @if (authService.hasPermission('VIEW_CMS')) {
-                    <li>
-                        <a routerLink="/dashboard/home-cms" 
-                           routerLinkActive="active" 
-                           (click)="closeSidebar()">
-                            <lucide-icon [img]="Home" [size]="20"></lucide-icon>
-                            <span>Home CMS</span>
-                        </a>
-                    </li>
+                <li>
+                    <a routerLink="/dashboard/home-cms" routerLinkActive="active" (click)="closeSidebar()">
+                        <lucide-icon [img]="Home" [size]="20"></lucide-icon>
+                        <span>Home CMS</span>
+                    </a>
+                </li>
                 }
 
                 <!-- @if (authService.hasPermission('VIEW_REPORTS')) {
@@ -123,14 +110,12 @@
                 } -->
 
                 @if (authService.hasPermission('VIEW_SETTINGS')) {
-                    <li>
-                        <a routerLink="/dashboard/settings" 
-                           routerLinkActive="active" 
-                           (click)="closeSidebar()">
-                            <lucide-icon [img]="Settings" [size]="20"></lucide-icon>
-                            <span>Site Settings</span>
-                        </a>
-                    </li>
+                <li>
+                    <a routerLink="/dashboard/settings" routerLinkActive="active" (click)="closeSidebar()">
+                        <lucide-icon [img]="Settings" [size]="20"></lucide-icon>
+                        <span>Site Settings</span>
+                    </a>
+                </li>
                 }
 
                 <li class="logout-item">
@@ -150,24 +135,21 @@
             <div class="topbar-left">
                 <button class="menu-toggle" (click)="toggleSidebar()" type="button" aria-label="Toggle menu">
                     @if (isSidebarOpen) {
-                        <lucide-icon [img]="X" [size]="24"></lucide-icon>
+                    <lucide-icon [img]="X" [size]="24"></lucide-icon>
                     } @else {
-                        <lucide-icon [img]="Menu" [size]="24"></lucide-icon>
+                    <lucide-icon [img]="Menu" [size]="24"></lucide-icon>
                     }
                 </button>
                 <h2 class="page-title">Agency Management</h2>
             </div>
 
             <div class="topbar-actions">
-                <button 
-                    (click)="themeService.toggleTheme()" 
-                    class="theme-toggle"
-                    type="button"
+                <button (click)="themeService.toggleTheme()" class="theme-toggle" type="button"
                     [attr.aria-label]="themeService.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
                     @if (themeService.theme() === 'dark') {
-                        <lucide-icon [img]="Sun" [size]="20"></lucide-icon>
+                    <lucide-icon [img]="Sun" [size]="20"></lucide-icon>
                     } @else {
-                        <lucide-icon [img]="Moon" [size]="20"></lucide-icon>
+                    <lucide-icon [img]="Moon" [size]="20"></lucide-icon>
                     }
                 </button>
 
@@ -176,12 +158,13 @@
                         {{ authService.user()?.name?.charAt(0)?.toUpperCase() || 'A' }}
                     </div>
                     @if (authService.user()) {
-                        <div class="user-info">
-                            <span class="user-name">{{ authService.user()?.name }}</span>
-                            <span class="user-role">
-                                {{ authService.isAdmin() ? 'Lead Manager' : (authService.user()?.roles?.[0]?.name | titlecase) }}
-                            </span>
-                        </div>
+                    <div class="user-info">
+                        <span class="user-name">{{ authService.user()?.name }}</span>
+                        <span class="user-role">
+                            {{ authService.isAdmin() ? 'Lead Manager' : (authService.user()?.roles?.[0]?.name |
+                            titlecase) }}
+                        </span>
+                    </div>
                     }
                 </div>
             </div>

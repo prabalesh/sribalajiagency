@@ -9,9 +9,11 @@ import { Brand } from '../../core/models/brand.model';
 import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
 import { BrandService } from '../../core/services/api/brand.service';
+import { VariantTypeService } from '../../core/services/api/variant-type.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { LucideAngularModule, Package } from 'lucide-angular';
+import { VariantType } from '../../core/models/variant-type.model';
 import { ProductFormComponent } from './components/product-form/product-form.component';
 import { ProductListComponent } from './components/product-list/product-list.component';
 
@@ -32,6 +34,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
+  private variantTypeService = inject(VariantTypeService);
   private toastService = inject(ToastService);
   public authService = inject(AuthService);
 
@@ -58,6 +61,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   // Dropdown Data
   brands: Brand[] = [];
   categories: (Category & { level: number })[] = [];
+  variantTypes: VariantType[] = [];
 
   // Selection State
   selectedCategoryId: string = '';
@@ -72,7 +76,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       await Promise.all([
         this.loadProducts(),
         this.loadBrands(),
-        this.loadCategories()
+        this.loadCategories(),
+        this.loadVariantTypes()
       ]);
     } catch (error) {
       console.error('Error initializing component:', error);
@@ -144,6 +149,17 @@ export class ProductsComponent implements OnInit, OnDestroy {
     }
   }
 
+  private async loadVariantTypes() {
+    try {
+      this.variantTypeService.getVariantTypes().subscribe(types => {
+        this.variantTypes = types;
+      });
+    } catch (error) {
+      console.error('Error loading variant types:', error);
+      throw error;
+    }
+  }
+
   onCategoryChange(categoryId: string) {
     this.selectedCategoryId = categoryId;
     this.newProduct.categoryId = categoryId;
@@ -162,10 +178,11 @@ export class ProductsComponent implements OnInit, OnDestroy {
         brandId: this.newProduct.brandId,
         isFeatured: this.newProduct.isFeatured,
         variants: this.newProduct.variants?.map(v => {
-          const { sku, specifications, ...variantData } = v;
+          const { sku, specifications, variantType, ...variantData } = v;
           return {
             ...variantData,
-            id: v.id && v.id !== '' ? v.id : undefined
+            id: v.id && v.id !== '' ? v.id : undefined,
+            variantTypeId: v.variantTypeId === '' ? null : v.variantTypeId
           };
         }) || []
       };
@@ -261,7 +278,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       stock: 0,
       image: '',
       images: [],
-      description: ''
+      description: '',
+      variantTypeId: ''
     });
   }
 

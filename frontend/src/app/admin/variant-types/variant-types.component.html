@@ -1,0 +1,161 @@
+<div class="crud-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <lucide-icon [img]="Layers" [size]="32"></lucide-icon>
+                <span>Variant Types</span>
+            </h1>
+            <p class="page-subtitle">Manage types for product variants (e.g. Color, Size, Material)</p>
+        </div>
+    </div>
+
+    <div class="crud-layout">
+        <!-- Add/Edit Form -->
+        <div class="form-card glass-card">
+            <div class="form-header">
+                <h3>
+                    <lucide-icon [img]="isEditing ? Edit : Plus" [size]="20"></lucide-icon>
+                    <span>{{ isEditing ? 'Edit Type' : 'Add New Type' }}</span>
+                </h3>
+                @if (isEditing) {
+                <button type="button" class="btn-icon-sm" (click)="resetForm()" title="Cancel">
+                    <lucide-icon [img]="X" [size]="18"></lucide-icon>
+                </button>
+                }
+            </div>
+
+            <form (ngSubmit)="saveVariantType()">
+                <div class="form-group">
+                    <label class="form-label">
+                        <lucide-icon [img]="Layers" [size]="16"></lucide-icon>
+                        <span>System Name</span>
+                    </label>
+                    <input type="text" class="form-input" [(ngModel)]="newVariantType.name" name="name"
+                        placeholder="e.g. color" required [disabled]="isSaving">
+                    <small class="form-hint">Internal identifier (lowercase recommended)</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                        <span>Display Name (Optional)</span>
+                    </label>
+                    <input type="text" class="form-input" [(ngModel)]="newVariantType.displayName" name="displayName"
+                        placeholder="e.g. Color" [disabled]="isSaving">
+                    <small class="form-hint">How it appears to customers</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" [disabled]="!newVariantType.name?.trim() || isSaving">
+                        @if (isSaving) {
+                        <span class="spinner-small"></span>
+                        <span>{{ isEditing ? 'Updating...' : 'Adding...' }}</span>
+                        } @else {
+                        <lucide-icon [img]="isEditing ? Edit : Plus" [size]="18"></lucide-icon>
+                        <span>{{ isEditing ? 'Update' : 'Add' }} Type</span>
+                        }
+                    </button>
+                    @if (isEditing) {
+                    <button type="button" (click)="resetForm()" class="btn-secondary" [disabled]="isSaving">
+                        Cancel
+                    </button>
+                    }
+                </div>
+            </form>
+        </div>
+
+        <!-- List -->
+        <div class="list-card glass-card">
+            <div class="list-header">
+                <h3>
+                    <lucide-icon [img]="Layers" [size]="20"></lucide-icon>
+                    <span>Existing Types</span>
+                </h3>
+
+                <!-- Search Bar -->
+                <div class="search-box">
+                    <lucide-icon [img]="Search" [size]="18"></lucide-icon>
+                    <input type="text" class="search-input" [(ngModel)]="searchQuery" placeholder="Search types..."
+                        [disabled]="isLoading">
+                </div>
+            </div>
+
+            @if (isLoading) {
+            <div class="loading-state">
+                <div class="spinner-large"></div>
+                <p>Loading variant types...</p>
+            </div>
+            } @else if (filteredVariantTypes.length === 0) {
+            <div class="empty-state">
+                <lucide-icon [img]="Layers" [size]="48"></lucide-icon>
+                <p>{{ searchQuery ? 'No types found matching your search' : 'No variant types yet. Create your first
+                    one!' }}</p>
+            </div>
+            } @else {
+            <div class="table-wrapper desktop-only">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>System Name</th>
+                            <th>Display Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (type of filteredVariantTypes; track type.id) {
+                        <tr>
+                            <td>
+                                <strong>{{ type.name }}</strong>
+                            </td>
+                            <td>
+                                {{ type.displayName || '—' }}
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <button class="btn-icon" (click)="editVariantType(type)" title="Edit">
+                                        <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                                    </button>
+                                    <button class="btn-icon btn-delete" (click)="openDeleteConfirm(type.id, type.name)"
+                                        title="Delete">
+                                        <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mobile-cards mobile-only">
+                @for (type of filteredVariantTypes; track type.id) {
+                <div class="brand-card"> <!-- Using brand-card class for simplicity as it shares styles -->
+                    <div class="brand-card-info">
+                        <h4>{{ type.displayName || type.name }}</h4>
+                        <code class="slug-code">Internal: {{ type.name }}</code>
+                    </div>
+
+                    <div class="brand-card-actions">
+                        <button class="btn-secondary btn-sm" (click)="editVariantType(type)">
+                            <lucide-icon [img]="Edit" [size]="16"></lucide-icon>
+                            <span>Edit</span>
+                        </button>
+                        <button class="btn-danger btn-sm" (click)="openDeleteConfirm(type.id, type.name)">
+                            <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                            <span>Delete</span>
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Delete Confirmation -->
+    <app-confirm-dialog [isOpen]="showDeleteConfirm" [title]="'Delete Variant Type'"
+        [message]="'Are you sure you want to delete ' + (typeToDelete?.name || '') + '? This will unassign it from any product variants.'"
+        [confirmText]="'Delete'" [cancelText]="'Cancel'" (confirm)="confirmDelete()" (cancel)="closeDeleteConfirm()">
+    </app-confirm-dialog>
+</div>

@@ -1,7 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Trash2 } from 'lucide-angular';
+import { LucideAngularModule, Trash2, Layers } from 'lucide-angular';
+import { VariantType } from '../../../../core/models/variant-type.model';
 import { ImageUploaderComponent } from '../../../../shared/components/image-uploader/image-uploader.component';
 
 @Component({
@@ -15,6 +16,7 @@ export class ProductVariantFormComponent {
     @Input({ required: true }) variant: any;
     @Input({ required: true }) index: number = 0;
     @Input() isSaving = false;
+    @Input() variantTypes: VariantType[] = [];
 
     @Output() remove = new EventEmitter<number>();
     @Output() fileSelected = new EventEmitter<File>();

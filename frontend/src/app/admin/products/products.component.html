@@ -22,7 +22,7 @@
         (addVariant)="addVariant()" (removeVariant)="removeVariant($event)"
         (variantFileSelected)="onVariantFileSelected($event)" (variantUrlChanged)="onVariantUrlChanged($event)"
         (variantImageRemoved)="onVariantImageRemoved($event)" (categoryChange)="onCategoryChange($event)"
-        (paymentMethodToggle)="togglePaymentMethod($event)">
+        (paymentMethodToggle)="togglePaymentMethod($event)" [variantTypes]="variantTypes">
     </app-product-form>
     }
 

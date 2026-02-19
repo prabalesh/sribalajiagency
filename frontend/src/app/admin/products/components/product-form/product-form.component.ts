@@ -5,6 +5,7 @@ import { LucideAngularModule, Edit, Plus, X, Package, Tag, FolderTree, DollarSig
 import { Product } from '../../../../core/models/product.model';
 import { Category } from '../../../../core/models/category.model';
 import { Brand } from '../../../../core/models/brand.model';
+import { VariantType } from '../../../../core/models/variant-type.model';
 import { ImageUploaderComponent } from '../../../../shared/components/image-uploader/image-uploader.component';
 import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
 import { ProductVariantFormComponent } from '../product-variant-form/product-variant-form.component';
@@ -34,6 +35,7 @@ export class ProductFormComponent {
     @Input({ required: true }) pendingUrls: string[] = [];
     @Input({ required: true }) pendingImageUrl: string = '';
     @Input({ required: true }) selectedCategoryId: string = '';
+    @Input() variantTypes: VariantType[] = [];
 
     @Output() save = new EventEmitter<void>();
     @Output() cancel = new EventEmitter<void>();

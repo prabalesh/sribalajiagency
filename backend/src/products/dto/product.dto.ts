@@ -36,6 +36,10 @@ export class ProductVariantDto {
     @IsOptional()
     @IsString()
     description?: string;
+
+    @IsOptional()
+    @IsUUID()
+    variantTypeId?: string;
 }
 
 export class CreateProductDto {

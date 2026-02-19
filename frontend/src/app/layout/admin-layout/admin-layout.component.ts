@@ -3,15 +3,15 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../core/store/theme.service';
 import { AuthService } from '../../core/services/auth/auth.service';
-import { LucideAngularModule, BarChart3, Users, FolderTree, Tag, Package, ShoppingCart, Ticket, Shield, Home, MessageSquare, Settings, LogOut, Menu, X, Sun, Moon } from 'lucide-angular';
+import { LucideAngularModule, BarChart3, Users, FolderTree, Tag, Package, ShoppingCart, Ticket, Shield, Home, MessageSquare, Settings, LogOut, Menu, X, Sun, Moon, Layers } from 'lucide-angular';
 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
   imports: [
-    RouterOutlet, 
-    RouterLink, 
-    RouterLinkActive, 
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
     CommonModule,
     LucideAngularModule
   ],
@@ -39,6 +39,7 @@ export class AdminLayoutComponent {
   readonly X = X;
   readonly Sun = Sun;
   readonly Moon = Moon;
+  readonly Layers = Layers;
 
   isSidebarOpen = false;
 

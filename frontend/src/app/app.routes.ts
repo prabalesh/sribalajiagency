@@ -153,6 +153,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./admin/products/products.component').then(m => m.ProductsComponent)
             },
             {
+                path: 'variant-types',
+                loadComponent: () => import('./admin/variant-types/variant-types.component').then(m => m.VariantTypesComponent)
+            },
+            {
                 path: 'models',
                 loadComponent: () => import('./admin/models/models.component').then(m => m.ModelsComponent)
             },

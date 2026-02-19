@@ -18,6 +18,8 @@ export interface ProductVariant {
     image?: string;
     images?: string[]; // Added
     description?: string;
+    variantTypeId?: string;
+    variantType?: any;
 }
 
 export interface Product {

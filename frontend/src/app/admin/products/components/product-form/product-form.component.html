@@ -232,8 +232,9 @@
                 <div class="variants-list">
                     @for (v of product.variants; track $index) {
                     <app-product-variant-form [variant]="v" [index]="$index" [isSaving]="isSaving"
-                        (remove)="onRemoveVariant($event)" (fileSelected)="onVariantFileSelected($event, v)"
-                        (urlChanged)="onVariantUrlChanged($event, v)" (imageRemoved)="onVariantImageRemoved(v)">
+                        [variantTypes]="variantTypes" (remove)="onRemoveVariant($event)"
+                        (fileSelected)="onVariantFileSelected($event, v)" (urlChanged)="onVariantUrlChanged($event, v)"
+                        (imageRemoved)="onVariantImageRemoved(v)">
                     </app-product-variant-form>
                     }
                 </div>

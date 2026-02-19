@@ -109,22 +109,27 @@
             </div>
 
             <!-- Variant Selector -->
-            <div class="variants-section" *ngIf="product.variants && product.variants.length > 0">
-                <label>
-                    <lucide-icon [img]="Package" [size]="16"></lucide-icon>
-                    <span>Select Option:</span>
-                </label>
-                <div class="variant-chips">
-                    @for (v of product.variants; track v.id) {
-                    <button class="variant-chip" [class.active]="selectedVariant?.id === v.id"
-                        [class.disabled]="v.stock <= 0" (click)="selectVariant(v)" [disabled]="v.stock <= 0">
-                        {{ v.name }}
-                        @if (v.stock <= 0) { <span class="sold-out">Sold Out</span>
-                            }
-                    </button>
-                    }
+            @if (product.variants && product.variants.length > 0) {
+            <div class="variants-wrapper">
+                @for (group of groupedVariants | keyvalue; track group.key) {
+                <div class="variants-section">
+                    <label>
+                        <lucide-icon [img]="Package" [size]="16"></lucide-icon>
+                        <span>Select {{ group.key }}:</span>
+                    </label>
+                    <div class="variant-chips">
+                        @for (v of group.value.variants; track v.id) {
+                        <button class="variant-chip" [class.active]="selectedVariant?.id === v.id"
+                            [class.disabled]="v.stock <= 0" (click)="selectVariant(v)" [disabled]="v.stock <= 0">
+                            {{ v.name }}
+                            @if (v.stock <= 0) { <span class="sold-out">Sold Out</span> }
+                        </button>
+                        }
+                    </div>
                 </div>
+                }
             </div>
+            }
 
             <!-- Description -->
             <div class="description">

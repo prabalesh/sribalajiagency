@@ -31,6 +31,15 @@
                 placeholder="0" min="0" required [disabled]="isSaving">
         </div>
 
+        <div class="field">
+            <label class="field-label">Variant Type</label>
+            <select class="form-input" [(ngModel)]="variant.variantTypeId" [name]="'vType-' + index"
+                [disabled]="isSaving">
+                <option value="">None</option>
+                <option *ngFor="let type of variantTypes" [value]="type.id">{{ type.displayName || type.name }}</option>
+            </select>
+        </div>
+
         <div class="field full-width">
             <app-image-uploader [initialUrl]="variant.image || null" label="Variant Image" [required]="false"
                 (fileSelected)="onFileSelected($event)" (urlChanged)="onUrlChanged($event)"

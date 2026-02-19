@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { Product } from './product.entity';
+import { VariantType } from './variant-type.entity';
 import { ColumnNumericTransformer } from '../../common/transformers/numeric.transformer';
 
 @Entity('product_variants')
@@ -39,6 +40,12 @@ export class ProductVariant {
     @Index()
     @ManyToOne(() => Product, (product) => product.variants, { onDelete: 'CASCADE' })
     product: Product;
+
+    @Column({ nullable: true })
+    variantTypeId: string;
+
+    @ManyToOne(() => VariantType, (variantType) => variantType.variants, { nullable: true })
+    variantType: VariantType;
 
     @CreateDateColumn()
     createdAt: Date;
