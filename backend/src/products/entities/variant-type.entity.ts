@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, Index, DeleteDateColumn } from 'typeorm';
 import { ProductVariant } from './product-variant.entity';
 
 @Entity('variant_types')
@@ -20,4 +20,8 @@ export class VariantType {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @Index()
+    @DeleteDateColumn()
+    deletedAt: Date;
 }

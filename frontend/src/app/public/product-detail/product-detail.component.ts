@@ -173,6 +173,11 @@ export class ProductDetailComponent implements OnInit {
                     }
                 }
 
+                // Default selection: First variant with stock
+                if (this.product.variants?.length > 0) {
+                    this.selectedVariant = this.product.variants.find(v => v.stock > 0) || this.product.variants[0];
+                }
+
                 // Reset scroll
                 if (this.isBrowser) {
                     window.scrollTo(0, 0);
@@ -185,6 +190,21 @@ export class ProductDetailComponent implements OnInit {
         } finally {
             this.isLoading = false;
         }
+    }
+
+    get variantSpecifications(): { key: string, value: string }[] {
+        if (!this.selectedVariant?.specifications) return [];
+        return Object.entries(this.selectedVariant.specifications).map(([key, value]) => ({
+            key: this.formatKey(key),
+            value: String(value)
+        }));
+    }
+
+    private formatKey(key: string): string {
+        return key
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase())
+            .trim();
     }
 
     selectVariant(variant: ProductVariant) {

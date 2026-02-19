@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, Index, DeleteDateColumn } from 'typeorm';
 import { Product } from './product.entity';
 import { VariantType } from './variant-type.entity';
 import { ColumnNumericTransformer } from '../../common/transformers/numeric.transformer';
@@ -52,4 +52,8 @@ export class ProductVariant {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @Index()
+    @DeleteDateColumn()
+    deletedAt: Date;
 }

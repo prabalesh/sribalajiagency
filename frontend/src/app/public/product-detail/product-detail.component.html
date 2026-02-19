@@ -239,13 +239,17 @@
                     <span class="label">Category:</span>
                     <span class="value">{{ category?.name || 'N/A' }}</span>
                 </div>
+
+                @for (spec of variantSpecifications; track spec.key) {
                 <div class="spec-row">
-                    <span class="label">Warranty:</span>
-                    <span class="value">1 Year Domestic</span>
+                    <span class="label">{{ spec.key }}:</span>
+                    <span class="value">{{ spec.value }}</span>
                 </div>
+                }
+
                 @if (selectedVariant) {
                 <div class="spec-row">
-                    <span class="label">Variant:</span>
+                    <span class="label">Variant Name:</span>
                     <span class="value">{{ selectedVariant.name }}</span>
                 </div>
                 }

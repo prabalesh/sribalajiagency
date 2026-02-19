@@ -536,10 +536,14 @@ export class ProductsService {
             }
         }
 
-        // TODO: Use soft delete instead
-        const result = await this.productRepo.delete(id);
+        // Soft delete associated variants first
+        await this.variantRepo.softDelete({ product: { id } });
+        this.logger.log(`Soft deleted variants for product ${id}`);
 
-        this.logger.log(`Product ${id} deleted successfully`);
+        // Soft delete the product
+        const result = await this.productRepo.softDelete(id);
+
+        this.logger.log(`Product ${id} soft-deleted successfully`);
 
         // TODO: Emit ProductDeletedEvent
         // TODO: Clear product cache

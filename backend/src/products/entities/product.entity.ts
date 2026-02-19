@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, Index, DeleteDateColumn } from 'typeorm';
 import { Category } from '../../categories/entities/category.entity';
 import { Brand } from '../../brands/entities/brand.entity';
 import { ProductImage } from './product-image.entity';
@@ -70,5 +70,9 @@ export class Product {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @Index()
+    @DeleteDateColumn()
+    deletedAt: Date;
 }
 

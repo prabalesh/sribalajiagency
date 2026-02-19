@@ -52,7 +52,7 @@ export class VariantTypesService {
     }
 
     async remove(id: string): Promise<void> {
-        const result = await this.variantTypeRepository.delete(id);
+        const result = await this.variantTypeRepository.softDelete(id);
         if (result.affected === 0) {
             throw new NotFoundException(`Variant type with ID "${id}" not found`);
         }
