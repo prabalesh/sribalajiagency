@@ -186,6 +186,7 @@
                             </button>
 
                             <!-- Features Grid (Non-Technical Icons) -->
+                            @if (product.warranty) {
                             <div class="features-grid-simple">
                                 <div class="feature-item">
                                     <lucide-icon [img]="ShieldCheck" [size]="20"></lucide-icon>
@@ -195,6 +196,7 @@
                                     </div>
                                 </div>
                             </div>
+                            }
                         </div>
 
                     </div> <!-- Overview Tab End -->
