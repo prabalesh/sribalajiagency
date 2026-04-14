@@ -17,11 +17,11 @@ export class CartSummaryComponent {
     readonly Lock = Lock;
 
     get tax() {
-        return this.subtotal * 0.18;
+        return 0;
     }
 
     get total() {
-        return this.subtotal + this.tax;
+        return this.subtotal;
     }
 
     onProceed() {

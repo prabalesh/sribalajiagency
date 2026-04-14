@@ -120,4 +120,8 @@ export class AdminOrderDetailComponent implements OnInit {
         if (!this.order?.items) return 0;
         return this.order.items.reduce((sum, item) => sum + item.quantity, 0);
     }
+
+    viewProduct(productId: string, variantId?: string) {
+        window.open(`/products/detail/${productId}?variantId=${variantId || ''}`, '_blank');
+    }
 }

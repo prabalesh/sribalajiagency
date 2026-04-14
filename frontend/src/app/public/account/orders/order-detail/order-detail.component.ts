@@ -51,8 +51,10 @@ export class UserOrderDetailComponent implements OnInit {
     }
   }
 
-  viewProduct(productId: string) {
-    this.router.navigate(['/products/detail', productId]);
+  viewProduct(productId: string, variantId?: string) {
+    this.router.navigate(['/products/detail', productId], {
+      queryParams: { variantId }
+    });
   }
 
   printInvoice() {

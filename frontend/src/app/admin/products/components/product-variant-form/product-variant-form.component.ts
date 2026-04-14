@@ -1,14 +1,16 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Trash2, Layers } from 'lucide-angular';
+import { LucideAngularModule, Trash2, Layers, Star, X, ImageIcon, Plus } from 'lucide-angular';
 import { VariantType } from '../../../../core/models/variant-type.model';
 import { ImageUploaderComponent } from '../../../../shared/components/image-uploader/image-uploader.component';
+
+import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
 
 @Component({
     selector: 'app-product-variant-form',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule, ImageUploaderComponent],
+    imports: [CommonModule, FormsModule, LucideAngularModule, ImageUploaderComponent, ImageUrlPipe],
     templateUrl: './product-variant-form.component.html',
     styleUrl: './product-variant-form.component.scss'
 })
@@ -22,8 +24,19 @@ export class ProductVariantFormComponent {
     @Output() fileSelected = new EventEmitter<File>();
     @Output() urlChanged = new EventEmitter<string>();
     @Output() imageRemoved = new EventEmitter<void>();
+    @Output() setPrimaryImage = new EventEmitter<string>();
+    @Output() addImage = new EventEmitter<{ file?: File, url?: string }>();
+    @Output() filesSelected = new EventEmitter<File[]>();
+    @Output() removeImageAt = new EventEmitter<number>();
+    @Output() defaultChange = new EventEmitter<void>();
+
+    @ViewChild(ImageUploaderComponent) uploader!: ImageUploaderComponent;
 
     readonly Trash2 = Trash2;
+    readonly Star = Star;
+    readonly X = X;
+    readonly ImageIcon = ImageIcon;
+    readonly Plus = Plus;
 
     onRemove() {
         this.remove.emit(this.index);
@@ -39,5 +52,47 @@ export class ProductVariantFormComponent {
 
     onImageRemoved() {
         this.imageRemoved.emit();
+    }
+
+    onSetPrimary(url: string) {
+        this.variant.image = url;
+        this.setPrimaryImage.emit(url);
+    }
+
+    onRemoveImage(index: number) {
+        this.variant.images.splice(index, 1);
+        if (this.variant.image === this.variant.images[index]) {
+            this.variant.image = this.variant.images[0] || '';
+        }
+        this.removeImageAt.emit(index);
+    }
+
+    onAddVariantImageUrl(url: string) {
+        if (!this.variant.images) this.variant.images = [];
+        this.variant.images.push(url);
+        if (!this.variant.image) this.variant.image = url;
+        this.addImage.emit({ url });
+        this.uploader.reset();
+    }
+
+    onAddVariantFile(file: File) {
+        this.fileSelected.emit(file);
+        this.uploader.reset();
+    }
+
+    onAddVariantFiles(files: File[]) {
+        this.filesSelected.emit(files);
+        if (this.uploader) {
+            this.uploader.reset();
+        }
+    }
+
+    onDefaultChange() {
+        this.defaultChange.emit();
+    }
+
+    onSetDefault() {
+        this.variant.isDefault = true;
+        this.onDefaultChange();
     }
 }

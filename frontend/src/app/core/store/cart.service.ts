@@ -208,6 +208,11 @@ export class CartService implements OnDestroy {
 
     // Add to cart
     async addToCart(productId: string, quantity: number = 1, variantId?: string) {
+        if (!this.authService.isLoggedIn()) {
+            this.toast.info('Please log in to add items to your cart');
+            return;
+        }
+
         const current = this.cartItems();
         const existingIndex = current.findIndex(item =>
             item.productId === productId &&

@@ -421,10 +421,19 @@
                             font-weight: 600;
                         }
 
-                        .product-info {
+                        .product-info-link {
                             display: flex;
                             flex-direction: column;
                             gap: 0.25rem;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+
+                            &:hover {
+                                color: var(--primary-color);
+                                .product-name {
+                                    text-decoration: underline;
+                                }
+                            }
 
                             .product-name {
                                 font-weight: 600;
@@ -487,6 +496,15 @@
                     .item-name {
                         flex: 1;
                         min-width: 0;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+
+                        &:hover {
+                            .product-name {
+                                color: var(--primary-color);
+                                text-decoration: underline;
+                            }
+                        }
 
                         .product-name {
                             display: block;

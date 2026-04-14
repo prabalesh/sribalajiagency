@@ -8,7 +8,7 @@ import { User } from '../auth/entities/user.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Brand } from '../brands/entities/brand.entity';
 import { Product } from '../products/entities/product.entity';
-import { ProductImage } from '../products/entities/product-image.entity';
+
 import { ProductVariant } from '../products/entities/product-variant.entity';
 import { Coupon } from '../coupons/entities/coupon.entity';
 import { Order } from '../orders/entities/order.entity';
@@ -43,7 +43,7 @@ async function bootstrap() {
     const categoryRepo = app.get<Repository<Category>>(getRepositoryToken(Category));
     const brandRepo = app.get<Repository<Brand>>(getRepositoryToken(Brand));
     const productRepo = app.get<Repository<Product>>(getRepositoryToken(Product));
-    const productImageRepo = app.get<Repository<ProductImage>>(getRepositoryToken(ProductImage));
+
     const variantRepo = app.get<Repository<ProductVariant>>(getRepositoryToken(ProductVariant));
     const couponRepo = app.get<Repository<Coupon>>(getRepositoryToken(Coupon));
     const orderRepo = app.get<Repository<Order>>(getRepositoryToken(Order));
@@ -412,15 +412,12 @@ async function bootstrap() {
                         reviewCount: Math.floor(Math.random() * (100 - 5) + 5)
                     } as any) as unknown as Product);
 
-                    // Add 2-4 product images
+                    // 2-4 product images
                     const imageCount = faker.number.int({ min: 2, max: 4 });
                     const seed = faker.number.int({ min: 1, max: 10000 });
+                    const variantImages: string[] = [];
                     for (let j = 0; j < imageCount; j++) {
-                        await productImageRepo.save(productImageRepo.create({
-                            url: `https://picsum.photos/seed/${seed + j}/800/600`,
-                            isPrimary: j === 0,
-                            product: product as any
-                        }));
+                        variantImages.push(`https://picsum.photos/seed/${seed + j}/800/600`);
                     }
 
                     // Add 1-3 variants
@@ -436,6 +433,8 @@ async function bootstrap() {
                             price: price + (k * 500),
                             sku: `${brand.name.substring(0, 3).toUpperCase()}-${faker.string.alphanumeric(6).toUpperCase()}`,
                             stock,
+                            image: variantImages.length > 0 ? variantImages[0] : '',
+                            images: variantImages,
                             product: product as any
                         } as any));
                     }

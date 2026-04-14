@@ -478,12 +478,11 @@ export class CartsService {
                 // Get image URL (variant image or first product image)
                 // FIXME: Complex nested conditions - could be simplified
                 // TODO: Simplify image selection logic
-                if (variant && variant.image) {
-                    validatedItem.imageUrl = variant.image;
-                } else if (variant && variant.images && variant.images.length > 0) {
-                    validatedItem.imageUrl = variant.images[0];
-                } else if (product.images && product.images.length > 0) {
-                    validatedItem.imageUrl = product.images[0].url;
+                const targetVariant = variant || product.variants?.[0];
+                if (targetVariant && targetVariant.image) {
+                    validatedItem.imageUrl = targetVariant.image;
+                } else if (targetVariant && targetVariant.images && targetVariant.images.length > 0) {
+                    validatedItem.imageUrl = targetVariant.images[0];
                 } else {
                     validatedItem.imageUrl = undefined;
                 }

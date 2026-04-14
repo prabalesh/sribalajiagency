@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors, UploadedFile, UploadedFiles, UsePipes, ValidationPipe, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards, UseInterceptors, UploadedFile, UploadedFiles, UsePipes, ValidationPipe, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -68,44 +68,7 @@ export class ProductsController {
         return this.productsService.deleteProduct(id);
     }
 
-    // Image Uploads
-    // Rate Limit: Default 60s ttl, 10 requests (configured in AppModule)
-    @Post(':id/images')
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard, ThrottlerGuard)
-    @Permissions('UPDATE_PRODUCT')
-    @UseInterceptors(FileInterceptor('file'))
-    uploadImage(
-        @Param('id') id: string,
-        @UploadedFile(
-            new ParseFilePipe({
-                validators: [
-                    new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
-                    new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
-                ],
-            }),
-        ) file: Express.Multer.File,
-        @Body('isPrimary') isPrimary?: string
-    ) {
-        return this.productsService.addProductImage(id, file, isPrimary === 'true');
-    }
 
-    @Post(':id/images/link')
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('UPDATE_PRODUCT')
-    uploadImageLink(
-        @Param('id') id: string,
-        @Body('url') url: string,
-        @Body('isPrimary') isPrimary?: boolean
-    ) {
-        return this.productsService.addProductImageLink(id, url, isPrimary);
-    }
-
-    @Delete(':id/images/:imageId')
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-    @Permissions('UPDATE_PRODUCT')
-    removeImage(@Param('imageId') imageId: string) {
-        return this.productsService.removeProductImage(imageId);
-    }
 
     @Post('media/upload')
     @UseGuards(AuthGuard('jwt'), PermissionsGuard, ThrottlerGuard)

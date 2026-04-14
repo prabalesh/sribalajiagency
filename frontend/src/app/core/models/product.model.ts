@@ -1,11 +1,6 @@
 import { Brand } from './brand.model';
 import { Category } from './category.model';
 
-export interface ProductImage {
-    id: string;
-    url: string;
-    isPrimary: boolean;
-}
 
 export interface ProductVariant {
     id: string;
@@ -13,13 +8,14 @@ export interface ProductVariant {
     price: number;
     comparisonPrice?: number;
     sku?: string;
-    specifications?: any;
+    specifications?: Record<string, string>;
     stock: number;
     image?: string;
-    images?: string[]; // Added
+    images?: string[];
     description?: string;
+    isDefault: boolean;
     variantTypeId?: string;
-    variantType?: any;
+    variantType?: any; // Leaving this for now as it might be a complex interface
 }
 
 export interface Product {
@@ -30,7 +26,6 @@ export interface Product {
     brand?: Brand;
     categoryId: string;
     category?: Category;
-    images: ProductImage[];
     variants: ProductVariant[];
     isAvailable: boolean;
     isFeatured: boolean;
@@ -39,4 +34,6 @@ export interface Product {
     allowedPaymentMethods?: string[];
     rating?: number;
     reviewCount?: number;
+    warranty?: string;
+    specifications?: Record<string, string>;
 }

@@ -16,7 +16,7 @@
     @if (!isLoading && products.length > 0) {
     <div class="product-grid">
         @for (product of products; track product.id) {
-        <app-product-card [product]="product"></app-product-card>
+        <app-product-card [product]="product" [searchTerm]="query"></app-product-card>
         }
     </div>
     }

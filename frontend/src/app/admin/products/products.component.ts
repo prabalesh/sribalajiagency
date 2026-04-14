@@ -43,9 +43,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
   products: Product[] = [];
   newProduct: Product = this.getEmptyProduct();
   isEditing = false;
-  uploadedFiles: File[] = [];
-  pendingImageUrl: string = '';
-  pendingUrls: string[] = [];
 
   // Loading States
   isLoading = false;
@@ -177,7 +174,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
         categoryId: this.newProduct.categoryId,
         brandId: this.newProduct.brandId,
         isFeatured: this.newProduct.isFeatured,
-        variants: this.newProduct.variants?.map(v => {
+        warranty: this.newProduct.warranty,
+        specifications: this.newProduct.specifications,
+        variants: this.newProduct.variants?.map((v: any) => {
           const { sku, specifications, variantType, ...variantData } = v;
           return {
             ...variantData,
@@ -194,28 +193,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
         savedProduct = await this.productService.addProduct(productData);
       }
 
-      if (this.uploadedFiles.length > 0) {
-        this.isUploadingImage = true;
-        for (let i = 0; i < this.uploadedFiles.length; i++) {
-          await this.productService.uploadImage(
-            savedProduct.id,
-            this.uploadedFiles[i],
-            i === 0 && !savedProduct.images?.some(img => img.isPrimary)
-          );
-        }
-      }
-
-      if (this.pendingUrls.length > 0) {
-        this.isUploadingImage = true;
-        for (let i = 0; i < this.pendingUrls.length; i++) {
-          await this.productService.addImageLink(
-            savedProduct.id,
-            this.pendingUrls[i],
-            !savedProduct.images?.some(img => img.isPrimary) && i === 0 && this.uploadedFiles.length === 0
-          );
-        }
-      }
-      this.isUploadingImage = false;
 
       await this.loadProducts();
       this.resetForm();
@@ -279,27 +256,45 @@ export class ProductsComponent implements OnInit, OnDestroy {
       image: '',
       images: [],
       description: '',
-      variantTypeId: ''
+      variantTypeId: '',
+      isDefault: false
     });
   }
 
   removeVariant(index: number) {
-    this.newProduct.variants?.splice(index, 1);
+    if (!this.newProduct.variants) return;
+    
+    if (this.newProduct.variants.length <= 1) {
+      this.toastService.warning('At least one variant is required');
+      return;
+    }
+
+    const wasDefault = this.newProduct.variants[index].isDefault;
+    this.newProduct.variants.splice(index, 1);
+
+    // If we removed the default variant, set the first one as default
+    if (wasDefault && this.newProduct.variants.length > 0) {
+      this.newProduct.variants[0].isDefault = true;
+    }
   }
 
   async onVariantFileSelected(event: { file: File, variant: any }) {
+    this.onVariantFilesSelected({ files: [event.file], variant: event.variant });
+  }
+
+  async onVariantFilesSelected(event: { files: File[], variant: any }) {
     this.isUploadingImage = true;
     try {
-      const res = await this.productService.uploadGenericImages([event.file] as any);
+      const res = await this.productService.uploadGenericImages(event.files as any);
       if (res.urls && res.urls.length > 0) {
-        event.variant.image = res.urls[0];
         if (!event.variant.images) event.variant.images = [];
-        event.variant.images.push(res.urls[0]);
-        this.toastService.success('Variant image uploaded');
+        event.variant.images.push(...res.urls);
+        if (!event.variant.image) event.variant.image = res.urls[0];
+        this.toastService.success(`${res.urls.length} images uploaded`);
       }
     } catch (err) {
       console.error(err);
-      this.toastService.error('Failed to upload variant image');
+      this.toastService.error('Failed to upload variant images');
     } finally {
       this.isUploadingImage = false;
     }
@@ -311,37 +306,22 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   onVariantImageRemoved(variant: any) {
     variant.image = '';
+    variant.images = [];
   }
 
-  async removeImage(imageId: string) {
-    if (!confirm('Remove this image?')) {
-      return;
-    }
-
-    this.isUploadingImage = true;
-    try {
-      await this.productService.deleteImage(imageId);
-      if (this.isEditing) {
-        this.newProduct.images = this.newProduct.images?.filter(img => img.id !== imageId);
+  onVariantImageAdded(event: { url?: string, file?: File, variant: any }) {
+    if (event.url) {
+      if (!event.variant.images) event.variant.images = [];
+      if (!event.variant.images.includes(event.url)) {
+        event.variant.images.push(event.url);
       }
-      this.toastService.success('Image removed successfully');
-    } catch (error) {
-      console.error('Error removing image:', error);
-      this.toastService.error('Failed to remove image');
-    } finally {
-      this.isUploadingImage = false;
+      if (!event.variant.image) event.variant.image = event.url;
     }
   }
 
-  removeUploadedFile(index: number) {
-    this.uploadedFiles.splice(index, 1);
-  }
 
   resetForm() {
     this.newProduct = this.getEmptyProduct();
-    this.uploadedFiles = [];
-    this.pendingUrls = [];
-    this.pendingImageUrl = '';
     this.isEditing = false;
     this.selectedCategoryId = '';
   }
@@ -353,7 +333,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       description: '',
       brandId: '',
       categoryId: '',
-      images: [],
+      warranty: '',
+      specifications: {},
       variants: [{
         id: '',
         name: 'Default',
@@ -362,7 +343,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
         sku: 'DEFAULT-SKU',
         image: '',
         images: [],
-        description: ''
+        description: '',
+        isDefault: true
       }],
       isAvailable: true,
       isFeatured: false,
@@ -371,26 +353,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
     };
   }
 
-  onMainFileSelected(file: File) {
-    this.uploadedFiles.push(file);
-    this.toastService.success('Image added to gallery');
-  }
-
-  onMainUrlChanged(url: string) {
-    this.pendingImageUrl = url;
-  }
-
-  addPendingUrl() {
-    if (this.pendingImageUrl) {
-      this.pendingUrls.push(this.pendingImageUrl);
-      this.pendingImageUrl = '';
-      this.toastService.success('URL added to gallery');
-    }
-  }
-
-  removePendingUrl(index: number) {
-    this.pendingUrls.splice(index, 1);
-  }
 
   async loadProducts() {
     this.isLoading = true;

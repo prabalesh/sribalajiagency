@@ -45,7 +45,7 @@
     <div class="mobile-checkout-bar">
         <div class="checkout-info">
             <span class="total-label">Total</span>
-            <span class="total-value">₹{{ cartService.total() * 1.18 | number:'1.0-0' }}</span>
+            <span class="total-value">₹{{ cartService.total() | number:'1.0-0' }}</span>
         </div>
         <button class="btn-primary" (click)="proceedToCheckout()">
             Checkout

@@ -76,8 +76,13 @@ export class ProductService {
     return res.data;
   }
 
-  async deleteImage(imageId: string) {
+   async deleteImage(imageId: string) {
     await this.api.delete(`/products/images/${imageId}`);
+  }
+
+  async setPrimaryImage(productId: string, imageId: string) {
+    const res = await this.api.patch<any>(`/products/${productId}/images/${imageId}/primary`, {});
+    return res.data;
   }
 
   async getProductsByCategory(categoryId: string, page: number = 1, limit: number = 20) {

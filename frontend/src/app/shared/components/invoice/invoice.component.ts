@@ -14,10 +14,9 @@ import { Order } from '../../../core/models/order.model';
           <p>Authorized Dealer for Electrical Goods</p>
           <p>123 Agency Street, City - 600001</p>
           <p>Phone: +91 98765 43210 | Email: sales&#64;sribalaji.com</p>
-          <p><strong>GSTIN: 33AAAAA0000A1Z5</strong></p>
         </div>
         <div class="invoice-meta">
-          <h2>TAX INVOICE</h2>
+          <h2>INVOICE</h2>
           <p><strong>Invoice No:</strong> #{{ order.id.substring(0, 8).toUpperCase() }}</p>
           <p><strong>Date:</strong> {{ order.createdAt | date:'mediumDate' }}</p>
           <p><strong>Status:</strong> {{ order.status }}</p>
@@ -63,10 +62,6 @@ import { Order } from '../../../core/models/order.model';
           <tr>
             <td colspan="4" class="text-right">Subtotal</td>
             <td>₹{{ getSubtotal() | number:'1.2-2' }}</td>
-          </tr>
-          <tr *ngIf="order.taxAmount">
-            <td colspan="4" class="text-right">GST</td>
-            <td>₹{{ order.taxAmount | number:'1.2-2' }}</td>
           </tr>
           <tr class="grand-total">
             <td colspan="4" class="text-right">Grand Total</td>

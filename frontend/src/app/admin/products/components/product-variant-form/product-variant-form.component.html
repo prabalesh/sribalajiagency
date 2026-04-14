@@ -1,7 +1,21 @@
 <div class="variant-item glass-card">
     <div class="variant-header">
-        <span class="variant-number">Variant {{ index + 1 }}</span>
-        <button type="button" class="btn-icon-danger" (click)="onRemove()" [disabled]="isSaving" title="Remove Variant">
+        <div class="header-left">
+            <span class="variant-number">Variant {{ index + 1 }}</span>
+            @if (variant.isDefault) {
+                <span class="default-badge">
+                    <lucide-icon [img]="Star" [size]="12"></lucide-icon>
+                    Default
+                </span>
+            } @else {
+                <button type="button" class="btn-set-default" (click)="onSetDefault()" 
+                    [disabled]="isSaving" title="Set as Default">
+                    <lucide-icon [img]="Star" [size]="14"></lucide-icon>
+                    <span>Set as Default</span>
+                </button>
+            }
+        </div>
+        <button type="button" class="btn-icon-danger" (click)="onRemove()" [disabled]="isSaving || variant.isDefault" title="Remove Variant">
             <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
         </button>
     </div>
@@ -40,11 +54,44 @@
             </select>
         </div>
 
-        <div class="field full-width">
-            <app-image-uploader [initialUrl]="variant.image || null" label="Variant Image" [required]="false"
-                (fileSelected)="onFileSelected($event)" (urlChanged)="onUrlChanged($event)"
-                (imageRemoved)="onImageRemoved()">
-            </app-image-uploader>
+
+        <div class="field full-width variant-media-gallery">
+            <label class="field-label">Variant Gallery</label>
+            <div class="variant-image-grid">
+                <!-- Existing Variant Images -->
+                @for (img of variant.images; track img) {
+                <div class="variant-image-item glass-card" [class.is-primary]="variant.image === img">
+                    <img [src]="img | imageUrl" alt="Variant Image">
+                    <div class="image-actions">
+                        @if (variant.image !== img) {
+                        <button type="button" class="action-btn primary-btn" (click)="onSetPrimary(img)"
+                             title="Set as main variant image">
+                            <lucide-icon [img]="Star" [size]="14"></lucide-icon>
+                        </button>
+                        }
+                        <button type="button" class="action-btn delete-btn" (click)="onRemoveImage($index)"
+                             title="Remove variant image">
+                            <lucide-icon [img]="Trash2" [size]="14"></lucide-icon>
+                        </button>
+                    </div>
+                    @if (variant.image === img) {
+                    <span class="primary-badge">
+                        <lucide-icon [img]="Star" [size]="10"></lucide-icon>
+                        Main
+                    </span>
+                    }
+                </div>
+                }
+
+                <!-- Add New Variant Image -->
+                <div class="add-variant-image glass-card">
+                    <app-image-uploader [required]="false" label="Add" [allowMultiple]="true"
+                        (fileSelected)="onAddVariantFile($event)" 
+                        (filesSelected)="onAddVariantFiles($event)"
+                        (urlChanged)="onAddVariantImageUrl($event)">
+                    </app-image-uploader>
+                </div>
+            </div>
         </div>
     </div>
 </div>

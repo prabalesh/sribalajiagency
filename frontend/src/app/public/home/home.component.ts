@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
 import { BrandService } from '../../core/services/api/brand.service';
@@ -9,6 +9,7 @@ import { CmsService } from '../../core/services/api/cms.service';
 import { CartService } from '../../core/store/cart.service';
 import { Category } from '../../core/models/category.model';
 import { Product } from '../../core/models/product.model';
+import { AuthService } from '../../core/services/auth/auth.service';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { HeroComponent } from './components/hero/hero.component';
@@ -45,6 +46,8 @@ export class HomeComponent implements OnInit {
   private brandService = inject(BrandService);
   private cmsService = inject(CmsService);
   private cartService = inject(CartService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   categories: Category[] = [];
   featuredProducts: Product[] = [];
@@ -67,17 +70,25 @@ export class HomeComponent implements OnInit {
 
   async ngOnInit() {
     this.checkScreenSize();
-    [this.categories, this.brands, this.cms] = await Promise.all([
+    const [categories, brands, cms] = await Promise.all([
       this.categoryService.getCategories(),
       this.brandService.getBrands(),
       this.cmsService.getHomeCMS()
     ]);
+
+    this.brands = brands;
+    this.cms = cms;
+    this.categories = categories.filter((c: Category) => !c.parentId);
 
     const result = await this.productService.getProducts({ page: 1, limit: 8 });
     this.featuredProducts = result.items;
   }
 
   addToCart(product: Product) {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
     this.cartService.addToCart(product.id);
   }
 }

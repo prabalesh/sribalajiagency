@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, combineLatest } from 'rxjs';
 import { switchMap, takeUntil, map } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { Category } from '../../core/models/category.model';
 import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
 import { CartService } from '../../core/store/cart.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 // ImageUrlPipe removed as it is now used in ProductCardComponent
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { InfiniteScrollDirective } from '../../shared/directives/infinite-scroll.directive';
@@ -26,6 +27,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
     private productService = inject(ProductService);
     private categoryService = inject(CategoryService);
     private cartService = inject(CartService);
+    private authService = inject(AuthService);
+    private router = inject(Router);
     private route = inject(ActivatedRoute);
     private destroy$ = new Subject<void>();
 
@@ -217,6 +220,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
     }
 
     addToCart(product: Product) {
+        if (!this.authService.isLoggedIn()) {
+            this.router.navigate(['/login']);
+            return;
+        }
         this.cartService.addToCart(product.id);
     }
 }

@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsBoolean, IsArray, Min, IsUUID, ValidateNested } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsBoolean, IsArray, Min, IsUUID, ValidateNested, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ProductVariantDto {
@@ -40,6 +40,10 @@ export class ProductVariantDto {
     @IsOptional()
     @IsUUID()
     variantTypeId?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isDefault?: boolean;
 }
 
 export class CreateProductDto {
@@ -81,6 +85,14 @@ export class CreateProductDto {
     @IsOptional()
     @IsBoolean()
     isFeatured?: boolean;
+
+    @IsOptional()
+    @IsString()
+    warranty?: string;
+
+    @IsOptional()
+    @IsObject()
+    specifications?: Record<string, any>;
 
     // Add other fields as necessary based on entity
     @IsOptional()
@@ -130,6 +142,14 @@ export class UpdateProductDto {
     @IsOptional()
     @IsBoolean()
     isFeatured?: boolean;
+
+    @IsOptional()
+    @IsString()
+    warranty?: string;
+
+    @IsOptional()
+    @IsObject()
+    specifications?: Record<string, any>;
 
     @IsOptional()
     @IsArray()

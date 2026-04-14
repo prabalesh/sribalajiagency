@@ -68,7 +68,7 @@
         </div>
         <div class="items-list">
           @for (item of order.items; track item.productId) {
-          <div class="item" (click)="viewProduct(item.productId)">
+          <div class="item" (click)="viewProduct(item.product?.id || item.productId, item.variantId)">
             <div class="item-info">
               <h3>{{ item.productName }}</h3>
               @if (item.variantName) {

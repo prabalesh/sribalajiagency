@@ -5,7 +5,7 @@ import { Product } from './entities/product.entity';
 import { Category } from '../categories/entities/category.entity';
 import { CategoriesService } from '../categories/categories.service';
 import { Brand } from '../brands/entities/brand.entity';
-import { ProductImage } from './entities/product-image.entity';
+
 import { ProductVariant } from './entities/product-variant.entity';
 import { FileStorageService } from '../common/services/file-storage.service';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
@@ -64,8 +64,7 @@ export class ProductsService {
         private categoryRepo: Repository<Category>,
         @InjectRepository(Brand)
         private brandRepo: Repository<Brand>,
-        @InjectRepository(ProductImage)
-        private imageRepo: Repository<ProductImage>,
+
         @InjectRepository(ProductVariant)
         private variantRepo: Repository<ProductVariant>,
         private categoriesService: CategoriesService,
@@ -150,7 +149,6 @@ export class ProductsService {
         const query = this.productRepo.createQueryBuilder('product')
             .leftJoinAndSelect('product.category', 'category')
             .leftJoinAndSelect('product.brand', 'brand')
-            .leftJoinAndSelect('product.images', 'images')
             .leftJoinAndSelect('product.variants', 'variants');
 
         // Category filter (including subtree)
@@ -261,7 +259,7 @@ export class ProductsService {
         // TODO: Add error handling for invalid UUID format
         return this.productRepo.findOne({
             where: { id },
-            relations: ['category', 'brand', 'images', 'variants'],
+            relations: ['category', 'brand', 'variants'],
         });
     }
 
@@ -407,7 +405,7 @@ export class ProductsService {
      * TODO: Validate stock levels for variants
      */
     async updateProduct(id: string, data: UpdateProductDto) {
-        const { variants, images, brand, category, ...productData } = data as any;
+        const { variants, brand, category, ...productData } = data as any;
 
         this.logger.log(`Updating product: ${id}`);
 
@@ -523,18 +521,7 @@ export class ProductsService {
 
         // TODO: Check if product has any orders before deletion
 
-        // Delete associated images from storage
-        if (product && product.images) {
-            for (const image of product.images) {
-                try {
-                    await this.fileStorageService.deleteFile(image.url);
-                    this.logger.debug(`Deleted image: ${image.url}`);
-                } catch (error) {
-                    this.logger.error(`Failed to delete image ${image.url}: ${error.message}`);
-                    // TODO: Decide whether to continue or abort deletion
-                }
-            }
-        }
+
 
         // Soft delete associated variants first
         await this.variantRepo.softDelete({ product: { id } });
@@ -551,148 +538,7 @@ export class ProductsService {
         return result;
     }
 
-    /**
-     * Adds an image to a product.
-     * 
-     * Uploads image to storage and creates ProductImage record.
-     * Supports marking image as primary (main product image).
-     * 
-     * @param productId - Product ID to add image to
-     * @param file - Uploaded image file
-     * @param isPrimary - Whether this is the primary product image
-     * @returns Promise resolving to created ProductImage entity
-     * 
-     * @example
-     * ```typescript
-     * const image = await productsService.addProductImage(
-     *   'prod_123',
-     *   uploadedFile,
-     *   true
-     * );
-     * ```
-     * 
-     * TODO: Validate file type (only images allowed)
-     * TODO: Validate file size (max 5MB)
-     * TODO: Generate thumbnails for different sizes
-     * TODO: Add image optimization/compression
-     * TODO: If isPrimary=true, unset other primary images
-     * TODO: Add transaction support
-     * TODO: Add image metadata (dimensions, file size)
-     * TODO: Add alt text support for accessibility
-     * TODO: Validate product exists before upload
-     * TODO: Add rollback on storage failure
-     */
-    async addProductImage(productId: string, file: Express.Multer.File, isPrimary: boolean = false) {
-        this.logger.log(`Adding image to product ${productId}, isPrimary: ${isPrimary}`);
 
-        // Check existing images count
-        const count = await this.imageRepo.count({ where: { product: { id: productId } } });
-        if (count >= 10) {
-            throw new BadRequestException('Maximum of 10 images allowed per product variant');
-        }
-
-        // Validate product exists
-        // TODO: Validate product exists
-        // TODO: Validate file type and size
-        // TODO: If isPrimary, unset existing primary images
-
-        try {
-            // Upload file to storage
-            const url = await this.fileStorageService.saveFile(file, `products/${productId}`);
-
-            // Create image record
-            const image = this.imageRepo.create({
-                url,
-                isPrimary,
-                product: { id: productId }
-            });
-
-            const saved = await this.imageRepo.save(image);
-            this.logger.log(`Image added successfully: ${saved.id}`);
-
-            // TODO: Generate thumbnails
-            // TODO: Emit ImageAddedEvent
-
-            return saved;
-        } catch (error) {
-            this.logger.error(`Failed to add image to product ${productId}: ${error.message}`, error.stack);
-            throw new BadRequestException('Failed to upload product image');
-        }
-    }
-
-    /**
-     * Removes a product image.
-     * 
-     * Deletes image from storage and removes database record.
-     * 
-     * @param imageId - ProductImage ID to remove
-     * 
-     * @example
-     * ```typescript
-     * await productsService.removeProductImage('img_123');
-     * ```
-     * 
-     * TODO: Add validation to prevent removing last image
-     * TODO: Add authorization check
-     * TODO: Add transaction support
-     * TODO: Handle storage deletion failures gracefully
-     * TODO: If removing primary image, set another as primary
-     * TODO: Delete associated thumbnails
-     * TODO: Emit ImageRemovedEvent
-     */
-    async removeProductImage(imageId: string) {
-        this.logger.log(`Removing product image: ${imageId}`);
-
-        const image = await this.imageRepo.findOneBy({ id: imageId });
-
-        if (image) {
-            try {
-                // Delete from storage
-                await this.fileStorageService.deleteFile(image.url);
-
-                // Delete from database
-                await this.imageRepo.delete(imageId);
-
-                this.logger.log(`Image ${imageId} removed successfully`);
-
-                // TODO: If was primary, set another image as primary
-                // TODO: Delete thumbnails
-                // TODO: Emit ImageRemovedEvent
-            } catch (error) {
-                this.logger.error(`Failed to remove image ${imageId}: ${error.message}`, error.stack);
-                throw new BadRequestException('Failed to remove product image');
-            }
-        }
-    }
-
-    /**
-     * Adds an image to a product via an external URL.
-     * 
-     * @param productId - Product ID to add image to
-     * @param url - External image URL
-     * @param isPrimary - Whether this is the primary product image
-     * @returns Promise resolving to created ProductImage entity
-     */
-    async addProductImageLink(productId: string, url: string, isPrimary: boolean = false) {
-        this.logger.log(`Adding image link to product ${productId}, url: ${url}, isPrimary: ${isPrimary}`);
-
-        try {
-            // Create image record directly with the URL
-            const image = this.imageRepo.create({
-                url,
-                isPrimary,
-                product: { id: productId }
-            });
-
-            const saved = await this.imageRepo.save(image);
-            this.logger.log(`Image link added successfully: ${saved.id}`);
-
-            return saved;
-        } catch (error) {
-            this.logger.error(`Failed to add image link to product ${productId}: ${error.message}`, error.stack);
-            throw new BadRequestException('Failed to add product image link');
-        }
-    }
 
     /**
      * Uploads a generic file (not associated with a product).

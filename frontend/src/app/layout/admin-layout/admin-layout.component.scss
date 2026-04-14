@@ -1,5 +1,9 @@
 @use "../../core/styles/glass" as *;
 
+.scrollbar {
+    list-style: none;
+}
+
 .admin-layout {
     display: flex;
     min-height: 100vh;
@@ -527,6 +531,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

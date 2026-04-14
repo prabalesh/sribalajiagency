@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, Index, DeleteDateColumn } from 'typeorm';
 import { Category } from '../../categories/entities/category.entity';
 import { Brand } from '../../brands/entities/brand.entity';
-import { ProductImage } from './product-image.entity';
+
 import { ProductVariant } from './product-variant.entity';
 import { ColumnNumericTransformer } from '../../common/transformers/numeric.transformer';
 
@@ -17,8 +17,7 @@ export class Product {
     @Column({ type: 'text' })
     description: string;
 
-    @OneToMany(() => ProductImage, (image) => image.product, { cascade: true })
-    images: ProductImage[];
+
 
     @OneToMany(() => ProductVariant, (variant) => variant.product, { cascade: true })
     variants: ProductVariant[];
@@ -49,6 +48,12 @@ export class Product {
     @Index()
     @Column({ default: false })
     isFeatured: boolean;
+
+    @Column({ nullable: true })
+    warranty: string;
+
+    @Column({ type: 'jsonb', nullable: true })
+    specifications: Record<string, any>;
 
     @ManyToOne(() => Category)
     category: Category;

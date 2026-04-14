@@ -14,13 +14,11 @@
     @if (authService.hasPermission('CREATE_PRODUCT') || (isEditing && authService.hasPermission('UPDATE_PRODUCT'))) {
     <app-product-form [product]="newProduct" [isEditing]="isEditing" [isSaving]="isSaving"
         [isUploadingImage]="isUploadingImage" [brands]="brands" [categories]="categories"
-        [uploadedFiles]="uploadedFiles" [pendingUrls]="pendingUrls" [pendingImageUrl]="pendingImageUrl"
         [selectedCategoryId]="selectedCategoryId" (save)="saveProduct()" (cancel)="resetForm()"
-        (fileSelected)="onMainFileSelected($event)" (urlChanged)="onMainUrlChanged($event)"
-        (addPendingUrl)="addPendingUrl()" (removePendingUrl)="removePendingUrl($event)"
-        (removeUploadedFile)="removeUploadedFile($event)" (removeImage)="removeImage($event)"
         (addVariant)="addVariant()" (removeVariant)="removeVariant($event)"
-        (variantFileSelected)="onVariantFileSelected($event)" (variantUrlChanged)="onVariantUrlChanged($event)"
+        (variantFileSelected)="onVariantFileSelected($event)" 
+        (variantFilesSelected)="onVariantFilesSelected($event)"
+        (variantUrlChanged)="onVariantUrlChanged($event)"
         (variantImageRemoved)="onVariantImageRemoved($event)" (categoryChange)="onCategoryChange($event)"
         (paymentMethodToggle)="togglePaymentMethod($event)" [variantTypes]="variantTypes">
     </app-product-form>

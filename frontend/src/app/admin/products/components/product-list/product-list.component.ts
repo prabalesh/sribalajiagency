@@ -78,4 +78,10 @@ export class ProductListComponent {
             .filter((p): p is number => p !== undefined && p !== null);
         return comparisonPrices.length > 0 ? Math.min(...comparisonPrices) : undefined;
     }
+
+    getProductImage(product: Product): string {
+        if (!product.variants || product.variants.length === 0) return '';
+        const variant = product.variants[0];
+        return variant.image || (variant.images && variant.images.length > 0 ? variant.images[0] : '');
+    }
 }

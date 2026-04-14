@@ -8,7 +8,7 @@ import { User } from '../auth/entities/user.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Brand } from '../brands/entities/brand.entity';
 import { Product } from '../products/entities/product.entity';
-import { ProductImage } from '../products/entities/product-image.entity';
+
 import { ProductVariant } from '../products/entities/product-variant.entity';
 import { Coupon } from '../coupons/entities/coupon.entity';
 import * as bcrypt from 'bcrypt';
@@ -23,7 +23,7 @@ async function bootstrap() {
     const categoryRepo = app.get<Repository<Category>>(getRepositoryToken(Category));
     const brandRepo = app.get<Repository<Brand>>(getRepositoryToken(Brand));
     const productRepo = app.get<Repository<Product>>(getRepositoryToken(Product));
-    const productImageRepo = app.get<Repository<ProductImage>>(getRepositoryToken(ProductImage));
+
     const variantRepo = app.get<Repository<ProductVariant>>(getRepositoryToken(ProductVariant));
     const couponRepo = app.get<Repository<Coupon>>(getRepositoryToken(Coupon));
 
@@ -222,15 +222,11 @@ async function bootstrap() {
                 } as any) as unknown as Product;
                 product = await productRepo.save(newProduct);
 
-                // Add product images (2-3 images per product)
                 const imageCount = 2 + Math.floor(Math.random() * 2); // 2 or 3 images
                 const randomSeed = Math.floor(Math.random() * 1000);
+                const variantImages: string[] = [];
                 for (let i = 0; i < imageCount; i++) {
-                    await productImageRepo.save(productImageRepo.create({
-                        url: `https://picsum.photos/seed/${randomSeed + i}/800/600`,
-                        isPrimary: i === 0, // First image is primary
-                        product: product as any
-                    }));
+                    variantImages.push(`https://picsum.photos/seed/${randomSeed + i}/800/600`);
                 }
 
                 // Add at least one variant
@@ -239,6 +235,8 @@ async function bootstrap() {
                     price: pTemp.price,
                     sku: `${pTemp.brand.substring(0, 3)}-${Math.floor(Math.random() * 10000)}`,
                     stock: 50 + Math.floor(Math.random() * 100),
+                    image: variantImages.length > 0 ? variantImages[0] : '',
+                    images: variantImages,
                     product: product as any
                 } as any));
             }

@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ViewChild, ElementRef, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../core/services/api/product.service';
 import { CategoryService } from '../../core/services/api/category.service';
@@ -14,6 +14,7 @@ import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/br
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { ProductReviewsComponent } from './components/product-reviews/product-reviews.component';
 import { ToastService } from '../../core/services/toast.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 import {
     LucideAngularModule,
     ShoppingCart,
@@ -61,6 +62,8 @@ export class ProductDetailComponent implements OnInit {
     private brandService = inject(BrandService);
     private cartService = inject(CartService);
     private toastService = inject(ToastService);
+    private authService = inject(AuthService);
+    private router = inject(Router);
     private platformId = inject(PLATFORM_ID);
 
     // Icon references
@@ -99,6 +102,8 @@ export class ProductDetailComponent implements OnInit {
     selectedVariant: ProductVariant | undefined;
     error: string | null = null;
     isAddingToCart = false;
+    activeTab: 'overview' | 'specs' = 'overview';
+    isDescriptionExpanded = false;
 
     ngOnInit() {
         this.isBrowser = isPlatformBrowser(this.platformId);
@@ -121,15 +126,6 @@ export class ProductDetailComponent implements OnInit {
             this.product = await this.productService.getProductById(id);
 
             if (this.product) {
-                // Ensure images is an array
-                if (this.product.images && !Array.isArray(this.product.images)) {
-                    this.product.images = typeof this.product.images === 'object'
-                        ? Object.values(this.product.images)
-                        : [];
-                } else if (!this.product.images) {
-                    this.product.images = [];
-                }
-
                 // Auto-select first variant if exists
                 if (this.product.variants && this.product.variants.length > 0) {
                     this.selectVariant(this.product.variants[0]);
@@ -173,9 +169,26 @@ export class ProductDetailComponent implements OnInit {
                     }
                 }
 
-                // Default selection: First variant with stock
+                // Intelligent variant selection
                 if (this.product.variants?.length > 0) {
-                    this.selectedVariant = this.product.variants.find(v => v.stock > 0) || this.product.variants[0];
+                    const urlVariantId = this.route.snapshot.queryParamMap.get('variantId');
+                    let targetVariant: ProductVariant | undefined;
+
+                    if (urlVariantId) {
+                        targetVariant = this.product.variants.find(v => v.id === urlVariantId);
+                    }
+
+                    if (!targetVariant) {
+                        targetVariant = this.product.variants.find(v => v.isDefault);
+                    }
+
+                    if (!targetVariant) {
+                        targetVariant = this.product.variants.find(v => v.stock > 0) || this.product.variants[0];
+                    }
+
+                    if (targetVariant) {
+                        this.selectVariant(targetVariant);
+                    }
                 }
 
                 // Reset scroll
@@ -192,12 +205,32 @@ export class ProductDetailComponent implements OnInit {
         }
     }
 
-    get variantSpecifications(): { key: string, value: string }[] {
-        if (!this.selectedVariant?.specifications) return [];
-        return Object.entries(this.selectedVariant.specifications).map(([key, value]) => ({
-            key: this.formatKey(key),
-            value: String(value)
-        }));
+    get allSpecifications(): { key: string, value: string }[] {
+        const specs: { key: string, value: string }[] = [];
+        
+        // Add global product specs first
+        if (this.product?.specifications) {
+            Object.entries(this.product.specifications).forEach(([key, value]) => {
+                specs.push({ key: this.formatKey(key), value: String(value) });
+            });
+        }
+
+        // Add variant-specific specs
+        if (this.selectedVariant?.specifications) {
+            Object.entries(this.selectedVariant.specifications).forEach(([key, value]) => {
+                specs.push({ key: this.formatKey(key), value: String(value) });
+            });
+        }
+
+        return specs;
+    }
+
+    setTab(tab: 'overview' | 'specs') {
+        this.activeTab = tab;
+    }
+
+    toggleDescription() {
+        this.isDescriptionExpanded = !this.isDescriptionExpanded;
     }
 
     private formatKey(key: string): string {
@@ -211,6 +244,14 @@ export class ProductDetailComponent implements OnInit {
         this.selectedVariant = variant;
         this.selectedImageIndex = 0;
         this.quantity = 1; // Reset quantity on variant change
+
+        // Sync URL with selected variant
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { variantId: variant.id },
+            queryParamsHandling: 'merge',
+            replaceUrl: true // Using replaceUrl to avoid cluttering history
+        });
     }
 
     get groupedVariants() {
@@ -235,7 +276,18 @@ export class ProductDetailComponent implements OnInit {
         if (this.selectedVariant?.image) {
             return [{ url: this.selectedVariant.image, isPrimary: true }];
         }
-        return this.product?.images || [];
+
+        // Aggregate images from all variants if none are specific to selection
+        const allImages: any[] = [];
+        this.product?.variants?.forEach(v => {
+            if (v.image) allImages.push({ url: v.image, isPrimary: true });
+            if (v.images) {
+                v.images.forEach(url => allImages.push({ url, isPrimary: false }));
+            }
+        });
+
+        // Return unique images if any exist
+        return Array.from(new Map(allImages.map(img => [img.url, img])).values());
     }
 
     get currentPrice(): number {
@@ -267,6 +319,11 @@ export class ProductDetailComponent implements OnInit {
 
     async addToCart() {
         if (!this.product) return;
+
+        if (!this.authService.isLoggedIn()) {
+            this.router.navigate(['/login']);
+            return;
+        }
 
         if (this.product.variants?.length && !this.selectedVariant) {
             this.toastService.warning('Please select a variation');

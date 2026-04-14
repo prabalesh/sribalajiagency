@@ -1,12 +1,12 @@
-<div class="uploader-container">
-  <label class="uploader-label">
+<div class="uploader-container flex flex-col gap-1">
+  <label class="uploader-label mb-1">
     {{ label }} <span *ngIf="required" class="required">*</span>
   </label>
 
-  <div class="mode-toggle">
+  <div class="mode-toggle flex items-center mb-2">
     <button 
       type="button" 
-      class="toggle-btn" 
+      class="toggle-btn flex items-center gap-1" 
       [class.active]="mode === 'upload'"
       (click)="setMode('upload')"
     >
@@ -15,7 +15,7 @@
     </button>
     <button 
       type="button" 
-      class="toggle-btn" 
+      class="toggle-btn flex items-center gap-1" 
       [class.active]="mode === 'link'"
       (click)="setMode('link')"
     >
@@ -26,16 +26,16 @@
 
   <div class="uploader-content">
     <!-- Preview Section -->
-    <div *ngIf="previewUrl" class="preview-area">
+    <div *ngIf="previewUrl" class="preview-area overflow-hidden">
       <img [src]="previewUrl" alt="Preview" class="preview-img">
-      <button type="button" class="remove-btn" (click)="removeImage()">
+      <button type="button" class="remove-btn flex items-center justify-center" (click)="removeImage()">
         <lucide-icon [name]="X" [size]="16"></lucide-icon>
       </button>
     </div>
 
     <!-- Upload Mode -->
     <div *ngIf="!previewUrl && mode === 'upload'" 
-         class="drop-zone"
+         class="drop-zone flex items-center justify-center"
          appDragDrop
          (fileDropped)="onFileDropped($event)">
       <input 
@@ -43,23 +43,24 @@
         #fileInput 
         (change)="onFileSelected($event)" 
         accept="image/*" 
+        [multiple]="allowMultiple"
         class="hidden-input"
       >
-      <div class="drop-zone-content" (click)="fileInput.click()">
-        <div class="icon-circle">
+      <div class="drop-zone-content flex flex-col items-center gap-2" (click)="fileInput.click()">
+        <div class="icon-circle flex items-center justify-center">
           <lucide-icon [name]="Upload" [size]="24"></lucide-icon>
         </div>
-        <div class="text-content">
-          <p class="main-text">Click to upload or drag and drop</p>
+        <div class="text-content text-center">
+          <p class="main-text fw-semibold">Click to upload or drag and drop</p>
           <p class="sub-text">{{ helpText }}</p>
         </div>
       </div>
     </div>
 
     <!-- Link Mode -->
-    <div *ngIf="!previewUrl && mode === 'link'" class="link-input-area">
-      <div class="input-group">
-        <div class="input-prefix">
+    <div *ngIf="!previewUrl && mode === 'link'" class="link-input-area flex flex-col gap-2">
+      <div class="input-group flex items-center">
+        <div class="input-prefix flex items-center">
           <lucide-icon [name]="Link" [size]="18"></lucide-icon>
         </div>
         <input 

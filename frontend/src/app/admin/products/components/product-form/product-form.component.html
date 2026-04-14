@@ -41,6 +41,18 @@
                 </div>
             </div>
 
+            <!-- Warranty (Moved for visibility) -->
+            <div class="form-group">
+                <label class="form-label">
+                    <lucide-icon [img]="ShieldCheck" [size]="16"></lucide-icon>
+                    <span>Product Warranty</span>
+                </label>
+                <input type="text" class="form-input" [(ngModel)]="product.warranty" name="warranty"
+                    placeholder="e.g. 1 Year Brand Warranty" [disabled]="isSaving">
+            </div>
+
+
+
             <!-- Category -->
             <div class="form-group full-width">
                 <label class="form-label">
@@ -131,89 +143,80 @@
                 </div>
             </div>
 
-            <!-- Description -->
+            <!-- Description & Specifications -->
             <div class="form-group full-width">
                 <label class="form-label">
-                    <lucide-icon [img]="Package" [size]="16"></lucide-icon>
-                    <span>Description <span class="required">*</span></span>
+                    <lucide-icon [img]="FileText" [size]="16"></lucide-icon>
+                    <span>Product Description <span class="required">*</span></span>
                 </label>
-                <textarea class="form-textarea" [(ngModel)]="product.description" name="description" rows="4"
-                    placeholder="Technical specifications, features, and details..." [disabled]="isSaving"></textarea>
-            </div>
-
-            <!-- Upload Media -->
-            <div class="form-group full-width">
-                <label class="form-label">
-                    <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
-                    <span>Add Media (File or Link)</span>
-                </label>
-                <div class="media-uploader-container">
-                    <app-image-uploader label="Add to Gallery" [required]="false"
-                        (fileSelected)="onFileSelected($event)" (urlChanged)="onUrlChanged($event)"
-                        (imageRemoved)="urlChanged.emit('')">
-                    </app-image-uploader>
-
-                    @if (pendingImageUrl) {
-                    <button type="button" class="btn-add-url" (click)="onAddPendingUrl()">
-                        <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
-                        <span>Add URL to Gallery</span>
-                    </button>
-                    }
-                </div>
-
-                <!-- Pending Files and URLs -->
-                @if (uploadedFiles.length > 0 || pendingUrls.length > 0) {
-                <div class="pending-media-list">
-                    <h6>Pending Gallery Additions</h6>
-                    <div class="file-previews">
-                        @for (file of uploadedFiles; track $index) {
-                        <div class="file-item">
-                            <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
-                            <span>{{ file.name }} (Upload)</span>
-                            <button type="button" class="remove-btn" (click)="onRemoveUploadedFile($index)"
-                                [disabled]="isSaving">
-                                <lucide-icon [img]="X" [size]="14"></lucide-icon>
-                            </button>
-                        </div>
-                        }
-                        @for (url of pendingUrls; track $index) {
-                        <div class="file-item url-item">
-                            <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
-                            <span class="url-text">{{ url }} (Link)</span>
-                            <button type="button" class="remove-btn" (click)="onRemovePendingUrl($index)"
-                                [disabled]="isSaving">
-                                <lucide-icon [img]="X" [size]="14"></lucide-icon>
-                            </button>
-                        </div>
-                        }
-                    </div>
-                </div>
-                }
-            </div>
-
-            <!-- Existing Images -->
-            @if (product.images && product.images.length > 0) {
-            <div class="form-group full-width">
-                <label class="form-label">
-                    <lucide-icon [img]="ImageIcon" [size]="16"></lucide-icon>
-                    <span>Media Gallery</span>
-                </label>
-                <div class="image-gallery">
-                    @for (img of product.images; track img.id) {
-                    <div class="image-item glass-card">
-                        <img [src]="img.url | imageUrl" alt="Product Image">
-                        <button type="button" class="delete-btn" (click)="onRemoveImage(img.id)"
-                            [disabled]="isSaving || isUploadingImage" title="Remove image">
-                            <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                <div class="rich-text-container" [class.disabled]="isSaving">
+                    <div class="rich-text-toolbar">
+                        <button type="button" class="tool-btn" (click)="formatDoc('bold')" title="Bold"
+                            [class.active]="commandStates.bold">
+                            <lucide-icon [img]="Bold" [size]="14"></lucide-icon>
                         </button>
-                        @if (img.isPrimary) {
-                        <span class="primary-badge">Primary</span>
-                        }
+                        <button type="button" class="tool-btn" (click)="formatDoc('italic')" title="Italic"
+                            [class.active]="commandStates.italic">
+                            <lucide-icon [img]="Italic" [size]="14"></lucide-icon>
+                        </button>
+                        <button type="button" class="tool-btn" (click)="formatDoc('underline')" title="Underline"
+                            [class.active]="commandStates.underline">
+                            <lucide-icon [img]="Underline" [size]="14"></lucide-icon>
+                        </button>
+                        <div class="tool-separator"></div>
+                        <button type="button" class="tool-btn" (click)="formatDoc('insertUnorderedList')" title="Bullet List"
+                            [class.active]="commandStates.insertUnorderedList">
+                            <lucide-icon [img]="List" [size]="14"></lucide-icon>
+                        </button>
+                        <button type="button" class="tool-btn" (click)="formatDoc('insertOrderedList')" title="Numbered List"
+                            [class.active]="commandStates.insertOrderedList">
+                            <lucide-icon [img]="ListOrdered" [size]="14"></lucide-icon>
+                        </button>
+                    </div>
+                    <div #editor class="rich-text-editor rich-text-content" contenteditable="true" 
+                        (input)="onDescriptionChange($event)"
+                        (keyup)="checkCommandStates()"
+                        (mouseup)="checkCommandStates()"
+                        (keydown)="handleKeyDown($event)"
+                        (focus)="onFocusEditor($event)" [class.disabled]="isSaving" 
+                        [attr.aria-label]="'Product Description'" role="textbox"
+                        placeholder="Describe the product features, benefits, and specifications..."></div>
+                </div>
+            </div>
+
+            <div class="form-group full-width specifications-builder">
+                <label class="form-label">
+                    <lucide-icon [img]="Layers" [size]="16"></lucide-icon>
+                    <span>Technical Specifications</span>
+                    <button type="button" class="btn-text-sm" (click)="addSpec()" [disabled]="isSaving">
+                        <lucide-icon [img]="PlusCircle" [size]="14"></lucide-icon>
+                        <span>Add Specification</span>
+                    </button>
+                </label>
+                
+                <div class="specs-list">
+                    @for (spec of specEntries; track $index) {
+                    <div class="spec-row animate-fade">
+                        <div class="spec-field">
+                            <input type="text" class="form-input" [(ngModel)]="spec.key" 
+                                [name]="'spec-key-' + $index" placeholder="Property (e.g. Weight)"
+                                (change)="syncSpecs()" [disabled]="isSaving">
+                        </div>
+                        <div class="spec-field">
+                            <input type="text" class="form-input" [(ngModel)]="spec.value" 
+                                [name]="'spec-val-' + $index" placeholder="Value (e.g. 2.5 kg)"
+                                (change)="syncSpecs()" [disabled]="isSaving">
+                        </div>
+                        <button type="button" class="btn-icon-danger-sm" (click)="removeSpec($index)" 
+                            [disabled]="isSaving || specEntries.length === 1">
+                            <lucide-icon [img]="Trash2" [size]="14"></lucide-icon>
+                        </button>
                     </div>
                     }
                 </div>
             </div>
-            }
+
+
 
             <!-- Variants Section -->
             <div class="form-group full-width variants-section">
@@ -233,8 +236,11 @@
                     @for (v of product.variants; track $index) {
                     <app-product-variant-form [variant]="v" [index]="$index" [isSaving]="isSaving"
                         [variantTypes]="variantTypes" (remove)="onRemoveVariant($event)"
-                        (fileSelected)="onVariantFileSelected($event, v)" (urlChanged)="onVariantUrlChanged($event, v)"
-                        (imageRemoved)="onVariantImageRemoved(v)">
+                        (fileSelected)="onVariantFileSelected($event, v)"
+                        (filesSelected)="onVariantFilesSelected($event, v)"
+                        (urlChanged)="onVariantUrlChanged($event, v)"
+                        (imageRemoved)="onVariantImageRemoved(v)"
+                        (defaultChange)="onVariantDefaultChange(v)">
                     </app-product-variant-form>
                     }
                 </div>

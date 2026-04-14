@@ -133,70 +133,81 @@ export class OrdersService {
     async create(userId: string, createOrderDto: CreateOrderDto) {
         this.logger.log(`Creating order for user ${userId} with ${createOrderDto.items.length} items`);
 
-        // FIXME: No validation that products exist or have sufficient stock
-        // TODO: Add product existence and stock validation here
+        return await this.dataSource.transaction(async (manager) => {
+            // Calculate taxes (now effectively zero)
+            const taxResults = await this.calculateTax(
+                createOrderDto.items.map(i => ({
+                    productId: i.productId,
+                    variantId: i.variantId,
+                    quantity: i.quantity
+                })),
+                createOrderDto.deliveryState
+            );
 
-        // Calculate taxes
-        const taxResults = await this.calculateTax(
-            createOrderDto.items.map(i => ({
-                productId: i.productId,
-                variantId: i.variantId,
-                quantity: i.quantity
-            })),
-            createOrderDto.deliveryState
-        );
+            this.logger.debug(`Tax calculation complete: subtotal=${taxResults.subtotal}, tax=${taxResults.totalTax}`);
 
-        this.logger.debug(`Tax calculation complete: subtotal=${taxResults.subtotal}, tax=${taxResults.totalTax}`);
+            const orderItems: OrderItem[] = [];
 
-        // FIXME: No transaction - if any step fails, partial data may be saved
-        // TODO: Wrap in transaction
+            // Process items and deduct stock
+            for (const item of createOrderDto.items) {
+                // Find and lock variant for update to prevent race conditions
+                const variant = await manager.findOne(ProductVariant, {
+                    where: { id: item.variantId },
+                    lock: { mode: 'pessimistic_write' }
+                });
 
-        // Create order items
-        // FIXME: productName and variantName from DTO can be manipulated
-        // TODO: Fetch actual product/variant names from database
-        const orderItems = createOrderDto.items.map(item => {
-            return this.orderItemRepo.create({
-                product: { id: item.productId },
-                variant: item.variantId ? { id: item.variantId } : undefined,
-                productName: item.productName, // FIXME: Should fetch from DB
-                variantName: item.variantName, // FIXME: Should fetch from DB
-                price: item.price, // FIXME: Should validate against actual price
-                quantity: item.quantity,
+                if (!variant) {
+                    throw new BadRequestException(`Variant ${item.variantId} not found`);
+                }
+
+                if (variant.stock < item.quantity) {
+                    throw new BadRequestException(`Insufficient stock for ${item.productName}. Available: ${variant.stock}, Requested: ${item.quantity}`);
+                }
+
+                // Deduct stock
+                variant.stock -= item.quantity;
+                await manager.save(ProductVariant, variant);
+
+                // Create order item
+                const orderItem = manager.create(OrderItem, {
+                    product: { id: item.productId },
+                    variant: { id: item.variantId },
+                    productName: item.productName,
+                    variantName: item.variantName,
+                    price: item.price,
+                    quantity: item.quantity,
+                });
+                orderItems.push(orderItem);
+            }
+
+            // Create order
+            const order = manager.create(Order, {
+                user: { id: userId },
+                items: orderItems,
+                totalAmount: taxResults.grandTotal,
+                taxAmount: taxResults.totalTax,
+                taxDetails: taxResults.breakdown,
+                status: 'Pending',
+                paymentMethod: createOrderDto.paymentMethod,
+                deliveryAddress: createOrderDto.deliveryAddress,
+                deliveryPhone: createOrderDto.deliveryPhone,
+                deliveryNotes: createOrderDto.deliveryNotes,
             });
+
+            const savedOrder = await manager.save(Order, order);
+            this.logger.log(`Order created with ID: ${savedOrder.id}`);
+
+            // Create initial status history entry
+            const statusHistory = manager.create(OrderStatusHistory, {
+                order: savedOrder,
+                status: 'Pending',
+                message: 'Order placed successfully',
+                changedBy: { id: userId },
+            });
+            await manager.save(OrderStatusHistory, statusHistory);
+
+            return savedOrder;
         });
-
-        // Create order
-        const order = this.orderRepo.create({
-            user: { id: userId },
-            items: orderItems,
-            totalAmount: taxResults.grandTotal,
-            taxAmount: taxResults.totalTax,
-            taxDetails: taxResults.breakdown,
-            status: 'Pending', // FIXME: Should be type-safe OrderStatus enum
-            paymentMethod: createOrderDto.paymentMethod,
-            deliveryAddress: createOrderDto.deliveryAddress,
-            deliveryPhone: createOrderDto.deliveryPhone,
-            deliveryNotes: createOrderDto.deliveryNotes,
-        });
-
-        const savedOrder = await this.orderRepo.save(order);
-        this.logger.log(`Order created with ID: ${savedOrder.id}`);
-
-        // Create initial status history entry
-        const statusHistory = this.statusHistoryRepo.create({
-            order: savedOrder,
-            status: 'Pending', // FIXME: Should use OrderStatus enum
-            message: 'Order placed successfully',
-            changedBy: { id: userId },
-        });
-        await this.statusHistoryRepo.save(statusHistory);
-
-        // TODO: Deduct stock quantities here
-        // TODO: Emit OrderCreatedEvent
-        // TODO: Send order confirmation notification
-        // TODO: Initiate payment if payment method is 'Online'
-
-        return this.findOne(savedOrder.id);
     }
 
     /**
@@ -612,11 +623,8 @@ export class OrdersService {
             const variant = item.variantId ? variants.find(v => v.id === item.variantId) : null;
             const price = variant ? +variant.price : (product.variants?.[0]?.price || 0);
 
-            // Determine GST rate (product > category > default 18%)
-            // FIXME: Complex validation logic - should be extracted to separate method
-            const rate = +(product.gstRate !== null && product.gstRate !== undefined && product.gstRate >= 0 && product.gstRate <= 100 && !isNaN(product.gstRate)
-                ? product.gstRate
-                : (product.category?.gstRate ?? 18)); // FIXME: Default 18% may not be correct
+            // Determine GST rate (Disabled per request)
+            const rate = 0;
 
             // Calculate item totals
             const itemSubtotal = price * item.quantity;

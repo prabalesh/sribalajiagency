@@ -53,6 +53,9 @@ export class ProductVariant {
     @UpdateDateColumn()
     updatedAt: Date;
 
+    @Column({ default: false })
+    isDefault: boolean;
+
     @Index()
     @DeleteDateColumn()
     deletedAt: Date;

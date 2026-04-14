@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Brand } from '../brands/entities/brand.entity';
-import { ProductImage } from './entities/product-image.entity';
+
 import { ProductVariant } from './entities/product-variant.entity';
 import { VariantType } from './entities/variant-type.entity';
 import { ProductsController } from './products.controller';
@@ -17,7 +17,6 @@ import { CategoriesModule } from '../categories/categories.module';
             Product,
             Category,
             Brand,
-            ProductImage,
             ProductVariant,
             VariantType
         ]),

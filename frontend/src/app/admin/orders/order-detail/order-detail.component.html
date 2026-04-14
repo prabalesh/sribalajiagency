@@ -146,7 +146,7 @@
                             @for (item of order.items; track item.productId) {
                                 <tr>
                                     <td>
-                                        <div class="product-info">
+                                        <div class="product-info-link" (click)="viewProduct(item.product?.id || item.productId, item.variantId)" title="View Product">
                                             <span class="product-name">{{ item.productName }}</span>
                                             @if (item.variantName) {
                                                 <span class="variant-name">{{ item.variantName }}</span>
@@ -173,7 +173,7 @@
                     @for (item of order.items; track item.productId) {
                         <div class="item-card">
                             <div class="item-header">
-                                <div class="item-name">
+                                <div class="item-name" (click)="viewProduct(item.product?.id || item.productId, item.variantId)">
                                     <span class="product-name">{{ item.productName }}</span>
                                     @if (item.variantName) {
                                         <span class="variant-name">{{ item.variantName }}</span>

@@ -79,6 +79,10 @@
                         <lucide-icon [img]="Tag" [size]="14"></lucide-icon>
                         {{ brand.name }}
                     </span>
+                    <span class="warranty-badge" *ngIf="product.warranty">
+                        <lucide-icon [img]="ShieldCheck" [size]="14"></lucide-icon>
+                        {{ product.warranty }}
+                    </span>
                     @if (discountPercentage) {
                     <span class="discount-badge">
                         {{ discountPercentage }}% OFF
@@ -120,9 +124,8 @@
                     <div class="variant-chips">
                         @for (v of group.value.variants; track v.id) {
                         <button class="variant-chip" [class.active]="selectedVariant?.id === v.id"
-                            [class.disabled]="v.stock <= 0" (click)="selectVariant(v)" [disabled]="v.stock <= 0">
+                            [class.disabled]="v.stock <= 0" (click)="selectVariant(v)">
                             {{ v.name }}
-                            @if (v.stock <= 0) { <span class="sold-out">Sold Out</span> }
                         </button>
                         }
                     </div>
@@ -131,28 +134,14 @@
             </div>
             }
 
-            <!-- Description -->
-            <div class="description">
-                <lucide-icon [img]="Info" [size]="18"></lucide-icon>
-                <p>{{ selectedVariant?.description || product.description }}</p>
-            </div>
-
-            <!-- Order Limit Note -->
-            <div class="limit-note"
-                *ngIf="product.maxOrderQuantity && product.maxOrderQuantity < currentStock && !product.isShowcaseOnly">
-                <lucide-icon [img]="AlertCircle" [size]="16"></lucide-icon>
-                <span>Limit {{ product.maxOrderQuantity }} per order</span>
-            </div>
-
-            <!-- Purchase Actions -->
+            <!-- Purchase Actions (Moved below variants) -->
             <div class="purchase-actions" *ngIf="product.isAvailable && !product.isShowcaseOnly">
                 <div class="quantity-selector" *ngIf="currentStock > 0">
-                    <button (click)="updateQuantity(-1)" [disabled]="quantity <= 1" aria-label="Decrease quantity">
+                    <button (click)="updateQuantity(-1)" [disabled]="quantity <= 1">
                         <lucide-icon [img]="Minus" [size]="18"></lucide-icon>
                     </button>
                     <span class="quantity-value">{{ quantity }}</span>
-                    <button (click)="updateQuantity(1)" [disabled]="quantity >= maxQuantity"
-                        aria-label="Increase quantity">
+                    <button (click)="updateQuantity(1)" [disabled]="quantity >= maxQuantity">
                         <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
                     </button>
                 </div>
@@ -162,104 +151,102 @@
                     @if (isAddingToCart) {
                     <span class="spinner-sm"></span>
                     <span>Adding...</span>
-                    } @else {
-                    <lucide-icon [img]="ShoppingCart" [size]="20"></lucide-icon>
-                    <span>Add to Cart</span>
-                    }
+                    } @else if (currentStock <= 0) { <lucide-icon [img]="X" [size]="20"></lucide-icon>
+                        <span>Out of Stock</span>
+                        } @else {
+                        <lucide-icon [img]="ShoppingCart" [size]="20"></lucide-icon>
+                        <span>Add to Cart</span>
+                        }
                 </button>
             </div>
 
-            <!-- Showcase Only Note -->
-            <div class="showcase-only-note" *ngIf="product.isShowcaseOnly">
-                <div class="note-icon">
-                    <lucide-icon [img]="Home" [size]="40"></lucide-icon>
+            <!-- Product Tabs -->
+            <div class="product-tabs-container">
+                <div class="tabs-header">
+                    <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="setTab('overview')">
+                        Overview
+                    </button>
+                    <button class="tab-btn" [class.active]="activeTab === 'specs'" (click)="setTab('specs')">
+                        Specifications
+                    </button>
                 </div>
-                <div class="note-text">
-                    <h3>In-Store Exclusive</h3>
-                    <p>This item is currently available for showcase only. Please visit our agency for a live
-                        demonstration and purchase.</p>
-                </div>
-                <button class="btn-primary" [routerLink]="['/request-quote', { productId: product.id }]">
-                    <lucide-icon [img]="Package" [size]="18"></lucide-icon>
-                    <span>Enquire Now</span>
-                </button>
-            </div>
 
-            <!-- Payment Methods Info -->
-            <div class="payment-methods-info" *ngIf="!product.isShowcaseOnly && product.allowedPaymentMethods?.length">
-                <label>
-                    <lucide-icon [img]="CreditCard" [size]="16"></lucide-icon>
-                    <span>Accepted Payments:</span>
-                </label>
-                <div class="payment-methods">
-                    <span class="method" *ngIf="product.allowedPaymentMethods?.includes('cod')">
-                        <lucide-icon [img]="Wallet" [size]="16"></lucide-icon>
-                        COD
-                    </span>
-                    <span class="method" *ngIf="product.allowedPaymentMethods?.includes('online')">
-                        <lucide-icon [img]="CreditCard" [size]="16"></lucide-icon>
-                        Online
-                    </span>
-                </div>
-            </div>
+                <div class="tabs-content">
+                    <!-- Overview Tab -->
+                    <div class="tab-pane animate-fade" *ngIf="activeTab === 'overview'">
+                        <div class="overview-content">
+                            <div class="description-wrapper" [class.expanded]="isDescriptionExpanded">
+                                <div class="description-text rich-text-content"
+                                    [innerHTML]="selectedVariant?.description || product.description"></div>
+                            </div>
 
-            <!-- Delivery & Features -->
-            <div class="features-grid">
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <lucide-icon [img]="Truck" [size]="24"></lucide-icon>
+                            <button class="btn-text-primary read-more-btn" (click)="toggleDescription()">
+                                <span>{{ isDescriptionExpanded ? 'Show Less' : 'Read Full Description' }}</span>
+                                <lucide-icon [img]="isDescriptionExpanded ? Minus : Plus" [size]="16"></lucide-icon>
+                            </button>
+
+                            <!-- Features Grid (Non-Technical Icons) -->
+                            <div class="features-grid-simple">
+                                <div class="feature-item">
+                                    <lucide-icon [img]="ShieldCheck" [size]="20"></lucide-icon>
+                                    <div class="feature-info">
+                                        <strong>Warranty</strong>
+                                        <span>{{ product.warranty || '1 Year Brand Warranty' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> <!-- Overview Tab End -->
+                    <div class="showcase-only-note" *ngIf="product.isShowcaseOnly">
+                        <div class="note-text">
+                            <h3><lucide-icon [img]="Home" [size]="20"></lucide-icon> In-Store Exclusive</h3>
+                            <p>Standard purchase is currently unavailable online. Please contact us for enquiry.</p>
+                        </div>
+                        <button class="btn-primary" [routerLink]="['/request-quote', { productId: product.id }]">
+                            Enquire Now
+                        </button>
                     </div>
-                    <div class="feature-text">
-                        <strong>Free Delivery</strong>
-                        <span>On orders above ₹500</span>
+
+                    <!-- Specifications Tab -->
+                    <div class="tab-pane animate-fade" *ngIf="activeTab === 'specs'">
+                        <div class="specs-table">
+                            <div class="spec-row header">
+                                <span>Technical Detail</span>
+                                <span>Specification</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="label">Brand</span>
+                                <span class="value">{{ brand?.name || 'N/A' }}</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="label">Category</span>
+                                <span class="value">{{ category?.name || 'N/A' }}</span>
+                            </div>
+                            @if (product.warranty) {
+                            <div class="spec-row">
+                                <span class="label">Warranty</span>
+                                <span class="value">{{ product.warranty }}</span>
+                            </div>
+                            }
+                            @for (spec of allSpecifications; track spec.key) {
+                            <div class="spec-row">
+                                <span class="label">{{ spec.key }}</span>
+                                <span class="value">{{ spec.value }}</span>
+                            </div>
+                            }
+                        </div>
                     </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <lucide-icon [img]="ShieldCheck" [size]="24"></lucide-icon>
-                    </div>
-                    <div class="feature-text">
-                        <strong>Warranty</strong>
-                        <span>1 Year Domestic</span>
-                    </div>
-                </div>
-            </div>
+                </div> <!-- End tabs-content -->
+            </div> <!-- End product-tabs-container -->
+        </div> <!-- End product-info -->
+    </div> <!-- End product-main-grid -->
 
-            <!-- Specs Card -->
-            <div class="specs-card">
-                <h3>
-                    <lucide-icon [img]="Package" [size]="20"></lucide-icon>
-                    <span>Technical Details</span>
-                </h3>
-                <div class="spec-row">
-                    <span class="label">Brand:</span>
-                    <span class="value">{{ brand?.name || 'N/A' }}</span>
-                </div>
-                <div class="spec-row">
-                    <span class="label">Category:</span>
-                    <span class="value">{{ category?.name || 'N/A' }}</span>
-                </div>
-
-                @for (spec of variantSpecifications; track spec.key) {
-                <div class="spec-row">
-                    <span class="label">{{ spec.key }}:</span>
-                    <span class="value">{{ spec.value }}</span>
-                </div>
-                }
-
-                @if (selectedVariant) {
-                <div class="spec-row">
-                    <span class="label">Variant Name:</span>
-                    <span class="value">{{ selectedVariant.name }}</span>
-                </div>
-                }
-            </div>
-
-            <!-- Product Reviews -->
-            <app-product-reviews [productId]="product.id" [averageRating]="product.rating || 0">
-            </app-product-reviews>
-        </div>
-    </div>
+    <!-- Product Reviews Section -->
+    <section class="product-reviews-section">
+        <app-product-reviews [productId]="product.id" [averageRating]="product.rating || 0">
+        </app-product-reviews>
+    </section>
 
     <!-- Related Products -->
     @if (relatedProducts.length > 0) {
@@ -287,4 +274,4 @@
         </div>
     </section>
     }
-</div>
+</div> <!-- End product-detail-page container line 45 -->

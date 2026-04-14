@@ -17,9 +17,11 @@ export class ImageUploaderComponent implements OnInit {
   @Input() label: string = 'Image';
   @Input() helpText: string = 'PNG, JPG or GIF (max. 5MB)';
   @Input() required: boolean = false;
+  @Input() allowMultiple: boolean = false;
   @Input() maxSize: number = 5; // MB
 
   @Output() fileSelected = new EventEmitter<File>();
+  @Output() filesSelected = new EventEmitter<File[]>();
   @Output() urlChanged = new EventEmitter<string>();
   @Output() imageRemoved = new EventEmitter<void>();
 
@@ -51,36 +53,48 @@ export class ImageUploaderComponent implements OnInit {
   }
 
   onFileSelected(event: any) {
-    const file = event.target.files?.[0];
-    if (file) {
-      this.handleFile(file);
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      this.handleFiles(Array.from(files));
     }
   }
 
   onFileDropped(files: FileList) {
     if (files.length > 0) {
-      this.handleFile(files[0]);
+      this.handleFiles(Array.from(files));
     }
   }
 
-  private handleFile(file: File) {
-    if (!file.type.startsWith('image/')) {
-      this.toastService.error('Only image files are allowed');
-      return;
+  private handleFiles(files: File[]) {
+    const validFiles: File[] = [];
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        this.toastService.error(`${file.name} is not an image file`);
+        continue;
+      }
+
+      if (file.size > this.maxSize * 1024 * 1024) {
+        this.toastService.error(`${file.name} exceeds ${this.maxSize}MB limit`);
+        continue;
+      }
+      validFiles.push(file);
     }
 
-    if (file.size > this.maxSize * 1024 * 1024) {
-      this.toastService.error(`File size exceeds ${this.maxSize}MB limit`);
-      return;
-    }
+    if (validFiles.length === 0) return;
 
-    this.selectedFile = file;
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.previewUrl = e.target.result;
-    };
-    reader.readAsDataURL(file);
-    this.fileSelected.emit(file);
+    if (this.allowMultiple) {
+      this.filesSelected.emit(validFiles);
+    } else {
+      // Single file mode
+      const file = validFiles[0];
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.previewUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      this.fileSelected.emit(file);
+    }
   }
 
   onUrlChange() {
@@ -88,10 +102,14 @@ export class ImageUploaderComponent implements OnInit {
     this.urlChanged.emit(this.externalUrl);
   }
 
-  removeImage() {
+  reset() {
     this.selectedFile = null;
     this.previewUrl = null;
     this.externalUrl = '';
+  }
+
+  removeImage() {
+    this.reset();
     this.imageRemoved.emit();
   }
 

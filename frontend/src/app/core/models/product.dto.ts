@@ -19,6 +19,8 @@ export interface CreateProductDto {
     categoryId?: string;
     brandId?: string;
     isFeatured?: boolean;
+    warranty?: string;
+    specifications?: any;
     variants?: ProductVariantDto[];
 }
 

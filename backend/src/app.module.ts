@@ -16,7 +16,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { Category } from './categories/entities/category.entity';
 import { BrandsModule } from './brands/brands.module';
 import { Brand } from './brands/entities/brand.entity';
-import { ProductImage } from './products/entities/product-image.entity';
+
 import { ProductVariant } from './products/entities/product-variant.entity';
 import { VariantType } from './products/entities/variant-type.entity';
 import { VariantTypesModule } from './products/variant-types/variant-types.module';
@@ -83,7 +83,7 @@ import { DatabaseSeederService } from './database/database-seeder.service';
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'sribalaji'),
-        entities: [User, Role, Permission, Product, Category, Brand, ProductImage, ProductVariant, VariantType, SiteSettings, Order, OrderItem, OrderStatusHistory, Coupon, LocationRestriction, HomeCMS, UserAddress, Review, Cart, CartItem],
+        entities: [User, Role, Permission, Product, Category, Brand, ProductVariant, VariantType, SiteSettings, Order, OrderItem, OrderStatusHistory, Coupon, LocationRestriction, HomeCMS, UserAddress, Review, Cart, CartItem],
 
         synchronize: true, // Auto-sync entities with database - disable in production
         // Migrations disabled - use seed script instead to avoid timing issues
