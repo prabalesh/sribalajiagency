@@ -252,6 +252,17 @@ export class ProductFormComponent implements OnInit, AfterViewInit, OnChanges {
     }
 
     /**
+     * Handles paste events to prevent styling and colors from being copied over
+     */
+    onPaste(event: ClipboardEvent): void {
+        event.preventDefault();
+        const text = event.clipboardData?.getData('text/plain');
+        if (text) {
+            document.execCommand('insertText', false, text);
+        }
+    }
+
+    /**
      * Handles editor focus to manage placeholders or focus states.
      */
     onFocusEditor(event: FocusEvent): void {

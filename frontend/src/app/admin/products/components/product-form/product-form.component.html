@@ -178,6 +178,7 @@
                         (keyup)="checkCommandStates()"
                         (mouseup)="checkCommandStates()"
                         (keydown)="handleKeyDown($event)"
+                        (paste)="onPaste($event)"
                         (focus)="onFocusEditor($event)" [class.disabled]="isSaving" 
                         [attr.aria-label]="'Product Description'" role="textbox"
                         placeholder="Describe the product features, benefits, and specifications..."></div>
