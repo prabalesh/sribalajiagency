@@ -259,6 +259,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit, OnChanges {
         const text = event.clipboardData?.getData('text/plain');
         if (text) {
             document.execCommand('insertText', false, text);
+            // Force an input event to update the model and run sanitization
+            if (this.editorRef) {
+                const inputEvent = new Event('input', { bubbles: true });
+                this.editorRef.nativeElement.dispatchEvent(inputEvent);
+            }
         }
     }
 
