@@ -40,7 +40,7 @@ import { VigileEyeModule } from '@prabalesh/vigileye-nestjs';
 import { CartsModule } from './carts/carts.module';
 import { Cart } from './carts/entities/cart.entity';
 import { CartItem } from './carts/entities/cart-item.entity';
-import { DatabaseSeederService } from './database/database-seeder.service';
+// import { DatabaseSeederService } from './database/database-seeder.service';
 
 @Module({
   imports: [
@@ -85,14 +85,11 @@ import { DatabaseSeederService } from './database/database-seeder.service';
         database: config.get<string>('DB_NAME', 'sribalaji'),
         entities: [User, Role, Permission, Product, Category, Brand, ProductVariant, VariantType, SiteSettings, Order, OrderItem, OrderStatusHistory, Coupon, LocationRestriction, HomeCMS, UserAddress, Review, Cart, CartItem],
 
-        synchronize: true, // Auto-sync entities with database - disable in production
-        // Migrations disabled - use seed script instead to avoid timing issues
-        // migrationsRun: false,
-        // migrations: [],
+        synchronize: false, // Auto-sync entities with database - disabled
+        migrationsRun: false,
+        migrations: ['dist/database/migrations/*.js'],
       }),
     }),
-    // Import entities for DatabaseSeederService
-    TypeOrmModule.forFeature([Role, Permission]),
   ],
   providers: [
     {
@@ -100,7 +97,7 @@ import { DatabaseSeederService } from './database/database-seeder.service';
       useClass: ThrottlerGuard,
     },
     AppService,
-    DatabaseSeederService, // Auto-seeds permissions and admin role on startup
+    // DatabaseSeederService, // Auto-seeds permissions and admin role on startup
   ],
   controllers: [AppController],
 })
