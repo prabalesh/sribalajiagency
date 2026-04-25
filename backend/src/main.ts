@@ -18,18 +18,23 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Security headers
-  app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" }
-  }));
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
-  app.use('/api/v1/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  app.use(
+    '/api/v1/uploads',
+    express.static(path.join(process.cwd(), 'uploads')),
+  );
 
   // Configure CORS with environment-based origins
   const corsOrigins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
+    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
     : ['http://localhost:4200'];
 
-  console.log(corsOrigins)
+  console.log(corsOrigins);
 
   app.enableCors({
     origin: corsOrigins,
@@ -39,10 +44,12 @@ async function bootstrap() {
   // Gzip compression
   app.use(compression());
 
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }),
+  );
 
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
@@ -51,6 +58,7 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
   logger.log(`Backend server is running on http://localhost:${port}`);
 }
-bootstrap();
-
-
+bootstrap().catch((err) => {
+  console.error('Failed to start application:', err);
+  process.exit(1);
+});

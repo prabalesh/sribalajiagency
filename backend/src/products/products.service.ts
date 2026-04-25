@@ -1,622 +1,318 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { EntityRepository, Repository, In, Between, MoreThanOrEqual, LessThanOrEqual, ILike, DataSource, Brackets } from 'typeorm';
-import { Product } from './entities/product.entity';
-import { Category } from '../categories/entities/category.entity';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+  Inject,
+} from '@nestjs/common';
+import {
+  eq,
+  and,
+  ilike,
+  or,
+  desc,
+  asc,
+  sql,
+  inArray,
+  isNull,
+} from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import * as schema from '../database/drizzle/schema';
+import { DRIZZLE_DB } from '../database/drizzle/drizzle.module';
 import { CategoriesService } from '../categories/categories.service';
-import { Brand } from '../brands/entities/brand.entity';
-
-import { ProductVariant } from './entities/product-variant.entity';
 import { FileStorageService } from '../common/services/file-storage.service';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 
 /**
- * Service for managing products in the e-commerce system.
- * 
- * Handles CRUD operations for products, including:
- * - Product listing with advanced filtering and pagination
- * - Product creation with variants and images
- * - Product updates with relation management
- * - Image and file upload management
- * - Product deletion with cleanup
- * 
- * @remarks
- * - Supports complex filtering (category, brand, price range, search)
- * - Manages product variants (size, color, etc.)
- * - Handles image uploads and deletions
- * - Validates relations (category, brand) before operations
- * 
- * @example
- * ```typescript
- * const products = await productsService.findAll(1, 20, { categorySlug: 'electronics' });
- * const product = await productsService.createProduct(createDto);
- * ```
- * 
- * TODO: Add transaction support for product creation/update with variants
- * TODO: Add caching layer for product listings (Redis)
- * TODO: Add search indexing (Elasticsearch) for better full-text search
- * TODO: Add inventory management integration
- * TODO: Add product import/export functionality (CSV/Excel)
- * TODO: Add product duplication feature
- * TODO: Implement soft delete for products
- * TODO: Add product activity/audit logging
+ * Service for managing products using Drizzle ORM.
  */
 @Injectable()
 export class ProductsService {
-    /** Logger instance for service-level logging */
-    private readonly logger = new Logger(ProductsService.name);
+  private readonly logger = new Logger(ProductsService.name);
 
-    /**
-     * Initializes the products service with required dependencies
-     * 
-     * @param productRepo - Repository for Product entity
-     * @param categoryRepo - Repository for Category entity
-     * @param brandRepo - Repository for Brand entity
-     * @param imageRepo - Repository for ProductImage entity
-     * @param variantRepo - Repository for ProductVariant entity
-     * @param fileStorageService - Service for file upload/deletion operations
-     * @param dataSource - TypeORM DataSource for transaction management
-     */
-    constructor(
-        @InjectRepository(Product)
-        private productRepo: Repository<Product>,
-        @InjectRepository(Category)
-        private categoryRepo: Repository<Category>,
-        @InjectRepository(Brand)
-        private brandRepo: Repository<Brand>,
+  constructor(
+    @Inject(DRIZZLE_DB)
+    private readonly db: NodePgDatabase<typeof schema>,
+    private categoriesService: CategoriesService,
+    private fileStorageService: FileStorageService,
+  ) {}
 
-        @InjectRepository(ProductVariant)
-        private variantRepo: Repository<ProductVariant>,
-        private categoriesService: CategoriesService,
-        private fileStorageService: FileStorageService,
-        private dataSource: DataSource,
-    ) { }
+  /**
+   * Retrieves paginated list of products with advanced filtering.
+   */
+  async findAll(
+    page: number = 1,
+    limit: number = 20,
+    filters: {
+      categoryId?: string;
+      categorySlug?: string;
+      brandId?: string;
+      brandSlug?: string;
+      q?: string;
+      isFeatured?: boolean;
+      minPrice?: number;
+      maxPrice?: number;
+      sortBy?: string;
+      sortOrder?: 'ASC' | 'DESC';
+    } = {},
+  ) {
+    this.logger.log(
+      `Finding products: page=${page}, limit=${limit}, filters=${JSON.stringify(filters)}`,
+    );
 
-    /**
-     * Retrieves paginated list of products with advanced filtering.
-     * 
-     * Supports multiple filter combinations:
-     * - Category/Brand filtering (by ID or slug)
-     * - Price range filtering
-     * - Search by name or description
-     * - Featured products filter
-     * - Custom sorting
-     * 
-     * @param page - Page number (1-indexed, default: 1)
-     * @param limit - Items per page (default: 20, max: 50)
-     * @param filters - Object containing filter criteria
-     * @returns Promise resolving to paginated product results with relations
-     * 
-     * @example
-     * ```typescript
-     * // Get featured products in electronics category
-     * const result = await productsService.findAll(1, 20, {
-     *   categorySlug: 'electronics',
-     *   isFeatured: true,
-     *   minPrice: 1000,
-     *   maxPrice: 50000,
-     *   sortBy: 'price',
-     *   sortOrder: 'ASC'
-     * });
-     * 
-     * // Search products
-     * const searchResult = await productsService.findAll(1, 10, {
-     *   q: 'laptop'
-     * });
-     * ```
-     * 
-     * TODO: Add validation for filter parameters (positive numbers, valid sort fields)
-     * TODO: Implement query builder for more complex filters
-     * TODO: Add faceted search (count products by category/brand/price range)
-     * TODO: Cache popular filter combinations (Redis)
-     * TODO: Add support for multiple category/brand filters (e.g., categoryIds: [])
-     * TODO: Add stock availability filter
-     * TODO: Add discount/sale filter
-     * TODO: Add rating filter (e.g., minRating: 4)
-     * TODO: Optimize query performance with indexes
-     * TODO: Add query execution time logging
-     * TODO: Consider using Elasticsearch for complex search queries
-     * TODO: Add support for custom fields filtering (attributes)
-     */
-    async findAll(
-        page: number = 1,
-        limit: number = 20,
-        filters: {
-            categoryId?: string,
-            categorySlug?: string,
-            brandId?: string,
-            brandSlug?: string,
-            q?: string,
-            isFeatured?: boolean,
-            minPrice?: number,
-            maxPrice?: number,
-            sortBy?: string,
-            sortOrder?: 'ASC' | 'DESC'
-        } = {}
-    ) {
-        this.logger.log(`Finding products: page=${page}, limit=${limit}, filters=${JSON.stringify(filters)}`);
+    if (limit > 50) limit = 50;
+    const offset = (page - 1) * limit;
 
-        // Cap limit to prevent performance issues
-        // TODO: Make max limit configurable
-        if (limit > 50) {
-            this.logger.warn(`Limit ${limit} exceeds maximum, capping to 50`);
-            limit = 50;
-        }
+    const whereConditions: any[] = [isNull(schema.products.deletedAt)];
 
-        // TODO: Validate page and limit are positive integers
-        const skip = (page - 1) * limit;
-
-        const query = this.productRepo.createQueryBuilder('product')
-            .leftJoinAndSelect('product.category', 'category')
-            .leftJoinAndSelect('product.brand', 'brand')
-            .leftJoinAndSelect('product.variants', 'variants');
-
-        // Category filter (including subtree)
-        if (filters.categoryId || filters.categorySlug) {
-            const categoryIds = await this.categoriesService.getSubtreeIds(
-                filters.categoryId,
-                filters.categorySlug
-            );
-            if (categoryIds.length > 0) {
-                query.andWhere('product.categoryId IN (:...categoryIds)', { categoryIds });
-            } else {
-                query.andWhere('product.id = :dummyId', { dummyId: '00000000-0000-0000-0000-000000000000' });
-            }
-        }
-
-        // Brand filter (by ID or slug)
-        if (filters.brandId) {
-            query.andWhere('product.brandId = :brandId', { brandId: filters.brandId });
-        }
-        if (filters.brandSlug) {
-            query.andWhere('brand.slug = :brandSlug', { brandSlug: filters.brandSlug });
-        }
-
-        // Featured filter
-        if (filters.isFeatured !== undefined) {
-            query.andWhere('product.isFeatured = :isFeatured', { isFeatured: filters.isFeatured });
-        }
-
-        // Price range filtering
-        if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
-            query.leftJoin('product.variants', 'v_filter');
-            if (filters.minPrice !== undefined) {
-                query.andWhere('v_filter.price >= :minPrice', { minPrice: filters.minPrice });
-            }
-            if (filters.maxPrice !== undefined) {
-                query.andWhere('v_filter.price <= :maxPrice', { maxPrice: filters.maxPrice });
-            }
-        }
-
-        // Search query (name, description, category, brand, or variant)
-        if (filters.q) {
-            const keywords = filters.q.trim().split(/\s+/);
-            keywords.forEach((keyword, index) => {
-                const paramName = `q_${index}`;
-                query.andWhere(
-                    new Brackets(qb => {
-                        qb.where('product.name ILike :' + paramName, { [paramName]: `%${keyword}%` })
-                            .orWhere('product.description ILike :' + paramName, { [paramName]: `%${keyword}%` })
-                            .orWhere('category.name ILike :' + paramName, { [paramName]: `%${keyword}%` })
-                            .orWhere('brand.name ILike :' + paramName, { [paramName]: `%${keyword}%` })
-                            .orWhere('variants.name ILike :' + paramName, { [paramName]: `%${keyword}%` })
-                            .orWhere('variants.sku ILike :' + paramName, { [paramName]: `%${keyword}%` });
-                    })
-                );
-            });
-        }
-
-        // Sorting
-        if (filters.sortBy) {
-            if (filters.sortBy === 'price') {
-                // Sort by the minimum variant price
-                // Note: This requires a subquery or careful join if we want absolute correctness
-                // For now, sorting by the first variant's price linked in the main join
-                query.leftJoin('product.variants', 'v_sort');
-                query.orderBy('v_sort.price', filters.sortOrder || 'ASC');
-            } else {
-                query.orderBy(`product.${filters.sortBy}`, filters.sortOrder || 'ASC');
-            }
-        } else {
-            query.orderBy('product.isAvailable', 'DESC')
-                .addOrderBy('product.name', 'ASC');
-        }
-
-        const [items, total] = await query
-            .take(limit)
-            .skip(skip)
-            .getManyAndCount();
-
-        this.logger.log(`Found ${total} products, returning page ${page} with ${items.length} items`);
-        return { items, total, page, limit };
+    // Category filter
+    if (filters.categoryId || filters.categorySlug) {
+      const categoryIds = await this.categoriesService.getSubtreeIds(
+        filters.categoryId,
+        filters.categorySlug,
+      );
+      if (categoryIds.length > 0) {
+        whereConditions.push(inArray(schema.products.categoryId, categoryIds));
+      } else {
+        // If category not found, return no results
+        whereConditions.push(
+          eq(schema.products.id, '00000000-0000-0000-0000-000000000000'),
+        );
+      }
     }
 
-    /**
-     * Retrieves a single product by ID with all relations.
-     * 
-     * Loads product with category, brand, images, and variants.
-     * 
-     * @param id - Product ID
-     * @returns Promise resolving to Product entity or null if not found
-     * 
-     * @example
-     * ```typescript
-     * const product = await productsService.findOne('prod_123');
-     * if (!product) throw new NotFoundException('Product not found');
-     * ```
-     * 
-     * TODO: Add caching for frequently accessed products
-     * TODO: Add view count tracking
-     * TODO: Add related products retrieval
-     * TODO: Add stock availability check
-     * TODO: Add discount calculation
-     * TODO: Transform response to exclude internal fields
-     * TODO: Add support for slug-based lookup
-     */
-    findOne(id: string) {
-        this.logger.log(`Finding product by ID: ${id}`);
+    // Brand filter
+    if (filters.brandId) {
+      whereConditions.push(eq(schema.products.brandId, filters.brandId));
+    }
 
-        // TODO: Add error handling for invalid UUID format
-        return this.productRepo.findOne({
-            where: { id },
-            relations: ['category', 'brand', 'variants'],
+    // Featured filter
+    if (filters.isFeatured !== undefined) {
+      whereConditions.push(eq(schema.products.isFeatured, filters.isFeatured));
+    }
+
+    // Search query
+    if (filters.q) {
+      const keyword = `%${filters.q.trim().toLowerCase()}%`;
+      whereConditions.push(
+        or(
+          ilike(schema.products.name, keyword),
+          ilike(schema.products.description, keyword),
+        ),
+      );
+    }
+
+    // Sorting
+    let orderBy: any = desc(schema.products.createdAt);
+    if (filters.sortBy) {
+      const column = (schema.products as any)[filters.sortBy];
+      if (column) {
+        orderBy = filters.sortOrder === 'DESC' ? desc(column) : asc(column);
+      }
+    }
+
+    const items = await this.db.query.products.findMany({
+      where: and(...whereConditions),
+      limit,
+      offset,
+      with: {
+        category: true,
+        brand: true,
+        variants: true,
+      },
+      orderBy: [orderBy],
+    });
+
+    // Get total count
+    const totalResult = await this.db.execute(
+      sql`SELECT count(*) FROM products WHERE "deletedAt" IS NULL`,
+    );
+    const total = parseInt((totalResult.rows[0] as any).count);
+
+    return { items, total, page, limit };
+  }
+
+  /**
+   * Retrieves a single product by ID.
+   */
+  async findOne(id: string) {
+    this.logger.log(`Finding product by ID: ${id}`);
+    return await this.db.query.products.findFirst({
+      where: and(eq(schema.products.id, id), isNull(schema.products.deletedAt)),
+      with: {
+        category: true,
+        brand: true,
+        variants: {
+          where: (v, { isNull }) => isNull(v.deletedAt),
+        },
+      },
+    });
+  }
+
+  /**
+   * Creates a new product with variants.
+   */
+  async createProduct(data: CreateProductDto) {
+    const { variants, ...productData } = data as any;
+    this.logger.log(`Creating product: ${productData.name}`);
+
+    return await this.db.transaction(async (tx) => {
+      const [newProduct] = await tx
+        .insert(schema.products)
+        .values(productData)
+        .returning();
+
+      if (variants && variants.length > 0) {
+        await tx.insert(schema.productVariants).values(
+          variants.map((v: any) => ({
+            ...v,
+            productId: newProduct.id,
+          })),
+        );
+      } else {
+        // Create a default variant
+        await tx.insert(schema.productVariants).values({
+          name: 'Default',
+          price: '0.00',
+          sku: `${newProduct.name.replace(/\s+/g, '-').toUpperCase()}-DEF`,
+          stock: 0,
+          productId: newProduct.id,
+          isDefault: true,
         });
+      }
+
+      return await tx.query.products.findFirst({
+        where: eq(schema.products.id, newProduct.id),
+        with: {
+          category: true,
+          brand: true,
+          variants: true,
+        },
+      });
+    });
+  }
+
+  /**
+   * Updates an existing product.
+   */
+  async updateProduct(id: string, data: UpdateProductDto) {
+    const { variants, brand, category, ...productData } = data as any;
+    this.logger.log(`Updating product: ${id}`);
+
+    return await this.db.transaction(async (tx) => {
+      const existingProduct = await tx.query.products.findFirst({
+        where: eq(schema.products.id, id),
+      });
+
+      if (!existingProduct) {
+        throw new NotFoundException(`Product with ID ${id} not found`);
+      }
+
+      await tx
+        .update(schema.products)
+        .set(productData)
+        .where(eq(schema.products.id, id));
+
+      if (variants) {
+        // Soft delete existing variants first
+        await tx
+          .update(schema.productVariants)
+          .set({ deletedAt: new Date() })
+          .where(eq(schema.productVariants.productId, id));
+
+        if (variants.length > 0) {
+          await tx.insert(schema.productVariants).values(
+            variants.map((v: any) => ({
+              ...v,
+              productId: id,
+            })),
+          );
+        }
+      }
+
+      return await tx.query.products.findFirst({
+        where: eq(schema.products.id, id),
+        with: {
+          category: true,
+          brand: true,
+          variants: {
+            where: (v, { isNull }) => isNull(v.deletedAt),
+          },
+        },
+      });
+    });
+  }
+
+  /**
+   * Soft deletes a product.
+   */
+  async deleteProduct(id: string) {
+    this.logger.log(`Deleting product: ${id}`);
+
+    return await this.db.transaction(async (tx) => {
+      // Soft delete product
+      const [deletedProduct] = await tx
+        .update(schema.products)
+        .set({ deletedAt: new Date() })
+        .where(eq(schema.products.id, id))
+        .returning();
+
+      if (!deletedProduct) {
+        throw new NotFoundException(`Product with ID ${id} not found`);
+      }
+
+      // Soft delete variants
+      await tx
+        .update(schema.productVariants)
+        .set({ deletedAt: new Date() })
+        .where(eq(schema.productVariants.productId, id));
+
+      return { success: true };
+    });
+  }
+
+  /**
+   * Uploads a generic file.
+   */
+  async uploadGenericFile(file: Express.Multer.File) {
+    this.logger.log(`Uploading generic file: ${file.originalname}`);
+    try {
+      const url = await this.fileStorageService.saveFile(
+        file,
+        `media/generic/${Date.now()}`,
+      );
+      return { url };
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(
+        `Failed to upload generic file: ${err.message}`,
+        err.stack,
+      );
+      throw new BadRequestException('Failed to upload file');
     }
+  }
 
-    /**
-     * Creates a new product with optional variants.
-     * 
-     * Validates category and brand existence before creation.
-     * Supports creating product variants in a single operation.
-     * 
-     * @param data - Product creation data including variants
-     * @returns Promise resolving to created Product entity with relations
-     * 
-     * @throws {NotFoundException} If category or brand doesn't exist
-     * @throws {BadRequestException} If product creation fails
-     * 
-     * @example
-     * ```typescript
-     * const product = await productsService.createProduct({
-     *   name: 'Gaming Laptop',
-     *   price: 75000,
-     *   categoryId: 'cat_123',
-     *   brandId: 'brand_456',
-     *   variants: [
-     *     { name: '16GB RAM', sku: 'LAP-16GB', price: 75000, stock: 10 },
-     *     { name: '32GB RAM', sku: 'LAP-32GB', price: 85000, stock: 5 }
-     *   ]
-     * });
-     * ```
-     * 
-     * TODO: Add transaction support to ensure atomic creation (product + variants)
-     * TODO: Add SKU uniqueness validation
-     * TODO: Add slug auto-generation from product name
-     * TODO: Add input sanitization for HTML content
-     * TODO: Validate price is positive
-     * TODO: Add stock validation for variants
-     * TODO: Emit ProductCreatedEvent for analytics/notifications
-     * TODO: Add support for bulk product creation
-     * TODO: Add image upload support during creation
-     * TODO: Add error recovery mechanism
-     * TODO: Add duplicate product name check within category
-     */
-    async createProduct(data: CreateProductDto) {
-        const { variants, ...productData } = data as any;
-
-        this.logger.log(`Creating product: ${productData.name}`);
-
-        // Verify Category existence if provided
-        if (productData.categoryId) {
-            const category = await this.categoryRepo.findOneBy({ id: productData.categoryId });
-            if (!category) {
-                this.logger.warn(`Category ${productData.categoryId} not found`);
-                throw new NotFoundException(`Category with ID ${productData.categoryId} not found`);
-            }
-            productData.category = category; // Set relation
-        }
-
-        // Verify Brand existence if provided
-        if (productData.brandId) {
-            const brand = await this.brandRepo.findOneBy({ id: productData.brandId });
-            if (!brand) {
-                this.logger.warn(`Brand ${productData.brandId} not found`);
-                throw new NotFoundException(`Brand with ID ${productData.brandId} not found`);
-            }
-            productData.brand = brand; // Set relation
-        }
-
-        // TODO: Add transaction wrapper for atomic operation
-        try {
-            // Create product
-            const product = this.productRepo.create(productData);
-            const savedProduct = await this.productRepo.save(product) as any;
-
-            this.logger.log(`Product created with ID: ${savedProduct.id}`);
-
-            // Create variants if provided
-            if (variants && variants.length > 0) {
-                // TODO: Validate variant SKUs are unique
-                const variantEntities = variants.map(v =>
-                    this.variantRepo.create({ ...v, product: savedProduct })
-                );
-                await this.variantRepo.save(variantEntities);
-                this.logger.log(`Created ${variants.length} variants for product ${savedProduct.id}`);
-            } else {
-                // Creates a default variant
-                // Since product doesn't have price, we might want to throw error if variants empty
-                // But for safety, we'll create one with 0 price if somehow it reaches here
-                const defaultVariant = this.variantRepo.create({
-                    name: 'Default',
-                    price: 0,
-                    sku: `${savedProduct.name.replace(/\s+/g, '-').toUpperCase()}-DEF`,
-                    stock: 0,
-                    product: savedProduct
-                });
-                await this.variantRepo.save(defaultVariant);
-                this.logger.log(`Created fallback default variant for product ${savedProduct.id}`);
-            }
-
-            // TODO: Emit ProductCreatedEvent
-            // TODO: Clear related caches
-
-            // Return product with all relations
-            return this.findOne(savedProduct.id);
-        } catch (error) {
-            this.logger.error(`Error creating product: ${error.message}`, error.stack);
-            // TODO: Provide more specific error messages based on error type
-            throw new BadRequestException('Failed to create product. Check data fields.');
-        }
+  /**
+   * Uploads multiple generic files.
+   */
+  async uploadGenericFiles(files: Array<Express.Multer.File>) {
+    this.logger.log(`Uploading ${files.length} generic files`);
+    try {
+      const uploadPromises = files.map((file) =>
+        this.fileStorageService.saveFile(
+          file,
+          `media/generic/${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        ),
+      );
+      const urls = await Promise.all(uploadPromises);
+      return { urls };
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(
+        `Failed to upload generic files: ${err.message}`,
+        err.stack,
+      );
+      throw new BadRequestException('Failed to upload files');
     }
-
-    /**
-     * Updates an existing product with optional variants.
-     * 
-     * Validates category and brand existence before update.
-     * Supports updating product variants (replaces all existing variants).
-     * 
-     * @param id - Product ID to update
-     * @param data - Partial product update data
-     * @returns Promise resolving to updated Product entity
-     * 
-     * @throws {NotFoundException} If product, category, or brand doesn't exist
-     * @throws {BadRequestException} If update fails
-     * 
-     * @example
-     * ```typescript
-     * const updated = await productsService.updateProduct('prod_123', {
-     *   price: 65000,
-     *   isAvailable: true,
-     *   variants: [
-     *     { name: '16GB RAM', sku: 'LAP-16GB-V2', price: 65000, stock: 15 }
-     *   ]
-     * });
-     * ```
-     * 
-     * TODO: Add transaction support for atomic updates
-     * TODO: Implement partial variant updates instead of full replacement
-     * TODO: Add optimistic locking to prevent concurrent update conflicts
-     * TODO: Add validation that price matches variant prices
-     * TODO: Add change tracking/audit logging
-     * TODO: Emit ProductUpdatedEvent
-     * TODO: Clear product cache after update
-     * TODO: Add support for updating only specific fields
-     * TODO: Add slug regeneration on name change
-     * TODO: Validate stock levels for variants
-     */
-    async updateProduct(id: string, data: UpdateProductDto) {
-        const { variants, brand, category, ...productData } = data as any;
-
-        this.logger.log(`Updating product: ${id}`);
-
-        // Check product existence
-        const existingProduct = await this.productRepo.findOneBy({ id });
-        if (!existingProduct) {
-            this.logger.warn(`Product ${id} not found for update`);
-            throw new NotFoundException(`Product with ID ${id} not found`);
-        }
-
-        // Verify Category if updating
-        if (productData.categoryId) {
-            const cat = await this.categoryRepo.findOneBy({ id: productData.categoryId });
-            if (!cat) {
-                this.logger.warn(`Category ${productData.categoryId} not found`);
-                throw new NotFoundException(`Category with ID ${productData.categoryId} not found`);
-            }
-            productData.category = cat;
-        }
-
-        // Verify Brand if updating
-        if (productData.brandId) {
-            const b = await this.brandRepo.findOneBy({ id: productData.brandId });
-            if (!b) {
-                this.logger.warn(`Brand ${productData.brandId} not found`);
-                throw new NotFoundException(`Brand with ID ${productData.brandId} not found`);
-            }
-            productData.brand = b;
-        }
-
-        // TODO: Wrap in transaction
-        try {
-            // Update product
-            await this.productRepo.update(id, productData);
-            this.logger.log(`Product ${id} updated successfully`);
-
-            // Update variants if provided (complete replacement)
-            // TODO: Implement smarter variant updates (add/update/delete individually)
-            if (variants) {
-                // Fetch current variants
-                const currentVariants = await this.variantRepo.find({ where: { product: { id } } });
-                const incomingVariantIds = variants.filter(v => v.id).map(v => v.id);
-
-                // 1. Delete variants that are no longer present and NOT referenced by orders
-                const toDelete = currentVariants.filter(cv => !incomingVariantIds.includes(cv.id));
-                for (const variant of toDelete) {
-                    try {
-                        await this.variantRepo.delete(variant.id);
-                        this.logger.log(`Deleted unused variant ${variant.id}`);
-                    } catch (err) {
-                        this.logger.warn(`Could not delete variant ${variant.id} (likely referenced by orders): ${err.message}`);
-                        // Optionally: Mark as inactive if we had such a field
-                    }
-                }
-
-                // 2. Update existing or Create new variants
-                for (const v of variants) {
-                    if (v.id) {
-                        // Update existing
-                        await this.variantRepo.update(v.id, { ...v, product: { id } });
-                    } else {
-                        // Create new
-                        const newV = this.variantRepo.create({ ...v, product: { id } });
-                        await this.variantRepo.save(newV);
-                    }
-                }
-
-                this.logger.log(`Updated variants for product ${id}`);
-            }
-
-            // TODO: Emit ProductUpdatedEvent
-            // TODO: Invalidate cache
-
-            return this.findOne(id);
-        } catch (error) {
-            this.logger.error(`Error updating product ${id}: ${error.message}`, error.stack);
-            throw new BadRequestException('Failed to update product');
-        }
-    }
-
-    /**
-     * Deletes a product and its associated images.
-     * 
-     * Removes product images from storage before deleting the product.
-     * Cascades deletion to variants and images through database relations.
-     * 
-     * @param id - Product ID to delete
-     * @returns Promise resolving to deletion result
-     * 
-     * @example
-     * ```typescript
-     * await productsService.deleteProduct('prod_123');
-     * ```
-     * 
-     * TODO: Implement soft delete instead of hard delete
-     * TODO: Add transaction support
-     * TODO: Check for existing orders before deletion
-     * TODO: Archive product data before deletion
-     * TODO: Add authorization check (only admin can delete)
-     * TODO: Emit ProductDeletedEvent
-     * TODO: Add bulk delete functionality
-     * TODO: Add undo functionality for accidental deletions
-     * TODO: Add grace period before permanent deletion
-     * TODO: Handle file deletion errors gracefully
-     */
-    async deleteProduct(id: string) {
-        this.logger.log(`Deleting product: ${id}`);
-
-        // TODO: Add transaction wrapper
-
-        // Find product with images
-        const product = await this.findOne(id);
-
-        // TODO: Check if product has any orders before deletion
-
-
-
-        // Soft delete associated variants first
-        await this.variantRepo.softDelete({ product: { id } });
-        this.logger.log(`Soft deleted variants for product ${id}`);
-
-        // Soft delete the product
-        const result = await this.productRepo.softDelete(id);
-
-        this.logger.log(`Product ${id} soft-deleted successfully`);
-
-        // TODO: Emit ProductDeletedEvent
-        // TODO: Clear product cache
-
-        return result;
-    }
-
-
-
-    /**
-     * Uploads a generic file (not associated with a product).
-     * 
-     * Useful for CMS content, descriptions, or temporary uploads.
-     * 
-     * @param file - File to upload
-     * @returns Promise resolving to object with file URL
-     * 
-     * @example
-     * ```typescript
-     * const { url } = await productsService.uploadGenericFile(file);
-     * ```
-     * 
-     * TODO: Add file type validation
-     * TODO: Add file size limits
-     * TODO: Add virus scanning
-     * TODO: Add expiration/cleanup for unused files
-     * TODO: Add metadata tracking (who uploaded, when)
-     * TODO: Consider moving to dedicated FileService
-     */
-    async uploadGenericFile(file: Express.Multer.File) {
-        this.logger.log(`Uploading generic file: ${file.originalname}`);
-
-        // TODO: Validate file type and size
-        // TODO: Generate unique filename to prevent collisions
-
-        try {
-            const url = await this.fileStorageService.saveFile(file, `media/generic/${Date.now()}`);
-            this.logger.log(`Generic file uploaded: ${url}`);
-            return { url };
-        } catch (error) {
-            this.logger.error(`Failed to upload generic file: ${error.message}`, error.stack);
-            throw new BadRequestException('Failed to upload file');
-        }
-    }
-
-    /**
-     * Uploads multiple generic files.
-     * 
-     * Batch upload utility for multiple files.
-     * 
-     * @param files - Array of files to upload
-     * @returns Promise resolving to object with array of file URLs
-     * 
-     * @example
-     * ```typescript
-     * const { urls } = await productsService.uploadGenericFiles(files);
-     * ```
-     * 
-     * TODO: Add concurrent upload limit
-     * TODO: Add progress tracking
-     * TODO: Add partial failure handling (return success + failed)
-     * TODO: Add file type validation
-     * TODO: Add total size limit
-     * TODO: Consider moving to dedicated FileService
-     */
-    async uploadGenericFiles(files: Array<Express.Multer.File>) {
-        this.logger.log(`Uploading ${files.length} generic files`);
-
-        // TODO: Validate total file count and size
-        // TODO: Add concurrent upload limit (e.g., max 5 at a time)
-
-        try {
-            const uploadPromises = files.map(file =>
-                this.fileStorageService.saveFile(
-                    file,
-                    `media/generic/${Date.now()}_${Math.random().toString(36).substring(7)}`
-                )
-            );
-
-            const urls = await Promise.all(uploadPromises);
-            this.logger.log(`Uploaded ${urls.length} files successfully`);
-
-            return { urls };
-        } catch (error) {
-            this.logger.error(`Failed to upload generic files: ${error.message}`, error.stack);
-            throw new BadRequestException('Failed to upload files');
-        }
-    }
+  }
 }

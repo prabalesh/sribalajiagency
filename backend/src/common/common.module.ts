@@ -3,7 +3,7 @@ import { FileStorageService } from './services/file-storage.service';
 
 @Global()
 @Module({
-    providers: [FileStorageService],
-    exports: [FileStorageService],
+  providers: [FileStorageService],
+  exports: [FileStorageService],
 })
-export class CommonModule { }
+export class CommonModule {}

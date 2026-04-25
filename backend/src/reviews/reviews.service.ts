@@ -1,338 +1,185 @@
-import { Injectable, NotFoundException, ForbiddenException, ConflictException, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Review } from './entities/review.entity';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  ConflictException,
+  Logger,
+  Inject,
+} from '@nestjs/common';
+import { eq, and, sql, desc } from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import * as schema from '../database/drizzle/schema';
+import { DRIZZLE_DB } from '../database/drizzle/drizzle.module';
 import { CreateReviewDto } from './dto/create-review.dto';
-import { Product } from 'src/products/entities/product.entity';
 
 /**
- * Service for managing product reviews and ratings.
- * 
- * Handles CRUD operations for reviews, including creation, retrieval,
- * replies from sellers/admins, and deletion. Automatically updates
- * product rating averages when reviews are added or removed.
- * 
- * @remarks
- * - Enforces one review per user per product
- * - Automatically recalculates product ratings
- * - Supports pagination for review listings
- * - Thread-safe rating calculations
- * 
- * @example
- * ```typescript
- * const review = await reviewsService.create(dto, userId);
- * const reviews = await reviewsService.findAllByProduct(productId, 1, 10);
- * ```
- * 
- * TODO: Add transaction support for create/delete operations with rating updates
- * TODO: Add caching layer for product reviews (Redis)
- * TODO: Add support for review moderation/approval workflow
- * TODO: Add review helpful/upvote functionality
- * TODO: Add review reporting/flagging system
- * TODO: Add review media support (images/videos)
- * TODO: Implement soft delete instead of hard delete
+ * Service for managing product reviews using Drizzle ORM.
  */
 @Injectable()
 export class ReviewsService {
-    /** Logger instance for service-level logging */
-    private readonly logger = new Logger(ReviewsService.name);
+  private readonly logger = new Logger(ReviewsService.name);
 
-    /**
-     * Initializes the reviews service with required repositories
-     * 
-     * @param reviewsRepository - Repository for Review entity operations
-     * @param productRepository - Repository for Product entity operations
-     */
-    constructor(
-        @InjectRepository(Review)
-        private reviewsRepository: Repository<Review>,
-        @InjectRepository(Product)
-        private productRepository: Repository<Product>,
-    ) { }
+  constructor(
+    @Inject(DRIZZLE_DB)
+    private readonly db: NodePgDatabase<typeof schema>,
+  ) {}
 
-    /**
-     * Creates a new product review.
-     * 
-     * Validates that:
-     * - Product exists
-     * - User hasn't already reviewed this product
-     * - Rating and comment meet validation criteria
-     * 
-     * After creating the review, automatically recalculates the product's
-     * average rating and review count.
-     * 
-     * @param createReviewDto - Review data (productId, rating, comment)
-     * @param userId - ID of the user creating the review
-     * @returns Promise resolving to the created Review entity
-     * 
-     * @throws {NotFoundException} If product doesn't exist
-     * @throws {ConflictException} If user already reviewed this product
-     * 
-     * @example
-     * ```typescript
-     * const review = await reviewsService.create({
-     *   productId: 'prod_123',
-     *   rating: 5,
-     *   comment: 'Excellent product!'
-     * }, 'user_456');
-     * ```
-     * 
-     * TODO: Verify user actually purchased the product before allowing review
-     * TODO: Add transaction to ensure review creation and rating update are atomic
-     * TODO: Add profanity filter for review comments
-     * TODO: Add rate limiting to prevent review spam
-     * TODO: Emit event for review notifications (notify seller/admin)
-     * TODO: Add review verification badge for verified purchases
-     * TODO: Consider adding review edit functionality within time window
-     */
-    async create(createReviewDto: CreateReviewDto, userId: string) {
-        const { productId, rating, comment } = createReviewDto;
+  /**
+   * Creates a new product review and updates product rating.
+   */
+  async create(createReviewDto: CreateReviewDto, userId: string) {
+    const { productId, rating, comment } = createReviewDto;
+    this.logger.log(`User ${userId} creating review for product ${productId}`);
 
-        this.logger.log(`User ${userId} attempting to create review for product ${productId}`);
+    return await this.db.transaction(async (tx) => {
+      // Validate product exists
+      const product = await tx.query.products.findFirst({
+        where: eq(schema.products.id, productId),
+      });
+      if (!product) {
+        throw new NotFoundException('Product not found');
+      }
 
-        // Validate product exists
-        const product = await this.productRepository.findOne({ where: { id: productId } });
-        if (!product) {
-            this.logger.warn(`Product ${productId} not found for review creation`);
-            throw new NotFoundException('Product not found');
-        }
+      // Check for duplicate review
+      const existingReview = await tx.query.reviews.findFirst({
+        where: and(
+          eq(schema.reviews.userId, userId),
+          eq(schema.reviews.productId, productId),
+        ),
+      });
 
-        // Check for duplicate review from same user
-        const existingReview = await this.reviewsRepository.findOne({
-            where: { userId: userId, productId },
-        });
+      if (existingReview) {
+        throw new ConflictException('You have already reviewed this product');
+      }
 
-        if (existingReview) {
-            this.logger.warn(`User ${userId} attempted to create duplicate review for product ${productId}`);
-            throw new ConflictException('You have already reviewed this product');
-        }
+      const [review] = await tx
+        .insert(schema.reviews)
+        .values({
+          rating,
+          comment,
+          userId,
+          productId,
+        })
+        .returning();
 
-        // Create and save review
-        const review = this.reviewsRepository.create({
-            rating,
-            comment,
-            userId: userId,
-            productId,
-        });
+      // Update product rating
+      await this.updateProductRating(tx, productId);
 
-        await this.reviewsRepository.save(review);
-        this.logger.log(`Review created successfully: ${review.id}`);
+      return review;
+    });
+  }
 
-        // Update product rating asynchronously
-        // TODO: Move to transaction to ensure atomicity
-        await this.updateProductRating(productId);
+  /**
+   * Retrieves paginated reviews for a product.
+   */
+  async findAllByProduct(
+    productId: string,
+    page: number = 1,
+    limit: number = 5,
+  ) {
+    this.logger.log(`Fetching reviews for product ${productId}`);
 
-        // TODO: Emit ReviewCreatedEvent here
-        // TODO: Send notification to product owner
+    const offset = (page - 1) * limit;
 
-        return review;
+    const items = await this.db.query.reviews.findMany({
+      where: eq(schema.reviews.productId, productId),
+      limit,
+      offset,
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+      },
+      orderBy: [desc(schema.reviews.createdAt)],
+    });
+
+    const totalResult = await this.db.execute(
+      sql`SELECT count(*) FROM reviews WHERE "productId" = ${productId}`,
+    );
+    const total = parseInt((totalResult.rows[0] as any).count);
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  /**
+   * Adds a seller reply to a review.
+   */
+  async replyToReview(id: string, reply: string) {
+    this.logger.log(`Adding reply to review ${id}`);
+
+    const [updatedReview] = await this.db
+      .update(schema.reviews)
+      .set({
+        reply,
+        repliedAt: new Date(),
+      })
+      .where(eq(schema.reviews.id, id))
+      .returning();
+
+    if (!updatedReview) {
+      throw new NotFoundException('Review not found');
     }
 
-    /**
-     * Retrieves paginated reviews for a specific product.
-     * 
-     * Returns reviews in descending order (newest first) with user
-     * information populated. Supports pagination for performance.
-     * 
-     * @param productId - ID of the product to fetch reviews for
-     * @param page - Page number (1-indexed, default: 1)
-     * @param limit - Number of reviews per page (default: 5)
-     * @returns Promise resolving to paginated review results
-     * 
-     * @example
-     * ```typescript
-     * const result = await reviewsService.findAllByProduct('prod_123', 1, 10);
-     * // Returns: { items: [...], total: 45, page: 1, limit: 10, totalPages: 5 }
-     * ```
-     * 
-     * TODO: Add filtering by rating (e.g., show only 5-star reviews)
-     * TODO: Add sorting options (helpful, rating, date)
-     * TODO: Add search functionality for review content
-     * TODO: Cache results for popular products
-     * TODO: Add average rating breakdown (5-star: 60%, 4-star: 20%, etc.)
-     * TODO: Add verified purchase indicator in response
-     * TODO: Add review media (images) in response
-     * TODO: Consider using cursor-based pagination for better performance
-     */
-    async findAllByProduct(productId: string, page: number = 1, limit: number = 5) {
-        this.logger.log(`Fetching reviews for product ${productId}, page ${page}, limit ${limit}`);
+    return updatedReview;
+  }
 
-        // TODO: Add validation for page and limit parameters (max limit, positive numbers)
-        
-        const [items, total] = await this.reviewsRepository.findAndCount({
-            where: { productId },
-            order: { createdAt: 'DESC' },
-            relations: ['user'], // TODO: Select only necessary user fields to avoid data leakage
-            skip: (page - 1) * limit,
-            take: limit,
-        });
+  /**
+   * Deletes a review and updates product rating.
+   */
+  async remove(id: string, userId: string) {
+    this.logger.log(`User ${userId} deleting review ${id}`);
 
-        this.logger.log(`Found ${total} total reviews for product ${productId}`);
+    return await this.db.transaction(async (tx) => {
+      const review = await tx.query.reviews.findFirst({
+        where: eq(schema.reviews.id, id),
+      });
 
-        return {
-            items,
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit)
-        };
-    }
+      if (!review) {
+        throw new NotFoundException('Review not found');
+      }
 
-    /**
-     * Adds a seller/admin reply to an existing review.
-     * 
-     * Allows sellers or admins to respond to customer reviews.
-     * Records the reply timestamp for tracking.
-     * 
-     * @param id - ID of the review to reply to
-     * @param reply - Reply message text
-     * @returns Promise resolving to updated Review entity
-     * 
-     * @throws {NotFoundException} If review doesn't exist
-     * 
-     * @example
-     * ```typescript
-     * await reviewsService.replyToReview(
-     *   'review_123',
-     *   'Thank you for your feedback! We appreciate your business.'
-     * );
-     * ```
-     * 
-     * TODO: Add authorization check (only seller/admin can reply)
-     * TODO: Add validation for reply content length and format
-     * TODO: Add support for editing/deleting replies
-     * TODO: Track who replied (seller vs admin) for audit trail
-     * TODO: Emit notification to reviewer when reply is added
-     * TODO: Add profanity filter for replies
-     * TODO: Consider limiting reply length (e.g., 500 chars)
-     * TODO: Add support for multiple replies/conversation thread
-     */
-    async replyToReview(id: string, reply: string) {
-        this.logger.log(`Adding reply to review ${id}`);
+      if (review.userId !== userId) {
+        throw new ForbiddenException('You can only delete your own reviews');
+      }
 
-        const review = await this.reviewsRepository.findOne({ where: { id } });
-        if (!review) {
-            this.logger.warn(`Review ${id} not found for reply`);
-            throw new NotFoundException('Review not found');
-        }
+      await tx.delete(schema.reviews).where(eq(schema.reviews.id, id));
 
-        // TODO: Check if review already has a reply and handle accordingly
-        // TODO: Validate reply is not empty after trimming whitespace
+      // Update product rating
+      await this.updateProductRating(tx, review.productId);
 
-        review.reply = reply;
-        review.repliedAt = new Date();
+      return { success: true };
+    });
+  }
 
-        const updated = await this.reviewsRepository.save(review);
-        this.logger.log(`Reply added successfully to review ${id}`);
+  /**
+   * Recalculates and updates product rating.
+   */
+  private async updateProductRating(tx: any, productId: string) {
+    const statsResult = await tx.execute(
+      sql`SELECT COUNT(*), AVG(rating) FROM reviews WHERE "productId" = ${productId}`,
+    );
 
-        // TODO: Emit ReviewRepliedEvent
-        // TODO: Send notification to review author
+    const stats = statsResult.rows[0];
+    const count = parseInt(stats.count);
+    const average =
+      count > 0 ? parseFloat(parseFloat(stats.avg).toFixed(1)) : 0;
 
-        return updated;
-    }
-
-    /**
-     * Deletes a review.
-     * 
-     * Only allows users to delete their own reviews. Admin deletion
-     * should be handled separately with appropriate guards.
-     * 
-     * After deletion, automatically recalculates the product's rating.
-     * 
-     * @param id - ID of the review to delete
-     * @param userId - ID of the user attempting deletion
-     * 
-     * @throws {NotFoundException} If review doesn't exist
-     * @throws {ForbiddenException} If user tries to delete another user's review
-     * 
-     * @example
-     * ```typescript
-     * await reviewsService.remove('review_123', 'user_456');
-     * ```
-     * 
-     * TODO: Implement soft delete instead of hard delete (preserve data)
-     * TODO: Add transaction to ensure delete and rating update are atomic
-     * TODO: Add admin override capability (separate method or isAdmin check)
-     * TODO: Add audit logging for review deletions
-     * TODO: Add grace period for deletion (e.g., can only delete within 24h)
-     * TODO: Emit ReviewDeletedEvent for analytics
-     * TODO: Archive deleted reviews instead of removing completely
-     * TODO: Add confirmation/reason for deletion
-     */
-    async remove(id: string, userId: string) {
-        this.logger.log(`User ${userId} attempting to delete review ${id}`);
-
-        const review = await this.reviewsRepository.findOne({ where: { id } });
-
-        if (!review) {
-            this.logger.warn(`Review ${id} not found for deletion`);
-            throw new NotFoundException('Review not found');
-        }
-
-        // Authorization check - only owner can delete
-        // TODO: Add admin/moderator override capability
-        if (review.userId !== userId) {
-            this.logger.warn(`User ${userId} attempted to delete review ${id} owned by ${review.userId}`);
-            throw new ForbiddenException('You can only delete your own reviews');
-        }
-
-        const productId = review.productId;
-
-        // TODO: Use soft delete instead
-        await this.reviewsRepository.remove(review);
-        this.logger.log(`Review ${id} deleted successfully`);
-
-        // Update product rating after deletion
-        // TODO: Move to transaction to ensure atomicity
-        await this.updateProductRating(productId);
-
-        // TODO: Emit ReviewDeletedEvent
-        // TODO: Notify product owner of deletion
-    }
-
-    /**
-     * Recalculates and updates a product's average rating and review count.
-     * 
-     * Called automatically after review creation or deletion.
-     * Computes average rating to 1 decimal place.
-     * 
-     * @param productId - ID of the product to update
-     * @private
-     * 
-     * @remarks
-     * This is a critical operation that affects product display and sorting.
-     * Should be executed within a transaction with the calling operation.
-     * 
-     * TODO: Optimize with aggregation query instead of loading all reviews
-     * TODO: Add error handling and retry logic
-     * TODO: Add caching for frequently updated products
-     * TODO: Consider using database triggers for real-time updates
-     * TODO: Add weighted ratings (verified purchases count more)
-     * TODO: Add time-decay for ratings (recent reviews weighted higher)
-     * TODO: Add transaction support to prevent race conditions
-     * TODO: Add logging for rating changes
-     */
-    private async updateProductRating(productId: string) {
-        this.logger.debug(`Updating rating for product ${productId}`);
-
-        // TODO: Replace with aggregation query for better performance
-        // Example: SELECT AVG(rating), COUNT(*) FROM reviews WHERE productId = ?
-        const reviews = await this.reviewsRepository.find({ where: { productId } });
-        const count = reviews.length;
-
-        if (count === 0) {
-            await this.productRepository.update(productId, { rating: 0, reviewCount: 0 });
-            this.logger.debug(`Product ${productId} rating reset to 0 (no reviews)`);
-            return;
-        }
-
-        const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
-        const average = parseFloat((sum / count).toFixed(1)); // Keep 1 decimal place
-
-        await this.productRepository.update(productId, { rating: average, reviewCount: count });
-        this.logger.debug(`Product ${productId} rating updated to ${average} (${count} reviews)`);
-
-        // TODO: Invalidate product cache after rating update
-        // TODO: Emit ProductRatingUpdatedEvent for real-time updates
-    }
+    await tx
+      .update(schema.products)
+      .set({
+        rating: average.toString(),
+        reviewCount: count,
+      })
+      .where(eq(schema.products.id, productId));
+  }
 }

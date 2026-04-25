@@ -1,198 +1,264 @@
-import { IsString, IsOptional, IsEnum, IsBoolean, IsArray, ValidateNested, IsUrl, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsBoolean,
+  IsArray,
+  ValidateNested,
+  IsUrl,
+  IsNotEmpty,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class HomeSlideDto {
-    @IsString()
-    @IsNotEmpty()
-    title: string;
+  @IsString()
+  @IsNotEmpty()
+  title: string;
 
-    @IsString()
-    @IsOptional()
-    subtitle?: string;
+  @IsString()
+  @IsOptional()
+  subtitle?: string;
 
-    @IsString()
-    @IsOptional()
-    badge?: string;
+  @IsString()
+  @IsOptional()
+  badge?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    image: string;
+  @IsString()
+  @IsNotEmpty()
+  image: string;
 
-    @IsString()
-    @IsOptional()
-    link?: string;
+  @IsString()
+  @IsOptional()
+  link?: string;
 
-    @IsString()
-    @IsOptional()
-    linkText?: string;
+  @IsString()
+  @IsOptional()
+  linkText?: string;
 
-    @IsOptional()
-    @IsEnum(['top-left', 'top-center', 'top-right', 'center-left', 'center', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'])
-    alignment?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+  @IsOptional()
+  @IsEnum([
+    'top-left',
+    'top-center',
+    'top-right',
+    'center-left',
+    'center',
+    'center-right',
+    'bottom-left',
+    'bottom-center',
+    'bottom-right',
+  ])
+  alignment?:
+    | 'top-left'
+    | 'top-center'
+    | 'top-right'
+    | 'center-left'
+    | 'center'
+    | 'center-right'
+    | 'bottom-left'
+    | 'bottom-center'
+    | 'bottom-right';
 }
 
 export class SocialLinkDto {
-    @IsString()
-    @IsNotEmpty()
-    platform: string;
+  @IsString()
+  @IsNotEmpty()
+  platform: string;
 
-    @IsUrl()
-    @IsNotEmpty()
-    url: string;
+  @IsUrl()
+  @IsNotEmpty()
+  url: string;
 
-    @IsString()
-    @IsNotEmpty()
-    icon: string;
+  @IsString()
+  @IsNotEmpty()
+  icon: string;
 }
 
 export class UpdateHeroDto {
-    @IsEnum(['classic', 'carousel', 'split', 'overlay', 'classic-carousel'])
-    heroType: 'classic' | 'carousel' | 'split' | 'overlay' | 'classic-carousel';
+  @IsEnum(['classic', 'carousel', 'split', 'overlay', 'classic-carousel'])
+  heroType: 'classic' | 'carousel' | 'split' | 'overlay' | 'classic-carousel';
 
-    @IsOptional()
-    @IsEnum(['top-left', 'top-center', 'top-right', 'center-left', 'center', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'])
-    heroContentAlignment?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+  @IsOptional()
+  @IsEnum([
+    'top-left',
+    'top-center',
+    'top-right',
+    'center-left',
+    'center',
+    'center-right',
+    'bottom-left',
+    'bottom-center',
+    'bottom-right',
+  ])
+  heroContentAlignment?:
+    | 'top-left'
+    | 'top-center'
+    | 'top-right'
+    | 'center-left'
+    | 'center'
+    | 'center-right'
+    | 'bottom-left'
+    | 'bottom-center'
+    | 'bottom-right';
 
-    @IsOptional()
-    @IsString()
-    heroBadge?: string;
+  @IsOptional()
+  @IsString()
+  heroBadge?: string;
 
-    @IsOptional()
-    @IsString()
-    heroTitle?: string;
+  @IsOptional()
+  @IsString()
+  heroTitle?: string;
 
-    @IsOptional()
-    @IsString()
-    heroSubtitle?: string;
+  @IsOptional()
+  @IsString()
+  heroSubtitle?: string;
 
-    @IsOptional()
-    @IsString()
-    heroImage?: string;
+  @IsOptional()
+  @IsString()
+  heroImage?: string;
 
-    @IsOptional()
-    @IsString()
-    heroLink?: string;
+  @IsOptional()
+  @IsString()
+  heroLink?: string;
 
-    @IsOptional()
-    @IsString()
-    heroLinkText?: string;
+  @IsOptional()
+  @IsString()
+  heroLinkText?: string;
 
-    @IsOptional()
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => HomeSlideDto)
-    heroSlides?: HomeSlideDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => HomeSlideDto)
+  heroSlides?: HomeSlideDto[];
 }
 
 export class UpdateAboutDto {
-    @IsOptional()
-    @IsString()
-    aboutTitle?: string;
+  @IsOptional()
+  @IsString()
+  aboutTitle?: string;
 
-    @IsOptional()
-    @IsString()
-    aboutContent?: string;
+  @IsOptional()
+  @IsString()
+  aboutContent?: string;
 
-    @IsOptional()
-    @IsString()
-    aboutImage?: string;
+  @IsOptional()
+  @IsString()
+  aboutImage?: string;
 }
 
 export class UpdateSocialLinksDto {
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => SocialLinkDto)
-    socialLinks: SocialLinkDto[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SocialLinkDto)
+  socialLinks: SocialLinkDto[];
 }
 
 export class UpdateVisibilityDto {
-    @IsOptional()
-    @IsBoolean()
-    showCategories?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  showCategories?: boolean;
 
-    @IsOptional()
-    @IsBoolean()
-    showFeatured?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  showFeatured?: boolean;
 
-    @IsOptional()
-    @IsBoolean()
-    showBrands?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  showBrands?: boolean;
 
-    @IsOptional()
-    @IsBoolean()
-    showTrustMarkers?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  showTrustMarkers?: boolean;
 }
 
 export class UpdateHomeCmsDto {
-    @IsOptional()
-    @IsEnum(['classic', 'carousel', 'split', 'overlay', 'classic-carousel'])
-    heroType?: 'classic' | 'carousel' | 'split' | 'overlay' | 'classic-carousel';
+  @IsOptional()
+  @IsEnum(['classic', 'carousel', 'split', 'overlay', 'classic-carousel'])
+  heroType?: 'classic' | 'carousel' | 'split' | 'overlay' | 'classic-carousel';
 
-    @IsOptional()
-    @IsString()
-    heroBadge?: string;
+  @IsOptional()
+  @IsString()
+  heroBadge?: string;
 
-    @IsOptional()
-    @IsString()
-    heroTitle?: string;
+  @IsOptional()
+  @IsString()
+  heroTitle?: string;
 
-    @IsOptional()
-    @IsString()
-    heroSubtitle?: string;
+  @IsOptional()
+  @IsString()
+  heroSubtitle?: string;
 
-    @IsOptional()
-    @IsString()
-    heroImage?: string;
+  @IsOptional()
+  @IsString()
+  heroImage?: string;
 
-    @IsOptional()
-    @IsString()
-    heroLink?: string;
+  @IsOptional()
+  @IsString()
+  heroLink?: string;
 
-    @IsOptional()
-    @IsString()
-    heroLinkText?: string;
+  @IsOptional()
+  @IsString()
+  heroLinkText?: string;
 
-    @IsOptional()
-    @IsEnum(['top-left', 'top-center', 'top-right', 'center-left', 'center', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'])
-    heroContentAlignment?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+  @IsOptional()
+  @IsEnum([
+    'top-left',
+    'top-center',
+    'top-right',
+    'center-left',
+    'center',
+    'center-right',
+    'bottom-left',
+    'bottom-center',
+    'bottom-right',
+  ])
+  heroContentAlignment?:
+    | 'top-left'
+    | 'top-center'
+    | 'top-right'
+    | 'center-left'
+    | 'center'
+    | 'center-right'
+    | 'bottom-left'
+    | 'bottom-center'
+    | 'bottom-right';
 
-    @IsOptional()
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => HomeSlideDto)
-    heroSlides?: HomeSlideDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => HomeSlideDto)
+  heroSlides?: HomeSlideDto[];
 
-    @IsOptional()
-    @IsBoolean()
-    showCategories?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  showCategories?: boolean;
 
-    @IsOptional()
-    @IsBoolean()
-    showFeatured?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  showFeatured?: boolean;
 
-    @IsOptional()
-    @IsBoolean()
-    showBrands?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  showBrands?: boolean;
 
-    @IsOptional()
-    @IsBoolean()
-    showTrustMarkers?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  showTrustMarkers?: boolean;
 
-    @IsOptional()
-    @IsString()
-    aboutTitle?: string;
+  @IsOptional()
+  @IsString()
+  aboutTitle?: string;
 
-    @IsOptional()
-    @IsString()
-    aboutContent?: string;
+  @IsOptional()
+  @IsString()
+  aboutContent?: string;
 
-    @IsOptional()
-    @IsString()
-    aboutImage?: string;
+  @IsOptional()
+  @IsString()
+  aboutImage?: string;
 
-    @IsOptional()
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => SocialLinkDto)
-    socialLinks?: SocialLinkDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SocialLinkDto)
+  socialLinks?: SocialLinkDto[];
 }

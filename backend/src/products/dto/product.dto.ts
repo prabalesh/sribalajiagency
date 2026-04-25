@@ -1,159 +1,168 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsBoolean, IsArray, Min, IsUUID, ValidateNested, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+  IsArray,
+  Min,
+  IsUUID,
+  ValidateNested,
+  IsObject,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ProductVariantDto {
-    @IsOptional()
-    @IsUUID()
-    id?: string;
+  @IsOptional()
+  @IsUUID()
+  id?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    name: string;
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-    @IsNumber()
-    @Min(0)
-    price: number;
+  @IsNumber()
+  @Min(0)
+  price: number;
 
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    comparisonPrice?: number;
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  comparisonPrice?: number;
 
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    stock?: number;
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  stock?: number;
 
-    @IsOptional()
-    @IsString()
-    image?: string;
+  @IsOptional()
+  @IsString()
+  image?: string;
 
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    images?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
 
-    @IsOptional()
-    @IsString()
-    description?: string;
+  @IsOptional()
+  @IsString()
+  description?: string;
 
-    @IsOptional()
-    @IsUUID()
-    variantTypeId?: string;
+  @IsOptional()
+  @IsUUID()
+  variantTypeId?: string;
 
-    @IsOptional()
-    @IsBoolean()
-    isDefault?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  isDefault?: boolean;
 }
 
 export class CreateProductDto {
-    @IsString()
-    @IsNotEmpty({ message: 'Product name is required' })
-    name: string;
+  @IsString()
+  @IsNotEmpty({ message: 'Product name is required' })
+  name: string;
 
-    @IsString()
-    @IsNotEmpty({ message: 'Description is required' })
-    description: string;
+  @IsString()
+  @IsNotEmpty({ message: 'Description is required' })
+  description: string;
 
-    @IsOptional()
-    @IsBoolean()
-    isAvailable?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  isAvailable?: boolean;
 
+  @IsOptional()
+  @IsBoolean()
+  isShowcaseOnly?: boolean;
 
-    @IsOptional()
-    @IsBoolean()
-    isShowcaseOnly?: boolean;
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  allowedPaymentMethods?: string[];
 
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    allowedPaymentMethods?: string[];
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  gstRate?: number;
 
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    gstRate?: number;
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 
-    @IsOptional()
-    @IsUUID()
-    categoryId?: string;
+  @IsOptional()
+  @IsUUID()
+  brandId?: string;
 
-    @IsOptional()
-    @IsUUID()
-    brandId?: string;
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
 
-    @IsOptional()
-    @IsBoolean()
-    isFeatured?: boolean;
+  @IsOptional()
+  @IsString()
+  warranty?: string;
 
-    @IsOptional()
-    @IsString()
-    warranty?: string;
+  @IsOptional()
+  @IsObject()
+  specifications?: Record<string, any>;
 
-    @IsOptional()
-    @IsObject()
-    specifications?: Record<string, any>;
-
-    // Add other fields as necessary based on entity
-    @IsOptional()
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => ProductVariantDto)
-    variants?: ProductVariantDto[];
+  // Add other fields as necessary based on entity
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductVariantDto)
+  variants?: ProductVariantDto[];
 }
 
 export class UpdateProductDto {
-    @IsOptional()
-    @IsString()
-    @IsNotEmpty()
-    name?: string;
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  name?: string;
 
-    @IsOptional()
-    @IsString()
-    description?: string;
+  @IsOptional()
+  @IsString()
+  description?: string;
 
-    @IsOptional()
-    @IsBoolean()
-    isAvailable?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  isAvailable?: boolean;
 
+  @IsOptional()
+  @IsBoolean()
+  isShowcaseOnly?: boolean;
 
-    @IsOptional()
-    @IsBoolean()
-    isShowcaseOnly?: boolean;
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  allowedPaymentMethods?: string[];
 
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    allowedPaymentMethods?: string[];
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  gstRate?: number;
 
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    gstRate?: number;
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 
-    @IsOptional()
-    @IsUUID()
-    categoryId?: string;
+  @IsOptional()
+  @IsUUID()
+  brandId?: string;
 
-    @IsOptional()
-    @IsUUID()
-    brandId?: string;
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
 
-    @IsOptional()
-    @IsBoolean()
-    isFeatured?: boolean;
+  @IsOptional()
+  @IsString()
+  warranty?: string;
 
-    @IsOptional()
-    @IsString()
-    warranty?: string;
+  @IsOptional()
+  @IsObject()
+  specifications?: Record<string, any>;
 
-    @IsOptional()
-    @IsObject()
-    specifications?: Record<string, any>;
-
-    @IsOptional()
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => ProductVariantDto)
-    variants?: ProductVariantDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductVariantDto)
+  variants?: ProductVariantDto[];
 }
