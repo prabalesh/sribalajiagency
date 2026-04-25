@@ -29,7 +29,9 @@ jobs:
 
       - name: Build backend
         working-directory: ./backend
-        run: npm run build
+        run: |
+          npm run build
+          ls -R dist
 
       # Clean server before deploy
       - name: Clean server
@@ -41,6 +43,11 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             mkdir -p ~/sribalajiagency/backend
+            # Fix DB_NAME if it's still pointing to sba
+            if [ -f ~/sribalajiagency/backend/.env ]; then
+              sed -i 's/DB_NAME=sba/DB_NAME=store/g' ~/sribalajiagency/backend/.env
+              sed -i 's/DB_USER=neo/DB_USER=sribala/g' ~/sribalajiagency/backend/.env
+            fi
             rm -rf ~/sribalajiagency/backend/dist
 
       # Deploy Backend
@@ -66,16 +73,16 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/sribalajiagency/backend
-            echo "📂 Current directory: $(pwd)"
+            echo "📂 Files in dist:"
+            ls -R dist || echo "❌ dist folder not found!"
+            
             echo "📦 Installing dependencies..."
             npm install --production --force
             
             echo "🚀 Running migrations..."
-            # Run migration and capture exit code
             npm run db:migrate:prod
             
             echo "🔄 Restarting PM2..."
-            # Check if process exists, if so reload, otherwise start
             pm2 describe sribalajiagency-backend > /dev/null
             if [ $? -eq 0 ]; then
               echo "Reloading existing process..."
