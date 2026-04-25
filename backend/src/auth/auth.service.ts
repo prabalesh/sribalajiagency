@@ -73,6 +73,36 @@ export class AuthService {
   }
 
   /**
+   * Helper to flatten Drizzle's nested relation structure for the frontend.
+   */
+  private flattenUser(user: any) {
+    if (!user) return null;
+
+    const { password, refreshToken, roles, ...userData } = user;
+
+    // Flatten roles and permissions
+    const flattenedRoles =
+      roles?.map((ur: any) => {
+        const role = ur.role;
+        if (!role) return null;
+
+        const flattenedPermissions =
+          role.permissions?.map((rp: any) => rp.permission).filter(Boolean) ||
+          [];
+
+        return {
+          ...role,
+          permissions: flattenedPermissions,
+        };
+      }).filter(Boolean) || [];
+
+    return {
+      ...userData,
+      roles: flattenedRoles,
+    };
+  }
+
+  /**
    * Registers a new user account.
    */
   async signup(dto: AuthSignupDto) {
@@ -109,8 +139,7 @@ export class AuthService {
         .where(eq(schema.users.id, newUser.id));
 
       this.logger.log(`User registered successfully: ${email}`);
-      const { password, refreshToken, ...userWithoutSensitiveData } = newUser;
-      return { user: userWithoutSensitiveData, ...tokens };
+      return { user: this.flattenUser(newUser), ...tokens };
     });
   }
 
@@ -159,10 +188,8 @@ export class AuthService {
         .set({ refreshToken: refreshTokenHash })
         .where(eq(schema.users.id, user.id));
 
-      const { password, refreshToken, ...userWithoutSensitiveData } = user;
       this.logger.log(`Login successful: ${email}`);
-
-      return { user: userWithoutSensitiveData, ...tokens };
+      return { user: this.flattenUser(user), ...tokens };
     });
   }
 
@@ -194,8 +221,7 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    const { password, refreshToken, ...userWithoutSensitiveData } = user;
-    return userWithoutSensitiveData;
+    return this.flattenUser(user);
   }
 
   /**
@@ -206,6 +232,21 @@ export class AuthService {
 
     const user = await this.db.query.users.findFirst({
       where: eq(schema.users.id, userId),
+      with: {
+        roles: {
+          with: {
+            role: {
+              with: {
+                permissions: {
+                  with: {
+                    permission: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!user || !user.refreshToken) {
@@ -231,8 +272,7 @@ export class AuthService {
         .where(eq(schema.users.id, user.id));
 
       this.logger.log(`Tokens refreshed successfully for user ${userId}`);
-      const { password, refreshToken, ...userWithoutSensitiveData } = user;
-      return { user: userWithoutSensitiveData, ...tokens };
+      return { user: this.flattenUser(user), ...tokens };
     });
   }
 
@@ -261,7 +301,12 @@ export class AuthService {
     const totalResult = await this.db.execute(sql`SELECT count(*) FROM users`);
     const total = parseInt((totalResult.rows[0] as any).count);
 
-    return { items: usersList, total, page, limit };
+    return {
+      items: usersList.map((u) => this.flattenUser(u)),
+      total,
+      page,
+      limit,
+    };
   }
 
   /**
@@ -307,7 +352,7 @@ export class AuthService {
         }
       }
 
-      return await tx.query.users.findFirst({
+      const updatedUser = await tx.query.users.findFirst({
         where: eq(schema.users.id, id),
         with: {
           roles: {
@@ -317,6 +362,8 @@ export class AuthService {
           },
         },
       });
+
+      return this.flattenUser(updatedUser);
     });
   }
 
