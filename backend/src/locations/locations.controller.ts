@@ -16,9 +16,10 @@ import { UpdateLocationRestrictionDto } from './dto/update-location-restriction.
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 
+// add docs
 @Controller('locations')
 export class LocationsController {
-  constructor(private locationsService: LocationsService) {}
+  constructor(private locationsService: LocationsService) { }
 
   @Get()
   findAll() {
