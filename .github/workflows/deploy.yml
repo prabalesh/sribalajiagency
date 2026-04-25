@@ -55,8 +55,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: "backend/dist/**,backend/package.json,backend/package-lock.json,backend/src/database/drizzle/migrations/**,backend/scripts/**"
-          target: "/home/${{ secrets.SSH_USERNAME }}/sribalajiagency/"
-          strip_components: 0
+          target: "/home/${{ secrets.SSH_USERNAME }}/sribalajiagency/backend/"
+          strip_components: 1
           overwrite: true
 
       # Restart Services
