@@ -43,11 +43,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             mkdir -p ~/sribalajiagency/backend
-            # Fix DB_NAME if it's still pointing to sba
-            if [ -f ~/sribalajiagency/backend/.env ]; then
-              sed -i 's/DB_NAME=sba/DB_NAME=store/g' ~/sribalajiagency/backend/.env
-              sed -i 's/DB_USER=neo/DB_USER=sribala/g' ~/sribalajiagency/backend/.env
-            fi
+            # Just clear the dist folder to ensure a fresh deployment
             rm -rf ~/sribalajiagency/backend/dist
 
       # Deploy Backend
