@@ -85,7 +85,7 @@ jobs:
               pm2 reload sribalajiagency-backend --update-env
             else
               echo "Starting new process..."
-              pm2 start dist/main.js --name sribalajiagency-backend --node-args="--trace-warnings"
+              pm2 start dist/src/main.js --name sribalajiagency-backend --node-args="--trace-warnings"
             fi
             
             pm2 save

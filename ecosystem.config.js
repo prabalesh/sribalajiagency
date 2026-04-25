@@ -1,7 +1,7 @@
 module.exports = {
     apps: [{
         name: 'sribalaji-backend',
-        script: './backend/dist/main.js',
+        script: './backend/dist/src/main.js',
         instances: 1, // Or 'max' to use all CPU cores
         autorestart: true,
         watch: false,
