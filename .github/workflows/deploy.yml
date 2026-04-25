@@ -66,9 +66,24 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/sribalajiagency/backend
-            rm -rf node_modules
+            echo "📂 Current directory: $(pwd)"
+            echo "📦 Installing dependencies..."
             npm install --production --force
+            
+            echo "🚀 Running migrations..."
+            # Run migration and capture exit code
             npm run db:migrate:prod
-            pm2 delete sribalajiagency-backend || true
-            pm2 start dist/main.js --name sribalajiagency-backend --node-args="--trace-warnings"
+            
+            echo "🔄 Restarting PM2..."
+            # Check if process exists, if so reload, otherwise start
+            pm2 describe sribalajiagency-backend > /dev/null
+            if [ $? -eq 0 ]; then
+              echo "Reloading existing process..."
+              pm2 reload sribalajiagency-backend --update-env
+            else
+              echo "Starting new process..."
+              pm2 start dist/main.js --name sribalajiagency-backend --node-args="--trace-warnings"
+            fi
+            
             pm2 save
+            echo "✅ Deployment completed!"
