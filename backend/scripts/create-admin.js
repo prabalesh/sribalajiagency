@@ -1,7 +1,7 @@
 const { drizzle } = require('drizzle-orm/node-postgres');
 const { Pool } = require('pg');
 const { pgTable, uuid, varchar, text, primaryKey } = require('drizzle-orm/pg-core');
-const { eq } = require('drizzle-orm');
+const { eq, and } = require('drizzle-orm');
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv');
 const readline = require('readline');
@@ -109,42 +109,47 @@ async function main() {
   console.log('📡 Connecting to database:', process.env.DB_NAME || 'sribalaji');
 
   try {
-    // 1. Ensure Permissions exist
-    const existingPerms = await db.select().from(permissions);
-    
-    if (existingPerms.length === 0) {
-      console.log('⏳ Seeding permissions...');
-      await db.insert(permissions).values(permissionsList);
-      console.log(`✅ Created permissions.`);
-    } else {
-      console.log('ℹ️ Permissions already exist.');
+    // 1. Sync Permissions
+    console.log('⏳ Syncing permissions...');
+    for (const perm of permissionsList) {
+      const [existing] = await db.select().from(permissions).where(eq(permissions.name, perm.name));
+      if (!existing) {
+        await db.insert(permissions).values(perm);
+        console.log(`  + Created permission: ${perm.name}`);
+      }
     }
-
     const allPerms = await db.select().from(permissions);
 
     // 2. Ensure Admin Role exists
     let [adminRole] = await db.select().from(roles).where(eq(roles.name, 'admin'));
-
     if (!adminRole) {
       console.log('⏳ Creating admin role...');
       [adminRole] = await db.insert(roles).values({
         name: 'admin',
         description: 'Full system access',
       }).returning();
-
-      // Link permissions
-      await db.insert(rolePermissions).values(
-        allPerms.map((p) => ({
-          roleId: adminRole.id,
-          permissionId: p.id,
-        }))
-      );
-      console.log('✅ Admin role created and permissions linked.');
+      console.log('✅ Admin role created.');
     } else {
       console.log('ℹ️ Admin role already exists.');
     }
 
-    // 3. Get User Input
+    // 3. Sync Admin Role Permissions
+    console.log('⏳ Syncing admin role permissions...');
+    const existingRolePerms = await db.select().from(rolePermissions).where(eq(rolePermissions.roleId, adminRole.id));
+    const existingPermIds = new Set(existingRolePerms.map(rp => rp.permissionId));
+
+    for (const perm of allPerms) {
+      if (!existingPermIds.has(perm.id)) {
+        await db.insert(rolePermissions).values({
+          roleId: adminRole.id,
+          permissionId: perm.id,
+        });
+        console.log(`  + Linked permission: ${perm.name}`);
+      }
+    }
+    console.log('✅ Admin role permissions synchronized.');
+
+    // 4. Get User Input
     const name = await question('Enter Admin Name (Administrator): ') || 'Administrator';
     const email = (await question('Enter Admin Email: ')).toLowerCase().trim();
     if (!email || !email.includes('@')) {
@@ -156,29 +161,42 @@ async function main() {
       throw new Error('Password must be at least 6 characters.');
     }
 
-    // 4. Check if user already exists
+    // 5. Check if user already exists
     const [existingUser] = await db.select().from(users).where(eq(users.email, email));
 
     if (existingUser) {
-      throw new Error(`User with email ${email} already exists.`);
+      // If user exists, we'll just assign the role if they don't have it
+      console.log(`ℹ️ User with email ${email} already exists. Checking roles...`);
+      const [existingUserRole] = await db.select().from(userRoles).where(
+        and(eq(userRoles.userId, existingUser.id), eq(userRoles.roleId, adminRole.id))
+      );
+      if (!existingUserRole) {
+        await db.insert(userRoles).values({
+          userId: existingUser.id,
+          roleId: adminRole.id,
+        });
+        console.log(`✅ Admin role assigned to existing user "${name}".`);
+      } else {
+        console.log(`ℹ️ User "${name}" already has admin role.`);
+      }
+    } else {
+      // 6. Create user
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const [newUser] = await db.insert(users).values({
+        name,
+        email,
+        password: hashedPassword,
+      }).returning();
+
+      // 7. Assign role
+      await db.insert(userRoles).values({
+        userId: newUser.id,
+        roleId: adminRole.id,
+      });
+
+      console.log(`\n✨ Admin user "${name}" created successfully!`);
+      console.log(`📧 Email: ${email}`);
     }
-
-    // 5. Create user
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const [newUser] = await db.insert(users).values({
-      name,
-      email,
-      password: hashedPassword,
-    }).returning();
-
-    // 6. Assign role
-    await db.insert(userRoles).values({
-      userId: newUser.id,
-      roleId: adminRole.id,
-    });
-
-    console.log(`\n✨ Admin user "${name}" created successfully!`);
-    console.log(`📧 Email: ${email}`);
 
   } catch (error) {
     console.error('\n❌ Error:', error.message);
