@@ -17,13 +17,16 @@ export class PermissionsGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest();
 
     // Admin role bypasses all permission checks
-    if (user.roles?.some((role) => role.name === 'admin')) {
+    if (user.roles?.some((ur: any) => ur.role?.name === 'admin')) {
       return true;
     }
 
-    // permissions are nested in roles -> permissions
+    // permissions are nested in roles -> role -> permissions -> permission
     const userPermissions =
-      user.roles?.flatMap((role) => role.permissions?.map((p) => p.name)) || [];
+      user.roles?.flatMap(
+        (ur: any) =>
+          ur.role?.permissions?.map((rp: any) => rp.permission?.name) || [],
+      ) || [];
 
     return requiredPermissions.every((permission) =>
       userPermissions.includes(permission),
