@@ -148,6 +148,7 @@ export class ProductsService {
     this.logger.log(`Finding product by ID: ${id}`);
     return await this.db.query.products.findFirst({
       where: and(eq(schema.products.id, id), isNull(schema.products.deletedAt)),
+      with: {
         category: true,
         brand: true,
         variants: {
