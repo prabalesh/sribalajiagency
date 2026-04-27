@@ -15,6 +15,13 @@
       "when": 1777134691440,
       "tag": "0001_short_winter_soldier",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777271289672,
+      "tag": "0002_windy_psynapse",
+      "breakpoints": true
     }
   ]
 }

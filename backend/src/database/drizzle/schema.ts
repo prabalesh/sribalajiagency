@@ -202,6 +202,23 @@ export const productVariants = pgTable(
   }),
 );
 
+// Product Images
+export const productImages = pgTable('product_images', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  url: text('url').notNull(),
+  altText: varchar('altText', { length: 255 }),
+  isPrimary: boolean('isPrimary').default(false).notNull(),
+  sortOrder: integer('sortOrder').default(0).notNull(),
+  productId: uuid('productId').references(() => products.id, {
+    onDelete: 'cascade',
+  }),
+  variantId: uuid('variantId').references(() => productVariants.id, {
+    onDelete: 'cascade',
+  }),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().notNull(),
+});
+
 // Coupons
 export const coupons = pgTable('coupons', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -397,6 +414,17 @@ export const rolesRelations = relations(roles, ({ many }) => ({
   users: many(userRoles),
 }));
 
+export const productImagesRelations = relations(productImages, ({ one }) => ({
+  product: one(products, {
+    fields: [productImages.productId],
+    references: [products.id],
+  }),
+  variant: one(productVariants, {
+    fields: [productImages.variantId],
+    references: [productVariants.id],
+  }),
+}));
+
 export const rolePermissionsRelations = relations(
   rolePermissions,
   ({ one }) => ({
@@ -418,6 +446,21 @@ export const usersRelations = relations(users, ({ many }) => ({
   carts: many(carts),
   reviews: many(reviews),
 }));
+
+export const productVariantsRelations = relations(
+  productVariants,
+  ({ one, many }) => ({
+    product: one(products, {
+      fields: [productVariants.productId],
+      references: [products.id],
+    }),
+    variantType: one(variantTypes, {
+      fields: [productVariants.variantTypeId],
+      references: [variantTypes.id],
+    }),
+    images: many(productImages),
+  }),
+);
 
 export const userRolesRelations = relations(userRoles, ({ one }) => ({
   user: one(users, { fields: [userRoles.userId], references: [users.id] }),
@@ -449,6 +492,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   }),
   brand: one(brands, { fields: [products.brandId], references: [brands.id] }),
   variants: many(productVariants),
+  images: many(productImages),
   reviews: many(reviews),
 }));
 
@@ -456,19 +500,7 @@ export const variantTypesRelations = relations(variantTypes, ({ many }) => ({
   variants: many(productVariants),
 }));
 
-export const productVariantsRelations = relations(
-  productVariants,
-  ({ one }) => ({
-    product: one(products, {
-      fields: [productVariants.productId],
-      references: [products.id],
-    }),
-    variantType: one(variantTypes, {
-      fields: [productVariants.variantTypeId],
-      references: [variantTypes.id],
-    }),
-  }),
-);
+// Deleted productVariantsRelations from here as it's moved up for better organization
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
   user: one(users, { fields: [orders.userId], references: [users.id] }),

@@ -12,6 +12,24 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+export class ProductImageDto {
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+
+  @IsOptional()
+  @IsString()
+  altText?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isPrimary?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  sortOrder?: number;
+}
+
 export class ProductVariantDto {
   @IsOptional()
   @IsUUID()
@@ -43,6 +61,12 @@ export class ProductVariantDto {
   @IsArray()
   @IsString({ each: true })
   images?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductImageDto)
+  productImages?: ProductImageDto[];
 
   @IsOptional()
   @IsString()
@@ -104,12 +128,17 @@ export class CreateProductDto {
   @IsObject()
   specifications?: Record<string, any>;
 
-  // Add other fields as necessary based on entity
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProductVariantDto)
   variants?: ProductVariantDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductImageDto)
+  productImages?: ProductImageDto[];
 }
 
 export class UpdateProductDto {
@@ -165,4 +194,10 @@ export class UpdateProductDto {
   @ValidateNested({ each: true })
   @Type(() => ProductVariantDto)
   variants?: ProductVariantDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductImageDto)
+  productImages?: ProductImageDto[];
 }

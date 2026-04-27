@@ -118,7 +118,16 @@ export class ProductsService {
       with: {
         category: true,
         brand: true,
-        variants: true,
+        variants: {
+          with: {
+            images: {
+              orderBy: (img, { asc }) => [asc(img.sortOrder)],
+            },
+          },
+        },
+        images: {
+          orderBy: (img, { asc }) => [asc(img.sortOrder)],
+        },
       },
       orderBy: [orderBy],
     });
@@ -139,11 +148,18 @@ export class ProductsService {
     this.logger.log(`Finding product by ID: ${id}`);
     return await this.db.query.products.findFirst({
       where: and(eq(schema.products.id, id), isNull(schema.products.deletedAt)),
-      with: {
         category: true,
         brand: true,
         variants: {
           where: (v, { isNull }) => isNull(v.deletedAt),
+          with: {
+            images: {
+              orderBy: (img, { asc }) => [asc(img.sortOrder)],
+            },
+          },
+        },
+        images: {
+          orderBy: (img, { asc }) => [asc(img.sortOrder)],
         },
       },
     });
@@ -153,7 +169,7 @@ export class ProductsService {
    * Creates a new product with variants.
    */
   async createProduct(data: CreateProductDto) {
-    const { variants, ...productData } = data as any;
+    const { variants, productImages, ...productData } = data as any;
     this.logger.log(`Creating product: ${productData.name}`);
 
     return await this.db.transaction(async (tx) => {
@@ -162,13 +178,37 @@ export class ProductsService {
         .values(productData)
         .returning();
 
-      if (variants && variants.length > 0) {
-        await tx.insert(schema.productVariants).values(
-          variants.map((v: any) => ({
-            ...v,
+      // Handle product-level images
+      if (productImages && productImages.length > 0) {
+        await tx.insert(schema.productImages).values(
+          productImages.map((img: any) => ({
+            ...img,
             productId: newProduct.id,
           })),
         );
+      }
+
+      if (variants && variants.length > 0) {
+        for (const variantData of variants) {
+          const { productImages: variantImages, ...vData } = variantData;
+          const [newVariant] = await tx
+            .insert(schema.productVariants)
+            .values({
+              ...vData,
+              productId: newProduct.id,
+            })
+            .returning();
+
+          if (variantImages && variantImages.length > 0) {
+            await tx.insert(schema.productImages).values(
+              variantImages.map((img: any) => ({
+                ...img,
+                productId: newProduct.id,
+                variantId: newVariant.id,
+              })),
+            );
+          }
+        }
       } else {
         // Create a default variant
         await tx.insert(schema.productVariants).values({
@@ -186,7 +226,16 @@ export class ProductsService {
         with: {
           category: true,
           brand: true,
-          variants: true,
+          variants: {
+            with: {
+              images: {
+                orderBy: (img, { asc }) => [asc(img.sortOrder)],
+              },
+            },
+          },
+          images: {
+            orderBy: (img, { asc }) => [asc(img.sortOrder)],
+          },
         },
       });
     });
@@ -196,7 +245,8 @@ export class ProductsService {
    * Updates an existing product.
    */
   async updateProduct(id: string, data: UpdateProductDto) {
-    const { variants, brand, category, ...productData } = data as any;
+    const { variants, productImages, brand, category, ...productData } =
+      data as any;
     this.logger.log(`Updating product: ${id}`);
 
     return await this.db.transaction(async (tx) => {
@@ -213,6 +263,28 @@ export class ProductsService {
         .set(productData)
         .where(eq(schema.products.id, id));
 
+      // Handle product-level images
+      if (productImages) {
+        // Delete existing product-level images (where variantId is null)
+        await tx
+          .delete(schema.productImages)
+          .where(
+            and(
+              eq(schema.productImages.productId, id),
+              isNull(schema.productImages.variantId),
+            ),
+          );
+
+        if (productImages.length > 0) {
+          await tx.insert(schema.productImages).values(
+            productImages.map((img: any) => ({
+              ...img,
+              productId: id,
+            })),
+          );
+        }
+      }
+
       if (variants) {
         // Soft delete existing variants first
         await tx
@@ -221,12 +293,29 @@ export class ProductsService {
           .where(eq(schema.productVariants.productId, id));
 
         if (variants.length > 0) {
-          await tx.insert(schema.productVariants).values(
-            variants.map((v: any) => ({
-              ...v,
-              productId: id,
-            })),
-          );
+          for (const variantData of variants) {
+            const { productImages: variantImages, ...vData } = variantData;
+            // Remove ID if present to ensure a new variant is created (standard for this soft-delete pattern)
+            delete vData.id;
+
+            const [newVariant] = await tx
+              .insert(schema.productVariants)
+              .values({
+                ...vData,
+                productId: id,
+              })
+              .returning();
+
+            if (variantImages && variantImages.length > 0) {
+              await tx.insert(schema.productImages).values(
+                variantImages.map((img: any) => ({
+                  ...img,
+                  productId: id,
+                  variantId: newVariant.id,
+                })),
+              );
+            }
+          }
         }
       }
 
@@ -237,6 +326,14 @@ export class ProductsService {
           brand: true,
           variants: {
             where: (v, { isNull }) => isNull(v.deletedAt),
+            with: {
+              images: {
+                orderBy: (img, { asc }) => [asc(img.sortOrder)],
+              },
+            },
+          },
+          images: {
+            orderBy: (img, { asc }) => [asc(img.sortOrder)],
           },
         },
       });
