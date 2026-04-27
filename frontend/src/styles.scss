@@ -1,9 +1,5 @@
 @use "app/core/styles/glass" as *;
 
-/* ============================================
-   CSS CUSTOM PROPERTIES (VARIABLES)
-   ============================================ */
-
 :root {
   /* Layout */
   --container-max-width: 1280px;
@@ -65,7 +61,7 @@
   --hero-glass: rgba(255, 255, 255, 0.6);
 
   /* Typography */
-  --font-family: 'Montserrat', sans-serif;
+  --font-family: 'Roboto', sans-serif;
 }
 
 /* Dark Theme */
@@ -143,7 +139,7 @@ h4,
 h5,
 h6 {
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.5;
   color: var(--text-color);
   margin-bottom: 1rem;
   font-family: var(--font-family);

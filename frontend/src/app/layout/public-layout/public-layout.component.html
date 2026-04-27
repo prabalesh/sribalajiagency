@@ -58,9 +58,7 @@
           @if (!isLoading()) {
           <div class="user-menu">
             @if (authService.isLoggedIn()) {
-            <button class="btn-icon" 
-                    (click)="isUserDropdownOpen = !isUserDropdownOpen"
-                    aria-label="User Menu">
+            <button class="btn-icon" (click)="isUserDropdownOpen = !isUserDropdownOpen" aria-label="User Menu">
               <lucide-icon [img]="User" [size]="20"></lucide-icon>
             </button>
 
@@ -109,9 +107,7 @@
           }
 
           <!-- Mobile Menu Button -->
-          <button class="btn-icon btn-menu" 
-                  (click)="isMobileMenuOpen = !isMobileMenuOpen"
-                  aria-label="Menu">
+          <button class="btn-icon btn-menu" (click)="isMobileMenuOpen = !isMobileMenuOpen" aria-label="Menu">
             @if (!isMobileMenuOpen) {
             <lucide-icon [img]="Menu" [size]="24"></lucide-icon>
             } @else {
@@ -145,14 +141,9 @@
   <div class="search-overlay">
     <div class="container">
       <div class="search-box">
-        <input type="search" 
-               [(ngModel)]="searchQuery"
-               (keyup.enter)="onSearch()"
-               placeholder="What are you looking for?"
-               autofocus>
-        <button class="btn-primary" 
-                (click)="onSearch()"
-                [disabled]="!searchQuery.trim()">
+        <input type="search" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()"
+          placeholder="What are you looking for?" autofocus>
+        <button class="btn-primary" (click)="onSearch()" [disabled]="!searchQuery.trim()">
           Search
         </button>
       </div>

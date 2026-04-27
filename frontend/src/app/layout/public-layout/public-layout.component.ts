@@ -63,7 +63,7 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.routerSubscription = this.router.events
       .pipe(
-        filter(event => 
+        filter(event =>
           event instanceof RouteConfigLoadStart ||
           event instanceof RouteConfigLoadEnd ||
           event instanceof NavigationEnd ||
@@ -77,7 +77,7 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
         } else {
           this.routeLoadingService.hide();
         }
-        
+
         if (event instanceof NavigationEnd) {
           this.closeAll();
         }

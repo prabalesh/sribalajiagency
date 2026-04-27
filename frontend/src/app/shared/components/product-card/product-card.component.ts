@@ -4,10 +4,17 @@ import { RouterModule, Router } from '@angular/router';
 import { Product, ProductVariant } from '../../../core/models/product.model';
 import { AuthService } from '../../../core/services/auth/auth.service';
 
+// PrimeNG
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { RippleModule } from 'primeng/ripple';
+import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
+
 @Component({
   selector: 'app-product-card',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgOptimizedImage],
+  imports: [CommonModule, RouterModule, NgOptimizedImage, CardModule, ButtonModule, RippleModule, TagModule, TooltipModule,],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.scss'
 })
@@ -43,8 +50,8 @@ export class ProductCardComponent {
     // 1. Try to find a variant that matches search term
     if (this.searchTerm) {
       const query = this.searchTerm.toLowerCase();
-      const match = this.product.variants.find(v => 
-        v.name.toLowerCase().includes(query) || 
+      const match = this.product.variants.find(v =>
+        v.name.toLowerCase().includes(query) ||
         (v.sku && v.sku.toLowerCase().includes(query))
       );
       if (match) {
