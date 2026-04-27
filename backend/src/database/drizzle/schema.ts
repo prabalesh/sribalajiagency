@@ -184,8 +184,6 @@ export const productVariants = pgTable(
     sku: varchar('sku', { length: 255 }),
     specifications: jsonb('specifications'),
     stock: integer('stock').default(0).notNull(),
-    image: varchar('image', { length: 255 }),
-    images: text('images').array().default([]).notNull(),
     description: text('description'),
     productId: uuid('productId')
       .notNull()

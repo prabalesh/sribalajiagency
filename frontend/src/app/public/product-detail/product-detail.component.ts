@@ -208,7 +208,12 @@ export class ProductDetailComponent implements OnInit {
     get allSpecifications(): { key: string, value: string }[] {
         const specs: { key: string, value: string }[] = [];
         
-        // Add global product specs first
+        // Add SKU first if available
+        if (this.selectedVariant?.sku) {
+            specs.push({ key: 'SKU', value: this.selectedVariant.sku });
+        }
+
+        // Add global product specs
         if (this.product?.specifications) {
             Object.entries(this.product.specifications).forEach(([key, value]) => {
                 specs.push({ key: this.formatKey(key), value: String(value) });
@@ -270,24 +275,17 @@ export class ProductDetailComponent implements OnInit {
     }
 
     get displayImages(): any[] {
-        if (this.selectedVariant?.images?.length) {
-            return this.selectedVariant.images.map(url => ({ url, isPrimary: false }));
-        }
-        if (this.selectedVariant?.image) {
-            return [{ url: this.selectedVariant.image, isPrimary: true }];
+        // 1. Try images from the selected variant
+        if (this.selectedVariant?.images && this.selectedVariant.images.length > 0) {
+            return this.selectedVariant.images;
         }
 
-        // Aggregate images from all variants if none are specific to selection
-        const allImages: any[] = [];
-        this.product?.variants?.forEach(v => {
-            if (v.image) allImages.push({ url: v.image, isPrimary: true });
-            if (v.images) {
-                v.images.forEach(url => allImages.push({ url, isPrimary: false }));
-            }
-        });
+        // 2. Fallback to product-level images
+        if (this.product?.images && this.product.images.length > 0) {
+            return this.product.images;
+        }
 
-        // Return unique images if any exist
-        return Array.from(new Map(allImages.map(img => [img.url, img])).values());
+        return [];
     }
 
     get currentPrice(): number {

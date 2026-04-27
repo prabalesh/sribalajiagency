@@ -75,15 +75,20 @@ export class ProductCardComponent {
 
   get displayImage(): string {
     const variant = this.preferredVariant;
-    if (!variant) return 'https://placehold.co/400x400?text=No+Image';
+    if (variant?.images && variant.images.length > 0) {
+      return variant.images.find(img => img.isPrimary)?.url || variant.images[0].url;
+    }
 
-    if (variant.image) return variant.image;
-    if (variant.images && variant.images.length > 0) return variant.images[0];
+    // Fallback to product images
+    if (this.product.images && this.product.images.length > 0) {
+      return this.product.images.find(img => img.isPrimary)?.url || this.product.images[0].url;
+    }
 
-    // Fallback to any variant image if preferred has none
+    // Fallback to any variant image
     for (const v of this.product.variants) {
-      if (v.image) return v.image;
-      if (v.images && v.images.length > 0) return v.images[0];
+      if (v.images && v.images.length > 0) {
+        return v.images.find(img => img.isPrimary)?.url || v.images[0].url;
+      }
     }
 
     return 'https://placehold.co/400x400?text=No+Image';

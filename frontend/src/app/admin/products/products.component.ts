@@ -177,11 +177,20 @@ export class ProductsComponent implements OnInit, OnDestroy {
         warranty: this.newProduct.warranty,
         specifications: this.newProduct.specifications,
         variants: this.newProduct.variants?.map((v: any) => {
-          const { sku, specifications, variantType, ...variantData } = v;
+          // Ensure prices are numbers (they might be strings from inputs or Drizzle numeric return)
+          const price = typeof v.price === 'string' ? parseFloat(v.price) : v.price;
+          const comparisonPrice = v.comparisonPrice ? 
+            (typeof v.comparisonPrice === 'string' ? parseFloat(v.comparisonPrice) : v.comparisonPrice) : 
+            undefined;
+
           return {
-            ...variantData,
-            id: v.id && v.id !== '' ? v.id : undefined,
-            variantTypeId: v.variantTypeId === '' ? null : v.variantTypeId
+            ...v,
+            id: v.id && v.id.length > 10 ? v.id : undefined,
+            price,
+            comparisonPrice,
+            variantTypeId: v.variantTypeId === '' ? null : v.variantTypeId,
+            // Images are already structured in our unified model
+            images: v.images || []
           };
         }) || []
       };
@@ -208,7 +217,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
   async editProduct(product: Product) {
     this.newProduct = {
       ...product,
-      variants: product.variants ? [...product.variants] : [],
+      variants: product.variants ? product.variants.map(v => ({
+        ...v,
+        images: v.images || []
+      })) : [],
       categoryId: product.categoryId || product.category?.id || '',
       brandId: product.brandId || product.brand?.id || ''
     };
@@ -253,7 +265,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
       price: lastPrice,
       comparisonPrice: lastComparisonPrice,
       stock: 0,
-      image: '',
       images: [],
       description: '',
       variantTypeId: '',
@@ -288,8 +299,15 @@ export class ProductsComponent implements OnInit, OnDestroy {
       const res = await this.productService.uploadGenericImages(event.files as any);
       if (res.urls && res.urls.length > 0) {
         if (!event.variant.images) event.variant.images = [];
-        event.variant.images.push(...res.urls);
-        if (!event.variant.image) event.variant.image = res.urls[0];
+        
+        const newImages = res.urls.map(url => ({
+          url,
+          isPrimary: event.variant.images.length === 0 && res.urls.indexOf(url) === 0,
+          sortOrder: event.variant.images.length + res.urls.indexOf(url)
+        }));
+        
+        event.variant.images.push(...newImages);
+        
         this.toastService.success(`${res.urls.length} images uploaded`);
       }
     } catch (err) {
@@ -301,21 +319,26 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   onVariantUrlChanged(event: { url: string, variant: any }) {
-    event.variant.image = event.url;
+    // Legacy - usually handled within the variant form now
   }
 
   onVariantImageRemoved(variant: any) {
-    variant.image = '';
     variant.images = [];
   }
 
   onVariantImageAdded(event: { url?: string, file?: File, variant: any }) {
     if (event.url) {
       if (!event.variant.images) event.variant.images = [];
-      if (!event.variant.images.includes(event.url)) {
-        event.variant.images.push(event.url);
+      const exists = event.variant.images.some((img: any) => 
+        (typeof img === 'string' ? img : img.url) === event.url
+      );
+      if (!exists) {
+        event.variant.images.push({
+          url: event.url,
+          isPrimary: event.variant.images.length === 0,
+          sortOrder: event.variant.images.length
+        });
       }
-      if (!event.variant.image) event.variant.image = event.url;
     }
   }
 
@@ -341,7 +364,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
         price: 0,
         stock: 0,
         sku: 'DEFAULT-SKU',
-        image: '',
         images: [],
         description: '',
         isDefault: true

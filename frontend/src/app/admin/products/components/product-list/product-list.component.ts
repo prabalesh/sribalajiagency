@@ -80,8 +80,14 @@ export class ProductListComponent {
     }
 
     getProductImage(product: Product): string {
+        if (product.images && product.images.length > 0) {
+            return product.images.find(img => img.isPrimary)?.url || product.images[0].url;
+        }
         if (!product.variants || product.variants.length === 0) return '';
         const variant = product.variants[0];
-        return variant.image || (variant.images && variant.images.length > 0 ? variant.images[0] : '');
+        if (variant.images && variant.images.length > 0) {
+            return variant.images.find(img => img.isPrimary)?.url || variant.images[0].url;
+        }
+        return '';
     }
 }

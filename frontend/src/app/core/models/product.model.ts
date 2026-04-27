@@ -2,6 +2,14 @@ import { Brand } from './brand.model';
 import { Category } from './category.model';
 
 
+export interface ProductImage {
+    id?: string;
+    url: string;
+    altText?: string;
+    isPrimary: boolean;
+    sortOrder: number;
+}
+
 export interface ProductVariant {
     id: string;
     name: string;
@@ -10,12 +18,11 @@ export interface ProductVariant {
     sku?: string;
     specifications?: Record<string, string>;
     stock: number;
-    image?: string;
-    images?: string[];
+    images?: ProductImage[]; // Structured images (replaces legacy fields)
     description?: string;
     isDefault: boolean;
     variantTypeId?: string;
-    variantType?: any; // Leaving this for now as it might be a complex interface
+    variantType?: any;
 }
 
 export interface Product {
@@ -27,6 +34,7 @@ export interface Product {
     categoryId: string;
     category?: Category;
     variants: ProductVariant[];
+    images?: ProductImage[]; // Structured images (replaces legacy fields)
     isAvailable: boolean;
     isFeatured: boolean;
     maxOrderQuantity?: number;

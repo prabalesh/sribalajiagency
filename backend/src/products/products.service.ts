@@ -15,6 +15,7 @@ import {
   sql,
   inArray,
   isNull,
+  not,
 } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../database/drizzle/schema';
@@ -170,7 +171,7 @@ export class ProductsService {
    * Creates a new product with variants.
    */
   async createProduct(data: CreateProductDto) {
-    const { variants, productImages, ...productData } = data as any;
+    const { variants, images, ...productData } = data as any;
     this.logger.log(`Creating product: ${productData.name}`);
 
     return await this.db.transaction(async (tx) => {
@@ -180,9 +181,9 @@ export class ProductsService {
         .returning();
 
       // Handle product-level images
-      if (productImages && productImages.length > 0) {
+      if (images && images.length > 0) {
         await tx.insert(schema.productImages).values(
-          productImages.map((img: any) => ({
+          images.map((img: any) => ({
             ...img,
             productId: newProduct.id,
           })),
@@ -191,7 +192,7 @@ export class ProductsService {
 
       if (variants && variants.length > 0) {
         for (const variantData of variants) {
-          const { productImages: variantImages, ...vData } = variantData;
+          const { images: variantImages, ...vData } = variantData;
           const [newVariant] = await tx
             .insert(schema.productVariants)
             .values({
@@ -246,7 +247,7 @@ export class ProductsService {
    * Updates an existing product.
    */
   async updateProduct(id: string, data: UpdateProductDto) {
-    const { variants, productImages, brand, category, ...productData } =
+    const { variants, images, brand, category, ...productData } =
       data as any;
     this.logger.log(`Updating product: ${id}`);
 
@@ -265,7 +266,7 @@ export class ProductsService {
         .where(eq(schema.products.id, id));
 
       // Handle product-level images
-      if (productImages) {
+      if (images) {
         // Delete existing product-level images (where variantId is null)
         await tx
           .delete(schema.productImages)
@@ -276,9 +277,9 @@ export class ProductsService {
             ),
           );
 
-        if (productImages.length > 0) {
+        if (images.length > 0) {
           await tx.insert(schema.productImages).values(
-            productImages.map((img: any) => ({
+            images.map((img: any) => ({
               ...img,
               productId: id,
             })),
@@ -287,34 +288,70 @@ export class ProductsService {
       }
 
       if (variants) {
-        // Soft delete existing variants first
-        await tx
-          .update(schema.productVariants)
-          .set({ deletedAt: new Date() })
-          .where(eq(schema.productVariants.productId, id));
+        const incomingVariantIds = variants
+          .map((v: any) => v.id)
+          .filter((vId: string) => !!vId && vId.length > 10); // Ensure it's a real UUID
 
+        // 1. Soft delete variants that are NOT in the incoming request
+        if (incomingVariantIds.length > 0) {
+          await tx
+            .update(schema.productVariants)
+            .set({ deletedAt: new Date() })
+            .where(
+              and(
+                eq(schema.productVariants.productId, id),
+                not(inArray(schema.productVariants.id, incomingVariantIds)),
+              ),
+            );
+        } else {
+          // If no existing variants in request, soft delete all for this product
+          await tx
+            .update(schema.productVariants)
+            .set({ deletedAt: new Date() })
+            .where(eq(schema.productVariants.productId, id));
+        }
+
+        // 2. Process each variant (Update or Insert)
         if (variants.length > 0) {
           for (const variantData of variants) {
-            const { productImages: variantImages, ...vData } = variantData;
-            // Remove ID if present to ensure a new variant is created (standard for this soft-delete pattern)
-            delete vData.id;
+            const { images: variantImages, id: vId, ...vData } = variantData;
+            let currentVariantId: string;
 
-            const [newVariant] = await tx
-              .insert(schema.productVariants)
-              .values({
-                ...vData,
-                productId: id,
-              })
-              .returning();
-
-            if (variantImages && variantImages.length > 0) {
-              await tx.insert(schema.productImages).values(
-                variantImages.map((img: any) => ({
-                  ...img,
+            if (vId && vId.length > 10) {
+              // Update existing variant
+              const [updatedVariant] = await tx
+                .update(schema.productVariants)
+                .set({ ...vData, deletedAt: null }) // Restore if it was soft-deleted
+                .where(eq(schema.productVariants.id, vId))
+                .returning();
+              currentVariantId = updatedVariant.id;
+            } else {
+              // Insert new variant
+              const [newVariant] = await tx
+                .insert(schema.productVariants)
+                .values({
+                  ...vData,
                   productId: id,
-                  variantId: newVariant.id,
-                })),
-              );
+                })
+                .returning();
+              currentVariantId = newVariant.id;
+            }
+
+            // 3. Sync variant images (Delete existing and re-insert)
+            if (variantImages) {
+              await tx
+                .delete(schema.productImages)
+                .where(eq(schema.productImages.variantId, currentVariantId));
+
+              if (variantImages.length > 0) {
+                await tx.insert(schema.productImages).values(
+                  variantImages.map((img: any) => ({
+                    ...img,
+                    productId: id,
+                    variantId: currentVariantId,
+                  })),
+                );
+              }
             }
           }
         }

@@ -4,8 +4,6 @@ export interface ProductVariantDto {
     price: number;
     comparisonPrice?: number;
     stock?: number;
-    image?: string;
-    images?: string[];
     description?: string;
 }
 

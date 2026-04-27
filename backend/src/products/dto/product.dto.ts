@@ -41,32 +41,26 @@ export class ProductVariantDto {
 
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   price: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   comparisonPrice?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   stock?: number;
-
-  @IsOptional()
-  @IsString()
-  image?: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  images?: string[];
 
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProductImageDto)
-  productImages?: ProductImageDto[];
+  images?: ProductImageDto[];
 
   @IsOptional()
   @IsString()
@@ -138,7 +132,7 @@ export class CreateProductDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProductImageDto)
-  productImages?: ProductImageDto[];
+  images?: ProductImageDto[];
 }
 
 export class UpdateProductDto {
@@ -199,5 +193,5 @@ export class UpdateProductDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProductImageDto)
-  productImages?: ProductImageDto[];
+  images?: ProductImageDto[];
 }

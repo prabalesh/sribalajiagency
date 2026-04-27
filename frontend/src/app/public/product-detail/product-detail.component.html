@@ -92,23 +92,63 @@
 
                 <h1>{{ product.name }}</h1>
 
+                <div class="meta-row">
+                    <span class="sku-info" *ngIf="selectedVariant?.sku">
+                        <strong>SKU:</strong> {{ selectedVariant?.sku }}
+                    </span>
+                    <div class="rating-preview" *ngIf="product.rating">
+                        <div class="stars">
+                            <lucide-icon [img]="Star" [size]="14" class="filled"></lucide-icon>
+                            <span>{{ product.rating | number:'1.1-1' }}</span>
+                        </div>
+                        <span class="count" *ngIf="product.reviewCount">({{ product.reviewCount }} Reviews)</span>
+                    </div>
+                </div>
+
                 <!-- Price Section -->
                 <div class="price-section">
                     <div class="price-stack">
-                        <span class="price">₹{{ currentPrice | number:'1.2-2' }}</span>
-                        <span *ngIf="currentComparisonPrice" class="mrp">
-                            ₹{{ currentComparisonPrice | number:'1.2-2' }}
-                        </span>
+                        <div class="price-row">
+                            <span class="price">₹{{ currentPrice | number:'1.2-2' }}</span>
+                            <span *ngIf="currentComparisonPrice" class="mrp">
+                                ₹{{ currentComparisonPrice | number:'1.2-2' }}
+                            </span>
+                        </div>
+                        @if (discountPercentage) {
+                            <span class="savings">You save ₹{{ (currentComparisonPrice! - currentPrice) | number:'1.2-2' }} ({{ discountPercentage }}%)</span>
+                        }
                     </div>
 
                     <!-- Stock Status -->
-                    <span class="stock-status" [class.out]="currentStock <= 0"
-                        [class.low]="currentStock > 0 && currentStock <= 5">
-                        <lucide-icon [img]="currentStock > 0 ? Check : X" [size]="16">
-                        </lucide-icon>
-                        @if (currentStock > 0) {
-                        @if (currentStock <= 5) { Only {{ currentStock }} left! } @else { In Stock } } @else { Out of
-                            Stock } </span>
+                    <div class="status-col">
+                        <span class="stock-status" [class.out]="currentStock <= 0"
+                            [class.low]="currentStock > 0 && currentStock <= 5">
+                            <lucide-icon [img]="currentStock > 0 ? Check : X" [size]="16">
+                            </lucide-icon>
+                            @if (currentStock > 0) {
+                                @if (currentStock <= 5) { Only {{ currentStock }} left! } @else { In Stock } 
+                            } @else { Out of Stock } 
+                        </span>
+                        <span class="order-limit" *ngIf="product.maxOrderQuantity">
+                            Limit {{ product.maxOrderQuantity }} per order
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment & Shipping Info Quick Look -->
+            <div class="quick-specs-grid">
+                <div class="q-spec">
+                    <lucide-icon [img]="Truck" [size]="18"></lucide-icon>
+                    <span>Fast Delivery</span>
+                </div>
+                <div class="q-spec" *ngIf="product.allowedPaymentMethods?.includes('cod')">
+                    <lucide-icon [img]="Wallet" [size]="18"></lucide-icon>
+                    <span>COD Available</span>
+                </div>
+                <div class="q-spec" *ngIf="product.allowedPaymentMethods?.includes('online')">
+                    <lucide-icon [img]="CreditCard" [size]="18"></lucide-icon>
+                    <span>Secure Online Payment</span>
                 </div>
             </div>
 

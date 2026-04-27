@@ -60,11 +60,11 @@
             <div class="variant-image-grid">
                 <!-- Existing Variant Images -->
                 @for (img of variant.images; track img) {
-                <div class="variant-image-item glass-card" [class.is-primary]="variant.image === img">
-                    <img [src]="img | imageUrl" alt="Variant Image">
+                <div class="variant-image-item glass-card" [class.is-primary]="isImagePrimary(img)">
+                    <img [src]="getImageUrl(img) | imageUrl" alt="Variant Image">
                     <div class="image-actions">
-                        @if (variant.image !== img) {
-                        <button type="button" class="action-btn primary-btn" (click)="onSetPrimary(img)"
+                        @if (!isImagePrimary(img)) {
+                        <button type="button" class="action-btn primary-btn" (click)="onSetPrimary(getImageUrl(img))"
                              title="Set as main variant image">
                             <lucide-icon [img]="Star" [size]="14"></lucide-icon>
                         </button>
@@ -74,7 +74,7 @@
                             <lucide-icon [img]="Trash2" [size]="14"></lucide-icon>
                         </button>
                     </div>
-                    @if (variant.image === img) {
+                    @if (isImagePrimary(img)) {
                     <span class="primary-badge">
                         <lucide-icon [img]="Star" [size]="10"></lucide-icon>
                         Main

@@ -22,6 +22,13 @@
       "when": 1777271289672,
       "tag": "0002_windy_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1777277042478,
+      "tag": "0003_glorious_multiple_man",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Trash2, Layers, Star, X, ImageIcon, Plus } from 'lucide-angular';
 import { VariantType } from '../../../../core/models/variant-type.model';
 import { ImageUploaderComponent } from '../../../../shared/components/image-uploader/image-uploader.component';
+import { ProductImage } from '../../../../core/models/product.model';
 
 import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
 
@@ -55,22 +56,40 @@ export class ProductVariantFormComponent {
     }
 
     onSetPrimary(url: string) {
-        this.variant.image = url;
+        if (!this.variant.images) this.variant.images = [];
+        
+        this.variant.images.forEach((img: ProductImage) => {
+            img.isPrimary = (img.url === url);
+        });
+        
         this.setPrimaryImage.emit(url);
     }
 
     onRemoveImage(index: number) {
+        const removedImage = this.variant.images[index];
+        const isWasPrimary = removedImage.isPrimary;
+        
         this.variant.images.splice(index, 1);
-        if (this.variant.image === this.variant.images[index]) {
-            this.variant.image = this.variant.images[0] || '';
+        
+        // If we removed the primary image, set the first remaining one as primary
+        if (isWasPrimary && this.variant.images.length > 0) {
+            this.variant.images[0].isPrimary = true;
         }
+        
         this.removeImageAt.emit(index);
     }
 
     onAddVariantImageUrl(url: string) {
         if (!this.variant.images) this.variant.images = [];
-        this.variant.images.push(url);
-        if (!this.variant.image) this.variant.image = url;
+        
+        // Add as structured object
+        const newImage: ProductImage = {
+            url,
+            isPrimary: this.variant.images.length === 0,
+            sortOrder: this.variant.images.length
+        };
+        
+        this.variant.images.push(newImage);
         this.addImage.emit({ url });
         this.uploader.reset();
     }
@@ -94,5 +113,13 @@ export class ProductVariantFormComponent {
     onSetDefault() {
         this.variant.isDefault = true;
         this.onDefaultChange();
+    }
+
+    getImageUrl(img: any): string {
+        return img?.url || '';
+    }
+
+    isImagePrimary(img: ProductImage): boolean {
+        return !!img.isPrimary;
     }
 }
