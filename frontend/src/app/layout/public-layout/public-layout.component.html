@@ -26,13 +26,16 @@
           <a routerLink="/account/orders" routerLinkActive="active">Orders</a>
         </nav>
 
-        <!-- Actions -->
-        <div class="actions">
-          <!-- Search -->
-          <button class="btn-icon" (click)="toggleSearch()" aria-label="Search">
+        <!-- Inline Search Bar -->
+        <div class="header-search">
+          <input type="search" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" placeholder="Search products, brands and more..." class="search-input">
+          <button class="search-btn" (click)="onSearch()" aria-label="Search">
             <lucide-icon [img]="Search" [size]="20"></lucide-icon>
           </button>
+        </div>
 
+        <!-- Actions -->
+        <div class="actions">
           <!-- Theme -->
           @if (!isLoading()) {
           <button class="btn-icon" (click)="toggleTheme()" aria-label="Toggle Theme">
@@ -134,21 +137,6 @@
     <button class="btn-secondary" (click)="authService.logout(); closeAll()">Sign Out</button>
     }
   </nav>
-  }
-
-  <!-- Search Overlay -->
-  @if (isSearchOpen) {
-  <div class="search-overlay">
-    <div class="container">
-      <div class="search-box">
-        <input type="search" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()"
-          placeholder="What are you looking for?" autofocus>
-        <button class="btn-primary" (click)="onSearch()" [disabled]="!searchQuery.trim()">
-          Search
-        </button>
-      </div>
-    </div>
-  </div>
   }
 
   <!-- Main Content -->
