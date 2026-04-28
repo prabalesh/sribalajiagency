@@ -1,112 +1,150 @@
 <div class="products-page container">
-    <main class="products-main">
-        <header class="page-header">
-            <app-breadcrumbs [items]="breadcrumbItems"></app-breadcrumbs>
+    <app-breadcrumbs [items]="breadcrumbItems"></app-breadcrumbs>
+    
+    <div class="header-content">
+        <h1 class="text-gradient">{{ currentCategory ? currentCategory.name : 'Product Catalog' }}</h1>
+        <div class="header-actions">
+            <p class="count">{{ totalItems }} products found</p>
+            <button class="btn-mobile-filter" (click)="toggleMobileFilters()">
+                <lucide-icon [img]="FilterIcon" [size]="18"></lucide-icon>
+                Filters
+            </button>
+        </div>
+    </div>
 
-            <div class="header-content">
-                <h1 class="text-gradient">{{ currentCategory ? currentCategory.name : 'Product Catalog' }}</h1>
-                <p class="count">{{ totalItems }} products found</p>
+    <div class="catalog-layout">
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" [class.show]="isMobileFiltersOpen" (click)="toggleMobileFilters()"></div>
+
+        <!-- Sidebar Filters -->
+        <aside class="catalog-sidebar glass-card" [class.mobile-open]="isMobileFiltersOpen">
+            <div class="sidebar-header mobile-only">
+                <h3>Filters & Sort</h3>
+                <button class="btn-close" (click)="toggleMobileFilters()">
+                    <lucide-icon [img]="XIcon" [size]="24"></lucide-icon>
+                </button>
             </div>
 
-            <div class="horizontal-controls glass-card">
-                <div class="categories-nav">
-                    <a [class.active]="!currentCategory" routerLink="/products" class="cat-link">
-                        All Products
-                    </a>
-                    @for (cat of categories; track cat.id) {
-                    <a [class.active]="currentCategory?.id === cat.id" [routerLink]="['/products', cat.slug]"
-                        class="cat-link">
-                        {{ cat.name }}
-                    </a>
-                    }
+            <div class="sidebar-scroll">
+                <div class="filter-section">
+                    <h4>Categories</h4>
+                    <div class="categories-list">
+                        <a [class.active]="!currentCategory" routerLink="/products" class="cat-link" (click)="isMobileFiltersOpen = false">
+                            All Products
+                        </a>
+                        @for (cat of categories; track cat.id) {
+                        <a [class.active]="currentCategory?.id === cat.id" [routerLink]="['/products', cat.slug]"
+                            class="cat-link" (click)="isMobileFiltersOpen = false">
+                            {{ cat.name }}
+                        </a>
+                        }
+                    </div>
                 </div>
 
-                <div class="filters-row">
-                    <div class="filter-group">
-                        <label>Price Range:</label>
+                <div class="filter-section">
+                    <h4>Sort By</h4>
+                    <div class="sort-options">
+                        <label class="sort-radio">
+                            <input type="radio" name="sort" value="best_seller" [checked]="sortBy === 'reviewCount' && sortOrder === 'DESC'" (change)="onSortChange({target: {value: 'best_seller'}})">
+                            <span>Best Sellers</span>
+                        </label>
+                        <label class="sort-radio">
+                            <input type="radio" name="sort" value="rating" [checked]="sortBy === 'rating' && sortOrder === 'DESC'" (change)="onSortChange({target: {value: 'rating'}})">
+                            <span>Top Rated</span>
+                        </label>
+                        <label class="sort-radio">
+                            <input type="radio" name="sort" value="price_asc" [checked]="sortBy === 'price' && sortOrder === 'ASC'" (change)="onSortChange({target: {value: 'price_asc'}})">
+                            <span>Price: Low to High</span>
+                        </label>
+                        <label class="sort-radio">
+                            <input type="radio" name="sort" value="price_desc" [checked]="sortBy === 'price' && sortOrder === 'DESC'" (change)="onSortChange({target: {value: 'price_desc'}})">
+                            <span>Price: High to Low</span>
+                        </label>
+                        <label class="sort-radio">
+                            <input type="radio" name="sort" value="name" [checked]="sortBy === 'name'" (change)="onSortChange({target: {value: 'name'}})">
+                            <span>Name (A-Z)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4>Price Range</h4>
+                    <div class="range-slider-vertical">
+                        <div class="price-values">
+                            <span>₹{{minPrice}}</span>
+                            <span>₹{{maxPrice}}{{maxPrice >= sliderMax ? '+' : ''}}</span>
+                        </div>
                         <div class="range-slider">
                             <input type="range" [(ngModel)]="minPrice" [min]="sliderMin" [max]="sliderMax"
                                 (change)="validateRange()" class="range-input min-range">
                             <input type="range" [(ngModel)]="maxPrice" [min]="sliderMin" [max]="sliderMax"
                                 (change)="validateRange()" class="range-input max-range">
                             <div class="slider-track-bg"></div>
-                            <div class="price-values">
-                                <span>₹{{minPrice}}</span>
-                                <span>₹{{maxPrice}}{{maxPrice >= sliderMax ? '+' : ''}}</span>
-                            </div>
                         </div>
                     </div>
-
-                    <div class="filter-group">
-                        <label>Sort By:</label>
-                        <select class="glass-select" (change)="onSortChange($event)">
-                            <option value="name" [selected]="sortBy === 'name'">Name (A-Z)</option>
-                            <option value="price_asc" [selected]="sortBy === 'price' && sortOrder === 'ASC'">Price (Low
-                                to High)</option>
-                            <option value="price_desc" [selected]="sortBy === 'price' && sortOrder === 'DESC'">Price
-                                (High to Low)</option>
-                        </select>
-                    </div>
-
-                    <button class="btn-reset" *ngIf="minPrice || maxPrice" (click)="resetFilters(); applyFilters()">
-                        Clear Filters
-                    </button>
                 </div>
-            </div>
-        </header>
 
-        <section class="product-grid">
-            @if (isLoading && products.length === 0) {
-            @for (i of [1,2,3,4,5,6,7,8]; track i) {
-            <div class="product-card skeleton-card glass-card">
-                <app-skeleton height="200px" width="100%"></app-skeleton>
-                <div class="p-info" style="padding: 1.5rem;">
-                    <app-skeleton height="14px" width="40%" style="margin-bottom: 8px;"></app-skeleton>
-                    <app-skeleton height="24px" width="80%" style="margin-bottom: 15px;"></app-skeleton>
-                    <div class="p-footer" style="display: flex; justify-content: space-between; align-items: center;">
-                        <app-skeleton height="24px" width="30%"></app-skeleton>
-                        <app-skeleton height="36px" width="36px" borderRadius="10px"></app-skeleton>
+                <button class="btn-reset" *ngIf="minPrice > sliderMin || maxPrice < sliderMax || sortBy !== 'name' || currentCategory" (click)="resetFilters(); applyFilters(); isMobileFiltersOpen = false">
+                    Clear All Filters
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="catalog-content">
+            <section class="product-grid">
+                @if (isLoading && products.length === 0) {
+                @for (i of [1,2,3,4,5,6,7,8]; track i) {
+                <div class="product-card skeleton-card glass-card">
+                    <app-skeleton height="200px" width="100%"></app-skeleton>
+                    <div class="p-info" style="padding: 1.5rem;">
+                        <app-skeleton height="14px" width="40%" style="margin-bottom: 8px;"></app-skeleton>
+                        <app-skeleton height="24px" width="80%" style="margin-bottom: 15px;"></app-skeleton>
+                        <div class="p-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                            <app-skeleton height="24px" width="30%"></app-skeleton>
+                            <app-skeleton height="36px" width="36px" borderRadius="10px"></app-skeleton>
+                        </div>
                     </div>
                 </div>
+                }
+                }
+
+                @for (product of products; track product.id) {
+                <app-product-card [product]="product" (addToCart)="addToCart($event)">
+                </app-product-card>
+                }
+            </section>
+
+            <div class="scroll-status" appInfiniteScroll (scrolled)="onScroll()">
+                @if (isLoading) {
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <span>Discovering more...</span>
+                </div>
+                }
+                @if (!hasMore && products.length > 0) {
+                <div class="end-catalog glass-card">
+                    <p>You've explored the entire collection.</p>
+                    <button class="btn-text" (click)="scrollToTop()">Back to Top ↑</button>
+                </div>
+                }
+            </div>
+
+            @if (isCategoryNotFound) {
+            <div class="no-results glass-card animate-slide-up">
+                <lucide-icon [img]="SearchIcon" [size]="64" class="icon-lucide"></lucide-icon>
+                <h2>Category Not Found</h2>
+                <p>We couldn't find the specific category you're looking for.</p>
+                <button class="btn-primary" routerLink="/products">View All Products</button>
+            </div>
+            } @else if (products.length === 0 && !isLoading) {
+            <div class="no-results glass-card animate-slide-up">
+                <lucide-icon [img]="SearchIcon" [size]="64" class="icon-lucide"></lucide-icon>
+                <h2>No Products Found</h2>
+                <p>No products match your current filters or selection.</p>
+                <button class="btn-primary" (click)="resetFilters(); applyFilters()">Clear Filters</button>
             </div>
             }
-            }
-
-            @for (product of products; track product.id) {
-            <app-product-card [product]="product" (addToCart)="addToCart($event)">
-            </app-product-card>
-            }
-        </section>
-
-        <div class="scroll-status" appInfiniteScroll (scrolled)="onScroll()">
-            @if (isLoading) {
-            <div class="loading-spinner">
-                <div class="spinner"></div>
-                <span>Discovering more...</span>
-            </div>
-            }
-            @if (!hasMore && products.length > 0) {
-            <div class="end-catalog glass-card">
-                <p>You've explored the entire collection.</p>
-                <button class="btn-text" (click)="scrollToTop()">Back to Top ↑</button>
-            </div>
-            }
-        </div>
-
-        @if (isCategoryNotFound) {
-        <div class="no-results glass-card animate-slide-up">
-            <div class="icon">🔍</div>
-            <h2>Category Not Found</h2>
-            <p>We couldn't find the specific category you're looking for.</p>
-            <button class="btn-primary" routerLink="/products">View All Products</button>
-        </div>
-        } @else if (products.length === 0 && !isLoading) {
-        <div class="no-results glass-card animate-slide-up">
-            <div class="icon">🛒</div>
-            <h2>No Products Found</h2>
-            <p>No products match your current filters or selection.</p>
-            <button class="btn-primary" (click)="resetFilters(); applyFilters()">Clear Filters</button>
-        </div>
-        }
-    </main>
+        </main>
+    </div>
 </div>

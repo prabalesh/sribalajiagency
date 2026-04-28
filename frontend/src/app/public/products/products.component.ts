@@ -15,11 +15,12 @@ import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.com
 import { InfiniteScrollDirective } from '../../shared/directives/infinite-scroll.directive';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/breadcrumbs/breadcrumbs.component';
+import { LucideAngularModule, Filter, X, Search, ArrowUpDown } from 'lucide-angular';
 
 @Component({
     selector: 'app-products',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent, InfiniteScrollDirective, ProductCardComponent, BreadcrumbsComponent],
+    imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent, InfiniteScrollDirective, ProductCardComponent, BreadcrumbsComponent, LucideAngularModule],
     templateUrl: './products.component.html',
     styleUrl: './products.component.scss'
 })
@@ -31,6 +32,13 @@ export class ProductsComponent implements OnInit, OnDestroy {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private destroy$ = new Subject<void>();
+
+    readonly FilterIcon = Filter;
+    readonly XIcon = X;
+    readonly SearchIcon = Search;
+    readonly ArrowUpDownIcon = ArrowUpDown;
+
+    isMobileFiltersOpen = false;
 
     products: Product[] = [];
     categories: Category[] = [];
@@ -112,6 +120,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
         this.sortOrder = 'ASC';
     }
 
+    toggleMobileFilters() {
+        this.isMobileFiltersOpen = !this.isMobileFiltersOpen;
+    }
+
     async applyFilters() {
         this.products = [];
         this.currentPage = 1;
@@ -135,6 +147,12 @@ export class ProductsComponent implements OnInit, OnDestroy {
             this.sortOrder = 'ASC';
         } else if (val === 'price_desc') {
             this.sortBy = 'price';
+            this.sortOrder = 'DESC';
+        } else if (val === 'rating') {
+            this.sortBy = 'rating';
+            this.sortOrder = 'DESC';
+        } else if (val === 'best_seller') {
+            this.sortBy = 'reviewCount';
             this.sortOrder = 'DESC';
         } else {
             this.sortBy = 'name';

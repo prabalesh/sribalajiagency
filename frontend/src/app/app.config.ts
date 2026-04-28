@@ -11,8 +11,7 @@ import { AuthService } from './core/services/auth/auth.service';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
+import { LUCIDE_ICONS, LucideIconProvider, Search, Sun, Moon, ShoppingBag, User, Menu, X, LogIn, LogOut, Package, MapPin, ExternalLink, ChevronDown } from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,10 +32,10 @@ export const appConfig: ApplicationConfig = {
       multi: true
     },
     provideAnimationsAsync(),
-      providePrimeNG({
-          theme: {
-              preset: Aura
-        }
-    })
+    {
+      provide: LUCIDE_ICONS,
+      multi: true,
+      useValue: new LucideIconProvider({ Search, Sun, Moon, ShoppingBag, User, Menu, X, LogIn, LogOut, Package, MapPin, ExternalLink, ChevronDown })
+    }
   ]
 };

@@ -4,21 +4,23 @@ import { RouterModule, Router } from '@angular/router';
 import { Product, ProductVariant } from '../../../core/models/product.model';
 import { AuthService } from '../../../core/services/auth/auth.service';
 
-// PrimeNG
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { RippleModule } from 'primeng/ripple';
-import { TagModule } from 'primeng/tag';
-import { TooltipModule } from 'primeng/tooltip';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatRippleModule } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { LucideAngularModule, ShoppingBag, Star } from 'lucide-angular';
 
 @Component({
   selector: 'app-product-card',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgOptimizedImage, CardModule, ButtonModule, RippleModule, TagModule, TooltipModule,],
+  imports: [CommonModule, RouterModule, NgOptimizedImage, MatCardModule, MatButtonModule, MatRippleModule, MatTooltipModule, LucideAngularModule],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.scss'
 })
 export class ProductCardComponent {
+  readonly ShoppingBag = ShoppingBag;
+  readonly Star = Star;
+
   private authService = inject(AuthService);
   private router = inject(Router);
 
