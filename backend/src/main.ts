@@ -13,15 +13,42 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+
+  // 1. Configure CORS with environment-based origins using ConfigService
+  // This is moved to the top to ensure it handles preflight (OPTIONS) requests early
+  const corsOriginsValue = configService.get<string>('CORS_ORIGINS');
+  const corsOrigins = corsOriginsValue
+    ? corsOriginsValue.split(',').map((origin) => {
+        const trimmed = origin.trim();
+        // If it's a domain without protocol, allow both http and https
+        if (trimmed && !trimmed.startsWith('http') && trimmed !== '*') {
+          return [`https://${trimmed}`, `http://${trimmed}`];
+        }
+        return trimmed;
+      }).flat()
+    : ['http://localhost:4200'];
+
+  logger.log(`Allowed CORS origins: ${JSON.stringify(corsOrigins)}`);
+
+  app.enableCors({
+    origin: corsOrigins,
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization, X-Requested-With, Origin',
+    exposedHeaders: 'Set-Cookie',
+  });
+
   app.setGlobalPrefix('api/v1');
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   app.use(cookieParser());
 
-  // Security headers
+  // Security headers - loosened slightly to prevent interference with API calls
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },
+      contentSecurityPolicy: false, // CSP can sometimes block unexpected headers/requests
     }),
   );
 
@@ -33,20 +60,6 @@ async function bootstrap() {
     '/api/v1/uploads',
     express.static(path.join(process.cwd(), 'uploads')),
   );
-
-  // Configure CORS with environment-based origins using ConfigService
-  const configService = app.get(ConfigService);
-  const corsOriginsValue = configService.get<string>('CORS_ORIGINS');
-  const corsOrigins = corsOriginsValue
-    ? corsOriginsValue.split(',').map((origin) => origin.trim())
-    : ['http://localhost:4200'];
-
-  logger.log(`Allowed CORS origins: ${JSON.stringify(corsOrigins)}`);
-
-  app.enableCors({
-    origin: corsOrigins,
-    credentials: true,
-  });
 
   // Gzip compression
   app.use(compression());
@@ -61,7 +74,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
 
-  const port = process.env.PORT || 3000;
+  const port = configService.get<number>('PORT', 3000);
   await app.listen(port, '0.0.0.0');
   logger.log(`Backend server is running on http://localhost:${port}`);
 }

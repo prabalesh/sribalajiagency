@@ -81,7 +81,11 @@ export class CMSController {
   @Post('upload')
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Permissions('UPLOAD_CMS_ASSETS')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: {
+      fileSize: 50 * 1024 * 1024, // 50MB
+    }
+  }))
   async uploadImage(
     @UploadedFile(
       new ParseFilePipe({
