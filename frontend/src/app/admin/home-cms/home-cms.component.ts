@@ -9,7 +9,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { CmsPreviewService } from '../../core/services/cms-preview.service';
 import { ImageUploaderComponent } from '../../shared/components/image-uploader/image-uploader.component';
 
-type TabType = 'hero' | 'sections' | 'about' | 'social';
+type TabType = 'hero' | 'sections' | 'about' | 'contact';
 
 
 @Component({
@@ -29,7 +29,6 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
     cms: HomeCMS = {
         id: '',
         heroType: 'classic',
-        heroContentAlignment: 'center',
         heroBadge: '',
         heroTitle: '',
         heroSubtitle: '',
@@ -45,6 +44,9 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
         aboutContent: '',
         aboutImage: '',
         socialLinks: [],
+        address: '',
+        email: '',
+        phone: '',
         updatedAt: new Date()
     };
 
@@ -59,11 +61,6 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
         aboutImage: 'upload'
     };
 
-    alignmentOptions: ('top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right')[] = [
-        'top-left', 'top-center', 'top-right',
-        'center-left', 'center', 'center-right',
-        'bottom-left', 'bottom-center', 'bottom-right'
-    ];
 
     // Auto-save with debouncing
     private autoSaveSubject = new Subject<Partial<HomeCMS>>();
@@ -102,12 +99,6 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
                 socialLinks: data.socialLinks || []
             };
 
-            // Initialize slide alignment if missing
-            this.cms.heroSlides.forEach((slide) => {
-                if (!slide.alignment) {
-                    slide.alignment = 'center';
-                }
-            });
         } catch (error) {
             const errorMessage = this.extractErrorMessage(error);
             this.toastService.error(errorMessage || 'Failed to load CMS data');
@@ -138,12 +129,18 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
         try {
             switch (this.activeTab) {
                 case 'hero':
-                    await this.cmsService.updateHero(this.cms);
+                    const heroData: any = { ...this.cms };
+                    const isCarousel = this.cms.heroType === 'carousel' || this.cms.heroType === 'classic-carousel';
+                    if (!isCarousel) {
+                        delete heroData.heroSlides;
+                    }
+                    await this.cmsService.updateHero(heroData);
                     break;
                 case 'about':
                     await this.cmsService.updateAbout(this.cms);
                     break;
-                case 'social':
+                case 'contact':
+                    await this.cmsService.updateContact(this.cms);
                     await this.cmsService.updateSocialLinks(this.cms.socialLinks);
                     break;
                 case 'sections':
@@ -178,8 +175,7 @@ export class HomeCMSComponent implements OnInit, OnDestroy {
             badge: '',
             image: '',
             link: '/products',
-            linkText: 'Shop Now',
-            alignment: 'center'
+            linkText: 'Shop Now'
         };
         this.cms.heroSlides.push(newSlide);
         this.onCmsChange();

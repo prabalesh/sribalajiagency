@@ -22,6 +22,7 @@ import {
   UpdateAboutDto,
   UpdateSocialLinksDto,
   UpdateVisibilityDto,
+  UpdateContactDto,
 } from './dto/update-home-cms.dto';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
@@ -68,6 +69,13 @@ export class CMSController {
   @Permissions('UPDATE_CMS')
   async updateVisibility(@Body() data: UpdateVisibilityDto) {
     return this.cmsService.updateVisibility(data);
+  }
+
+  @Patch('contact')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @Permissions('UPDATE_CMS')
+  async updateContact(@Body() data: UpdateContactDto) {
+    return this.cmsService.updateContact(data);
   }
 
   @Post('upload')

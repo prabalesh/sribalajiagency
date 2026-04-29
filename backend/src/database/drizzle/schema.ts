@@ -385,9 +385,6 @@ export const homeCms = pgTable('home_cms', {
   heroLinkText: varchar('heroLinkText', { length: 255 })
     .default('Explore All')
     .notNull(),
-  heroContentAlignment: varchar('heroContentAlignment', { length: 255 })
-    .default('center')
-    .notNull(),
   heroSlides: jsonb('heroSlides'),
   showCategories: boolean('showCategories').default(true).notNull(),
   showFeatured: boolean('showFeatured').default(true).notNull(),
@@ -398,6 +395,9 @@ export const homeCms = pgTable('home_cms', {
     .notNull(),
   aboutContent: text('aboutContent'),
   aboutImage: varchar('aboutImage', { length: 255 }),
+  address: text('address'),
+  email: varchar('email', { length: 255 }),
+  phone: varchar('phone', { length: 255 }),
   socialLinks: jsonb('socialLinks'),
   updatedAt: timestamp('updatedAt').defaultNow().notNull(),
 });

@@ -12,7 +12,7 @@ import { Type } from 'class-transformer';
 
 export class HomeSlideDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   title: string;
 
   @IsString()
@@ -24,7 +24,7 @@ export class HomeSlideDto {
   badge?: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   image: string;
 
   @IsString()
@@ -35,28 +35,6 @@ export class HomeSlideDto {
   @IsOptional()
   linkText?: string;
 
-  @IsOptional()
-  @IsEnum([
-    'top-left',
-    'top-center',
-    'top-right',
-    'center-left',
-    'center',
-    'center-right',
-    'bottom-left',
-    'bottom-center',
-    'bottom-right',
-  ])
-  alignment?:
-    | 'top-left'
-    | 'top-center'
-    | 'top-right'
-    | 'center-left'
-    | 'center'
-    | 'center-right'
-    | 'bottom-left'
-    | 'bottom-center'
-    | 'bottom-right';
 }
 
 export class SocialLinkDto {
@@ -77,28 +55,6 @@ export class UpdateHeroDto {
   @IsEnum(['classic', 'carousel', 'split', 'overlay', 'classic-carousel'])
   heroType: 'classic' | 'carousel' | 'split' | 'overlay' | 'classic-carousel';
 
-  @IsOptional()
-  @IsEnum([
-    'top-left',
-    'top-center',
-    'top-right',
-    'center-left',
-    'center',
-    'center-right',
-    'bottom-left',
-    'bottom-center',
-    'bottom-right',
-  ])
-  heroContentAlignment?:
-    | 'top-left'
-    | 'top-center'
-    | 'top-right'
-    | 'center-left'
-    | 'center'
-    | 'center-right'
-    | 'bottom-left'
-    | 'bottom-center'
-    | 'bottom-right';
 
   @IsOptional()
   @IsString()
@@ -152,6 +108,20 @@ export class UpdateSocialLinksDto {
   socialLinks: SocialLinkDto[];
 }
 
+export class UpdateContactDto {
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+}
+
 export class UpdateVisibilityDto {
   @IsOptional()
   @IsBoolean()
@@ -199,28 +169,6 @@ export class UpdateHomeCmsDto {
   @IsString()
   heroLinkText?: string;
 
-  @IsOptional()
-  @IsEnum([
-    'top-left',
-    'top-center',
-    'top-right',
-    'center-left',
-    'center',
-    'center-right',
-    'bottom-left',
-    'bottom-center',
-    'bottom-right',
-  ])
-  heroContentAlignment?:
-    | 'top-left'
-    | 'top-center'
-    | 'top-right'
-    | 'center-left'
-    | 'center'
-    | 'center-right'
-    | 'bottom-left'
-    | 'bottom-center'
-    | 'bottom-right';
 
   @IsOptional()
   @IsArray()
@@ -261,4 +209,16 @@ export class UpdateHomeCmsDto {
   @ValidateNested({ each: true })
   @Type(() => SocialLinkDto)
   socialLinks?: SocialLinkDto[];
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
 }

@@ -15,6 +15,7 @@ import {
   UpdateAboutDto,
   UpdateSocialLinksDto,
   UpdateVisibilityDto,
+  UpdateContactDto,
 } from './dto/update-home-cms.dto';
 import { FileStorageService } from '../common/services/file-storage.service';
 
@@ -84,6 +85,9 @@ export class CMSService {
         aboutTitle: 'About Sri Balaji Agency',
         aboutContent:
           'With over two decades of excellence, Sri Balaji Agency has been at the forefront of providing premium electronic solutions. We pride ourselves on representing global giants and delivering unmatched customer service.',
+        address: '123, Main Road, Coimbatore, Tamil Nadu, India',
+        email: 'info@sribalajiagency.com',
+        phone: '+91 98765 43210',
         socialLinks: [
           { platform: 'Facebook', url: '#', icon: 'fb' },
           { platform: 'Instagram', url: '#', icon: 'ig' },
@@ -164,6 +168,10 @@ export class CMSService {
   }
 
   async updateVisibility(data: UpdateVisibilityDto) {
+    return this.updateCMS(data);
+  }
+
+  async updateContact(data: UpdateContactDto) {
     return this.updateCMS(data);
   }
 

@@ -9,7 +9,6 @@ export interface HeroSlide {
     image: string;
     link: string;
     linkText: string;
-    alignment?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 }
 
 export interface SocialLink {
@@ -23,7 +22,6 @@ export type HeroType = 'classic' | 'carousel' | 'split' | 'overlay' | 'classic-c
 export interface HomeCMS {
     id: string;
     heroType: HeroType;
-    heroContentAlignment: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
     heroBadge: string;
     heroTitle: string;
     heroSubtitle: string;
@@ -39,6 +37,9 @@ export interface HomeCMS {
     aboutContent: string;
     aboutImage: string;
     socialLinks: SocialLink[];
+    address?: string;
+    email?: string;
+    phone?: string;
     updatedAt: Date;
 }
 
@@ -79,6 +80,11 @@ export class CmsService {
 
     async updateVisibility(data: Partial<HomeCMS>): Promise<HomeCMS> {
         const res = await this.api.patch<HomeCMS>('/home-cms/visibility', data);
+        return res.data;
+    }
+
+    async updateContact(data: Partial<HomeCMS>): Promise<HomeCMS> {
+        const res = await this.api.patch<HomeCMS>('/home-cms/contact', data);
         return res.data;
     }
 
