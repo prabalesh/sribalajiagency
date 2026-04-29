@@ -4,18 +4,17 @@ import { RouterModule, Router } from '@angular/router';
 import { Product, ProductVariant } from '../../../core/models/product.model';
 import { AuthService } from '../../../core/services/auth/auth.service';
 
-import { LucideAngularModule, ShoppingBag, Star } from 'lucide-angular';
+
 
 @Component({
   selector: 'app-product-card',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgOptimizedImage, LucideAngularModule],
+  imports: [CommonModule, RouterModule, NgOptimizedImage],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.scss'
 })
 export class ProductCardComponent {
-  readonly ShoppingBag = ShoppingBag;
-  readonly Star = Star;
+
 
   private authService = inject(AuthService);
   private router = inject(Router);
