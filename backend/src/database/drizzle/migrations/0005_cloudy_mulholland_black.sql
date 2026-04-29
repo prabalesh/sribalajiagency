@@ -1,0 +1,1 @@
+ALTER TABLE "home_cms" DROP COLUMN "heroContentAlignment";
