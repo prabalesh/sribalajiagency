@@ -397,13 +397,19 @@
 
     .catalog-sidebar {
         position: fixed;
-        top: 0;
+        top: 70px;
         right: -320px;
         width: 320px;
         max-width: 85vw;
-        height: 100vh;
-        max-height: 100vh;
+        height: calc(100vh - 70px);
+        max-height: calc(100vh - 70px);
         z-index: 100;
+
+        @media (max-width: 768px) {
+            top: 110px;
+            height: calc(100vh - 110px);
+            max-height: calc(100vh - 110px);
+        }
         background: var(--surface-color);
         border-radius: 0;
         transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);

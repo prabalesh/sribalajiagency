@@ -510,6 +510,11 @@
   width: 280px;
   max-width: 85vw;
   height: calc(100vh - 60px);
+
+  @media (max-width: 768px) {
+    top: 110px;
+    height: calc(100vh - 110px);
+  }
   background: var(--surface-color);
   border-left: 1px solid var(--border-color);
   padding: 1.5rem;

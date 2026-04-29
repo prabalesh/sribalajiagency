@@ -42,9 +42,15 @@
     .home-link {
         display: flex;
         align-items: center;
+        gap: 0.5rem;
 
-        .icon {
-            display: none;
+        lucide-icon {
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        &:hover lucide-icon {
+            opacity: 1;
         }
 
         .text {
@@ -67,11 +73,8 @@
                 display: none;
             }
 
-            .icon {
+            lucide-icon {
                 display: inline-block;
-                font-size: 1.1rem;
-                line-height: 1;
-                filter: grayscale(1);
                 opacity: 0.7;
             }
         }

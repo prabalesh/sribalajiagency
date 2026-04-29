@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { LucideAngularModule, Home } from 'lucide-angular';
 
 export interface BreadcrumbItem {
   label: string;
@@ -10,14 +11,14 @@ export interface BreadcrumbItem {
 @Component({
   selector: 'app-breadcrumbs',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule],
   template: `
     <nav class="breadcrumbs">
       <!-- First Item (Home) -->
       @if (items.length > 0) {
         <a [routerLink]="items[0].url" class="home-link">
+          <lucide-icon [img]="Home" [size]="16"></lucide-icon>
           <span class="text">Home</span>
-          <span class="icon">🏠</span> 
         </a>
         <span class="sep">/</span>
       }
@@ -45,5 +46,6 @@ export interface BreadcrumbItem {
   styleUrls: ['./breadcrumbs.component.scss']
 })
 export class BreadcrumbsComponent {
+  readonly Home = Home;
   @Input() items: BreadcrumbItem[] = [];
 }
