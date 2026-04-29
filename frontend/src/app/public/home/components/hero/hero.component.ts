@@ -1,5 +1,5 @@
-import { Component, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { Component, Input, OnInit, OnDestroy, HostListener, inject, PLATFORM_ID, OnChanges, SimpleChanges } from '@angular/core';
+import { CommonModule, NgOptimizedImage, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule, ChevronLeft, ChevronRight } from 'lucide-angular';
 
@@ -10,8 +10,14 @@ import { LucideAngularModule, ChevronLeft, ChevronRight } from 'lucide-angular';
     templateUrl: './hero.component.html',
     styleUrl: './hero.component.scss'
 })
-export class HeroComponent implements OnInit, OnDestroy {
+export class HeroComponent implements OnInit, OnDestroy, OnChanges {
     @Input() cms: any;
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['cms'] && isPlatformBrowser(this.platformId)) {
+            this.initAutoPlay();
+        }
+    }
 
     readonly ChevronLeft = ChevronLeft;
     readonly ChevronRight = ChevronRight;
@@ -20,13 +26,18 @@ export class HeroComponent implements OnInit, OnDestroy {
     private slideInterval: any = null;
     private touchStartX = 0;
     private isAutoPlayEnabled = true;
+    private platformId = inject(PLATFORM_ID);
 
     ngOnInit() {
-        // Start auto-play after a short delay to let page load
+        if (isPlatformBrowser(this.platformId)) {
+            this.initAutoPlay();
+        }
+    }
+
+    private initAutoPlay() {
         if (this.shouldAutoPlay()) {
-            setTimeout(() => {
-                this.startAutoPlay();
-            }, 1000);
+            this.stopAutoPlay();
+            this.startAutoPlay();
         }
     }
 

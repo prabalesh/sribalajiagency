@@ -1,3 +1,16 @@
+@if (!cms) {
+<div class="hero-skeleton container">
+    <div class="skeleton-content">
+        <div class="skeleton-badge"></div>
+        <div class="skeleton-title"></div>
+        <div class="skeleton-title second"></div>
+        <div class="skeleton-text"></div>
+        <div class="skeleton-text short"></div>
+        <div class="skeleton-button"></div>
+    </div>
+    <div class="skeleton-image"></div>
+</div>
+} @else {
 <section class="hero-container animate-fade"
     [ngClass]="[cms?.heroType || 'classic', 'align-' + (cms?.heroContentAlignment || 'center')]">
 
@@ -191,3 +204,4 @@
     </section>
     }
 </section>
+}
