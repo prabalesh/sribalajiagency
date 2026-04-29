@@ -20,7 +20,11 @@ async function bootstrap() {
   const corsOriginsValue = configService.get<string>('CORS_ORIGINS');
   const corsOrigins = corsOriginsValue
     ? corsOriginsValue.split(',').map((origin) => {
-        const trimmed = origin.trim();
+        let trimmed = origin.trim();
+        // Remove trailing slash if present
+        if (trimmed.endsWith('/') && trimmed.length > 1) {
+          trimmed = trimmed.slice(0, -1);
+        }
         // If it's a domain without protocol, allow both http and https
         if (trimmed && !trimmed.startsWith('http') && trimmed !== '*') {
           return [`https://${trimmed}`, `http://${trimmed}`];
@@ -35,7 +39,8 @@ async function bootstrap() {
     origin: corsOrigins,
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept, Authorization, X-Requested-With, Origin',
+    allowedHeaders:
+      'Content-Type, Accept, Authorization, X-Requested-With, Origin, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Access-Control-Allow-Methods',
     exposedHeaders: 'Set-Cookie',
   });
 
