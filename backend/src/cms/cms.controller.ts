@@ -79,7 +79,7 @@ export class CMSController {
   }
 
   @Post('upload')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard, ThrottlerGuard)
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Permissions('UPLOAD_CMS_ASSETS')
   @UseInterceptors(FileInterceptor('file'))
   async uploadImage(

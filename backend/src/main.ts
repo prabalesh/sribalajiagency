@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -24,17 +25,23 @@ async function bootstrap() {
     }),
   );
 
+  // Body size limits for large file uploads
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
   app.use(
     '/api/v1/uploads',
     express.static(path.join(process.cwd(), 'uploads')),
   );
 
-  // Configure CORS with environment-based origins
-  const corsOrigins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
+  // Configure CORS with environment-based origins using ConfigService
+  const configService = app.get(ConfigService);
+  const corsOriginsValue = configService.get<string>('CORS_ORIGINS');
+  const corsOrigins = corsOriginsValue
+    ? corsOriginsValue.split(',').map((origin) => origin.trim())
     : ['http://localhost:4200'];
 
-  console.log(corsOrigins);
+  logger.log(`Allowed CORS origins: ${JSON.stringify(corsOrigins)}`);
 
   app.enableCors({
     origin: corsOrigins,
